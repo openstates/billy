@@ -1,6 +1,5 @@
 argparse==1.1
 boto
-icalendar
 jellyfish>=0.1.2
 lxml>=2.2
 name_tools>=0.1.2
