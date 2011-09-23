@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 from setuptools import setup
+from billy import __version__
 
 long_description = open('README.rst').read()
 
 setup(name='billy',
-      version='0.9.0',
+      version=__version__,
       packages=['billy', 'billy.scrape', 'billy.importers',
-                'billy.bin', 'billy.misc', 'billy.site',
+                'billy.bin', 'billy.conf', 'billy.misc', 'billy.site',
                 'billy.site.browse', 'billy.site.api'],
       package_data={'billy': ['schemas/*.json',
                               'schemas/api/*.json',
