@@ -62,10 +62,6 @@ def main():
 
         settings.update(args)
 
-        # set up search path
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__),
-                                        '../../openstates'))
-
         # get metadata
         metadata = __import__(args.module, fromlist=['metadata']).metadata
         abbr = metadata['abbreviation']

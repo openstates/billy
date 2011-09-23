@@ -23,6 +23,7 @@ base_arg_parser.add_argument('--retry_wait', type=int,
                              dest='SCRAPELIB_RETRY_WAIT_SECONDS')
 base_arg_parser.add_argument('--cache_dir', dest='BILLY_CACHE_DIR')
 base_arg_parser.add_argument('--error_dir', dest='BILLY_ERROR_DIR')
+base_arg_parser.add_argument('--manual_data_dir', dest='BILLY_MANUAL_DATA_DIR')
 
 
 class Settings(object):

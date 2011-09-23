@@ -6,15 +6,14 @@ MONGO_DATABASE = os.environ.get('OPENSTATES_MONGO_DATABASE', 'fiftystates')
 
 API_BASE_URL = 'http://openstates.org/api/v1/'
 
-BILLY_DATA_DIR = os.path.abspath(os.path.join(os.path.abspath(
-            os.path.dirname(__file__)), '../../data'))
+BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
 
 # Set to None to disable caching
-BILLY_CACHE_DIR = os.path.abspath(os.path.join(os.path.abspath(
-            os.path.dirname(__file__)), '../../cache'))
+BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
 
-BILLY_ERROR_DIR = os.path.abspath(os.path.join(os.path.abspath(
-            os.path.dirname(__file__)), '../../errors'))
+BILLY_ERROR_DIR = os.path.join(os.getcwd(), 'errors')
+
+BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
 BILLY_SUBJECTS = [
     'Agriculture and Food',

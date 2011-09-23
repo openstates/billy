@@ -10,12 +10,13 @@ from billy.conf import settings, base_arg_parser
 from billy.utils import metadata
 
 
-def categorize_subjects(abbr, data_dir, process_all):
+def categorize_subjects(abbr, process_all):
     categorizer = defaultdict(set)
     categories_per_bill = defaultdict(int)
     uncategorized = defaultdict(int)
 
-    filename = os.path.join(data_dir, abbr + '.csv')
+    filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR,
+                            'subjects', abbr + '.csv')
     try:
         reader = csv.reader(open(filename))
 
@@ -71,19 +72,14 @@ def main():
         conflict_handler='resolve',
     )
 
-    default_dir = os.path.join(os.path.dirname(__file__),
-                           '../../manual_data/subjects')
-
     parser.add_argument('abbr', type=str, help='abbreviation for data to process')
     parser.add_argument('--all', help='update all sessions',
                         action='store_true', default=False)
-    parser.add_argument('-d', '--data_dir', help='directory of subject csvs',
-                        dest='data_dir', default=default_dir)
     args = parser.parse_args()
 
     settings.update(args)
 
-    categorize_subjects(args.abbr, args.data_dir, args.all)
+    categorize_subjects(args.abbr, args.all)
 
 
 if __name__ == '__main__':
