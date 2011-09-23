@@ -3,6 +3,7 @@ import csv
 import os.path
 
 from billy import db
+from billy.conf import settings
 
 __matchers = {}
 
@@ -88,7 +89,7 @@ class NameMatcher(object):
         self._learn_manual_matches()
 
     def _learn_manual_matches(self):
-        path = os.path.join(self.BILLY_MANUAL_DATA_DIR,
+        path = os.path.join(settings.BILLY_MANUAL_DATA_DIR,
                             "leg_ids/%s.csv" % self._abbr)
         try:
             with open(path) as f:
