@@ -1,0 +1,4 @@
+Django>=1.3
+django-piston==0.2.2
+-e git://github.com/sunlightlabs/django-locksmith.git#egg=django-locksmith
+icalendar==2.1

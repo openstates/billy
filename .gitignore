@@ -1,0 +1,16 @@
+data
+cache
+*.pyc
+*.DS_Store
+*~
+docs/_build/*
+local_settings.*py
+errors/*
+*.pid
+*.swp
+*.egg-info
+dist/
+MANIFEST
+*.class
+*.jar
+build
