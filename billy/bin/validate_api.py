@@ -19,7 +19,7 @@ def get_xml_schema():
     schema_dir = os.path.join(cwd, "../schemas/relax/")
 
     rnc_path = os.path.join(schema_dir, 'api.rnc')
-    rng_path = os.path.join(schema_dir, 'api_gen.rng')
+    rng_path = '/tmp/api_gen.rng'
 
     subprocess.check_call(["trang", rnc_path, rng_path])
 
