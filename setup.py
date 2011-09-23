@@ -39,4 +39,13 @@ billy-scrape-bill = billy.bin.scrape_bill:main
 billy-update-external-ids = billy.bin.update_external_ids:main
 billy-update-leg-ids = billy.bin.update_leg_ids:main
 billy-validate-api = billy.bin.validate_api:main
-""")
+""",
+    install_requires=["argparse==1.1",
+                      "jellyfish>=0.1.2",
+                      "lxml>=2.2",
+                      "name_tools>=0.1.2",
+                      "pymongo>=1.8.1",
+                      "scrapelib>=0.5.4",
+                      "validictory>=0.7.1",
+                     ]
+)
