@@ -1,3 +1,5 @@
+import os
+import sys
 import argparse
 
 from billy.conf import default_settings
@@ -41,7 +43,9 @@ settings = Settings()
 settings.update(default_settings)
 
 try:
+    sys.path.insert(0, os.getcwd())
     import billy_settings
     settings.update(billy_settings)
+    sys.path.pop(0)
 except ImportError:
     pass

@@ -1,18 +1,16 @@
 import os
 
-MONGO_HOST = os.environ.get('OPENSTATES_MONGO_HOST', 'localhost')
-MONGO_PORT = os.environ.get('OPENSTATES_MONGO_PORT', 27017)
-MONGO_DATABASE = os.environ.get('OPENSTATES_MONGO_DATABASE', 'fiftystates')
+MONGO_HOST = 'localhost'
+MONGO_PORT = 27017
+MONGO_DATABASE = 'billy'
 
 API_BASE_URL = 'http://openstates.org/api/v1/'
 
+SCRAPER_PATHS = []
+
 BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
-
-# Set to None to disable caching
 BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
-
 BILLY_ERROR_DIR = os.path.join(os.getcwd(), 'errors')
-
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
 BILLY_SUBJECTS = [

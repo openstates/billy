@@ -143,6 +143,10 @@ def main():
 
         settings.update(args)
 
+        # inject scraper paths so scraper module can be found
+        for newpath in settings.SCRAPER_PATHS:
+            sys.path.insert(0, newpath)
+
         # get metadata
         metadata = __import__(args.module, fromlist=['metadata']).metadata
 
