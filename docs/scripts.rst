@@ -10,7 +10,7 @@ Scraping
 .. program:: billy-scrape
 
 :program:`billy-scrape` <STATE>
-----------------------------
+-------------------------------
 
 .. option:: STATE
 

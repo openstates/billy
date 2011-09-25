@@ -48,4 +48,5 @@ try:
     settings.update(billy_settings)
     sys.path.pop(0)
 except ImportError:
+    print 'no billy_settings file found, continuing with defaults..'
     pass

@@ -4,9 +4,10 @@ Billy Configuration
 
 Billy has a global configuration object at :data:`billy.conf.settings` that is used in scraping, import, and serving the API.
 
-If billy finds a module named :mod:`billy_settings` on the global import path it will import that module.  Values found in a custom
-:mod:`billy_settings` will override all default settings.  It is also possible to provide custom settings by adding additional all-caps variables
-in your custom :mod:`billy_settings`.
+All billy scripts attempt to load a :mod:`billy_settings` module which should
+either be on the import path or in the working directory, this file can
+contain overrides and custom settings.  As of 0.9.2 if no :mod:`billy_settings`
+module can be located a warning message will be printed to the console.
 
 .. module:: billy.conf
 
@@ -18,13 +19,28 @@ Default Settings
 :data:`MONGO_PORT`
     Port for MongoDB server. (default: "27017")
 :data:`MONGO_DATABASE`
-    MongoDB database name. (default: "fiftystates")
+    MongoDB database name. (default: "billy")
+:data:`API_BASE_URL`
+    Public URL that the API can be accessed at.
+:data:`SCRAPER_PATHS`
+    Paths that scraper modules are stored under, will be added to ``sys.path`` when
+    attempting to load scrapers.
 :data:`BILLY_DATA_DIR`
-    Directory where scraped data should be stored.  (default: "../../data")
+    Directory where scraped data should be stored.  (default: "<cwd>/data")
 :data:`BILLY_CACHE_DIR`
-    Directory where scraper cache should be stored.  (default: "../../cache")
+    Directory where scraper cache should be stored.  (default: "<cwd>/cache")
 :data:`BILLY_ERROR_DIR`
-    Directory where scraper error dumps should be stored.  (default: "../../errors")
+    Directory where scraper error dumps should be stored.  (default: "<cwd>/errors")
+:data:`BILLY_MANUAL_DATA_DIR`
+    Directory where manual data files for matched ids/subjects are stored.  (default: "<cwd>/manual_data")
+:data:`BILLY_SUBJECTS`
+    List of valid subject names
+:data:`BILLY_LEVEL_FIELDS`
+    Mapping of level names to required fields for the level in question.
+    Default::
+        {'country': ('country',),
+         'state': ('state', 'country'),
+        }
 :data:`SCRAPELIB_TIMEOUT`
     Value (in seconds) for url retrieval timeout.  (default: 600)
 :data:`SCRAPELIB_RETRY_ATTEMPTS`
@@ -49,6 +65,10 @@ Most available scripts can override the above default settings with command line
 .. option:: --error_dir <error_dir>
 
     Override :data:`BILLY_ERROR_DIR`
+
+.. option:: --manual_data_dir <manual_data_dir>
+
+    Override :data:`BILLY_MANUAL_DATA_DIR`
 
 .. option:: --retries <retries>
 
