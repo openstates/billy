@@ -1,7 +1,14 @@
-The Open State Project
-=======================
+billy
+=====
 
-The `Open State Project <http://openstates.org>`_ is powered by ``billy``, a python package designed around the needs of the project that handles all aspects of extracting, cleaning, and providing legislative information.
+billy is a suite of tools developed as a part of `Open States <http://openstates.org>`_ that provide a framework for scraping, storing, and sharing legislative information.
+
+Features:
+    * Scraper architecture for scraping bills, votes, legislators, committees, and events.
+    * Utility scripts for data cleanup and analysis.
+    * Bulk data export.
+    * Server that includes a data browser and API.
+
 
 Documentation
 -------------
