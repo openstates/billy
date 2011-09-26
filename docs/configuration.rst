@@ -54,6 +54,18 @@ Command-Line Overrides
 
 Most available scripts can override the above default settings with command line switches:
 
+.. option:: --mongo_host <mongo_host>
+
+    Override :data:`MONGO_HOST`
+
+.. option:: --mongo_port <mongo_port>
+
+    Override :data:`MONGO_PORT`
+
+.. option:: --mongo_db <mongo_db>
+
+    Override :data:`MONGO_DATABASE`
+
 .. option:: -d <data_dir>, --data_dir <data_dir>
 
     Override :data:`BILLY_DATA_DIR`

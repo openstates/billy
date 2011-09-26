@@ -10,6 +10,12 @@ base_arg_parser.add_argument('-v', '--verbose', action='count',
                              dest='verbose', default=False,
                              help=("be verbose (use multiple times for "
                                    "more debugging information)"))
+base_arg_parser.add_argument('--mongo_host', help='mongo host',
+                             dest='MONGO_HOST')
+base_arg_parser.add_argument('--mongo_port', help='mongo port',
+                             dest='MONGO_PORT')
+base_arg_parser.add_argument('--mongo_db', help='mongo database name',
+                             dest='MONGO_DATABASE')
 base_arg_parser.add_argument('-d', '--data_dir',
                              help='scraped data directory',
                              dest='BILLY_DATA_DIR')
