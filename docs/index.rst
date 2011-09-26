@@ -20,3 +20,4 @@ Documentation
    metadata
    configuration
    scripts
+   changelog
