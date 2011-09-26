@@ -1,6 +1,11 @@
 scrapelib changelog
 ===================
 
+0.9.3
+-----
+    * force tests to use a test database
+    * --mongo_host, --mongo_db, --mongo_port command line options
+
 0.9.2
 -----
 **26 September 2011**
