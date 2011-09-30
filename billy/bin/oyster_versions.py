@@ -14,8 +14,8 @@ def oysterize_versions(state, update_mins=20000):
     oclient = get_configured_client()
     new_bills = list(db.bills.find({'state': state,
                                     'versions.url': {'$exists': True},
-                                    'versions._oyster_id': {'$exists': False}})
-                    )
+                                    #'versions._oyster_id': {'$exists': False}
+                                   }))
     print '%s bills with versions to oysterize' % len(new_bills)
     for bill in new_bills:
         for version in bill['versions']:
@@ -29,12 +29,12 @@ def oysterize_versions(state, update_mins=20000):
                                             chamber=bill['chamber'],
                                             bill_id=bill['bill_id'],
                                             openstates_bill_id=bill['_id'])
-                    version['_oyster_id'] = _id
+                    #version['_oyster_id'] = _id
                 except Exception as e:
                     print e
 
         # save bill after updating all versions
-        db.bills.save(bill, safe=True)
+        #db.bills.save(bill, safe=True)
 
 
 def main():
