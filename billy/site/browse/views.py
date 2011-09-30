@@ -48,6 +48,7 @@ def browse_index(request, template='billy/index.html'):
 
         com_counts = db.committee_counts.find_one({'_id': row['id']})
         if com_counts:
+            com_counts = com_counts['value']
             row['committees'] = com_counts['committees']
             if counts['members']:
                 row['member_ids'] = (float(com_counts['idd_members']) /
