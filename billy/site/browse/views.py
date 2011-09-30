@@ -44,6 +44,9 @@ def browse_index(request, template='billy/index.html'):
             if counts['voters']:
                 row['voter_ids'] = (float(counts['idd_voters']) /
                                     counts['voters'] * 100)
+            if counts['members']:
+                row['member_ids'] = (float(counts['idd_members']) /
+                                     counts['members'] * 100)
 
         if row['id'] != 'total':
             level = meta['level']

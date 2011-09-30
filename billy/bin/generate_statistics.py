@@ -8,7 +8,7 @@ def generate_statistics():
     Use mongo's map/reduce to output counts of various objects to the 'counts'
     collection.
     """
-    m = Code("""
+    bill_map = Code("""
     function () {
 
         var val = {'bills': 1,
@@ -86,7 +86,7 @@ def generate_statistics():
         emit('total', val);
     }""")
 
-    r = Code("""
+    bill_reduce = Code("""
     function (key, values) {
         sums = {'bills': 0, 'actions': 0, 'votes': 0, 'versions': 0,
                 'subjects': 0, 'introduced': 0, 'categorized': 0,
@@ -103,6 +103,39 @@ def generate_statistics():
         return sums;
     }""")
 
+    com_map = Code("""
+    function () {
+        var val = {'committees': 1 };
+
+        // check member leg_ids
+        val['members'] = this.members.length;
+        val['idd_members'] = 0;
+
+        for(var i=0; i < this.members.length; ++i) {
+             if(this.members[i]['leg_id']) {
+                 val['idd_members'] += 1;
+             }
+        }
+
+        emit(this[this['level']], val);
+        emit('total', val);
+    }""")
+
+    com_reduce = Code("""
+    function (key, values) {
+        sums = {'committees': 0, 'members': 0, 'idd_members': 0};
+        for (var i in values) {
+            value = values[i];
+
+            for (var t in value) {
+                sums[t] += value[t];
+            }
+        }
+
+        return sums;
+    }""")
+
+
     # a finalizer to convert all counts from JS numbers (floats) to longs
     f = Code("""
     function (key, value) {
@@ -113,8 +146,9 @@ def generate_statistics():
         return value;
     }""")
 
-    db.bills.map_reduce(m, r, finalize=f, out='counts')
-
+    db.bills.map_reduce(bill_map, bill_reduce, finalize=f, out='counts')
+    db.bills.map_reduce(com_map, com_reduce, finalize=f,
+                        out={'merge': 'counts'})
 
 if __name__ == '__main__':
     generate_statistics()
