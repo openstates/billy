@@ -50,7 +50,7 @@ def browse_index(request, template='billy/index.html'):
         if com_counts:
             com_counts = com_counts['value']
             row['committees'] = com_counts['committees']
-            if counts['members']:
+            if com_counts['members']:
                 row['member_ids'] = (float(com_counts['idd_members']) /
                                      com_counts['members'] * 100)
 
