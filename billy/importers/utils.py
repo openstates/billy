@@ -90,7 +90,22 @@ def _timestamp_to_dt(timestamp):
     return dt
 
 
-def update(old, new, coll):
+def update(old, new, collection, sneaky_update_filter=None):
+    """
+        update an existing object with a new one, only saving it and
+        setting updated_at if something has changed
+
+        old
+            old object
+        new
+            new object
+        collection
+            collection to save changed object to
+        sneaky_update_filter
+            a filter for updates to object that should be ignored
+            format is a dict mapping field names to a comparison function
+            that returns True iff there is a change
+    """
     # To prevent deleting standalone votes..
     if 'votes' in new and not new['votes']:
         del new['votes']
@@ -107,8 +122,14 @@ def update(old, new, coll):
             continue
 
         if old.get(key) != value:
-            old[key] = value
-            need_save = True
+            if sneaky_update_filter and key in sneaky_update_filter:
+                if sneaky_update_filter[key](old[key], value):
+                    old[key] = value
+                    need_save = True
+            else:
+                old[key] = value
+                need_save = True
+
 
         # remove old +key field if this field no longer has a +
         plus_key = '+%s' % key
@@ -118,7 +139,7 @@ def update(old, new, coll):
 
     if need_save:
         old['updated_at'] = datetime.datetime.utcnow()
-        coll.save(old, safe=True)
+        collection.save(old, safe=True)
 
 
 def convert_timestamps(obj):

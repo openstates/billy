@@ -43,6 +43,19 @@ def ensure_indexes():
                            ('sponsors.leg_id', pymongo.ASCENDING)])
 
 
+def _versions_differ(old, new):
+    """ sneaky update filter for versions, ignore _oyster_id """
+    old = old[:]
+    for ov in old:
+        ov.pop('_oyster_id', None)
+    return old != new
+
+
+bill_sneaky_update_filter = {
+    'versions': _versions_differ,
+}
+
+
 def import_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
     paths = glob.glob(pattern)
@@ -139,7 +152,7 @@ def import_bill(data, votes):
     if not bill:
         insert_with_id(data)
     else:
-        update(bill, data, db.bills)
+        update(bill, data, db.bills, bill_sneaky_update_filter)
 
 
 def import_bills(abbr, data_dir):

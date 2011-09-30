@@ -16,7 +16,7 @@ def oysterize_versions(state, update_mins=20000):
                                     'versions.url': {'$exists': True},
                                     'versions._oyster_id': {'$exists': False}})
                     )
-    print '%s bills with versions to _oysterize' % len(new_bills)
+    print '%s bills with versions to oysterize' % len(new_bills)
     for bill in new_bills:
         for version in bill['versions']:
             if 'url' in version and '_oyster_id' not in version:
