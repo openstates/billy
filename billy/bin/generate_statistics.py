@@ -148,7 +148,7 @@ def generate_statistics():
 
     db.bills.map_reduce(bill_map, bill_reduce, finalize=f, out='counts')
     db.committees.map_reduce(com_map, com_reduce, finalize=f,
-                             out={'merge': 'counts'})
+                             out='committee_counts')
 
 if __name__ == '__main__':
     generate_statistics()

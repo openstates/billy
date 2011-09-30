@@ -26,6 +26,7 @@ def browse_index(request, template='billy/index.html'):
         row = {}
         row['id'] = meta['_id']
         row['name'] = meta['name']
+
         counts = db.counts.find_one({'_id': row['id']})
         if counts:
             counts = counts['value']
@@ -44,16 +45,19 @@ def browse_index(request, template='billy/index.html'):
             if counts['voters']:
                 row['voter_ids'] = (float(counts['idd_voters']) /
                                     counts['voters'] * 100)
+
+        com_counts = db.committee_counts.find_one({'_id': row['id']})
+        if com_counts:
+            row['committees'] = com_counts['committees']
             if counts['members']:
-                row['member_ids'] = (float(counts['idd_members']) /
-                                     counts['members'] * 100)
+                row['member_ids'] = (float(com_counts['idd_members']) /
+                                     com_counts['members'] * 100)
 
         if row['id'] != 'total':
             level = meta['level']
             s_spec = {'level': level, level: row['id']}
             row['bill_types'] = len(db.bills.find(s_spec).distinct('type')) > 1
             row['legislators'] = db.legislators.find(s_spec).count()
-            row['committees'] = db.committees.find(s_spec).count()
             row['events'] = db.events.find(s_spec).count()
             id_counts = _get_leg_id_stats(level, row['id'])
             active_legs = db.legislators.find({'level': level,
