@@ -40,9 +40,9 @@ def _build_mongo_filter(request, keys, icase=True):
     # We use regex queries to get case insensitive search - this
     # means they won't use any indexes for now. Real case insensitive
     # queries are coming eventually:
-        # http://jira.mongodb.org/browse/SERVER-90
-        _filter = {}
-        keys = set(keys) - set(['fields'])
+    # http://jira.mongodb.org/browse/SERVER-90
+    _filter = {}
+    keys = set(keys) - set(['fields'])
 
     try:
         keys.remove('subjects')
