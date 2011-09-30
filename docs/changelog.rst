@@ -6,6 +6,7 @@ scrapelib changelog
     * force tests to use a test database
     * --mongo_host, --mongo_db, --mongo_port command line options
     * sneaky_update_filter option added, can ignore minor updates
+    * committee counts
 
 0.9.2
 -----

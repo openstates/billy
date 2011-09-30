@@ -5,8 +5,8 @@ from pymongo.code import Code
 
 def generate_statistics():
     """
-    Use mongo's map/reduce to output counts of various objects to the 'counts'
-    collection.
+    Use mongo's map/reduce to output counts of various objects to the various
+    '_stats' collections.
     """
     bill_map = Code("""
     function () {
@@ -146,9 +146,9 @@ def generate_statistics():
         return value;
     }""")
 
-    db.bills.map_reduce(bill_map, bill_reduce, finalize=f, out='counts')
+    db.bills.map_reduce(bill_map, bill_reduce, finalize=f, out='bill_stats')
     db.committees.map_reduce(com_map, com_reduce, finalize=f,
-                             out='committee_counts')
+                             out='committee_stats')
 
 if __name__ == '__main__':
     generate_statistics()

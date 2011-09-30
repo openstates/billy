@@ -22,7 +22,7 @@ _chamber_aliases = {
     'assembly': 'lower',
     'house': 'lower',
     'senate': 'upper',
-    }
+}
 
 
 def parse_param_dt(dt):
@@ -40,9 +40,9 @@ def _build_mongo_filter(request, keys, icase=True):
     # We use regex queries to get case insensitive search - this
     # means they won't use any indexes for now. Real case insensitive
     # queries are coming eventually:
-    # http://jira.mongodb.org/browse/SERVER-90
-    _filter = {}
-    keys = set(keys) - set(['fields'])
+        # http://jira.mongodb.org/browse/SERVER-90
+        _filter = {}
+        keys = set(keys) - set(['fields'])
 
     try:
         keys.remove('subjects')
@@ -135,7 +135,7 @@ class MetadataHandler(BillyHandler):
         Get metadata about a legislature.
         """
         return db.metadata.find_one({'_id': abbr.lower()},
-                                   fields=_build_field_list(request))
+                                    fields=_build_field_list(request))
 
 
 class BillHandler(BillyHandler):
@@ -145,7 +145,7 @@ class BillHandler(BillyHandler):
         query = {level: abbr, 'session': session, 'bill_id': bill_id}
         if chamber:
             query['chamber'] = chamber.lower()
-        return db.bills.find_one(query, fields=_build_field_list(request))
+            return db.bills.find_one(query, fields=_build_field_list(request))
 
 
 class BillSearchHandler(BillyHandler):
@@ -227,7 +227,7 @@ class LegislatorSearchHandler(BillyHandler):
         legislator_fields = _build_field_list(request, legislator_fields)
 
         _filter = _build_mongo_filter(request, ('state', 'first_name',
-                                               'last_name'))
+                                                'last_name'))
         elemMatch = _build_mongo_filter(request, ('chamber', 'term',
                                                   'district', 'party'))
         if elemMatch:
@@ -247,7 +247,7 @@ class LegislatorSearchHandler(BillyHandler):
 class CommitteeHandler(BillyHandler):
     def read(self, request, id):
         return db.committees.find_one({'_all_ids': id},
-                                     _build_field_list(request))
+                                      _build_field_list(request))
 
 
 class CommitteeSearchHandler(BillyHandler):
@@ -265,9 +265,9 @@ class StatsHandler(BillyHandler):
     def read(self, request):
         counts = {}
 
-        # db.counts contains the output of a m/r run that generates counts of
-        # bills and bill sub-objects
-        for count in db.counts.find():
+        # db.bill_stats contains the output of a m/r run that generates counts
+        # of bills and bill sub-objects
+        for count in db.bill_stats.find():
             val = count['value']
             abbr = count['_id']
 
