@@ -20,6 +20,6 @@ class SuperFastMatchTask(ExternalStoreTask):
                                   fromlist=['extract_text']).extract_text
         _id = int(time.time()*10000)
         extracted = extract_text(filedata, metadata)
-        self.sfm_client.add(1, id, filedata, defer=True,
+        self.sfm_client.add(1, _id, filedata, defer=True,
                             **metadata)
         return _id
