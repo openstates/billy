@@ -1,4 +1,5 @@
 import sys
+import time
 
 from oyster.tasks import ExternalStoreTask
 from superfastmatch import Client
