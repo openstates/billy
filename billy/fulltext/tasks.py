@@ -1,5 +1,12 @@
+import sys
+
 from oyster.tasks import ExternalStoreTask
 from superfastmatch import Client
+
+from billy.conf import settings
+
+for p in settings.SCRAPER_PATHS:
+    sys.path.insert(0, p)
 
 class SuperFastMatchTask(ExternalStoreTask):
 
