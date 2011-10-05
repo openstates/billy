@@ -10,6 +10,6 @@ class SuperFastMatchTask(ExternalStoreTask):
 
     def upload_document(self, doc_id, filedata, metadata):
         _id = int(time.time()*10000)
-        self.sfm_client.add(1, _id, extracted, defer=True,
+        self.sfm_client.add(1, _id, filedata, defer=True,
                             **metadata)
         return _id
