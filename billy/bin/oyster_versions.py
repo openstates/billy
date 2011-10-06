@@ -42,7 +42,7 @@ def sfm_sync(state):
     from billy.fulltext.tasks import SuperFastMatchTask
     oclient = get_configured_client()
 
-    new_versions = list(oclient.db.tracked.find({'state': state,
+    new_versions = list(oclient.db.tracked.find({'metadata.state': state,
                                      'superfastmatch_id': {'$exists': False}}))
     print '%s new versions to sync' % len(new_versions)
 
