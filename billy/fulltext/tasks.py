@@ -11,5 +11,6 @@ class SuperFastMatchTask(ExternalStoreTask):
     def upload_document(self, doc_id, filedata, metadata):
         _id = int(time.time()*10000)
         self.sfm_client.add(1, _id, filedata, defer=True,
-                            **metadata)
+                title='%(state)s %(session)s %(bill_id)s %(name)s' % metadata,
+                **metadata)
         return _id
