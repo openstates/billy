@@ -145,7 +145,7 @@ class BillHandler(BillyHandler):
         query = {level: abbr, 'session': session, 'bill_id': bill_id}
         if chamber:
             query['chamber'] = chamber.lower()
-            return db.bills.find_one(query, fields=_build_field_list(request))
+        return db.bills.find_one(query, fields=_build_field_list(request))
 
 
 class BillSearchHandler(BillyHandler):
