@@ -12,8 +12,8 @@
 <table border=1>
     <tr>
         <th>State</th>
-        <th>Districts</th>
-        <th>Legislators</th>
+        <th colspan=2>Districts</th>
+        <th colspan=2>Legislators</th>
         <th>Committees</th>
         <th>Events</th>
         <th>Bills</th>
@@ -33,9 +33,13 @@
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
         <td class="{{row.upper_districts|yesno:"good,bad"}}">
-            {{row.upper_districts}} | {{row.lower_districts}}</td>
-        <td class="{{row.legislators|yesno:"good,bad"}}">
-            {{row.legislators}}</td>
+            {{row.upper_districts}}</td>
+        <td class="{{row.lower_districts|yesno:"good,bad"}}">
+            {{row.lower_districts}}</td>
+        <td class="{{row.upper_legislators|yesno:"good,bad"}}">
+            {{row.upper_legislators}}</td>
+        <td class="{{row.lower_legislators|yesno:"good,bad"}}">
+            {{row.lower_legislators}}</td>
         <td class="{{row.committees|yesno:"good,bad"}}">
             {{row.committees}}</td>
         <td class="{{row.events|yesno:"good,warning"}}">
