@@ -33,7 +33,7 @@ def browse_index(request, template='billy/index.html'):
             row['bills'] = bill_stats['bills']
             row['votes'] = bill_stats['votes']
             row['versions'] = bill_stats['versions']
-            if bill_stats['actions']:
+            if bill_stats['actions_this_term']:
                 row['typed_actions'] = (float(bill_stats['categorized']) /
                                         bill_stats['actions_this_term'] * 100)
             if bill_stats['bills']:
