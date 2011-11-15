@@ -7,6 +7,7 @@ scrapelib changelog
     * --mongo_host, --mongo_db, --mongo_port command line options
     * sneaky_update_filter option added, can ignore minor updates
     * committee counts
+    * API bugfix when chamber isn't specified on bill lookup
 
 0.9.2
 -----

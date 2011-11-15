@@ -58,12 +58,19 @@ def browse_index(request, template='billy/index.html'):
             level = meta['level']
             s_spec = {'level': level, level: row['id']}
             row['bill_types'] = len(db.bills.find(s_spec).distinct('type')) > 1
-            row['legislators'] = db.legislators.find(s_spec).count()
             row['events'] = db.events.find(s_spec).count()
+            row['legislators'] = db.legislators.find(s_spec).count()
             id_counts = _get_leg_id_stats(level, row['id'])
             active_legs = db.legislators.find({'level': level,
                                                level: row['id'],
                                                'active': True}).count()
+
+            # districts
+            districts = db.districts.find({'abbr': row['id']})
+            row['upper_districts'] = sum(d['num_seats'] for d in districts
+                                         if d['chamber'] == 'upper')
+            row['lower_districts'] = sum(d['num_seats'] for d in districts
+                                         if d['chamber'] == 'lower')
 
             if not active_legs:
                 row['external_ids'] = 0

@@ -12,6 +12,7 @@
 <table border=1>
     <tr>
         <th>State</th>
+        <th>Districts</th>
         <th>Legislators</th>
         <th>Committees</th>
         <th>Events</th>
@@ -31,6 +32,8 @@
     {% for row in rows %}
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
+        <td class="{{row.upper_districts|yesno:"good,bad"}}">
+            {{row.upper_districts}} | {{row.lower_districts}}</td>
         <td class="{{row.legislators|yesno:"good,bad"}}">
             {{row.legislators}}</td>
         <td class="{{row.committees|yesno:"good,bad"}}">
