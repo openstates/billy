@@ -8,6 +8,7 @@ scrapelib changelog
     * sneaky_update_filter option added, can ignore minor updates
     * committee counts
     * API bugfix when chamber isn't specified on bill lookup
+    * /browse/ page shows districts and divides legislators
 
 0.9.2
 -----

@@ -69,7 +69,7 @@ def browse_index(request, template='billy/index.html'):
                                                'active': True}).count()
 
             # districts
-            districts = db.districts.find({'abbr': row['id']})
+            districts = list(db.districts.find({'abbr': row['id']}))
             row['upper_districts'] = sum(d['num_seats'] for d in districts
                                          if d['chamber'] == 'upper')
             row['lower_districts'] = sum(d['num_seats'] for d in districts
