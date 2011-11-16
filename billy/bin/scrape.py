@@ -138,6 +138,12 @@ def main():
                             dest='rpm', default=60)
         parser.add_argument('--timeout', action='store', type=int,
                             dest='timeout', default=10)
+        parser.add_argument('--importonly', dest='import_only',
+                            help="don't scrape, only import",
+                            action="store_true", default=False)
+        parser.add_argument('--import', dest='do_import',
+                            help="import data after scrape",
+                            action="store_true", default=False)
 
         args = parser.parse_args()
 
@@ -149,32 +155,17 @@ def main():
 
         # get metadata
         metadata = __import__(args.module, fromlist=['metadata']).metadata
+        abbrev = metadata['abbreviation']
 
         configure_logging(args.verbose, args.module)
 
         # make output dir
-        args.output_dir = os.path.join(settings.BILLY_DATA_DIR,
-                                       metadata['abbreviation'])
+        args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
         try:
             os.makedirs(args.output_dir)
         except OSError as e:
             if e.errno != 17:
                 raise e
-
-        # write metadata
-        try:
-            schema_path = os.path.join(os.path.split(__file__)[0],
-                                       '../schemas/metadata.json')
-            schema = json.load(open(schema_path))
-
-            validator = DatetimeValidator()
-            validator.validate(metadata, schema)
-        except ValueError as e:
-            logging.getLogger('billy').warning('metadata validation error: '
-                                                     + str(e))
-
-        with open(os.path.join(args.output_dir, 'metadata.json'), 'w') as f:
-            json.dump(metadata, f, cls=JSONDateEncoder)
 
         # determine time period to run for
         if args.terms:
@@ -192,28 +183,68 @@ def main():
         if not args.chambers:
             args.chambers = ['upper', 'lower']
 
+        # determine which scrapers to run
         if not (args.bills or args.legislators or args.votes or
                 args.committees or args.events or args.alldata):
             raise ScrapeError("Must specify at least one of --bills, "
                               "--legislators, --committees, --votes, --events,"
                               " --alldata")
-
         if args.alldata:
             args.bills = True
             args.legislators = True
             args.votes = True
             args.committees = True
 
-        if args.legislators:
-            _run_scraper('legislators', args, metadata)
-        if args.committees:
-            _run_scraper('committees', args, metadata)
-        if args.votes:
-            _run_scraper('votes', args, metadata)
-        if args.events:
-            _run_scraper('events', args, metadata)
-        if args.bills:
-            _run_scraper('bills', args, metadata)
+
+        if not args.import_only:
+            # write metadata
+            try:
+                schema_path = os.path.join(os.path.split(__file__)[0],
+                                           '../schemas/metadata.json')
+                schema = json.load(open(schema_path))
+
+                validator = DatetimeValidator()
+                validator.validate(metadata, schema)
+            except ValueError as e:
+                logging.getLogger('billy').warning('metadata validation error: '
+                                                         + str(e))
+
+            with open(os.path.join(args.output_dir, 'metadata.json'), 'w') as f:
+                json.dump(metadata, f, cls=JSONDateEncoder)
+
+            # run scrapers
+            if args.legislators:
+                _run_scraper('legislators', args, metadata)
+            if args.committees:
+                _run_scraper('committees', args, metadata)
+            if args.votes:
+                _run_scraper('votes', args, metadata)
+            if args.events:
+                _run_scraper('events', args, metadata)
+            if args.bills:
+                _run_scraper('bills', args, metadata)
+
+
+        if args.do_import or args.import_only:
+            # do imports here so that scrapers don't depend on mongo
+            from billy.importers.metadata import import_metadata
+            from billy.importers.bills import import_bills
+            from billy.importers.legislators import import_legislators
+            from billy.importers.committees import import_committees
+            from billy.importers.events import import_events
+
+            # always import metadata
+            import_metadata(abbrev, settings.BILLY_DATA_DIR)
+
+            if args.legislators:
+                import_legislators(abbrev, settings.BILLY_DATA_DIR)
+            if args.bills:
+                import_bills(abbrev, settings.BILLY_DATA_DIR)
+            if args.committees:
+                import_committees(abbrev, settings.BILLY_DATA_DIR)
+            if args.events:
+                import_events(abbrev, settings.BILLY_DATA_DIR)
+
     except ScrapeError as e:
         print 'Error:', e
         sys.exit(1)
