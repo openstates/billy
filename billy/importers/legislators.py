@@ -3,12 +3,14 @@ import os
 import glob
 import datetime
 import json
+import logging
 
 from billy import db
 from billy.importers.utils import insert_with_id, update, prepare_obj
 
 import pymongo
 
+logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.legislators.ensure_index('_all_ids', pymongo.ASCENDING)
@@ -32,7 +34,7 @@ def import_legislators(abbr, data_dir):
         with open(path) as f:
             import_legislator(json.load(f))
 
-    print 'imported %s legislator files' % len(paths)
+    logger.info('imported %s legislator files' % len(paths))
 
     meta = db.metadata.find_one({'_id': abbr})
     current_term = meta['terms'][-1]['name']

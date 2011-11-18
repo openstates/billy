@@ -11,6 +11,8 @@ from billy.scrape.events import Event
 
 import pymongo
 
+logger = logging.getLogger('billy')
+
 def ensure_indexes():
     db.events.ensure_index([('when', pymongo.ASCENDING),
                             ('state', pymongo.ASCENDING),
@@ -23,7 +25,7 @@ def ensure_indexes():
 def _insert_with_id(event):
     abbr = event[event['level']]
     id = next_big_id(abbr, 'E', 'event_ids')
-    logging.info("Saving as %s" % id)
+    logger.info("Saving as %s" % id)
 
     event['_id'] = id
     db.events.save(event, safe=True)
@@ -74,8 +76,6 @@ def import_event(data):
 
 def actions_to_events(state):
     for bill in db.bills.find({'state': state}):
-        print "Converting %s actions to events" % bill['_id']
-
         count = 1
         for action in bill['actions']:
             guid = "%s:action:%06d" % (bill['_id'], count)

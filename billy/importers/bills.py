@@ -2,8 +2,9 @@
 import os
 import re
 import glob
-from collections import defaultdict
 import json
+import logging
+from collections import defaultdict
 
 from billy.utils import keywordize, term_for_session
 from billy import db
@@ -13,6 +14,7 @@ from billy.importers.utils import (insert_with_id, update, prepare_obj,
 
 import pymongo
 
+logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.bills.ensure_index([('state', pymongo.ASCENDING),
@@ -71,7 +73,7 @@ def import_votes(data_dir):
 
         votes[(data['bill_chamber'], data['session'], bill_id)].append(data)
 
-    print 'imported %s vote files' % len(paths)
+    logger.info('imported %s vote files' % len(paths))
     return votes
 
 
@@ -168,11 +170,11 @@ def import_bills(abbr, data_dir):
 
         import_bill(data, votes)
 
-    print 'imported %s bill files' % len(paths)
+    logger.info('imported %s bill files' % len(paths))
 
     for remaining in votes.keys():
-        print 'Failed to match vote %s %s %s' % tuple([
-            r.encode('ascii', 'replace') for r in remaining])
+        logger.debug('Failed to match vote %s %s %s' % tuple([
+            r.encode('ascii', 'replace') for r in remaining]))
 
     meta = db.metadata.find_one({'_id': abbr})
     level = meta['level']

@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import logging
 
 from billy.conf import default_settings
 
@@ -54,5 +55,4 @@ try:
     settings.update(billy_settings)
     sys.path.pop(0)
 except ImportError:
-    print 'no billy_settings file found, continuing with defaults..'
-    pass
+    logging.warning('no billy_settings file found, continuing with defaults..')

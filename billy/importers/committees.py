@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import os
 import glob
-import datetime
 import json
+import datetime
+import logging
 
 from billy import db
 from billy.conf import settings
@@ -11,6 +12,7 @@ from billy.importers.utils import prepare_obj, update, insert_with_id
 
 import pymongo
 
+logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.committees.ensure_index([('_all_ids', pymongo.ASCENDING)])
@@ -97,8 +99,8 @@ def import_committee(data, current_session, current_term):
                                    member['name'])
 
         if not leg_id:
-            print "No matches for %s" % member['name'].encode(
-                'ascii', 'ignore')
+            logger.debug("No matches for %s" % member['name'].encode('ascii',
+                                                                     'ignore'))
             member['leg_id'] = None
             continue
 
@@ -157,7 +159,7 @@ def import_committees(abbr, data_dir):
 
         import_committee(data, current_session, current_term)
 
-    print 'imported %s committee files' % len(paths)
+    logger.info('imported %s committee files' % len(paths))
 
     link_parents(level, abbr)
 
@@ -175,7 +177,7 @@ def link_parents(level, abbr):
                                              'chamber': comm['chamber'],
                                              'committee': comm['committee']})
             if not parent:
-                print "Failed finding parent for: %s" % sub
+                logger.warning("Failed finding parent for: %s" % sub)
                 comm['parent_id'] = None
             else:
                 comm['parent_id'] = parent['_id']
