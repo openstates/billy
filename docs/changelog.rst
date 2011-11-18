@@ -10,6 +10,7 @@ scrapelib changelog
     * API bugfix when chamber isn't specified on bill lookup
     * /browse/ page shows districts and divides legislators
     * billy-import replaced by --import[only] flag to billy-scrape
+    * change import to use logger instead of unbuffered print statements
 
 0.9.2
 -----
