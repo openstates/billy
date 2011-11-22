@@ -32,6 +32,7 @@ billy-generate-stats = billy.bin.generate_statistics:generate_statistics
 billy-import-districts = billy.bin.import_districts:main
 billy-load-legislator-csv = billy.bin.load_legislator_csv:main
 billy-oysterize = billy.bin.oyster_versions:main
+billy-report = billy.bin.report:main
 billy-retire-legislator = billy.bin.retire_legislator:main
 billy-scrape = billy.bin.scrape:main
 billy-scrape-bill = billy.bin.scrape_bill:main
