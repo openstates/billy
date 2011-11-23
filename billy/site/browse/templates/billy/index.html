@@ -12,118 +12,92 @@
 <table border=1>
     <tr>
         <th>State</th>
-        <th colspan=2>Districts</th>
-        <th colspan=2>Legislators</th>
-        <th>Committees</th>
-        <th>Events</th>
+        <!-- bills -->
         <th>Bills</th>
-        <th>Votes</th>
-        <th>Versions</th>
+        <th>No Actions</th>
+        <th>No Sponsors</th>
+        <th>No Versions</th>
+        <th>No Source</th>
         <th>Bill Types</th>
-        <th>Bills w/ Subjects</th>
+        <th>w/ Subjects</th>
         <th>Actions w/ Types</th>
         <th>Sponsor leg_ids</th>
+        <!-- votes -->
+        <th>Votes</th>
         <th>Vote leg_ids</th>
-        <th>Committee leg_ids</th>
-        <th>External IDs</th>
-        <th>Missing Sources</th>
+        <th>Bad Counts</th>
     </tr>
 
     {% for row in rows %}
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
-        <td class="{{row.upper_districts|yesno:"good,bad"}}">
-            {{row.upper_districts}}</td>
-        <td class="{{row.lower_districts|yesno:"good,bad"}}">
-            {{row.lower_districts}}</td>
-        <td class="{{row.upper_legislators|yesno:"good,bad"}}">
-            {{row.upper_legislators}}</td>
-        <td class="{{row.lower_legislators|yesno:"good,bad"}}">
-            {{row.lower_legislators}}</td>
-        <td class="{{row.committees|yesno:"good,bad"}}">
-            {{row.committees}}</td>
-        <td class="{{row.events|yesno:"good,warning"}}">
-            {{row.events}}</td>
-        <td class="{{row.bills|yesno:"good,bad"}}">
-            {{row.bills}}</td>
-        <td class="{{row.votes|yesno:"good,bad"}}">
-            {{row.votes}}</td>
-        <td class="{{row.versions|yesno:"good,bad"}}">
-            {{row.versions}}</td>
-        <td class="{{row.bill_types|yesno:"good,bad"}}">
-            {{row.bill_types}}</td>
+        <!-- bills -->
+        <td class="{{row.bills.bill_count|yesno:"good,bad"}}">
+            {{row.bills.bill_count}}</td>
+        <td class="{{row.bills.actionless|length|yesno:"bad,good"}}">
+            {{row.bills.actionless|length}}</td>
+        <td class="{{row.bills.sponsorless|length|yesno:"bad,good"}}">
+            {{row.bills.sponsorless|length}}</td>
+        <td class="{{row.bills.versionless|length|yesno:"bad,good"}}">
+            {{row.bills.versionless|length}}</td>
+        <td class="{{row.bills.sourceless|length|yesno:"bad,good"}}">
+           {{row.bills.sourceless|length}}</td>
+        <td class="{{row.bills.bill_types|length_is:"1"|yesno:"bad,good"}}">
+            {{row.bills.bill_types|length}}</td>
         <td
-            {% if not row.subjects %}
+            {% if not row.bills.have_subjects %}
             class="warning">---</td>
             {% else %}
-                {% if row.subjects < 25 %}
+                {% if row.bills.have_subjects < .25 %}
                 class="bad"
                 {% else %}
-                    {% if row.subjects < 90 %}
+                    {% if row.bills.have_subjects < .9 %}
                     class="warning"
                     {% else %}
                     class="good"
                     {% endif %}
                 {% endif %}
-                >{{row.subjects|floatformat}}</td>
+                >{{row.bills.have_subjects|floatformat}}</td>
             {% endif %}
         <td
-            {% if row.typed_actions < 25 %}
+            {% if row.bills.typed_actions < 25 %}
             class="bad"
             {% else %}
-                {% if row.typed_actions < 50 %}
+                {% if row.bills.typed_actions < 50 %}
                 class="warning"
                 {% else %}
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.typed_actions|floatformat}}</td>
+            >{{row.bills.typed_actions|floatformat}}</td>
         <td
-            {% if row.sponsor_ids < 75 %}
+            {% if row.bills.sponsors_with_leg_id < 75 %}
             class="bad"
             {% else %}
-                {% if row.sponsor_ids < 95 %}
+                {% if row.bills.sponsors_with_leg_id < 95 %}
                 class="warning"
                 {% else %}
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.sponsor_ids|floatformat}}</td>
+            >{{row.bills.sponsors_with_leg_id|floatformat}}</td>
+
+        <!-- votes -->
+        <td class="{{row.bills.vote_count|yesno:"good,bad"}}">
+            {{row.bills.vote_count}}</td>
         <td
-            {% if row.voter_ids < 75 %}
+            {% if row.bills.rollcalls_with_leg_id < 75 %}
             class="bad"
             {% else %}
-                {% if row.voter_ids < 95 %}
+                {% if row.bills.rollcalls_with_leg_id < 95 %}
                 class="warning"
                 {% else %}
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.voter_ids|floatformat}}</td>
-        <td
-            {% if row.member_ids < 75 %}
-            class="bad"
-            {% else %}
-                {% if row.member_ids < 95 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
-            {% endif %}
-            >{{row.member_ids|floatformat}}</td>
-        <td
-            {% if row.external_ids < 75 %}
-            class="bad"
-            {% else %}
-                {% if row.external_ids < 98 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
-            {% endif %}
-            >{{row.external_ids|floatformat}}</td>
-        <td class="{{row.missing_sources|yesno:"bad,good"}}">
-           {{row.missing_sources}}</td>
+            >{{row.bills.rollcalls_with_leg_id|floatformat}}</td>
+        <td class="{{row.bills.bad_vote_totals|length|yesno:"bad,good"}}">
+            {{row.bills.bad_vote_totals|length}}</td>
     </tr>
     {% endfor %}
 </table>

@@ -21,7 +21,7 @@ def main():
         print 'updating %s reports...' % abbr
         report['bills'] = bill_report(abbr)
 
-    db.report.save(report, safe=True)
+    db.reports.save(report, safe=True)
 
 if __name__ == '__main__':
     main()

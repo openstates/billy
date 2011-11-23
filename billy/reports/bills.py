@@ -168,42 +168,48 @@ def combine_bill_reports(reports):
 def calculate_percentages(report):
     # general bill stuff
     bill_count = float(report['bill_count'])
-    report['updated_this_year'] = (report.pop('_updated_this_year_count') /
+    if bill_count:
+        report['updated_this_year'] = (report.pop('_updated_this_year_count') /
+                                       bill_count)
+        report['updated_this_month'] = (report.pop('_updated_this_month_count') /
+                                        bill_count)
+        report['updated_today'] = (report.pop('_updated_today_count') /
                                    bill_count)
-    report['updated_this_month'] = (report.pop('_updated_this_month_count') /
-                                    bill_count)
-    report['updated_today'] = report.pop('_updated_today_count') / bill_count
-    report['have_subjects'] = report.pop('_subjects_count') / bill_count
+        report['have_subjects'] = report.pop('_subjects_count') / bill_count
 
     # actions
     action_count = float(report['action_count'])
-    for k in report['actions_per_type'].iterkeys():
-        report['actions_per_type'][k] /= action_count
-    for k in report['actions_per_actor'].iterkeys():
-        report['actions_per_actor'][k] /= action_count
-    for k in report['actions_per_month'].iterkeys():
-        report['actions_per_month'][k] /= action_count
+    if action_count:
+        for k in report['actions_per_type'].iterkeys():
+            report['actions_per_type'][k] /= action_count
+        for k in report['actions_per_actor'].iterkeys():
+            report['actions_per_actor'][k] /= action_count
+        for k in report['actions_per_month'].iterkeys():
+            report['actions_per_month'][k] /= action_count
 
     # sponsors
     _sponsor_count = float(report.pop('_sponsor_count'))
-    report['sponsors_with_leg_id'] = (report.pop('_sponsors_with_leg_id_count')
-                                      / _sponsor_count)
-    for k in report['sponsors_per_type'].iterkeys():
-        report['sponsors_per_type'][k] /= _sponsor_count
+    if _sponsor_count:
+        report['sponsors_with_leg_id'] = (
+            report.pop('_sponsors_with_leg_id_count') / _sponsor_count)
+        for k in report['sponsors_per_type'].iterkeys():
+            report['sponsors_per_type'][k] /= _sponsor_count
 
     # votes
     vote_count = float(report['vote_count'])
-    report['votes_passed'] = report.pop('_passed_vote_count') / vote_count
-    for k in report['votes_per_type'].iterkeys():
-        report['votes_per_type'][k] /= vote_count
-    for k in report['votes_per_chamber'].iterkeys():
-        report['votes_per_chamber'][k] /= vote_count
-    for k in report['votes_per_month'].iterkeys():
-        report['votes_per_month'][k] /= vote_count
-    report['rollcalls_with_leg_id'] = (
-        report.pop('_rollcalls_with_leg_id_count') /
-        float(report.pop('_rollcall_count'))
-    )
+    if vote_count:
+        report['votes_passed'] = report.pop('_passed_vote_count') / vote_count
+        for k in report['votes_per_type'].iterkeys():
+            report['votes_per_type'][k] /= vote_count
+        for k in report['votes_per_chamber'].iterkeys():
+            report['votes_per_chamber'][k] /= vote_count
+        for k in report['votes_per_month'].iterkeys():
+            report['votes_per_month'][k] /= vote_count
+    rollcall_count = float(report.pop('_rollcall_count'))
+    if rollcall_count:
+        report['rollcalls_with_leg_id'] = (
+            report.pop('_rollcalls_with_leg_id_count') / rollcall_count
+        )
 
 
 def bill_report(abbr):

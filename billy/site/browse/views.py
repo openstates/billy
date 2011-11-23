@@ -22,156 +22,42 @@ def browse_index(request, template='billy/index.html'):
     total_missing_ids = 0
     total_active = 0
 
-    for meta in list(db.metadata.find()) + [{'_id':'total', 'name':'total'}]:
-        row = {}
-        row['id'] = meta['_id']
-        row['name'] = meta['name']
 
-        bill_stats = db.bill_stats.find_one({'_id': row['id']})
-        if bill_stats:
-            bill_stats = bill_stats['value']
-            row['bills'] = bill_stats['bills']
-            row['votes'] = bill_stats['votes']
-            row['versions'] = bill_stats['versions']
-            if bill_stats['actions_this_term']:
-                row['typed_actions'] = (float(bill_stats['categorized']) /
-                                        bill_stats['actions_this_term'] * 100)
-            if bill_stats['bills']:
-                row['subjects'] = (float(bill_stats['subjects']) /
-                                   bill_stats['bills'] * 100)
-            if bill_stats['sponsors']:
-                row['sponsor_ids'] = (float(bill_stats['idd_sponsors']) /
-                                      bill_stats['sponsors'] * 100)
-            if bill_stats['voters']:
-                row['voter_ids'] = (float(bill_stats['idd_voters']) /
-                                    bill_stats['voters'] * 100)
+    for report in db.reports.find():
+        meta = db.metadata.find_one({'_id': report['_id']})
 
-        com_stats = db.committee_stats.find_one({'_id': row['id']})
+        report['id'] = report['_id']
+        report['name'] = meta['name']
+
+        bill_report = report['bills']
+        bill_report['typed_actions'] = (1 -
+                                bill_report['actions_per_type']['other'])*100
+
+        com_stats = db.committee_stats.find_one({'_id': report['id']})
         if com_stats:
             com_stats = com_stats['value']
-            row['committees'] = com_stats['committees']
+            report['committees'] = com_stats['committees']
             if com_stats['members']:
-                row['member_ids'] = (float(com_stats['idd_members']) /
+                report['member_ids'] = (float(com_stats['idd_members']) /
                                      com_stats['members'] * 100)
 
-        if row['id'] != 'total':
-            level = meta['level']
-            s_spec = {'level': level, level: row['id']}
-            row['bill_types'] = len(db.bills.find(s_spec).distinct('type')) > 1
-            row['events'] = db.events.find(s_spec).count()
-            s_spec['chamber'] = 'lower'
-            row['lower_legislators'] = db.legislators.find(s_spec).count()
-            s_spec['chamber'] = 'upper'
-            row['upper_legislators'] = db.legislators.find(s_spec).count()
-            id_counts = _get_leg_id_stats(level, row['id'])
-            active_legs = db.legislators.find({'level': level,
-                                               level: row['id'],
-                                               'active': True}).count()
+        # districts
+        districts = list(db.districts.find({'abbr': report['id']}))
+        report['upper_districts'] = sum(d['num_seats'] for d in districts
+                                     if d['chamber'] == 'upper')
+        report['lower_districts'] = sum(d['num_seats'] for d in districts
+                                     if d['chamber'] == 'lower')
+        rows.append(report)
 
-            # districts
-            districts = list(db.districts.find({'abbr': row['id']}))
-            row['upper_districts'] = sum(d['num_seats'] for d in districts
-                                         if d['chamber'] == 'upper')
-            row['lower_districts'] = sum(d['num_seats'] for d in districts
-                                         if d['chamber'] == 'lower')
-
-            if not active_legs:
-                row['external_ids'] = 0
-            else:
-                missing_ids = float(id_counts['missing_pvs'] +
-                                    id_counts['missing_tdata'])
-                row['external_ids'] = (1 - (missing_ids /
-                                            (active_legs * 2))) * 100
-                total_missing_ids += missing_ids
-                total_active += active_legs
-
-            missing_bill_sources = db.bills.find({'level': level,
-                                                  level: row['id'],
-                                              'sources': {'$size': 0}}).count()
-            missing_leg_sources = db.legislators.find({'level': level,
-                                                       level: row['id'],
-                                              'sources': {'$size': 0}}).count()
-            row['missing_sources'] = ''
-            if missing_bill_sources:
-                row['missing_sources'] += 'bills'
-            if missing_leg_sources:
-                row['missing_sources'] += ' legislators'
-        else:
-            row['bill_types'] = 'n/a'
-            row['lower_legislators'] = db.legislators.find({'chamber': 'lower'}).count()
-            row['upper_legislators'] = db.legislators.find({'chamber': 'upper'}).count()
-            row['committees'] = db.committees.find().count()
-            row['events'] = db.events.find().count()
-
-        rows.append(row)
-
-    rows.sort(key=lambda x: x['id'] if x['id'] != 'total' else 'zz')
-
-    # set total external ids
-    rows[-1]['external_ids'] = (1 - (total_missing_ids /
-                                     (total_active * 2))) * 100
+    rows.sort(key=lambda x: x['id'])
 
     return render_to_response(template, {'rows': rows})
 
 
-def _bill_stats_for_session(level, abbr, session):
-    context = {}
-    context['upper_bill_count'] = db.bills.find({'level': level,
-                                                 level: abbr,
-                                                 'session': session,
-                                                 'chamber': 'upper'}).count()
-    context['lower_bill_count'] = db.bills.find({'level': level,
-                                                 level: abbr,
-                                                 'session': session,
-                                                 'chamber': 'lower'}).count()
-    context['bill_count'] = (context['upper_bill_count'] +
-                             context['lower_bill_count'])
-    context['ns_bill_count'] = db.bills.find({'level': level,
-                                              level: abbr,
-                                              'session': session,
-                                           'sources': {'$size': 0}}).count()
-    types = defaultdict(int)
-    action_types = defaultdict(int)
-    total_actions = 0
-    versions = 0
-
-    for bill in db.bills.find({'level': level, level: abbr,
-                               'session': session},
-                              {'type': 1, 'actions.type': 1, 'versions': 1}):
-        for t in bill['type']:
-            types[t] += 1
-        for a in bill['actions']:
-            for at in a['type']:
-                action_types[at] += 1
-                total_actions += 1
-        versions += len(bill.get('versions', []))
-    context['versions'] = versions
-
-    context['types'] = dict(types)
-    context['action_types'] = dict(action_types)
-    if total_actions:
-        context['action_cat_percent'] = ((total_actions -
-                                          action_types['other']) /
-                                         float(total_actions) * 100)
-
-    return context
-
-
-def _get_leg_id_stats(level, abbr):
-    context = {}
-    context['missing_pvs'] = db.legislators.find({'level': level,
-                             level: abbr,
-                             'active': True,
-                             'votesmart_id': {'$exists': False}}).count()
-    context['missing_tdata'] = db.legislators.find({'level': level,
-         level: abbr, 'active': True,
-         'transparencydata_id': {'$exists': False}}).count()
-    return context
-
-
 def overview(request, abbr):
     meta = metadata(abbr)
-    if not meta:
+    report = db.reports.find({'_id': abbr})
+    if not meta or not report:
         raise Http404
 
     context = {}
@@ -183,19 +69,13 @@ def overview(request, abbr):
 
     level = meta['level']
 
-    context.update(_bill_stats_for_session(level, abbr, latest_session))
+    context.update(
 
     # legislators
-    context['upper_leg_count'] = db.legislators.find({'level': level,
-                                                      level: abbr,
-                                                      'active': True,
-                                                  'chamber': 'upper'}).count()
-    context['lower_leg_count'] = db.legislators.find({'level': level,
-                                                      level: abbr,
-                                                      'active': True,
-                                                  'chamber': 'lower'}).count()
-    context['leg_count'] = (context['upper_leg_count'] +
-                            context['lower_leg_count'])
+    context['upper_active_count'] = 0
+    context['lower_active_count'] = 0
+    context['active_count'] = (context['upper_active_count'] +
+                            context['lower_active_count'])
     context['inactive_leg_count'] = db.legislators.find({'level': level,
                                                          level: abbr,
                                                      'active': False}).count()
@@ -203,7 +83,6 @@ def overview(request, abbr):
                              level: abbr,
                              'active': True,
                              'sources': {'$size': 0}}).count()
-    context.update(_get_leg_id_stats(level, abbr))
 
     # committees
     context['upper_com_count'] = db.committees.find({'level': level,
