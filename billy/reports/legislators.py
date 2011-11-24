@@ -49,7 +49,7 @@ def scan_legislators(abbr):
                 # TODO: track these? (executives)
                 pass
 
-            seats_filled[leg['chamber']][leg['district']] += 1
+            seats_filled[chamber][leg['district']] += 1
             # TODO: check seats_filled against districts
 
             for key in checked_keys:
