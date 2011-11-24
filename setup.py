@@ -33,7 +33,6 @@ billy-import-districts = billy.bin.import_districts:main
 billy-load-legislator-csv = billy.bin.load_legislator_csv:main
 billy-oysterize = billy.bin.oyster_versions:main
 billy-retire-legislator = billy.bin.retire_legislator:main
-billy-scrape-bill = billy.bin.scrape_bill:main
 billy-update-external-ids = billy.bin.update_external_ids:main
 billy-update-leg-ids = billy.bin.update_leg_ids:main
 billy-validate-api = billy.bin.validate_api:main
