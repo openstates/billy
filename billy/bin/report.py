@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import logging
+
 from billy import db
 from billy.conf import settings, base_arg_parser
 from billy.utils import configure_logging
