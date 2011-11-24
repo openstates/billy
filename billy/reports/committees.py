@@ -21,6 +21,7 @@ def scan_committees(abbr):
               '_updated_this_year_count': 0,
               '_member_count': 0,
               '_members_with_leg_id_count': 0,
+              'sourceless': set(),
              }
 
     for com in db.committees.find({'level': level, level: abbr}):

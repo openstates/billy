@@ -22,6 +22,7 @@ def scan_legislators(abbr):
               '_updated_today_count': 0,
               '_updated_this_month_count': 0,
               '_updated_this_year_count': 0,
+              'sourceless': set(),
              }
     seats_filled = {'upper': defaultdict(int), 'lower': defaultdict(int)}
     for key in checked_keys:
