@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from billy import db
 
+logger = logging.getLogger('billy')
 
 def _bill_report_dict():
     return {'bill_count': 0,
@@ -92,8 +93,10 @@ def scan_bills(abbr):
             session_d['vote_count'] += 1
             if vote['passed']:
                 session_d['_passed_vote_count'] += 1
-            session_d['votes_per_type'][vote['type']] += 1
+            session_d['votes_per_type'][vote.get('type')] += 1
             session_d['votes_per_chamber'][vote['chamber']] += 1
+            if not vote.get('date'):
+                logger.warning('vote is missing date on %s' % bill['_id'])
             session_d['votes_per_month'][vote['date'].strftime('%Y-%m')] += 1
 
             # roll calls

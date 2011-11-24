@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from billy import db
 from billy.conf import settings, base_arg_parser
+from billy.utils import configure_logging
 from billy.reports.bills import bill_report
 from billy.reports.legislators import legislator_report
 from billy.reports.committees import committee_report
@@ -15,6 +16,7 @@ def main():
                         help='states to update reports for')
     args = parser.parse_args()
     settings.update(args)
+    configure_logging(args.verbose)
 
     for abbr in args.abbrs:
         report = db.reports.find_one({'_id': abbr})
