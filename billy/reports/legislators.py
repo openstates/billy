@@ -2,6 +2,7 @@ import datetime
 from collections import defaultdict
 
 from billy import db
+from billy.reports.utils import update_common
 
 # semi-optional keys to check for on active legislators
 checked_keys = ('photo_url', 'url', 'votesmart_id', 'transparencydata_id')
@@ -11,10 +12,6 @@ def scan_legislators(abbr):
     metadata = db.metadata.find_one({'_id': abbr})
     level = metadata['level']
 
-    yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    last_month = datetime.datetime.utcnow() - datetime.timedelta(days=30)
-    last_year = datetime.datetime.utcnow() - datetime.timedelta(days=365)
-
     duplicate_sources = defaultdict(int)
     report = {'upper_active_count': 0,
               'lower_active_count': 0,
@@ -22,7 +19,7 @@ def scan_legislators(abbr):
               '_updated_today_count': 0,
               '_updated_this_month_count': 0,
               '_updated_this_year_count': 0,
-              'sourceless': set(),
+              'sourceless_count': 0,
              }
     seats_filled = {'upper': defaultdict(int), 'lower': defaultdict(int)}
     for key in checked_keys:
@@ -30,13 +27,8 @@ def scan_legislators(abbr):
 
     for leg in db.legislators.find({'level': level, level: abbr}):
 
-        # updated checks
-        if leg['updated_at'] >= yesterday:
-            report['_updated_today_count'] += 1
-            if leg['updated_at'] >= last_month:
-                report['_updated_this_month_count'] += 1
-                if leg['updated_at'] >= last_year:
-                    report['_updated_this_year_count'] += 1
+        # do common details
+        update_common(leg, report)
 
         # most checks only apply to active set
         if leg.get('active'):
@@ -58,11 +50,8 @@ def scan_legislators(abbr):
         else:
             report['inactive_count'] += 1
 
-        # sources
-        for source in leg['sources']:
+        for source in obj['sources']:
             duplicate_sources[source['url']] += 1
-        if not leg['sources']:
-            report['sourceless'].add(leg['_id'])
 
     report['duplicate_sources'] = []
     for url, n in duplicate_sources.iteritems():
@@ -91,5 +80,4 @@ def calculate_percentages(report):
 def legislator_report(abbr):
     report = scan_legislators(abbr)
     calculate_percentages(report)
-    report['sourceless'] = list(report['sourceless'])
     return report

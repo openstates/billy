@@ -2,14 +2,11 @@ import datetime
 from collections import defaultdict
 
 from billy import db
+from billy.reports.utils import update_common
 
 def scan_committees(abbr):
     metadata = db.metadata.find_one({'_id': abbr})
     level = metadata['level']
-
-    yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    last_month = datetime.datetime.utcnow() - datetime.timedelta(days=30)
-    last_year = datetime.datetime.utcnow() - datetime.timedelta(days=365)
 
     duplicate_sources = defaultdict(int)
     report = {'upper_count': 0,
@@ -21,18 +18,12 @@ def scan_committees(abbr):
               '_updated_this_year_count': 0,
               '_member_count': 0,
               '_members_with_leg_id_count': 0,
-              'sourceless': set(),
+              'sourceless_count': 0,
              }
 
     for com in db.committees.find({'level': level, level: abbr}):
 
-        # updated checks
-        if com['updated_at'] >= yesterday:
-            report['_updated_today_count'] += 1
-            if com['updated_at'] >= last_month:
-                report['_updated_this_month_count'] += 1
-                if com['updated_at'] >= last_year:
-                    report['_updated_this_year_count'] += 1
+        update_common(com, report)
 
         if com['chamber'] == 'upper':
             report['upper_count'] += 1
@@ -53,8 +44,6 @@ def scan_committees(abbr):
         # sources
         for source in com['sources']:
             duplicate_sources[source['url']] += 1
-        if not com['sources']:
-            report['sourceless'].add(com['_id'])
 
     report['duplicate_sources'] = []
     for url, n in duplicate_sources.iteritems():
@@ -84,5 +73,4 @@ def calculate_percentages(report):
 def committee_report(abbr):
     report = scan_committees(abbr)
     calculate_percentages(report)
-    report['sourceless'] = list(report['sourceless'])
     return report

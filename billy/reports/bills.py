@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict
 
 from billy import db
+from billy.reports.utils import update_common
 
 logger = logging.getLogger('billy')
 
@@ -32,7 +33,7 @@ def _bill_report_dict():
             '_rollcalls_with_leg_id_count': 0,
             '_subjects_count': 0,
             'bills_per_subject': defaultdict(int),
-            'sourceless': set(),
+            'sourceless_count': 0,
             'versionless': set(),
            }
 
@@ -41,10 +42,6 @@ def _bill_report_dict():
 def scan_bills(abbr):
     metadata = db.metadata.find_one({'_id': abbr})
     level = metadata['level']
-
-    yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    last_month = datetime.datetime.utcnow() - datetime.timedelta(days=30)
-    last_year = datetime.datetime.utcnow() - datetime.timedelta(days=365)
 
     duplicate_sources = defaultdict(int)
     duplicate_versions = defaultdict(int)
@@ -58,13 +55,7 @@ def scan_bills(abbr):
         for type in bill['type']:
             session_d['bill_types'][type] += 1
 
-        # updated date
-        if bill['updated_at'] >= yesterday:
-            session_d['_updated_today_count'] += 1
-            if bill['updated_at'] >= last_month:
-                session_d['_updated_this_month_count'] += 1
-                if bill['updated_at'] >= last_year:
-                    session_d['_updated_this_year_count'] += 1
+        update_common(bill, session_d)
 
         # actions
         last_date = datetime.datetime(1900,1,1)
@@ -129,8 +120,6 @@ def scan_bills(abbr):
         # sources
         for source in bill['sources']:
             duplicate_sources[source['url']] += 1
-        if not bill['sources']:
-            session_d['sourceless'].add(bill['_id'])
 
         # versions
         if not bill['versions']:
