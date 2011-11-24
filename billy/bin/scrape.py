@@ -31,7 +31,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
         # silence error only for --alldata
         if (options.alldata and str(e.orig_exception) ==
             'No module named %s' % scraper_type):
-            return
+            return None
         else:
             raise e
 
@@ -55,6 +55,8 @@ def _run_scraper(scraper_type, options, metadata):
     """
     _clear_scraped_data(options.output_dir, scraper_type)
     scraper = _get_configured_scraper(scraper_type, options, metadata)
+    if not scraper:
+        pass
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
