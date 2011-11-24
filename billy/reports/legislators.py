@@ -40,10 +40,13 @@ def scan_legislators(abbr):
 
         # most checks only apply to active set
         if leg.get('active'):
-            if leg['chamber'] == 'upper':
+            chamber = leg.get('chamber')
+            if chamber == 'upper':
                 report['upper_active_count'] += 1
-            elif leg['chamber'] == 'lower':
+            elif chamber == 'lower':
                 report['lower_active_count'] += 1
+            else:
+                # TODO: track these? (executives)
 
             seats_filled[leg['chamber']][leg['district']] += 1
             # TODO: check seats_filled against districts
