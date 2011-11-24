@@ -12,6 +12,7 @@ scrapelib changelog
     * removed billy-generate-stats and replaced with robust billy-report
     * updated browse interface
     * billy-export replaces billy-dump-*
+    * billy-bill-scrape merged into billy-scrape
 
 0.9.2
 -----
