@@ -3,6 +3,7 @@ from billy import db
 from billy.conf import settings, base_arg_parser
 from billy.reports.bills import bill_report
 from billy.reports.legislators import legislator_report
+from billy.reports.committees import committee_report
 
 def main():
     import sys
@@ -22,6 +23,7 @@ def main():
         print 'updating %s reports...' % abbr
         report['bills'] = bill_report(abbr)
         report['legislators'] = legislator_report(abbr)
+        report['committees'] = committee_report(abbr)
 
     db.reports.save(report, safe=True)
 
