@@ -6,11 +6,11 @@ scrapelib changelog
     * force tests to use a test database
     * --mongo_host, --mongo_db, --mongo_port command line options
     * sneaky_update_filter option added, can ignore minor updates
-    * committee counts
     * API bugfix when chamber isn't specified on bill lookup
-    * /browse/ page shows districts and divides legislators
     * billy-import replaced by --import[only] flag to billy-scrape
     * change import to use logger instead of unbuffered print statements
+    * removed billy-generate-stats and replaced with robust billy-report
+    * updated browse interface
 
 0.9.2
 -----
