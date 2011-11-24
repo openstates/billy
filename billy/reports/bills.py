@@ -98,6 +98,7 @@ def scan_bills(abbr):
             session_d['votes_per_chamber'][vote['chamber']] += 1
             if not vote.get('date'):
                 logger.warning('vote is missing date on %s' % bill['_id'])
+                continue
             session_d['votes_per_month'][vote['date'].strftime('%Y-%m')] += 1
 
             # roll calls
