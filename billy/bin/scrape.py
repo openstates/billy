@@ -56,7 +56,7 @@ def _run_scraper(scraper_type, options, metadata):
     _clear_scraped_data(options.output_dir, scraper_type)
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
-        pass
+        return
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
