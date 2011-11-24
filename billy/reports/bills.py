@@ -94,8 +94,11 @@ def scan_bills(abbr):
             session_d['vote_count'] += 1
             if vote['passed']:
                 session_d['_passed_vote_count'] += 1
-            session_d['votes_per_type'][vote.get('type')] += 1
             session_d['votes_per_chamber'][vote['chamber']] += 1
+            if not vote.get('type'):
+                logger.warning('vote is missing type on %s' % bill['_id'])
+                continue
+            session_d['votes_per_type'][vote.get('type')] += 1
             if not vote.get('date'):
                 logger.warning('vote is missing date on %s' % bill['_id'])
                 continue
