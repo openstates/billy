@@ -25,7 +25,7 @@ def _bill_report_dict():
             'votes_per_month': defaultdict(int),
             'votes_per_chamber': defaultdict(int),
             'votes_per_type': defaultdict(int),
-            'bad_vote_totals': set(),
+            'bad_vote_counts': set(),
             '_rollcall_count': 0,
             '_rollcalls_with_leg_id_count': 0,
             '_subjects_count': 0,
