@@ -11,6 +11,7 @@ scrapelib changelog
     * change import to use logger instead of unbuffered print statements
     * removed billy-generate-stats and replaced with robust billy-report
     * updated browse interface
+    * billy-export replaces billy-dump-*
 
 0.9.2
 -----
