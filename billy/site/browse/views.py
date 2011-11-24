@@ -30,8 +30,8 @@ def browse_index(request, template='billy/index.html'):
         report['name'] = meta['name']
 
         bill_report = report['bills']
-        bill_report['typed_actions'] = (1 -
-                                bill_report['actions_per_type']['other'])*100
+        bill_report['typed_actions'] = (100 -
+                                bill_report['actions_per_type']['other'])
 
         com_stats = db.committee_stats.find_one({'_id': report['id']})
         if com_stats:
@@ -42,11 +42,11 @@ def browse_index(request, template='billy/index.html'):
                                      com_stats['members'] * 100)
 
         # districts
-        districts = list(db.districts.find({'abbr': report['id']}))
-        report['upper_districts'] = sum(d['num_seats'] for d in districts
-                                     if d['chamber'] == 'upper')
-        report['lower_districts'] = sum(d['num_seats'] for d in districts
-                                     if d['chamber'] == 'lower')
+        #districts = list(db.districts.find({'abbr': report['id']}))
+        #report['upper_districts'] = sum(d['num_seats'] for d in districts
+        #                             if d['chamber'] == 'upper')
+        #report['lower_districts'] = sum(d['num_seats'] for d in districts
+        #                             if d['chamber'] == 'lower')
         rows.append(report)
 
     rows.sort(key=lambda x: x['id'])
@@ -56,26 +56,17 @@ def browse_index(request, template='billy/index.html'):
 
 def overview(request, abbr):
     meta = metadata(abbr)
-    report = db.reports.find({'_id': abbr})
+    report = db.reports.find_one({'_id': abbr})
     if not meta or not report:
         raise Http404
 
     context = {}
     context['metadata'] = SortedDict(sorted(meta.items()))
-
-    # types
-    latest_session = meta['terms'][-1]['sessions'][-1]
-    context['session'] = latest_session
+    context['report'] = report
 
     level = meta['level']
 
-    context.update(
-
     # legislators
-    context['upper_active_count'] = 0
-    context['lower_active_count'] = 0
-    context['active_count'] = (context['upper_active_count'] +
-                            context['lower_active_count'])
     context['inactive_leg_count'] = db.legislators.find({'level': level,
                                                          level: abbr,
                                                      'active': False}).count()

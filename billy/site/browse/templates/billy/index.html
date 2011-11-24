@@ -1,19 +1,33 @@
 {% extends "billy/base.html" %}
 
 {% block content %}
-<h2>Data Browse</h2>
-
 <style type="text/css">
     td.good { background-color: #b0ff66; }
     td.bad { background-color: #fc7c7d; }
     td.warning { background-color: #fcde7c; }
+    /* collapse sidebar margin */
+    .container-fluid > .content { margin-left: 10px; }
 </style>
 
-<table border=1>
+<div class="container-fluid">
+<div class="content">
+<table class="condensed-table bordered-table">
+    <thead>
+    <tr>
+        <th>&nbsp;</th>
+        <th colspan=5>Legislators</th>
+        <th colspan=9>Bills</th>
+        <th colspan=3>Votes</th>
     <tr>
         <th>State</th>
+        <!-- legislators -->
+        <th>upper</th>
+        <th>lower</th>
+        <th>No Source</th>
+        <th>PVS</th>
+        <th>TData</th>
         <!-- bills -->
-        <th>Bills</th>
+        <th>total</th>
         <th>No Actions</th>
         <th>No Sponsors</th>
         <th>No Versions</th>
@@ -23,14 +37,44 @@
         <th>Actions w/ Types</th>
         <th>Sponsor leg_ids</th>
         <!-- votes -->
-        <th>Votes</th>
+        <th>total</th>
         <th>Vote leg_ids</th>
         <th>Bad Counts</th>
     </tr>
-
+    </thead>
+    <tbody>
     {% for row in rows %}
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
+        <!-- legislators -->
+        <td class="{{row.legislators.upper_active_count|yesno:"good,bad"}}">
+            {{row.legislators.upper_active_count}}</td>
+        <td class="{{row.legislators.lower_active_count|yesno:"good,bad"}}">
+            {{row.legislators.lower_active_count}}</td>
+        <td class="{{row.legislators.sourceless|length|yesno:"bad,good"}}">
+            {{row.legislators.sourceless|length}}</td>
+        <td
+            {% if row.legislators.votesmart_id < 75 %}
+            class="bad"
+            {% else %}
+                {% if row.legislators.votesmart_id < 95 %}
+                class="warning"
+                {% else %}
+                class="good"
+                {% endif %}
+            {% endif %}
+            >{{row.legislators.votesmart_id|floatformat}}%</td>
+        <td
+            {% if row.legislators.transparencydata_id < 75 %}
+            class="bad"
+            {% else %}
+                {% if row.legislators.transparencydata_id < 95 %}
+                class="warning"
+                {% else %}
+                class="good"
+                {% endif %}
+            {% endif %}
+            >{{row.legislators.transparencydata_id|floatformat}}%</td>
         <!-- bills -->
         <td class="{{row.bills.bill_count|yesno:"good,bad"}}">
             {{row.bills.bill_count}}</td>
@@ -48,16 +92,16 @@
             {% if not row.bills.have_subjects %}
             class="warning">---</td>
             {% else %}
-                {% if row.bills.have_subjects < .25 %}
+                {% if row.bills.have_subjects < 25 %}
                 class="bad"
                 {% else %}
-                    {% if row.bills.have_subjects < .9 %}
+                    {% if row.bills.have_subjects < 90 %}
                     class="warning"
                     {% else %}
                     class="good"
                     {% endif %}
                 {% endif %}
-                >{{row.bills.have_subjects|floatformat}}</td>
+                >{{row.bills.have_subjects|floatformat}}%</td>
             {% endif %}
         <td
             {% if row.bills.typed_actions < 25 %}
@@ -69,7 +113,7 @@
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.bills.typed_actions|floatformat}}</td>
+            >{{row.bills.typed_actions|floatformat}}%</td>
         <td
             {% if row.bills.sponsors_with_leg_id < 75 %}
             class="bad"
@@ -80,7 +124,7 @@
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.bills.sponsors_with_leg_id|floatformat}}</td>
+            >{{row.bills.sponsors_with_leg_id|floatformat}}%</td>
 
         <!-- votes -->
         <td class="{{row.bills.vote_count|yesno:"good,bad"}}">
@@ -95,10 +139,13 @@
                 class="good"
                 {% endif %}
             {% endif %}
-            >{{row.bills.rollcalls_with_leg_id|floatformat}}</td>
+            >{{row.bills.rollcalls_with_leg_id|floatformat}}%</td>
         <td class="{{row.bills.bad_vote_totals|length|yesno:"bad,good"}}">
             {{row.bills.bad_vote_totals|length}}</td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
+</div>
+</div>
 {% endblock %}

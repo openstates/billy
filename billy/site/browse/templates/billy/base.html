@@ -2,15 +2,15 @@
 <html>
   <head>
       <title>{% block title %}Data Browse{% endblock %}</title>
+      <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+      <!--
       <style>
           dt { font-weight: bold; font-variant: small-caps; padding-right: 1.5em; }
       </style>
+      -->
   </head>
   <body>
-    <div id="header">
-
-    </div>
-    <div id="content">
+    <div class="row" id="content">
       {% block content %}{% endblock %}
     </div>
   </body>
