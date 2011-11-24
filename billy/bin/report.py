@@ -27,7 +27,7 @@ def main():
         report['legislators'] = legislator_report(abbr)
         report['committees'] = committee_report(abbr)
 
-    db.reports.save(report, safe=True)
+        db.reports.save(report, safe=True)
 
 if __name__ == '__main__':
     main()
