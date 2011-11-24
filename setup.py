@@ -28,7 +28,6 @@ billy-devserver = billy.bin.run_dev_server:main
 billy-dump-csv = billy.bin.dump_csv:main
 billy-dump-json = billy.bin.dump_json:main
 billy-dump-missing-leg-ids = billy.bin.dump_missing_leg_ids:main
-billy-generate-stats = billy.bin.generate_statistics:generate_statistics
 billy-import-districts = billy.bin.import_districts:main
 billy-load-legislator-csv = billy.bin.load_legislator_csv:main
 billy-oysterize = billy.bin.oyster_versions:main
