@@ -47,6 +47,7 @@ def scan_legislators(abbr):
                 report['lower_active_count'] += 1
             else:
                 # TODO: track these? (executives)
+                pass
 
             seats_filled[leg['chamber']][leg['district']] += 1
             # TODO: check seats_filled against districts
