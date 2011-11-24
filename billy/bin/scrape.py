@@ -24,16 +24,9 @@ def _clear_scraped_data(output_dir, scraper_type):
             for f in glob.glob(path + '/*.json'):
                 os.remove(f)
 
-
-def _run_scraper(scraper_type, options, metadata):
-    """
-        scraper_type: bills, legislators, committees, votes
-    """
-    _clear_scraped_data(options.output_dir, scraper_type)
-    mod_path = options.module
-
+def _get_configured_scraper(scraper_type, options, metadata):
     try:
-        ScraperClass = get_scraper(mod_path, scraper_type)
+        ScraperClass = get_scraper(options.module, scraper_type)
     except ScrapeError as e:
         # silence error only for --alldata
         if (options.alldata and str(e.orig_exception) ==
@@ -54,6 +47,14 @@ def _run_scraper(scraper_type, options, metadata):
         opts['requests_per_minute'] = 0
         opts['use_cache_first'] = True
     scraper = ScraperClass(metadata, **opts)
+    return scraper
+
+def _run_scraper(scraper_type, options, metadata):
+    """
+        scraper_type: bills, legislators, committees, votes
+    """
+    _clear_scraped_data(options.output_dir, scraper_type)
+    scraper = _get_configured_scraper(scraper_type, options, metadata)
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
@@ -96,6 +97,22 @@ def _run_scraper(scraper_type, options, metadata):
             scraper.scrape('other', time)
 
 
+def _scrape_solo_bills(options, metadata):
+    _clear_scraped_data(options.output_dir, 'bills')
+    scraper = _get_configured_scraper('bills', options, metadata)
+
+    if len(options.chambers) == 1:
+        chamber = options.chambers[0]
+    else:
+        raise ScrapeError('must specify --chamber when providing a --bill')
+    if len(options.sessions):
+        session = list(options.sessions)[0]
+    else:
+        raise ScrapeError('must specify --session when providing a --bill')
+
+    for bill_id in options.solo_bills:
+        scraper.scrape_bill(chamber, session, bill_id)
+
 def main():
     try:
         parser = argparse.ArgumentParser(
@@ -127,6 +144,8 @@ def main():
         parser.add_argument('--alldata', action='store_true', dest='alldata',
                             default=False,
                             help="scrape all available types of data")
+        parser.add_argument('--bill', action='append', dest='solo_bills',
+                            help='individual bill id(s) to scrape')
         parser.add_argument('--strict', action='store_true', dest='strict',
                             default=False, help="fail immediately when"
                             "encountering validation warning")
@@ -185,7 +204,8 @@ def main():
 
         # determine which scrapers to run
         if not (args.bills or args.legislators or args.votes or
-                args.committees or args.events or args.alldata):
+                args.committees or args.events or args.alldata or
+                args.solo_bills):
             raise ScrapeError("Must specify at least one of --bills, "
                               "--legislators, --committees, --votes, --events,"
                               " --alldata")
@@ -196,7 +216,8 @@ def main():
             args.committees = True
 
 
-        if not args.import_only:
+        # do full scrape if neither solo_bills or import_only is specified
+        if not args.solo_bills and not args.import_only:
             # write metadata
             try:
                 schema_path = os.path.join(os.path.split(__file__)[0],
@@ -224,7 +245,10 @@ def main():
             if args.bills:
                 _run_scraper('bills', args, metadata)
 
+        elif args.solo_bills:
+            _scrape_solo_bills(args, metadata)
 
+        # --import or --importonly
         if args.do_import or args.import_only:
             # do imports here so that scrapers don't depend on mongo
             from billy.importers.metadata import import_metadata
