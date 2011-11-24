@@ -7,8 +7,6 @@ from billy.utils import metadata
 from django.http import Http404
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render_to_response
-from django.utils.datastructures import SortedDict
-
 
 def keyfunc(obj):
     try:
@@ -19,28 +17,13 @@ def keyfunc(obj):
 
 def browse_index(request, template='billy/index.html'):
     rows = []
-    total_missing_ids = 0
-    total_active = 0
-
 
     for report in db.reports.find():
-        meta = db.metadata.find_one({'_id': report['_id']})
-
         report['id'] = report['_id']
+        meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
-
-        bill_report = report['bills']
-        bill_report['typed_actions'] = (100 -
-                                bill_report['actions_per_type']['other'])
-
-        com_stats = db.committee_stats.find_one({'_id': report['id']})
-        if com_stats:
-            com_stats = com_stats['value']
-            report['committees'] = com_stats['committees']
-            if com_stats['members']:
-                report['member_ids'] = (float(com_stats['idd_members']) /
-                                     com_stats['members'] * 100)
-
+        report['bills']['typed_actions'] = (100 -
+                                report['bills']['actions_per_type']['other'])
         # districts
         #districts = list(db.districts.find({'abbr': report['id']}))
         #report['upper_districts'] = sum(d['num_seats'] for d in districts
@@ -61,36 +44,8 @@ def overview(request, abbr):
         raise Http404
 
     context = {}
-    context['metadata'] = SortedDict(sorted(meta.items()))
+    context['metadata'] = meta
     context['report'] = report
-
-    level = meta['level']
-
-    # legislators
-    context['inactive_leg_count'] = db.legislators.find({'level': level,
-                                                         level: abbr,
-                                                     'active': False}).count()
-    context['ns_leg_count'] = db.legislators.find({'level': level,
-                             level: abbr,
-                             'active': True,
-                             'sources': {'$size': 0}}).count()
-
-    # committees
-    context['upper_com_count'] = db.committees.find({'level': level,
-                                                     level: abbr,
-                                                  'chamber': 'upper'}).count()
-    context['lower_com_count'] = db.committees.find({'level': level,
-                                                     level: abbr,
-                                                  'chamber': 'lower'}).count()
-    context['joint_com_count'] = db.committees.find({'level': level,
-                                                     level: abbr,
-                                                  'chamber': 'joint'}).count()
-    context['com_count'] = (context['upper_com_count'] +
-                            context['lower_com_count'] +
-                            context['joint_com_count'])
-    context['ns_com_count'] = db.committees.find({'level': level,
-                                                  level: abbr,
-                             'sources': {'$size': 0}}).count()
 
     return render_to_response('billy/state_index.html', context)
 
