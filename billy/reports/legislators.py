@@ -50,7 +50,7 @@ def scan_legislators(abbr):
         else:
             report['inactive_count'] += 1
 
-        for source in obj['sources']:
+        for source in leg['sources']:
             duplicate_sources[source['url']] += 1
 
     report['duplicate_sources'] = []
