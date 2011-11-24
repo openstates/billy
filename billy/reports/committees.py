@@ -84,4 +84,5 @@ def calculate_percentages(report):
 def committee_report(abbr):
     report = scan_committees(abbr)
     calculate_percentages(report)
+    report['sourceless'] = list(report['sourceless'])
     return report

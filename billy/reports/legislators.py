@@ -87,4 +87,5 @@ def calculate_percentages(report):
 def legislator_report(abbr):
     report = scan_legislators(abbr)
     calculate_percentages(report)
+    report['sourceless'] = list(report['sourceless'])
     return report
