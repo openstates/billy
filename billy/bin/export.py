@@ -1,17 +1,97 @@
 #!/usr/bin/env python
-import os
+import datetime
 import csv
+import json
+import logging
+import os
+import re
+import urllib
 import shutil
 import zipfile
-import datetime
 
-from billy import db
-from billy.utils import extract_fields, metadata
 from billy.conf import settings, base_arg_parser
+from billy.utils import metadata, configure_logging, extract_fields
+from billy import db
 
+import scrapelib
+import validictory
 import boto
 from boto.s3.key import Key
 
+# JSON ###########
+
+class APIValidator(validictory.SchemaValidator):
+    def validate_type_datetime(self, val):
+        if not isinstance(val, basestring):
+            return False
+
+        return re.match(r'^\d{4}-\d\d-\d\d( \d\d:\d\d:\d\d)?$', val)
+
+
+def api_url(path):
+    return "%s%s/?apikey=%s" % (settings.API_BASE_URL, urllib.quote(path),
+                                settings.SUNLIGHT_SERVICES_KEY)
+
+
+def dump_json(abbr, filename, validate, schema_dir):
+    scraper = scrapelib.Scraper(requests_per_minute=600, follow_robots=False)
+    level = metadata(abbr)['level']
+
+    zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
+
+    if not schema_dir:
+        cwd = os.path.split(__file__)[0]
+        schema_dir = os.path.join(cwd, "../schemas/api/")
+
+    with open(os.path.join(schema_dir, "bill.json")) as f:
+        bill_schema = json.load(f)
+
+    with open(os.path.join(schema_dir, "legislator.json")) as f:
+        legislator_schema = json.load(f)
+
+    with open(os.path.join(schema_dir, "committee.json")) as f:
+        committee_schema = json.load(f)
+
+    logging.info('exporting %s bills...' % abbr)
+    for bill in db.bills.find({'level': level, level: abbr}, timeout=False):
+        path = "bills/%s/%s/%s/%s" % (abbr, bill['session'],
+                                      bill['chamber'], bill['bill_id'])
+        url = api_url(path)
+
+        response = scraper.urlopen(url)
+        if validate:
+            validictory.validate(json.loads(response), bill_schema,
+                                 validator_cls=APIValidator)
+
+        zip.writestr(path, response)
+
+    logging.info('exporting %s legislators...' % abbr)
+    for legislator in db.legislators.find({'level': level, level: abbr}):
+        path = 'legislators/%s' % legislator['_id']
+        url = api_url(path)
+
+        response = scraper.urlopen(url)
+        if validate:
+            validictory.validate(json.loads(response), legislator_schema,
+                                 validator_cls=APIValidator)
+
+        zip.writestr(path, response)
+
+    logging.info('exporting %s committees...' % abbr)
+    for committee in db.committees.find({'level': level, level: abbr}):
+        path = 'committees/%s' % committee['_id']
+        url = api_url(path)
+
+        response = scraper.urlopen(url)
+        if validate:
+            validictory.validate(json.loads(response), committee_schema,
+                                 validator_cls=APIValidator)
+
+        zip.writestr(path, response)
+
+    zip.close()
+
+# CSV ################
 
 def _make_csv(abbr, name, fields):
     filename = '/tmp/{0}_{1}'.format(abbr, name)
@@ -121,7 +201,7 @@ def dump_bill_csvs(level, abbr):
             vote_csv_fname, legvote_csv_fname)
 
 
-def dump_csv(abbr, filename, nozip):
+def dump_csv(abbr, filename):
 
     level = metadata(abbr)['level']
 
@@ -129,29 +209,20 @@ def dump_csv(abbr, filename, nozip):
     files += dump_legislator_csvs(level, abbr)
     files += dump_bill_csvs(level, abbr)
 
-    if not nozip:
-        zfile = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
-        for fname in files:
-            arcname = fname.split('/')[-1]
-            zfile.write(fname, arcname=arcname)
-            os.remove(fname)
-    else:
-        dirname = abbr + '_csv'
-        try:
-            os.makedirs(dirname)
-        except OSError:
-            pass
-        for fname in files:
-            shutil.move(fname, dirname)
+    zfile = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
+    for fname in files:
+        arcname = fname.split('/')[-1]
+        zfile.write(fname, arcname=arcname)
+        os.remove(fname)
 
 
-def upload(abbr, filename):
+def upload(abbr, filename, type):
     today = datetime.date.today()
 
     # build URL
     s3_bucket = settings.AWS_BUCKET
-    s3_path = '%s-%02d-%02d-%s-csv.zip' % (today.year, today.month, today.day,
-                                           abbr)
+    s3_path = '%s-%02d-%02d-%s-%s.zip' % (today.year, today.month, today.day,
+                                          abbr, type)
     s3_url = 'http://%s.s3.amazonaws.com/%s' % (s3_bucket, s3_path)
 
     # S3 upload
@@ -159,50 +230,59 @@ def upload(abbr, filename):
     bucket = s3conn.create_bucket(s3_bucket)
     k = Key(bucket)
     k.key = s3_path
+    logging.info('beginning upload to %s' % s3_url)
     k.set_contents_from_filename(filename)
     k.set_acl('public-read')
 
     meta = metadata(abbr)
-    meta['latest_csv_url'] = s3_url
-    meta['latest_csv_date'] = datetime.datetime.utcnow()
+    meta['latest_%s_url' % type] = s3_url
+    meta['latest_%s_date' % type] = datetime.datetime.utcnow()
     db.metadata.save(meta, safe=True)
 
-    print('uploaded to %s' % s3_url)
+    logging.info('uploaded to %s' % s3_url)
 
 
 def main():
     import argparse
 
+    configure_logging(1)
+
     parser = argparse.ArgumentParser(
-        description=('Dump data to a set of CSV files, optionally uploading to'
-                     ' S3 when done.'),
+        description=('Export data in a variety of formats, '
+                     'optionally uploading to S3 when done.'),
         parents=[base_arg_parser],
     )
     parser.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
                 help=('the two-letter abbreviation for the data to export'))
     parser.add_argument('--file', '-f',
                         help='filename to output to (defaults to <abbr>.zip)')
-    parser.add_argument('--nozip', action='store_true', default=False,
-                        help="don't zip the files")
+    parser.add_argument('--schema_dir',
+                        help='directory to use for API schemas (optional)',
+                        default=None)
+    parser.add_argument('--novalidate', action='store_true', default=False,
+                        help="don't run validation")
+    parser.add_argument('--json', action='store_true', default=False,
+                        help='create JSON export')
+    parser.add_argument('--csv', action='store_true', default=False,
+                        help='create CSV export')
     parser.add_argument('--upload', '-u', action='store_true', default=False,
-                        help='upload the created archive to S3')
+                        help='upload the created archives to S3')
 
     args = parser.parse_args()
 
     settings.update(args)
 
     for abbr in args.abbrs:
-        print 'dumping CSV for', abbr
-
         if not args.file:
-            args.file = '{0}_csv.zip'.format(abbr)
+            args.file = abbr + '.zip'
 
-        dump_csv(abbr, args.file, args.nozip)
-
-        if args.upload:
-            if args.nozip:
-                raise Warning('Unable to --upload if --nozip is specified')
-            else:
+        if args.json:
+            dump_json(abbr, args.file, not args.novalidate, args.schema_dir)
+            if args.upload:
+                upload(abbr, args.file)
+        if args.csv:
+            dump_csv(abbr, args.file)
+            if args.upload:
                 upload(abbr, args.file)
 
 
