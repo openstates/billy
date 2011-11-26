@@ -27,10 +27,10 @@ Metadata Fields
     The title used to refer to members of the 'upper' chamber (if applicable)
 ``lower_chamber_title``
     The title used to refer to members of the 'lower' chamber (if applicable)
-``latest_dump_url``
+``latest_json_url``
     URL pointing to a download of all data for the state
-``latest_dump_date``
-    datestamp of the file at ``latest_dump_url``
+``latest_json_date``
+    datestamp of the file at ``latest_json_url``
 ``latest_csv_url``
     URL pointing to experimental CSV download of state data
 ``latest_csv_date``
