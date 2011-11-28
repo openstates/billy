@@ -171,7 +171,7 @@ def _do_reports(abbrev, args):
     db.reports.save(report, safe=True)
 
 
-def main():
+def main(old_scrape_compat=False):
     try:
         parser = argparse.ArgumentParser(
           description='Scrape legislative data, saving data to disk as JSON.',
@@ -224,17 +224,13 @@ def main():
                             dest='SCRAPELIB_RETRY_WAIT_SECONDS')
         parser.add_argument('--bill', action='append', dest='solo_bills',
                             help='individual bill id(s) to scrape')
-        parser.add_argument('--importonly', dest='import_only',
-                            help="don't scrape, only import",
+        # old_scrape_compat defaults scrape to true, if being called as scrape
+        parser.add_argument('--scrape', help="run specified scrapers",
+                            action="store_true", default=old_scrape_compat)
+        parser.add_argument('--import', dest="do_import",
+                            help="run specified import process",
                             action="store_true", default=False)
-        parser.add_argument('--import', dest='do_import',
-                            help="import data after scrape",
-                            action="store_true", default=False)
-        parser.add_argument('--reportonly', dest='report_only',
-                            help="don't scrape, only report",
-                            action="store_true", default=False)
-        parser.add_argument('--report', dest='do_report',
-                            help="build reports after import",
+        parser.add_argument('--report', help="run specified reports",
                             action="store_true", default=False)
 
         args = parser.parse_args()
@@ -275,7 +271,12 @@ def main():
         if not args.chambers:
             args.chambers = ['upper', 'lower']
 
-        # determine which scrapers to run
+        if not (args.scrape or args.do_import or args.report
+                or args.solo_bills):
+            raise ScrapeError("Must specify at least one of --scrape, "
+                              "--import, --report")
+
+        # determine which types to process
         if not (args.bills or args.legislators or args.votes or
                 args.committees or args.events or args.alldata or
                 args.solo_bills):
@@ -290,7 +291,7 @@ def main():
 
 
         # do full scrape if not solo bills, import only, or report only
-        if not (args.solo_bills or args.import_only or args.report_only):
+        if args.scrape:
             # write metadata
             try:
                 schema_path = os.path.join(os.path.split(__file__)[0],
@@ -322,11 +323,11 @@ def main():
             _scrape_solo_bills(args, metadata)
 
         # imports
-        if args.do_import or args.import_only:
+        if args.do_import:
             _do_imports(abbrev, args)
 
         # reports
-        if args.do_report or args.report_only:
+        if args.report:
             _do_reports(abbrev, args)
 
 
@@ -334,6 +335,8 @@ def main():
         print 'Error:', e
         sys.exit(1)
 
+def scrape_compat_main():
+    main(True)
 
 if __name__ == '__main__':
     main()

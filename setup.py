@@ -23,7 +23,8 @@ setup(name='billy',
       platforms=['any'],
       entry_points="""
 [console_scripts]
-billy-scrape = billy.bin.scrape:main
+billy-scrape = billy.bin.update:scrape_compat_main
+billy-update = billy.bin.update:main
 billy-report = billy.bin.report:main
 billy-export = billy.bin.export:main
 billy-categorize-subjects = billy.bin.categorize_subjects:main
