@@ -254,6 +254,8 @@ def main():
     )
     parser.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
                 help=('the two-letter abbreviation for the data to export'))
+    parser.add_argument('--sunlight_key', help='the Sunlight API key to use',
+                        dest='SUNLIGHT_SERVICES_KEY')
     parser.add_argument('--file', '-f',
                         help='filename to output to (defaults to <abbr>.zip)')
     parser.add_argument('--schema_dir',

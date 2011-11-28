@@ -164,43 +164,52 @@ def main():
           parents=[base_arg_parser],
         )
 
+        what = parser.add_argument_group('what to scrape',
+                                 'flags that help select what data to scrape')
+        scrape = parser.add_argument_group('scraper config',
+                                 'settings for the scraper')
+
         parser.add_argument('module', type=str, help='scraper module (eg. nc)')
-        parser.add_argument('-s', '--session', action='append',
+        what.add_argument('-s', '--session', action='append',
                             dest='sessions', help='session(s) to scrape')
-        parser.add_argument('-t', '--term', action='append', dest='terms',
+        what.add_argument('-t', '--term', action='append', dest='terms',
                             help='term(s) to scrape')
-        parser.add_argument('--upper', action='store_true', dest='upper',
+        what.add_argument('--upper', action='store_true', dest='upper',
                             default=False, help='scrape upper chamber')
-        parser.add_argument('--lower', action='store_true', dest='lower',
+        what.add_argument('--lower', action='store_true', dest='lower',
                             default=False, help='scrape lower chamber')
-        parser.add_argument('--bills', action='store_true', dest='bills',
+        what.add_argument('--bills', action='store_true', dest='bills',
                             default=False, help="scrape bill data")
-        parser.add_argument('--legislators', action='store_true',
+        what.add_argument('--legislators', action='store_true',
                             dest='legislators', default=False,
                             help="scrape legislator data")
-        parser.add_argument('--committees', action='store_true',
+        what.add_argument('--committees', action='store_true',
                             dest='committees', default=False,
                             help="scrape committee data")
-        parser.add_argument('--votes', action='store_true', dest='votes',
+        what.add_argument('--votes', action='store_true', dest='votes',
                             default=False, help="scrape vote data")
-        parser.add_argument('--events', action='store_true', dest='events',
+        what.add_argument('--events', action='store_true', dest='events',
                             default=False, help='scrape event data')
-        parser.add_argument('--alldata', action='store_true', dest='alldata',
+        what.add_argument('--alldata', action='store_true', dest='alldata',
                             default=False,
                             help="scrape all available types of data")
-        parser.add_argument('--bill', action='append', dest='solo_bills',
-                            help='individual bill id(s) to scrape')
-        parser.add_argument('--strict', action='store_true', dest='strict',
+        scrape.add_argument('--strict', action='store_true', dest='strict',
                             default=False, help="fail immediately when"
                             "encountering validation warning")
-        parser.add_argument('-n', '--no_cache', action='store_true',
+        scrape.add_argument('-n', '--no_cache', action='store_true',
                             dest='no_cache', help="don't use web page cache")
-        parser.add_argument('--fastmode', help="scrape in fast mode",
+        scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
-        parser.add_argument('-r', '--rpm', action='store', type=int,
+        scrape.add_argument('-r', '--rpm', action='store', type=int,
                             dest='rpm', default=60)
-        parser.add_argument('--timeout', action='store', type=int,
+        scrape.add_argument('--timeout', action='store', type=int,
                             dest='timeout', default=10)
+        scrape.add_argument('--retries', type=int,
+                            dest='SCRAPELIB_RETRY_ATTEMPTS')
+        scrape.add_argument('--retry_wait', type=int,
+                            dest='SCRAPELIB_RETRY_WAIT_SECONDS')
+        parser.add_argument('--bill', action='append', dest='solo_bills',
+                            help='individual bill id(s) to scrape')
         parser.add_argument('--importonly', dest='import_only',
                             help="don't scrape, only import",
                             action="store_true", default=False)

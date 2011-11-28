@@ -121,7 +121,11 @@ def main():
 
     parser.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
                         help='abbreviations for data to update')
-
+    parser.add_argument('--votesmart_key',
+                        help='the Project Vote Smart API key to use',
+                        dest='VOTESMART_API_KEY')
+    parser.add_argument('--sunlight_key', help='the Sunlight API key to use',
+                        dest='SUNLIGHT_SERVICES_KEY')
     args = parser.parse_args()
 
     settings.update(args)
