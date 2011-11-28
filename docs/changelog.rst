@@ -7,11 +7,11 @@ scrapelib changelog
     * --mongo_host, --mongo_db, --mongo_port command line options
     * sneaky_update_filter option added, can ignore minor updates
     * API bugfix when chamber isn't specified on bill lookup
-    * billy-export replaces billy-dump-*
-    * billy-scrape enhancements
-        * billy-bill-scrape merged into billy-scrape
-        * change import to use logger instead of unbuffered print statements
-        * billy-import merged in as --import[only]
+    * change importers to use logger instead of unbuffered print statements
+    * billy-export replaces billy-dump- scripts
+    * billy-update
+        * billy-scrape deprecated and replaced with billy-update
+        * billy-import, billy-bill-scrape, billy-import-districts replaced
     * reporting
         * removed billy-generate-stats and replaced with robust reports
         * updated browse interface to use reports

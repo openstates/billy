@@ -2,32 +2,38 @@
 Billy Scripts
 =============
 
-Billy is primarily composed of a handful of scripts that help facilitate the scraping, import, and cleanup process.
-
 Scraping
 ========
 
-.. program:: billy-scrape
+.. program:: billy-update
 
-:program:`billy-scrape` <STATE>
+:program:`billy-update` <STATE>
 -------------------------------
 
 .. option:: MODULE
 
     state scraper module name (eg. nc) [required]
 
-.. option:: --alldata
+.. option:: --scrape, --import, --report
 
-    include all available scrapers
+    Which portions of the update process to run, at least one must be specified.
+
+    --scrape crawls the specified sites and writes data to disk in JSON format
+    --import imports the JSON format on disk to billy's MongoDB database
+    --report runs a series of reports on data quality and aggregates
 
 .. option:: --bills, --legislators, --votes, --committees, --events
 
-    include (bill, legislator, vote, committee, event) scraper
+    include (bill, legislator, vote, committee, event) data in (scrape/import/report)
     (can specify multiple)
+
+.. option:: --alldata
+
+    same as specifying --bills --legislators --votes --committees
 
 .. option:: --upper, --lower
 
-    scrape upper/lower chamber (if neither is specified will include both)
+    process upper/lower chamber (if neither is specified will include both)
 
 .. option:: -v, --verbose
 
@@ -61,11 +67,3 @@ Scraping
 .. option:: --timeout TIMEOUT
 
     set HTTP timeout in seconds (default: 10s)
-
-.. option:: --import
-
-    import data to MongoDB database after scraping is complete
-
-.. option:: --importonly
-
-    same as specifying --import but skips scrape step
