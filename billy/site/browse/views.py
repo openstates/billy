@@ -1,10 +1,11 @@
+import csv
 import random
 from collections import defaultdict
 
 from billy import db
 from billy.utils import metadata
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render_to_response
 
@@ -13,6 +14,17 @@ def keyfunc(obj):
         return int(obj['district'])
     except ValueError:
         return obj['district']
+
+def _csv_response(request, template, data):
+    if 'csv' in request.REQUEST:
+        resp = HttpResponse(mimetype="text/plain")
+        out = csv.writer(resp)
+        for item in sorted(data.iteritems()):
+            out.writerow(item)
+        return resp
+    else:
+        return render_to_response(template, {'data':data})
+
 
 
 def browse_index(request, template='billy/index.html'):
@@ -71,8 +83,9 @@ def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
-    return render_to_response('billy/other_actions.html',
-          {'other_actions': report['bills']['other_actions']})
+    return _csv_response(request, 'billy/other_actions.html',
+                         report['bills']['other_actions'])
+
 
 @never_cache
 def random_bill(request, abbr):
