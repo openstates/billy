@@ -67,6 +67,13 @@ def bills(request, abbr):
                               {'sessions': sessions, 'metadata': meta})
 
 
+def other_actions(request, abbr):
+    report = db.reports.find_one({'_id': abbr})
+    if not report:
+        raise Http404
+    return render_to_response('billy/other_actions.html',
+          {'other_actions': report['bills']['other_actions']})
+
 @never_cache
 def random_bill(request, abbr):
     meta = metadata(abbr)

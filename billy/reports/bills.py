@@ -19,6 +19,7 @@ def _bill_report_dict():
             'actions_per_type': defaultdict(int),
             'actions_per_actor': defaultdict(int),
             'actions_per_month': defaultdict(int),
+            'other_actions': defaultdict(int),
             'sponsorless': set(),
             '_sponsor_count': 0,
             '_sponsors_with_leg_id_count': 0,
@@ -66,6 +67,8 @@ def scan_bills(abbr):
             session_d['action_count'] += 1
             for type in action['type']:
                 session_d['actions_per_type'][type] += 1
+            if 'other' in action['type']:
+                session_d['other_actions'][action['action']] += 1
             session_d['actions_per_actor'][action['actor']] += 1
             session_d['actions_per_month'][date.strftime('%Y-%m')] += 1
         if not bill['actions']:
