@@ -8,10 +8,6 @@ from billy import db
 def import_district_csv(filename):
     csvfile = csv.DictReader(open(filename))
     for dist in csvfile:
-        dist['_id'] = '%(abbr)s-%(chamber)s-%(name)s' % dist
-        dist['boundary_id'] = dist['boundary_id'] % dist
-        dist['num_seats'] = int(dist['num_seats'])
-        db.districts.save(dist, safe=True)
 
 def main():
     parser = argparse.ArgumentParser(
