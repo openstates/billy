@@ -115,6 +115,48 @@ def _scrape_solo_bills(options, metadata):
     for bill_id in options.solo_bills:
         scraper.scrape_bill(chamber, session, bill_id)
 
+
+def _do_imports(abbrev, args):
+    # do imports here so that scrapers don't depend on mongo
+    from billy.importers.metadata import import_metadata
+    from billy.importers.bills import import_bills
+    from billy.importers.legislators import import_legislators
+    from billy.importers.committees import import_committees
+    from billy.importers.events import import_events
+
+    # always import metadata
+    import_metadata(abbrev, settings.BILLY_DATA_DIR)
+
+    if args.legislators:
+        import_legislators(abbrev, settings.BILLY_DATA_DIR)
+    if args.bills:
+        import_bills(abbrev, settings.BILLY_DATA_DIR)
+    if args.committees:
+        import_committees(abbrev, settings.BILLY_DATA_DIR)
+    if args.events:
+        import_events(abbrev, settings.BILLY_DATA_DIR)
+
+
+def _do_reports(abbrev, args):
+    from billy import db
+    from billy.reports.bills import bill_report
+    from billy.reports.legislators import legislator_report
+    from billy.reports.committees import committee_report
+
+    report = db.reports.find_one({'_id': abbrev})
+    if not report:
+        report = {'_id': abbrev}
+
+    if args.legislators:
+        report['legislators'] = legislator_report(abbrev)
+    if args.bills:
+        report['bills'] = bill_report(abbrev)
+    if args.committees:
+        report['committees'] = committee_report(abbrev)
+
+    db.reports.save(report, safe=True)
+
+
 def main():
     try:
         parser = argparse.ArgumentParser(
@@ -164,6 +206,12 @@ def main():
                             action="store_true", default=False)
         parser.add_argument('--import', dest='do_import',
                             help="import data after scrape",
+                            action="store_true", default=False)
+        parser.add_argument('--reportonly', dest='report_only',
+                            help="don't scrape, only report",
+                            action="store_true", default=False)
+        parser.add_argument('--report', dest='do_report',
+                            help="build reports after import",
                             action="store_true", default=False)
 
         args = parser.parse_args()
@@ -250,26 +298,14 @@ def main():
         elif args.solo_bills:
             _scrape_solo_bills(args, metadata)
 
-        # --import or --importonly
+        # imports
         if args.do_import or args.import_only:
-            # do imports here so that scrapers don't depend on mongo
-            from billy.importers.metadata import import_metadata
-            from billy.importers.bills import import_bills
-            from billy.importers.legislators import import_legislators
-            from billy.importers.committees import import_committees
-            from billy.importers.events import import_events
+            _do_imports(abbrev, args)
 
-            # always import metadata
-            import_metadata(abbrev, settings.BILLY_DATA_DIR)
+        # reports
+        if args.do_report or args.report_only:
+            _do_reports(abbrev, args)
 
-            if args.legislators:
-                import_legislators(abbrev, settings.BILLY_DATA_DIR)
-            if args.bills:
-                import_bills(abbrev, settings.BILLY_DATA_DIR)
-            if args.committees:
-                import_committees(abbrev, settings.BILLY_DATA_DIR)
-            if args.events:
-                import_events(abbrev, settings.BILLY_DATA_DIR)
 
     except ScrapeError as e:
         print 'Error:', e
