@@ -7,6 +7,7 @@ import csv
 import argparse
 import json
 
+from billy import db
 from billy.conf import settings, base_arg_parser
 from billy.scrape import ScrapeError, JSONDateEncoder, get_scraper
 from billy.utils import configure_logging
@@ -138,7 +139,7 @@ def _do_imports(abbrev, args):
             dist['num_seats'] = int(dist['num_seats'])
             db.districts.save(dist, safe=True)
     else:
-        print "%s not found, continuing without districts"
+        print "%s not found, continuing without districts" % dist_filename
 
     if args.legislators:
         import_legislators(abbrev, settings.BILLY_DATA_DIR)
