@@ -275,8 +275,8 @@ def main():
             args.committees = True
 
 
-        # do full scrape if neither solo_bills or import_only is specified
-        if not args.solo_bills and not args.import_only:
+        # do full scrape if not solo bills, import only, or report only
+        if not (args.solo_bills or args.import_only or args.report_only):
             # write metadata
             try:
                 schema_path = os.path.join(os.path.split(__file__)[0],

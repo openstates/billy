@@ -19,6 +19,7 @@ def scan_committees(abbr):
               '_member_count': 0,
               '_members_with_leg_id_count': 0,
               'sourceless_count': 0,
+              'unmatched_leg_ids': set(),
              }
 
     for com in db.committees.find({'level': level, level: abbr}):
@@ -40,6 +41,10 @@ def scan_committees(abbr):
             report['_member_count'] += 1
             if member.get('leg_id'):
                 report['_members_with_leg_id_count'] += 1
+            else:
+                report['unmatched_leg_ids'].add((com.get('term', ''),
+                                                 com['chamber'],
+                                                 member['name']))
 
         # sources
         for source in com['sources']:
@@ -73,4 +78,5 @@ def calculate_percentages(report):
 def committee_report(abbr):
     report = scan_committees(abbr)
     calculate_percentages(report)
+    report['unmatched_leg_ids'] = list(report['unmatched_leg_ids'])
     return report

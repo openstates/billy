@@ -19,7 +19,7 @@ def _csv_response(request, template, data):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
         out = csv.writer(resp)
-        for item in sorted(data.iteritems()):
+        for item in data:
             out.writerow(item)
         return resp
     else:
@@ -84,8 +84,16 @@ def other_actions(request, abbr):
     if not report:
         raise Http404
     return _csv_response(request, 'billy/other_actions.html',
-                         report['bills']['other_actions'])
+                         sorted(report['bills']['other_actions'].items()))
 
+def unmatched_leg_ids(request, abbr):
+    report = db.reports.find_one({'_id': abbr})
+    if not report:
+        raise Http404
+    combined_sets = (set(report['bills']['unmatched_leg_ids']) |
+                     set(report['bills']['unmatched_leg_ids']))
+    return _csv_response(request, 'billy/unmatched_leg_ids.html',
+                         sorted(combined_sets))
 
 @never_cache
 def random_bill(request, abbr):

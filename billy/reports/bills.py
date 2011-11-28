@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict
 
 from billy import db
+from billy.utils import term_for_session
 from billy.reports.utils import update_common
 
 logger = logging.getLogger('billy')
@@ -36,8 +37,8 @@ def _bill_report_dict():
             'bills_per_subject': defaultdict(int),
             'sourceless_count': 0,
             'versionless': set(),
+            'unmatched_leg_ids': set(),
            }
-
 
 
 def scan_bills(abbr):
@@ -79,6 +80,12 @@ def scan_bills(abbr):
             session_d['_sponsor_count'] += 1
             if sponsor.get('leg_id'):
                 session_d['_sponsors_with_leg_id_count'] += 1
+            else:
+                # keep missing leg_ids
+                session_d['unmatched_leg_ids'].add(
+                    (term_for_session(abbr, bill['session']), bill['chamber'],
+                    sponsor['name'])
+                )
             session_d['sponsors_per_type'][sponsor['type']] += 1
         if not bill['sponsors']:
             session_d['sponsorless'].add(bill['_id'])
@@ -106,6 +113,13 @@ def scan_bills(abbr):
                 session_d['_rollcall_count'] += 1
                 if rc.get('leg_id'):
                     session_d['_rollcalls_with_leg_id_count'] += 1
+                else:
+                    # keep missing leg_ids
+                    session_d['unmatched_leg_ids'].add(
+                        (term_for_session(abbr, bill['session']),
+                         vote['chamber'],
+                        rc['name'])
+                    )
 
             # check counts if any rollcalls are present
             if (has_rollcalls and

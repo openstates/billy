@@ -13,7 +13,7 @@
             <tr><th>action</th><th>#</th></tr>
         </thead>
         <tbody>
-            {% for action, num in data|sorted_items %}
+            {% for action, num in data %}
                 <tr><td>{{action}}</td><td>{{num}}</td></tr>
             {% endfor %}
         </tbody>
