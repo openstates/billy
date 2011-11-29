@@ -1,0 +1,18 @@
+{% extends "billy/base.html" %}
+{% load billy_utiltags %}
+
+{% block content %}
+<div class="container">
+    <table class="condensed-table bordered-table">
+        <thead>
+            <tr><th>subject</th><th>#</th></tr>
+        </thead>
+        <tbody>
+            {% for subject, num in data %}
+                <tr><td>{{subject}}</td><td>{{num}}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
