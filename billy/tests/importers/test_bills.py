@@ -59,7 +59,8 @@ def test_import_bill():
     }
 
     # deepcopy both so we can reinsert same data without modification
-    bills.import_bill(copy.deepcopy(data), copy.deepcopy(standalone_votes))
+    bills.import_bill(copy.deepcopy(data), copy.deepcopy(standalone_votes),
+                      None)
 
     # test that basics work
     bill = db.bills.find_one()
@@ -89,7 +90,7 @@ def test_import_bill():
     # now test an update
     data['versions'].append({'title': 'third title'})
     data['sponsors'].pop()
-    bills.import_bill(data, standalone_votes)
+    bills.import_bill(data, standalone_votes, None)
 
     # still only one bill
     assert db.bills.count() == 1

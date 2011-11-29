@@ -9,6 +9,7 @@ from collections import defaultdict
 from billy.utils import keywordize, term_for_session
 from billy import db
 from billy.importers.names import get_legislator_id
+from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
                                    next_big_id)
 
@@ -77,20 +78,23 @@ def import_votes(data_dir):
     return votes
 
 
-def import_bill(data, votes):
+def import_bill(data, votes, categorizer):
     level = data['level']
     abbr = data[level]
     # clean up bill_id
     data['bill_id'] = fix_bill_id(data['bill_id'])
 
     # move subjects to scraped_subjects
-    subjects = data.pop('subjects', None)
-
     # NOTE: intentionally doesn't copy blank lists of subjects
     # this avoids the problem where a bill is re-run but we can't
     # get subjects anymore (quite common)
+    subjects = data.pop('subjects', None)
     if subjects:
         data['scraped_subjects'] = subjects
+
+    # update categorized subjects
+    if categorizer:
+        categorizer.categorize_bill(bill)
 
     # add loaded votes to data
     bill_votes = votes.pop((data['chamber'], data['session'],
@@ -162,13 +166,18 @@ def import_bills(abbr, data_dir):
     pattern = os.path.join(data_dir, 'bills', '*.json')
 
     votes = import_votes(data_dir)
+    try:
+        categorizer = SubjectCategorizer(abbr)
+    except Exception:
+        logger.debug('Proceeding without subject categorizer')
+        categorizer = None
 
     paths = glob.glob(pattern)
     for path in paths:
         with open(path) as f:
             data = prepare_obj(json.load(f))
 
-        import_bill(data, votes)
+        import_bill(data, votes, categorizer)
 
     logger.info('imported %s bill files' % len(paths))
 
@@ -178,7 +187,7 @@ def import_bills(abbr, data_dir):
 
     meta = db.metadata.find_one({'_id': abbr})
     level = meta['level']
-    populate_current_fields(level, abbr)
+    #populate_current_fields(level, abbr)
 
     ensure_indexes()
 
