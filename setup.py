@@ -25,9 +25,7 @@ setup(name='billy',
 [console_scripts]
 billy-scrape = billy.bin.update:scrape_compat_main
 billy-update = billy.bin.update:main
-billy-report = billy.bin.report:main
 billy-export = billy.bin.export:main
-billy-categorize-subjects = billy.bin.categorize_subjects:main
 billy-devserver = billy.bin.run_dev_server:main
 billy-load-legislator-csv = billy.bin.load_legislator_csv:main
 billy-oysterize = billy.bin.oyster_versions:main
