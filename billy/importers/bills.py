@@ -94,7 +94,7 @@ def import_bill(data, votes, categorizer):
 
     # update categorized subjects
     if categorizer:
-        categorizer.categorize_bill(bill)
+        categorizer.categorize_bill(data)
 
     # add loaded votes to data
     bill_votes = votes.pop((data['chamber'], data['session'],
