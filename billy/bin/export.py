@@ -281,11 +281,11 @@ def main():
         if args.json:
             dump_json(abbr, args.file, not args.novalidate, args.schema_dir)
             if args.upload:
-                upload(abbr, args.file)
+                upload(abbr, args.file, 'json')
         if args.csv:
             dump_csv(abbr, args.file)
             if args.upload:
-                upload(abbr, args.file)
+                upload(abbr, args.file, 'csv')
 
 
 if __name__ == '__main__':
