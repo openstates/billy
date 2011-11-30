@@ -55,7 +55,7 @@ def update_votesmart_legislators(meta):
     print 'Updated %s of %s missing votesmart ids' % (updated, initial_count)
 
 
-def update_transparencydata_legislators(meta, sunlight_key):
+def update_transparencydata_legislators(meta):
     current_term = meta['terms'][-1]['name']
     query = {'roles': {'$elemMatch':
                        {'type': 'member',
@@ -72,7 +72,7 @@ def update_transparencydata_legislators(meta, sunlight_key):
     abbrev = meta['_id'].upper()
 
     for leg in db.legislators.find(query):
-        query = urllib.urlencode({'apikey': sunlight_key,
+        query = urllib.urlencode({'apikey': settings.SUNLIGHT_SERVICES_KEY
                                   'search': leg['full_name'].encode('utf8')})
         url = 'http://transparencydata.com/api/1.0/entities.json?' + query
         data = urllib2.urlopen(url).read()
@@ -123,7 +123,7 @@ class UpdateMissingIds(BaseCommand):
             update_votesmart_legislators(meta)
 
             print "Updating TransparencyData ids..."
-            update_transparencydata_legislators(meta, args.sunlight_key)
+            update_transparencydata_legislators(meta)
 
             time.sleep(30)
 
