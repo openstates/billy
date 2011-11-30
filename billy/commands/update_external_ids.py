@@ -6,6 +6,7 @@ import sys
 
 from votesmart import votesmart, VotesmartApiError
 
+from billy import db
 from billy.conf import settings
 from billy.commands import BaseCommand
 
