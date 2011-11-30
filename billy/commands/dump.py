@@ -188,7 +188,7 @@ class DumpCSV(BaseCommand):
         for abbr in args.abbrs:
             if not args.file:
                 args.file = abbr + '.zip'
-            self.dump(abbr, args.filename)
+            self.dump(abbr, args.file)
             if args.upload:
                 upload(abbr, args.file, 'csv')
 
