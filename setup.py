@@ -25,14 +25,7 @@ setup(name='billy',
 [console_scripts]
 billy-scrape = billy.bin.update:scrape_compat_main
 billy-update = billy.bin.update:main
-billy-export = billy.bin.export:main
-billy-devserver = billy.bin.run_dev_server:main
-billy-load-legislator-csv = billy.bin.load_legislator_csv:main
-billy-oysterize = billy.bin.oyster_versions:main
-billy-retire-legislator = billy.bin.retire_legislator:main
-billy-update-external-ids = billy.bin.update_external_ids:main
-billy-update-leg-ids = billy.bin.update_leg_ids:main
-billy-validate-api = billy.bin.validate_api:main
+billy-util = billy.bin.util:main
 """,
     install_requires=["argparse==1.1",
                       "jellyfish>=0.1.2",

@@ -1,18 +1,13 @@
-#!/usr/bin/env python
-
-from billy.conf import settings, base_arg_parser
-from billy import db
-
-import sys
 import json
 import urllib
 import urllib2
 import time
-
-import argparse
+import sys
 
 from votesmart import votesmart, VotesmartApiError
 
+from billy.conf import settings
+from billy.commands import BaseCommand
 
 def update_votesmart_legislators(meta):
     current_term = meta['terms'][-1]['name']
@@ -97,45 +92,38 @@ def update_transparencydata_legislators(meta, sunlight_key):
                                                              initial_count)
 
 
-def update_missing_ids(abbr, sunlight_key):
-    meta = db.metadata.find_one({'_id': abbr.lower()})
-    if not meta:
-        print "'{0}' does not exist in the database.".format(abbr)
-        sys.exit(1)
-    else:
-        print "Updating ids for {0}".format(abbr)
 
-    print "Updating PVS legislator ids..."
-    update_votesmart_legislators(meta)
+class UpdateMissingIds(BaseCommand):
 
-    print "Updating TransparencyData ids..."
-    update_transparencydata_legislators(meta, sunlight_key)
+    name = 'update_external_ids'
+    help = 'update TransparencyData and Vote Smart ids'
 
+    def add_args(self):
+        self.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
+                          help='abbreviations for data to update')
+        self.add_argument('--votesmart_key',
+                          help='the Project Vote Smart API key to use',
+                          dest='VOTESMART_API_KEY')
+        self.add_argument('--sunlight_key', help='the Sunlight API key to use',
+                          dest='SUNLIGHT_SERVICES_KEY')
 
-def main():
-    parser = argparse.ArgumentParser(
-        description=('attempt to match legislators with ids in other'
-                     'relevant APIs'),
-        parents=[base_arg_parser],
-    )
+    def handle(self, args):
+        votesmart.apikey = settings.VOTESMART_API_KEY
+        for abbr in args.abbrs:
 
-    parser.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
-                        help='abbreviations for data to update')
-    parser.add_argument('--votesmart_key',
-                        help='the Project Vote Smart API key to use',
-                        dest='VOTESMART_API_KEY')
-    parser.add_argument('--sunlight_key', help='the Sunlight API key to use',
-                        dest='SUNLIGHT_SERVICES_KEY')
-    args = parser.parse_args()
+            meta = db.metadata.find_one({'_id': abbr.lower()})
+            if not meta:
+                print "'{0}' does not exist in the database.".format(abbr)
+                sys.exit(1)
+            else:
+                print "Updating ids for {0}".format(abbr)
 
-    settings.update(args)
+            print "Updating PVS legislator ids..."
+            update_votesmart_legislators(meta)
 
-    votesmart.apikey = settings.VOTESMART_API_KEY
+            print "Updating TransparencyData ids..."
+            update_transparencydata_legislators(meta, sunlight_key)
 
-    for abbr in args.abbrs:
-        update_missing_ids(abbr, settings.SUNLIGHT_SERVICES_KEY)
-        time.sleep(30)
+            time.sleep(30)
 
 
-if __name__ == '__main__':
-    main()

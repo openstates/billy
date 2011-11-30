@@ -1,18 +1,29 @@
-#!/usr/bin/env python
 import os
 import json
 import random
 import subprocess
 
 from billy import db
+from billy.commands import BaseCommand
 from billy.utils import metadata
+
 from billy.conf import settings, base_arg_parser
-from billy.bin.dump_json import APIValidator, api_url
+from billy.commands.export import APIValidator, api_url
 
 import scrapelib
 import lxml.etree
 import validictory
 
+class ValidateApi(BaseCommand):
+    name = 'validateapi'
+    help = 'validate data from the API'
+
+    def add_args(self):
+        self.add_argument('states', nargs='+', help='states to oysterize')
+
+    def handle(self, args):
+        for state in args.states:
+            validate_api(state, args.schema_dir)
 
 def get_xml_schema():
     cwd = os.path.split(__file__)[0]
@@ -119,25 +130,3 @@ def validate_api(abbr, schema_dir=None):
                                  validator_cls=APIValidator)
 
             validate_xml(url, xml_schema)
-
-
-def main():
-    import sys
-    import argparse
-
-    parser = argparse.ArgumentParser(description='validate API results',
-                                     parents=[base_arg_parser])
-    parser.add_argument('states', nargs='+', help='states to validate')
-    parser.add_argument('--schema_dir',
-                        help='directory to use for API schemas (optional)',
-                        default=None)
-    args = parser.parse_args()
-    settings.update(args)
-
-    for state in args.states:
-        print "Validating %s" % state
-        validate_api(state, args.schema_dir)
-
-
-if __name__ == '__main__':
-    main()
