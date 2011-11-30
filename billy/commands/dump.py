@@ -188,7 +188,7 @@ class DumpCSV(BaseCommand):
         for abbr in args.abbrs:
             if not args.file:
                 args.file = abbr + '.zip'
-            dump(abbr, args.filename)
+            self.dump(abbr, args.filename)
             if args.upload:
                 upload(abbr, args.file, 'csv')
 
@@ -228,7 +228,7 @@ class DumpJSON(BaseCommand):
         for abbr in args.abbrs:
             if not args.file:
                 args.file = abbr + '.zip'
-            dump_json(abbr, args.file, not args.novalidate, args.schema_dir)
+            self.dump(abbr, args.file, not args.novalidate, args.schema_dir)
             if args.upload:
                 upload(abbr, args.file, 'json')
 
