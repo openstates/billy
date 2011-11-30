@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 from billy import __version__
 
 long_description = open('README.rst').read()
 
 setup(name='billy',
       version=__version__,
-      packages=['billy', 'billy.scrape', 'billy.importers',
-                'billy.bin', 'billy.conf', 'billy.misc', 'billy.site',
-                'billy.site.browse', 'billy.site.api'],
+      packages=find_packages(),
       package_data={'billy': ['schemas/*.json',
                               'schemas/api/*.json',
                               'schemas/relax/api.rnc'],
