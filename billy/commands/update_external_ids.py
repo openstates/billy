@@ -123,7 +123,7 @@ class UpdateMissingIds(BaseCommand):
             update_votesmart_legislators(meta)
 
             print "Updating TransparencyData ids..."
-            update_transparencydata_legislators(meta, sunlight_key)
+            update_transparencydata_legislators(meta, args.sunlight_key)
 
             time.sleep(30)
 
