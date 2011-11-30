@@ -17,7 +17,9 @@ class CommandMeta(type):
         if not hasattr(cls, 'subcommands'):
             cls.subcommands = []
         else:
-            cls.subcommands.append(cls)
+            # if this is a unique command
+            if cls.name not in [c.name for c in cls.subcommands]:
+                cls.subcommands.append(cls)
 
         return cls
 
@@ -28,10 +30,8 @@ class BaseCommand(object):
     help = ''
 
     def __init__(self, subparsers):
-        self._subparsers = subparsers
-        self.subparser = self._subparsers.add_parser(self.name, help=self.help)
+        self.subparser = subparsers.add_parser(self.name, help=self.help)
         self.add_args()
-        self.subparser.set_defaults(func=self.handle)
 
     def add_argument(self, *args, **kwargs):
         self.subparser.add_argument(*args, **kwargs)

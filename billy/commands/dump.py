@@ -10,7 +10,7 @@ import shutil
 import zipfile
 
 from billy.conf import settings
-from billy.utils import metadata, configure_logging, extract_fields
+from billy.utils import metadata, extract_fields
 from billy.commands import BaseCommand
 from billy import db
 
