@@ -20,6 +20,8 @@ class ValidateApi(BaseCommand):
 
     def add_args(self):
         self.add_argument('states', nargs='+', help='states to oysterize')
+        self.add_argument('--sunlight_key', dest='SUNLIGHT_SERVICES_KEY',
+                  help='the Sunlight API key to use')
 
     def handle(self, args):
         for state in args.states:
