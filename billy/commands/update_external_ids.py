@@ -95,7 +95,7 @@ def update_transparencydata_legislators(meta, sunlight_key):
 
 class UpdateMissingIds(BaseCommand):
 
-    name = 'update_external_ids'
+    name = 'update-ext-ids'
     help = 'update TransparencyData and Vote Smart ids'
 
     def add_args(self):
