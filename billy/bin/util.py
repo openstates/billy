@@ -15,8 +15,7 @@ def scan_plugin_dir(dir):
         try:
             __import__(name)
         except ImportError, e:
-            print 'error "{0}" prevented loading of {1} subcommand'.format(e,
-                                                                         name)
+            print 'error "{0}" prevented loading of {1} module'.format(e, name)
     sys.path.pop(0)
 
 def main():

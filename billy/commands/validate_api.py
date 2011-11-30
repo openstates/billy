@@ -8,7 +8,7 @@ from billy.commands import BaseCommand
 from billy.utils import metadata
 
 from billy.conf import settings, base_arg_parser
-from billy.commands.export import APIValidator, api_url
+from billy.commands.dump import APIValidator, api_url
 
 import scrapelib
 import lxml.etree
