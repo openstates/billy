@@ -3,15 +3,21 @@
   <head>
       <title>{% block title %}Data Browse{% endblock %}</title>
       <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
-      <!--
       <style>
-          dt { font-weight: bold; font-variant: small-caps; padding-right: 1.5em; }
+          body { padding-top: 50px; }
       </style>
-      -->
   </head>
   <body>
-    <div class="row" id="content">
-      {% block content %}{% endblock %}
+    <div class="topbar">
+        <div class="fill">
+            <a class="brand" href="/browse/">billy</a>
+            <div class="container">
+                <ul class="nav">
+                    <li> <a href='/browse/'>Overview</a> </li>
+                </ul>
+            </div>
+        </div>
     </div>
+     {% block content %}{% endblock %}
   </body>
 </html>

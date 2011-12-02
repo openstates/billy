@@ -3,16 +3,15 @@
 {% load billy_utiltags %}
 
 {% block content %}
+<div class="container">
+    <h1>{{ metadata.name }}</h1>
+</div>
 
 <div class="container">
 <div class="row">
-    <h2>{{ metadata.name }}</h2>
-</div>
-
-<div class="row">
 
 <div class="span-one-third" id="metadata">
-    <h4 width="100%">Metadata</h4>
+    <h4>Metadata</h4>
     <dl>
     {% for k, v in metadata|sorted_items %}
     {% if k != "terms" and k != "session_details" %}
@@ -21,7 +20,7 @@
     {% endfor %}
     </dl>
 
-    <h4 width="100%">Terms</h4>
+    <h4>Terms</h4>
     <table>
         <tr><th>Term</th><th>Start Year</th><th>End Year</th><th>Sessions</th></tr>
         {% for term in metadata.terms %}
@@ -33,7 +32,7 @@
 </div>
 
 <div class="span-one-third" id="bills">
-    <h4 width="100%">Bills<a href="random_bill/">(random bill)</a></h4>
+    <h4>Bills<a href="random_bill/">(random bill)</a></h4>
   <dl>
       <dt>Upper:</dt><dd>{{report.bills.upper_count}}</dd>
       <dt>Lower:</dt><dd>{{report.bills.lower_count}}</dd>
@@ -46,28 +45,28 @@
       <dt>Updated This Month:</dt><dd>{{report.bills.updated_this_month}}%</dd>
       <dt>Updated This Year:</dt><dd>{{report.bills.updated_this_year}}%</dd>
   </dl>
-  <h4 width="100%">Bill Types</h4>
+  <h4>Bill Types</h4>
   <table>
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.bill_types|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
-  <h4 width="100%">Action Types</h4>
+  <h4>Action Types</h4>
   <table>
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_type|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
-  <h4 width="100%">Actors</h4>
+  <h4>Actors</h4>
   <table>
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_actor|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
-  <h4 width="100%">Actions by Month</h4>
+  <h4>Actions by Month</h4>
   <table>
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_month|sorted_items %}
@@ -78,7 +77,7 @@
 </div>
 
 <div class="span-one-third" id="legislators">
-    <h4 width="100%"><a href="legislators/">Legislators</a></h4>
+    <h4><a href="legislators/">Legislators</a></h4>
     <dl>
       <dt>Upper:</dt><dd>{{report.legislators.upper_active_count}}</dd>
       <dt>Lower:</dt><dd>{{report.legislators.lower_active_count}}</dd>
@@ -91,7 +90,7 @@
       <dt>Updated This Year:</dt><dd>{{report.legislators.updated_this_year}}%</dd>
     </dl>
 
-    <h4 width="100%"><a href="committees/">Committees</a></h4>
+    <h4><a href="committees/">Committees</a></h4>
     <dl>
       <dt>Upper:</dt><dd>{{report.committees.upper_count}}</dd>
       <dt>Lower:</dt><dd>{{report.committees.lower_count}}</dd>
