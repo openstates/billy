@@ -4,7 +4,10 @@ scrapelib changelog
 0.9.4
 -----
     * lots of fixes and improvements to browse
-    * districtcsv helper command added to util
+    * new utils
+        * districtcsv for generating district CSV stubs
+        * prunecommittees for removing old committees
+
 
 0.9.3
 -----

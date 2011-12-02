@@ -16,7 +16,7 @@ class DistrictCSV(BaseCommand):
     help = '''create stub district CSV'''
 
     def add_args(self):
-        self.add_argument('abbr', help='abbr to run matching for')
+        self.add_argument('abbr', help='abbr to create district csv stub')
 
 
     def handle(self, args):
