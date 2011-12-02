@@ -16,13 +16,13 @@ def _bill_report_dict():
             '_updated_this_month_count': 0,
             '_updated_today_count': 0,
             'actions_unsorted': set(),
-            'actionless': set(),
+            'actionless_count': 0,
             'action_count': 0,
             'actions_per_type': defaultdict(int),
             'actions_per_actor': defaultdict(int),
             'actions_per_month': defaultdict(int),
             'other_actions': defaultdict(int),
-            'sponsorless': set(),
+            'sponsorless_count': 0,
             '_sponsor_count': 0,
             '_sponsors_with_leg_id_count': 0,
             'sponsors_per_type': defaultdict(int),
@@ -38,7 +38,8 @@ def _bill_report_dict():
             'bills_per_subject': defaultdict(int),
             'uncategorized_subjects': defaultdict(int),
             'sourceless_count': 0,
-            'versionless': set(),
+            'versionless_count': 0,
+            'version_count': 0,
             'unmatched_leg_ids': set(),
            }
 
@@ -78,7 +79,7 @@ def scan_bills(abbr):
             session_d['actions_per_actor'][action['actor']] += 1
             session_d['actions_per_month'][date.strftime('%Y-%m')] += 1
         if not bill['actions']:
-            session_d['actionless'].add(bill['_id'])
+            session_d['actionless_count'] += 1
 
         # sponsors
         for sponsor in bill['sponsors']:
@@ -93,7 +94,7 @@ def scan_bills(abbr):
                 )
             session_d['sponsors_per_type'][sponsor['type']] += 1
         if not bill['sponsors']:
-            session_d['sponsorless'].add(bill['_id'])
+            session_d['sponsorless_count'] += 1
 
         # votes
         for vote in bill['votes']:
@@ -147,7 +148,11 @@ def scan_bills(abbr):
 
         # versions
         if not bill['versions']:
-            session_d['versionless'].add(bill['_id'])
+            # total num of bills w/o versions
+            session_d['versionless_count'] += 1
+        else:
+            # total num of versions
+            session_d['version_count'] += len(bill['versions'])
         for doc in (bill['versions'] + bill['documents']):
             duplicate_versions[doc['url']] += 1
 
