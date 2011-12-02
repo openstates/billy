@@ -4,6 +4,7 @@ scrapelib changelog
 0.9.4
 -----
     * lots of fixes and improvements to browse
+    * districtcsv helper command added to util
 
 0.9.3
 -----
