@@ -1,6 +1,10 @@
 scrapelib changelog
 ===================
 
+0.9.4
+-----
+    * lots of fixes and improvements to browse
+
 0.9.3
 -----
 **30 November 2011**
