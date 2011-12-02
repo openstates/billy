@@ -11,18 +11,25 @@ from billy.commands import BaseCommand
 logger = logging.getLogger('billy')
 configure_logging(1)
 
-def scan_plugin_dir(dir):
-    if not dir.endswith('/'):
-        dir = dir + '/'
-    sys.path.insert(0, dir)
-    for fname in glob.glob(dir + '[a-zA-Z]*.py'):
-        name = fname.replace(dir, '').replace('.py', '')
-        try:
-            __import__(name)
-        except ImportError, e:
-            logger.warning(
-                'error "{0}" prevented loading of {1} module'.format(e, name))
-    sys.path.pop(0)
+COMMAND_MODULES = (
+    'billy.commands.district_csv_stub',
+    'billy.commands.dump',
+    'billy.commands.load_legislators',
+    'billy.commands.oysterize',
+    'billy.commands.prune_committees',
+    'billy.commands.retire',
+    'billy.commands.serve',
+    'billy.commands.update_external_ids',
+    'billy.commands.update_leg_ids',
+    'billy.commands.validate_api',
+)
+
+def import_command_module(mod):
+    try:
+        __import__(mod)
+    except ImportError, e:
+        logger.warning(
+            'error "{0}" prevented loading of {1} module'.format(e, mod))
 
 def main():
     parser = argparse.ArgumentParser(description='generic billy util',
@@ -30,8 +37,8 @@ def main():
     subparsers = parser.add_subparsers(dest='subcommand')
 
     # import command plugins
-    plugin_dir = os.path.join(os.path.dirname(__file__), '../commands')
-    scan_plugin_dir(plugin_dir)
+    for mod in COMMAND_MODULES:
+        import_command_module(mod)
 
     # instantiate all subcommands
     subcommands = {}
