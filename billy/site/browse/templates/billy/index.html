@@ -34,7 +34,8 @@
         <th>empty</th>
         <th>leg_ids</th>
         <!-- bills -->
-        <th>total</th>
+        <th>upper</th>
+        <th>lower</th>
         <th>No Actions</th>
         <th>No Sponsors</th>
         <th>No Versions</th>
@@ -103,8 +104,10 @@
             {% endif %}
             >{{row.committees.members_with_leg_id|floatformat}}%</td>
         <!-- bills -->
-        <td class="{{row.bills.bill_count|yesno:"good,bad"}}">
-            {{row.bills.bill_count}}</td>
+        <td class="{{row.bills.upper_count|yesno:"good,bad"}}">
+            {{row.bills.upper_count}}</td>
+        <td class="{{row.bills.lower_count|yesno:"good,bad"}}">
+            {{row.bills.lower_count}}</td>
         <td class="{{row.bills.actionless|length|yesno:"bad,good"}}">
             {{row.bills.actionless|length}}</td>
         <td class="{{row.bills.sponsorless|length|yesno:"bad,good"}}">

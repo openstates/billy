@@ -9,7 +9,8 @@ from billy.reports.utils import update_common
 logger = logging.getLogger('billy')
 
 def _bill_report_dict():
-    return {'bill_count': 0,
+    return {'upper_count': 0,
+            'lower_count': 0,
             'bill_types': defaultdict(int),
             '_updated_this_year_count': 0,
             '_updated_this_month_count': 0,
@@ -53,8 +54,11 @@ def scan_bills(abbr):
     for bill in db.bills.find({'level': level, level: abbr}):
         session_d = sessions[bill['session']]
 
-        # normal bill count & bill_types
-        session_d['bill_count'] += 1
+        # chamber count & bill_types
+        if bill['chamber'] == 'lower':
+            session_d['lower_count'] += 1
+        elif bill['chamber'] == 'upper':
+            session_d['upper_count'] += 1
         for type in bill['type']:
             session_d['bill_types'][type] += 1
 
@@ -184,7 +188,7 @@ def combine_bill_reports(reports):
 
 def calculate_percentages(report):
     # general bill stuff
-    bill_count = float(report['bill_count'])/100
+    bill_count = float(report['upper_count'] + report['lower_count'])/100
     if bill_count:
         report['updated_this_year'] = (report.pop('_updated_this_year_count') /
                                        bill_count)
