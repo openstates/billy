@@ -76,7 +76,7 @@ def term_for_session(abbr, session):
         if session in term['sessions']:
             return term['name']
 
-    raise ValueError("no such session")
+    raise ValueError("no such session '%s'" % session)
 
 
 def urlescape(url):
