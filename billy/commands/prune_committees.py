@@ -21,12 +21,13 @@ class PruneCommittees(BaseCommand):
             old = (com['updated_at'] + datetime.timedelta(days=args.days) <
                    datetime.datetime.utcnow())
             if empty and old:
+                if com['subcommittee']:
+                    name = '[{_id}] {committee}: {subcommittee}'.format(com)
+                else:
+                    name = '[{_id}] {committee}'.format(com)
+
                 if args.delete:
-                    if com['subcommittee']:
-                        name = '[{_id}] {committee}: {subcommittee}'.format(com)
-                    else:
-                        name = '[{_id}] {committee}'.format(com)
                     print 'removing', name
-                    db.committees.remove(c['_id'], safe=True)
+                    db.committees.remove(com['_id'], safe=True)
                 else:
                     print 'would remove', name
