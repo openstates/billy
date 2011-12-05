@@ -22,9 +22,9 @@ class PruneCommittees(BaseCommand):
                    datetime.datetime.utcnow())
             if empty and old:
                 if com['subcommittee']:
-                    name = '[{_id}] {committee}: {subcommittee}'.format(com)
+                    name = '[{_id}] {committee}: {subcommittee}'.format(**com)
                 else:
-                    name = '[{_id}] {committee}'.format(com)
+                    name = '[{_id}] {committee}'.format(**com)
 
                 if args.delete:
                     print 'removing', name
