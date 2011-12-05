@@ -23,10 +23,10 @@ class PruneCommittees(BaseCommand):
             if empty and old:
                 if args.delete:
                     if com['subcommittee']:
-                        name = '[{id}] {committee}: {subcommittee}'.format(com)
+                        name = '[{_id}] {committee}: {subcommittee}'.format(com)
                     else:
-                        name = '[{id}] {committee}'
+                        name = '[{_id}] {committee}'.format(com)
                     print 'removing', name
                     db.committees.remove(c['_id'], safe=True)
                 else:
-                    print 'would remove', com['committee']
+                    print 'would remove', name
