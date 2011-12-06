@@ -115,7 +115,7 @@ def random_bill(request, abbr):
 
     if 'bad_vote_counts' in request.GET:
         bad_vote_counts = db.reports.find_one({'_id': abbr})['bills']['bad_vote_counts']
-        spec = {'bill_id': {'$in': bad_vote_counts}}
+        spec = {'_id': {'$in': bad_vote_counts}}
     else:
         spec = {'level': level, level: abbr.lower(), 'session': latest_session}
 
