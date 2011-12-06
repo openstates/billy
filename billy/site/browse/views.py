@@ -113,7 +113,11 @@ def random_bill(request, abbr):
     level = meta['level']
     latest_session = meta['terms'][-1]['sessions'][-1]
 
-    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
+    if 'bad_vote_counts' in request.GET:
+        bad_vote_counts = db.reports.find({'_id': abbr})['bills']['bad_vote_counts']
+        spec = {'bill_id': {'$in': bad_vote_counts}}
+    else:
+        spec = {'level': level, level: abbr.lower(), 'session': latest_session}
 
     count = db.bills.find(spec).count()
     bill = db.bills.find(spec)[random.randint(0, count - 1)]
