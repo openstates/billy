@@ -90,8 +90,11 @@ def unmatched_leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
-    combined_sets = (set(report['bills']['unmatched_leg_ids']) |
-                     set(report['bills']['unmatched_leg_ids']))
+    bill_unmatched = set(tuple(i) for i in
+                         report['bills']['unmatched_leg_ids'])
+    com_unmatched = set(tuple(i) for i in
+                         report['committees']['unmatched_leg_ids'])
+    combined_sets = bill_unmatched | com_unmatched
     return _csv_response(request, 'billy/unmatched_leg_ids.html',
                          sorted(combined_sets))
 
