@@ -44,7 +44,7 @@ def browse_index(request, template='billy/index.html'):
         #                             if d['chamber'] == 'lower')
         rows.append(report)
 
-    rows.sort(key=lambda x: x['id'])
+    rows.sort(key=lambda x: x['name'])
 
     return render_to_response(template, {'rows': rows})
 
