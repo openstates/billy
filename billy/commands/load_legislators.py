@@ -9,7 +9,7 @@ class LoadLegislators(BaseCommand):
 of their data'''
 
     def add_args(self):
-        self.add_argument('file', metavar='FILE', type=str,
+        self.add_argument('file', metavar='FILE', type=str, dest='filename',
                           help='CSV file to import')
         self.add_argument('--save', action='store_true', default=False,
                           help='save changes to database (default is dry run)')
