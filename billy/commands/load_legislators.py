@@ -19,10 +19,6 @@ of their data'''
 
         # print initial missing counts (a hack)
         state = args.filename.split('_')[0]
-        print 'missing pvs', db.legislators.find({'state': state,
-                                                  'votesmart_id': None}).count()
-        print 'missing tdata', db.legislators.find({'state': state,
-                                            'transparencydata_id': None}).count()
 
         namefile = csv.DictReader(open(args.filename))
 
@@ -75,10 +71,3 @@ of their data'''
                                   changed.keys() + ['full_name']))
                 leg['_locked_fields'] = locked
                 db.legislators.save(leg, safe=True)
-
-        if args.save:
-            print 'missing pvs', db.legislators.find({'state': state,
-                                              'votesmart_id': None}).count()
-            print 'missing tdata', db.legislators.find({'state': state,
-                                        'transparencydata_id': None}).count()
-
