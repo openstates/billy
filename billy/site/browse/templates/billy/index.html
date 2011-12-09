@@ -16,9 +16,9 @@
     <thead>
     <tr>
         <th>&nbsp;</th>
-        <th colspan=5>Legislators</th>
+        <th colspan=7>Legislators</th>
         <th colspan=5>Committees</th>
-        <th colspan=9>Bills</th>
+        <th colspan=10>Bills</th>
         <th colspan=3>Votes</th>
     <tr>
         <th>State</th>
@@ -28,6 +28,8 @@
         <th>No Source</th>
         <th>PVS</th>
         <th>TData</th>
+        <th>URL</th>
+        <th>Photo</th>
         <!-- committees -->
         <th>upper</th>
         <th>lower</th>
@@ -84,6 +86,29 @@
                 {% endif %}
             {% endif %}
             >{{row.legislators.transparencydata_id|floatformat}}%</td>
+        <td
+            {% if row.legislators.url < 90 %}
+            class="bad"
+            {% else %}
+                {% if row.legislators.url < 98 %}
+                class="warning"
+                {% else %}
+                class="good"
+                {% endif %}
+            {% endif %}
+            >{{row.legislators.url|floatformat}}%</td>
+
+        <td
+            {% if row.legislators.photo_url < 75 %}
+            class="bad"
+            {% else %}
+                {% if row.legislators.photo_url < 95 %}
+                class="warning"
+                {% else %}
+                class="good"
+                {% endif %}
+            {% endif %}
+            >{{row.legislators.photo_url|floatformat}}%</td>
         <!-- committees -->
         <td class="{{row.committees.upper_count|yesno:"good,bad"}}">
             {{row.committees.upper_count}}</td>
