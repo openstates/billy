@@ -7,6 +7,10 @@ scrapelib changelog
     * new utils
         * districtcsv for generating district CSV stubs
         * prunecommittees for removing old committees
+    * fixed utils
+        * load_legislators fixed
+    * promote legislator's url to a non + field
+    * random_bill/?bad_vote_counts
 
 
 0.9.3
