@@ -255,3 +255,18 @@ def get_scraper(mod_path, scraper_type):
         raise ScrapeError("no %s scraper found in module %s" %
                            (scraper_type, mod_path))
     return ScraperClass
+
+
+def check_sessions(metadata, sessions):
+    logger = logging.getLogger('billy')
+
+    metadata_session_details = [sd.get('_scraped_name')
+                            for sd in metadata['session_details'].itervalues()]
+    metadata_session_details += metadata.get('_ignored_scraped_names', [])
+
+    if not sessions:
+        logger.warning('no sessions from session_list()')
+
+    for s in sessions:
+        if s not in metadata_session_details:
+            logger.warning('session unaccounted for: %s', s)

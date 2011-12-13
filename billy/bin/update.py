@@ -9,7 +9,8 @@ import json
 
 from billy import db
 from billy.conf import settings, base_arg_parser
-from billy.scrape import ScrapeError, JSONDateEncoder, get_scraper
+from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
+                          check_sessions)
 from billy.utils import configure_logging
 from billy.scrape.validator import DatetimeValidator
 
@@ -242,7 +243,8 @@ def main(old_scrape_compat=False):
             sys.path.insert(0, newpath)
 
         # get metadata
-        metadata = __import__(args.module, fromlist=['metadata']).metadata
+        module = __import__(args.module)
+        metadata = module.metadata
         abbrev = metadata['abbreviation']
 
         configure_logging(args.verbose, args.module)
@@ -292,7 +294,14 @@ def main(old_scrape_compat=False):
 
         # do full scrape if not solo bills, import only, or report only
         if args.scrape:
-            # write metadata
+            # validate then write metadata
+
+            if hasattr(module, 'session_list'):
+                session_list = module.session_list()
+            else:
+                session_list = []
+            check_sessions(metadata, session_list)
+
             try:
                 schema_path = os.path.join(os.path.split(__file__)[0],
                                            '../schemas/metadata.json')
