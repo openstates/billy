@@ -262,11 +262,15 @@ def check_sessions(metadata, sessions):
 
     metadata_session_details = [sd.get('_scraped_name')
                             for sd in metadata['session_details'].itervalues()]
-    metadata_session_details += metadata.get('_ignored_scraped_names', [])
+    metadata_session_details += metadata.get('_ignored_scraped_sessions', [])
 
     if not sessions:
-        logger.warning('no sessions from session_list()')
+        raise ScrapeError('no sessions from session_list()')
 
+    unaccounted_sessions = []
     for s in sessions:
         if s not in metadata_session_details:
-            logger.warning('session unaccounted for: %s', s)
+            unaccounted_sessions.append(s)
+    if unaccounted_sessions:
+        raise ScrapeError('session(s) unaccounted for: %s' %
+                          ', '.join(unaccounted_sessions))
