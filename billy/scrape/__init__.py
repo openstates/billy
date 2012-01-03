@@ -272,5 +272,5 @@ def check_sessions(metadata, sessions):
         if s not in metadata_session_details:
             unaccounted_sessions.append(s)
     if unaccounted_sessions:
-        raise ScrapeError('session(s) unaccounted for: %s' %
-                          ', '.join(unaccounted_sessions))
+        raise ScrapeError('session(s) unaccounted for: %r' %
+                          unaccounted_sessions)
