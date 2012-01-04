@@ -3,8 +3,6 @@ from django.conf import settings
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
 
-from locksmith.mongoauth.db import db
-
 import piston.resource
 from piston.emitters import Emitter
 
@@ -15,6 +13,7 @@ from billy.site.api.emitters import FeedEmitter, ICalendarEmitter
 
 if getattr(settings, 'USE_LOCKSMITH', False):
     from locksmith.mongoauth.authentication import PistonKeyAuthentication
+    from locksmith.mongoauth.db import db
 
     class Authorizer(PistonKeyAuthentication):
         def challenge(self):
