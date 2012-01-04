@@ -92,7 +92,7 @@ def _run_scraper(scraper_type, options, metadata):
 
         # validate terms
         for time in times:
-            scraper.validate_term(time)
+            scraper.validate_term(time, scraper.latest_only)
 
     # run scraper against year/session/term
     for time in times:

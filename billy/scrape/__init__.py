@@ -83,6 +83,8 @@ class Scraper(scrapelib.Scraper):
 
     __metaclass__ = ScraperMeta
 
+    latest_only = False
+
     def __init__(self, metadata, no_cache=False, output_dir=None,
                  strict_validation=None, **kwargs):
         """
