@@ -267,7 +267,7 @@ def check_sessions(metadata, sessions):
             all_sessions_in_terms.remove(k)
         except ValueError:
             raise ScrapeError('session %s exists in session_details but not '
-                              'in a term')
+                              'in a term' % k)
 
         metadata_session_details.append(v.get('_scraped_name'))
 
