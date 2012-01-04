@@ -106,6 +106,11 @@ def import_committee(data, current_session, current_term):
 
         legislator = db.legislators.find_one({'_id': leg_id})
 
+        if not legislator:
+            logger.warning('No legislator with ID %s' % leg_id)
+            member['leg_id'] = None
+            continue
+
         member['leg_id'] = leg_id
 
         for role in legislator['roles']:
