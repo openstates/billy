@@ -258,14 +258,25 @@ def get_scraper(mod_path, scraper_type):
 
 
 def check_sessions(metadata, sessions):
-    logger = logging.getLogger('billy')
+    all_sessions_in_terms = reduce(lambda x,y: x+y,
+                                   [x['sessions'] for x in metadata['terms']])
+    metadata_session_details = metadata.get('_ignored_scraped_sessions', [])
 
-    metadata_session_details = [sd.get('_scraped_name')
-                            for sd in metadata['session_details'].itervalues()]
-    metadata_session_details += metadata.get('_ignored_scraped_sessions', [])
+    for k,v in metadata['session_details'].iteritems():
+        try:
+            all_sessions_in_terms.remove(k)
+        except ValueError:
+            raise ScrapeError('session %s exists in session_details but not '
+                              'in a term')
+
+        metadata_session_details.append(v.get('_scraped_name'))
 
     if not sessions:
         raise ScrapeError('no sessions from session_list()')
+
+    if all_sessions_in_terms:
+        raise ScrapeError('no session_details for session(s): %r' %
+                          all_sessions_in_terms)
 
     unaccounted_sessions = []
     for s in sessions:
