@@ -28,5 +28,11 @@
        }
      }
    },
-   "feature_flags": { "type": "array", "items": {"type": "string"}}
+   "feature_flags": { "type": "array", "items": {"type": "string"}},
+   "capitol_maps": { "type": "array", "required": false, "items":
+      {"type":"object", "properties": {
+       "name": {"type": "string"}, "url": {"type": "string"}
+       }
+      }
+    }
 }}
