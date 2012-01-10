@@ -89,7 +89,7 @@ class Bill(SourcedObject):
         """
         self['sponsors'].append(dict(type=type, name=name, **kwargs))
 
-    def add_document(self, name, url, **kwargs):
+    def add_document(self, name, url, mimetype=None, **kwargs):
         """
         Add a document or media item that is related to the bill.
         Use this method to add documents such as Fiscal Notes, Analyses,
@@ -98,24 +98,32 @@ class Bill(SourcedObject):
         :param name: a name given to the document, e.g.
                      'Fiscal Note for Amendment LCO 6544'
         :param url: link to location of document or file
+        :param mimetype: MIME type of the document
 
         If multiple formats of a document are provided, a good rule of
         thumb is to prefer text, followed by html, followed by pdf/word/etc.
         """
-        self['documents'].append(dict(name=name, url=url, **kwargs))
+        d = dict(name=name, url=url, **kwargs)
+        if mimetype:
+            d['mimetype'] = mimetype
+        self['documents'].append(d)
 
-    def add_version(self, name, url, **kwargs):
+    def add_version(self, name, url, mimetype=None, **kwargs):
         """
         Add a version of the text of this bill.
 
         :param name: a name given to this version of the text, e.g.
                      'As Introduced', 'Version 2', 'As amended', 'Enrolled'
         :param url: the location of this version on the legislative website.
+        :param mimetype: MIME type of the document
 
         If multiple formats are provided, a good rule of thumb is to
         prefer text, followed by html, followed by pdf/word/etc.
         """
-        self['versions'].append(dict(name=name, url=url, **kwargs))
+        d = dict(name=name, url=url, **kwargs)
+        if mimetype:
+            d['mimetype'] = mimetype
+        self['versions'].append(d)
 
     def add_action(self, actor, action, date, type=None, **kwargs):
         """
