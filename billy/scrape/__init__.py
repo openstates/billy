@@ -262,7 +262,9 @@ def get_scraper(mod_path, scraper_type):
 def check_sessions(metadata, sessions):
     all_sessions_in_terms = list(reduce(lambda x,y: x+y,
                                    [x['sessions'] for x in metadata['terms']]))
-    metadata_session_details = metadata.get('_ignored_scraped_sessions', [])
+    # copy the list to avoid modifying it
+    metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
+                                                 []))
 
     for k,v in metadata['session_details'].iteritems():
         try:
