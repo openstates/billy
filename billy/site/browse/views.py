@@ -12,6 +12,7 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
 
+
 def keyfunc(obj):
     try:
         return int(obj['district'])
@@ -64,6 +65,7 @@ def overview(request, abbr):
 
     return render_to_response('billy/state_index.html', context)
 
+
 @never_cache
 def bills(request, abbr):
 
@@ -74,53 +76,89 @@ def bills(request, abbr):
         raise Http404
 
     sessions = report['bills']['sessions']
-    
-    # Table data for bill "count" figures.
+
+
+    # ------------------------------------------------------------------------
+    # Get data for the tables for counts, types, etc. 
     tablespecs = [
         
-        ('counts', {'headings': ['upper_count','lower_count','version_count',
-                                'versionless_count']}),
+        ('bill counts', {'rownames': ['upper_count','lower_count','version_count',
+                                 'versionless_count']}),
 
-        ('types',  {'keypath': ['bill_types']}),
+        ('bill types',  {'keypath': ['bill_types']}),
 
-        ('actions per types', {'keypath': ['actions_per_type']}),
+        ('actions by type', {'keypath': ['actions_per_type']}),
 
-        ('actors per actor', {'keypath': ['actions_per_actor']}),
+        ('actions by actor', {'keypath': ['actions_per_actor']}),
 
-        ('actors per month', {'keypath': ['actions_per_month']})
-
-        ]
+       ]
                                
 
     tables = []
 
     for name, spec in tablespecs:
 
-        table_headings = []
-        table_rows = defaultdict(lambda: [])
+        column_names = []
+        rows = defaultdict(lambda: [])
         tabledata = {'title': name,
-                     'sessions': table_headings,
-                     'rows': table_rows}
+                     'column_names': column_names,
+                     'rows': rows}
         
-        for session, context in reversed(sessions.items()):
+        for session, context in sessions.items():
 
             if 'keypath' in spec:
                 for k in spec['keypath']:
                     context = context[k]
-
-            headings = spec.get('headings', context)
                 
-            table_headings.append(session)
+            column_names.append(session)
 
-            for h in headings:
-                table_rows[h].append(context[h])
+            rownames = spec.get('rownames', context)
+            f = spec.get('rowname_func', lambda k: k)
+            for r in rownames:
+                rows[r].append(context[r])
 
-        tabledata['rows'] = dict(table_rows)
+        # Get rid of defaultdict.
+        tabledata['rows'] = dict(rows)
+        
         tables.append(tabledata)
-            
-    render = functools.partial(render_to_string, 'billy/bills_table.html')
 
-    tables= map(render, tables)
+
+    # ------------------------------------------------------------------------
+    # Data for actions by month
+    class OrderedDict(dict):
+        '''
+        A quick ordered dict to get the month rows to display in the
+        correct order.
+        '''
+        def items(self, f=lambda k: int(k)):
+            res = []
+            for k in sorted(self, key=f):
+                res.append((k, self[k],))
+            return res
+    
+    actionsdata = defaultdict(lambda: defaultdict(lambda: {}))
+    years = set()
+    for session, context in sessions.items():
+        for s, n in context['actions_per_month'].items():            
+            year, month = s.split('-')
+            years.add(year)
+            actionsdata[month][year] = n
+
+    years = sorted(years, key=int)
+    for month in sorted(actionsdata, key=int):
+        actionsdata[month] = map(actionsdata[month].get, years)
+
+    table = {'title': 'actions by month',
+             'column_names': years,
+             'rows': OrderedDict(actionsdata)}
+
+    tables.append(table)
+
+        
+    # ------------------------------------------------------------------------
+    # Render the tables.
+    render = functools.partial(render_to_string, 'billy/bills_table.html')
+    tables = map(render, tables)
 
     return render_to_response("billy/bills.html",
                               dict(tables=tables, metadata=meta))
