@@ -63,21 +63,7 @@ def overview(request, abbr):
 
 
 def bills(request, abbr):
-    meta = metadata(abbr)
-    level = meta['level']
-    if not meta:
-        raise Http404
-
-    sessions = []
-    for term in meta['terms']:
-        for session in term['sessions']:
-            stats = _bill_stats_for_session(level, abbr, session)
-            stats['session'] = session
-            sessions.append(stats)
-
-    return render_to_response('billy/bills.html',
-                              {'sessions': sessions, 'metadata': meta})
-
+    pass
 
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
