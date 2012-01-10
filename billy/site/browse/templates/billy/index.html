@@ -1,5 +1,23 @@
 {% extends "billy/base.html" %}
 
+{% block script %}
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("tr").hover(
+        function(){$(this).find("td").css("color", "black")},
+        function(){$(this).find("td").css("color", "#404040")}
+        );
+      });    
+  </script>
+{% endblock %}
+
+{% block style %}
+  <style>
+  tr:hover {font-weight: bold;}
+  </style> 
+{% endblock %}
+
 {% block content %}
 <style type="text/css">
     td.good { background-color: #b0ff66; }
