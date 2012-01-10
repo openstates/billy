@@ -2,26 +2,32 @@
 {% load humanize %}
 
 {% block content %}
-<h2>{{ metadata.name }} bill summary</h2>
+<h2>{{ meta.name }} bill summary</h2>
 
-{% for session in sessions %}
+<div id="tables">
+{% for table in tables %}
+  {{ table|safe }}
+{% endfor %}
+</div>
+
+{% for name, session in sessions.iteritems %}
 
 <div style="float: left; padding-right: 3em;" class="bills">
-    <h4 width="100%">Bills for [{{session.session}}] </h4>
+    <h4 width="100%">Bills for [{{name}}] </h4>
   <dl>
-      <dt>Upper Chamber:</dt><dd>{{session.upper_bill_count}}</dd>
-      <dt>Lower Chamber:</dt><dd>{{session.lower_bill_count}}</dd>
-      <dt>Total Bills:</dt><dd>{{session.bill_count}}</dd>
-      <dt>Bills without sources:</dt><dd>{{session.ns_bill_count}}</dd>
-      <dt>Versions:</dt><dd>{{session.versions}}</dd>
+      <dt>Upper Chamber:</dt><dd>{{session.upper_count}}</dd>
+      <dt>Lower Chamber:</dt><dd>{{session.lower_count}}</dd>
+      <dt>Total Versions:</dt><dd>{{session.version_count}}</dd>
+      <dt>Bills without sources:</dt><dd>{{session.versionless_count}}</dd>
   </dl>
   <h4 width="100%">Bill Types</h4>
   <table>
       <tr><th>Type</th><th>#</th></tr>
-      {% for name, num in session.types.iteritems %}
+      {% for name, num in session.bill_types.iteritems %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
+
   <h4 width="100%">Action Types</h4>
   <em>{{session.action_cat_percent}}% categorized</em>
   <table>

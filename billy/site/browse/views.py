@@ -1,6 +1,8 @@
 import csv
 import random
 from collections import defaultdict
+import pdb
+import functools
 
 from billy import db
 from billy.utils import metadata
@@ -8,6 +10,7 @@ from billy.utils import metadata
 from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render_to_response
+from django.template.loader import render_to_string
 
 def keyfunc(obj):
     try:
@@ -61,9 +64,66 @@ def overview(request, abbr):
 
     return render_to_response('billy/state_index.html', context)
 
-
+@never_cache
 def bills(request, abbr):
-    pass
+
+    meta = metadata(abbr)
+
+    report = db.reports.find_one({'_id': abbr})
+    if not report:
+        raise Http404
+
+    sessions = report['bills']['sessions']
+    
+    # Table data for bill "count" figures.
+    tablespecs = [
+        
+        ('counts', {'headings': ['upper_count','lower_count','version_count',
+                                'versionless_count']}),
+
+        ('types',  {'keypath': ['bill_types']}),
+
+        ('actions per types', {'keypath': ['actions_per_type']}),
+
+        ('actors per actor', {'keypath': ['actions_per_actor']}),
+
+        ('actors per month', {'keypath': ['actions_per_month']})
+
+        ]
+                               
+
+    tables = []
+
+    for name, spec in tablespecs:
+
+        table_headings = []
+        table_rows = defaultdict(lambda: [])
+        tabledata = {'title': name,
+                     'sessions': table_headings,
+                     'rows': table_rows}
+        
+        for session, context in reversed(sessions.items()):
+
+            if 'keypath' in spec:
+                for k in spec['keypath']:
+                    context = context[k]
+
+            headings = spec.get('headings', context)
+                
+            table_headings.append(session)
+
+            for h in headings:
+                table_rows[h].append(context[h])
+
+        tabledata['rows'] = dict(table_rows)
+        tables.append(tabledata)
+            
+    render = functools.partial(render_to_string, 'billy/bills_table.html')
+
+    tables= map(render, tables)
+
+    return render_to_response("billy/bills.html",
+                              dict(tables=tables, metadata=meta))
 
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
