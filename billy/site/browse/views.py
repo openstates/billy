@@ -82,14 +82,14 @@ def bills(request, abbr):
     # Get data for the tables for counts, types, etc. 
     tablespecs = [
         
-        ('bill counts', {'rownames': ['upper_count','lower_count','version_count',
-                                 'versionless_count']}),
+        ('Bill Counts', {'rownames': ['upper_count','lower_count',
+                                      'version_count', 'versionless_count']}),
 
-        ('bill types',  {'keypath': ['bill_types']}),
+        ('Bill Types',  {'keypath': ['bill_types']}),
 
-        ('actions by type', {'keypath': ['actions_per_type']}),
+        ('Actions by Type', {'keypath': ['actions_per_type']}),
 
-        ('actions by actor', {'keypath': ['actions_per_actor']}),
+        ('Actions by Actor', {'keypath': ['actions_per_actor']}),
 
        ]
                                
@@ -113,7 +113,7 @@ def bills(request, abbr):
             column_names.append(session)
 
             rownames = spec.get('rownames', context)
-            f = spec.get('rowname_func', lambda k: k)
+
             for r in rownames:
                 rows[r].append(context[r])
 
@@ -124,44 +124,13 @@ def bills(request, abbr):
 
 
     # ------------------------------------------------------------------------
-    # Data for actions by month
-    class OrderedDict(dict):
-        '''
-        A quick ordered dict to get the month rows to display in the
-        correct order.
-        '''
-        def items(self, f=lambda k: int(k)):
-            res = []
-            for k in sorted(self, key=f):
-                res.append((k, self[k],))
-            return res
-    
-    actionsdata = defaultdict(lambda: defaultdict(lambda: {}))
-    years = set()
-    for session, context in sessions.items():
-        for s, n in context['actions_per_month'].items():            
-            year, month = s.split('-')
-            years.add(year)
-            actionsdata[month][year] = n
-
-    years = sorted(years, key=int)
-    for month in sorted(actionsdata, key=int):
-        actionsdata[month] = map(actionsdata[month].get, years)
-
-    table = {'title': 'actions by month',
-             'column_names': years,
-             'rows': OrderedDict(actionsdata)}
-
-    tables.append(table)
-
-        
-    # ------------------------------------------------------------------------
     # Render the tables.
     render = functools.partial(render_to_string, 'billy/bills_table.html')
     tables = map(render, tables)
 
     return render_to_response("billy/bills.html",
-                              dict(tables=tables, metadata=meta))
+                              dict(tables=tables, metadata=meta,
+                                   sessions=sessions))
 
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
