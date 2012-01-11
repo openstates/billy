@@ -99,7 +99,7 @@ def bills(request, abbr):
     for name, spec in tablespecs:
 
         column_names = []
-        rows = defaultdict(lambda: [])
+        rows = defaultdict(list)
         tabledata = {'title': name,
                      'column_names': column_names,
                      'rows': rows}
