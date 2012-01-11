@@ -11,6 +11,11 @@ scrapelib changelog
         * load_legislators fixed
     * promote legislator's url to a non + field
     * random_bill/?bad_vote_counts
+    * improve session handling
+        * session_list in metadata file
+        * missing sessions trigger an error
+    * new capitol_maps feature in metadata
+    * latest_only can be a flag on scrapers that only work for latest term
 
 
 0.9.3
