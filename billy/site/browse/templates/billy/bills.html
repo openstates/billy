@@ -21,7 +21,7 @@
 <table class="zebra-striped bordered-table condensed-table">
   <tr><th style="text-align: center;" colspan="2">{{session}}</th></tr>
   {% for name, num in data.actions_per_month|sorted_items %}
-    <tr><td>{{name}}</td><td>{{num}}</td></tr>
+    <tr><td>{{name}}</td><td>{{num|decimal_format}}</td></tr>
   {% endfor %}
 </table>
 </div>
