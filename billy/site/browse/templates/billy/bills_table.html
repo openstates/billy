@@ -1,0 +1,20 @@
+
+<table class="zebra-striped bordered-table condensed-table">
+ <caption><h3>{{title}}</h3></caption>
+<thead>
+ <tr style="background-color: #A3C2FF">
+   <th>Sessions</th>
+   {% for c in column_names %}
+     <th>{{ c }}</th>
+   {% endfor %}
+ </tr>
+</thead>
+<tbody>
+{% for name, row in rows.items %}
+ <tr>
+  <td><strong>{{ name }}</strong></td>
+ {% for cell in row  %}<td>{{ cell }}</td>{% endfor  %}</tr>
+{% endfor %}
+
+</tbody>
+</table>
