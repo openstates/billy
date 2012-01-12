@@ -3,6 +3,7 @@ import random
 from collections import defaultdict
 import pdb
 import functools
+import json
 
 from billy import db
 from billy.utils import metadata
@@ -189,6 +190,18 @@ def bill(request, abbr, session, id):
         raise Http404
 
     return render_to_response('billy/bill.html', {'bill': bill})
+
+from billy.scrape import JSONDateEncoder
+def bill_json(request, abbr, session, id):
+    level = metadata(abbr)['level']
+    bill = db.bills.find_one({'level': level, level: abbr,
+                              'session':session, 'bill_id':id.upper()})
+    if not bill:
+        raise Http404
+
+    _json = json.dumps(bill, cls=JSONDateEncoder, indent=4)
+
+    return render_to_response('billy/bill_json.html', {'json': _json})
 
 
 def legislators(request, abbr):
