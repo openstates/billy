@@ -1,9 +1,14 @@
+import re
 import csv
 import random
-from collections import defaultdict
 import pdb
 import functools
 import json
+import urllib
+import decimal
+from collections import defaultdict
+from operator import itemgetter
+from itertools import chain, imap
 
 from billy import db
 from billy.utils import metadata
@@ -133,12 +138,148 @@ def bills(request, abbr):
                               dict(tables=tables, metadata=meta,
                                    sessions=sessions))
 
+def summary_index(request, abbr):
+
+    meta = metadata(abbr)
+
+    session = request.GET['session']
+
+    object_types = 'votes actions versions sponsors documents sources'.split()
+
+    def build(context_set):
+        summary = defaultdict(int)
+        for c in context_set:
+            for k, v in c.items():
+                summary[k] += 1
+        return dict(summary)
+
+    def build_state(abbr):
+
+        bills = list(db.bills.find(state=abbr, session=session))
+        res = {}
+        for k in object_types:
+            res[k] = build(chain.from_iterable(map(itemgetter(k), bills)))
+
+        res.update(bills=build(bills))
+
+        return res
+    
+    summary = build_state(abbr)
+    return render_to_response('billy/summary_index.html', locals())
+
+
+def summary_object_key(request, abbr, urlencode=urllib.urlencode,
+                       collections=("bills", "legislators", "committees"),
+                       dumps=json.dumps, Decimal=decimal.Decimal):
+    
+    meta = metadata(abbr)
+
+    session = request.GET['session']
+    object_type = request.GET['object_type']
+    key = request.GET['key']
+
+    if object_type in collections:
+        objs = getattr(db, object_type).find(state=abbr, session=session)
+    else:
+        objs = db.bills.find(state=abbr, session=session)
+        objs = chain.from_iterable(imap(itemgetter(object_type), objs))
+
+    counter = defaultdict(Decimal)
+    _cache = set()
+    vals = set()
+    total = Decimal()
+    
+    for obj in objs:
+        
+        try:
+            val = dumps(obj[key], cls=JSONDateEncoder)
+        except KeyError:
+            continue
+
+        total += 1
+        counter[val] += 1            
+
+    params = lambda val: urlencode(dict(object_type=object_type,
+                                        key=key, val=val, session=session))
+    
+    vals = sorted(counter, key=counter.get, reverse=True)
+    vals = ((val, counter[val]/total, params(val)) for val in vals)
+
+    return render_to_response('billy/summary_object_key.html', locals())
+    
+
+def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
+                            collections=("bills", "legislators", "committees")):
+    
+    meta = metadata(abbr)
+
+    session = request.GET['session']
+    object_type = request.GET['object_type']
+    key = request.GET['key']
+    val = json.loads(request.GET['val'])
+
+    def get_objects():
+        
+        if object_type in collections:
+            for obj in getattr(db, object_type).find({'state': abbr,
+                                                      'session': session}):
+                try:
+                    keyval = obj[key]
+                except KeyError:
+                    continue
+
+                if keyval == val:
+                    yield object_type, obj['_id'], obj
+            
+        else:
+            for bill in db.bills.find(state=abbr, session=session):
+                try:
+                    objs = bill[object_type]
+                except KeyError:
+                    continue
+
+                if not objs:
+                    continue
+                
+                for obj in objs:                    
+                    try:
+                        keyval = obj[key]
+                    except KeyError:
+                        continue
+
+                if keyval == val:
+                    yield 'bills', bill['_id'], bill
+
+    objects = get_objects()
+
+    return render_to_response('billy/summary_object_keyvals.html', locals())
+
+    
+def object_json(request, collection, _id,
+                re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
+    
+    obj = getattr(db, collection).find({'_id': _id})[0]
+    obj_id = obj['_id']
+    obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
+    keys = sorted(obj)
+
+    def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
+        val = m.group(1)
+        return tmpl % (val, val)
+    
+    for k in obj:
+        obj_json = re_attr.sub(subfunc, obj_json)                               
+    
+    return render_to_response('billy/object_json.html', locals())
+    
+
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
     return _csv_response(request, 'billy/other_actions.html',
                          sorted(report['bills']['other_actions'].items()))
+
 
 def unmatched_leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})

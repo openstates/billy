@@ -1,4 +1,5 @@
 from decimal import Decimal, Context, Inexact
+import urllib
 import pdb
 
 from django import template
@@ -16,3 +17,5 @@ def decimal_format(value, TWOPLACES=Decimal(10) ** -2 ):
     n = n.quantize(TWOPLACES)#, context=Context(traps=[Inexact]))
     return n
         
+
+quote_plus=register.filter(urllib.quote_plus)
