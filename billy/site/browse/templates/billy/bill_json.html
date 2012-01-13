@@ -1,0 +1,17 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+
+{% block title %}
+{{ bill.state|upper }} {{ bill.bill_id }}
+{% endblock %}
+
+{% block content %}
+<a href="/browse/{{bill.state}}/{{bill.session}}/{{bill.bill_id}}">
+  <h3>{{bill.state|upper}} {{bill.bill_id}}</h3>
+</a>
+
+<pre>
+{{json}}
+</pre>
+
+{% endblock %}
