@@ -1,0 +1,35 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+
+<style>
+.summary-attr {padding-right: 5px;}
+</style>
+
+<div class="container">
+    <h2>{{ meta.name }} [{{ session }}]</h2>
+
+<dl>
+{% for object_type, keys in summary.items %}
+<dt>{{ object_type}}<dt>
+<dd>
+  {% for key in keys %}
+    {% if key not in object_types %}
+      <span class='summary-attr'><a href="/browse/{{ abbr }}/summary_object_key?session={{session|quote_plus}}&object_type={{object_type|quote_plus}}&key={{key|quote_plus}}">{{ key }}</a>
+    {% else %}
+      {{ key }}
+    {% endif %}
+    {% if not forloop.last %}, {% endif %}</span>
+  {% endfor %}
+</dd>
+{% endfor %}
+</dl>
+</div>
+
+
+
+
+
+{% endblock %}

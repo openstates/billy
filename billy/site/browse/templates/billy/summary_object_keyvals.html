@@ -1,0 +1,39 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+
+<style>
+tr:hover {cursor: pointer;}
+</style>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var trs = $("tr");
+      trs.click(function(){
+        var href = $(this).attr('href');
+        window.location = (href || window.location);
+        });
+      });    
+  </script>
+
+<div class="container">
+    <h2>{{ meta.name }} [{{ session }}]</h2>
+<h3>{{object_type}} where <span>{</span>"{{key}}": "{{val}}"<span>}</span></h3>
+<table class="zebra-striped bordered-table condensed-table">
+  <thead>
+  <tr><th>id</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for obj_type, obj_id, obj in objects  %}
+  <tr class="link" href="/browse/object_json/{{ obj_type }}/{{obj_id}}/"><td>{{ obj_id }}</td><td></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+</div>
+
+
+{% endblock %}
