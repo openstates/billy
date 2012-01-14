@@ -10,13 +10,15 @@ from collections import defaultdict
 from operator import itemgetter
 from itertools import chain, imap
 
-from billy import db
-from billy.utils import metadata
+import pymongo
 
 from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
+
+from billy import db
+from billy.utils import metadata
 
 
 def keyfunc(obj):
@@ -141,7 +143,6 @@ def bills(request, abbr):
 def summary_index(request, abbr):
 
     meta = metadata(abbr)
-
     session = request.GET['session']
 
     object_types = 'votes actions versions sponsors documents sources'.split()
@@ -155,7 +156,7 @@ def summary_index(request, abbr):
 
     def build_state(abbr):
 
-        bills = list(db.bills.find(state=abbr, session=session))
+        bills = list(db.bills.find({'state': abbr, 'session': session}))
         res = {}
         for k in object_types:
             res[k] = build(chain.from_iterable(map(itemgetter(k), bills)))
@@ -177,34 +178,26 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
+    spec = {'state': abbr, 'session': session}
 
     if object_type in collections:
-        objs = getattr(db, object_type).find(state=abbr, session=session)
+        collection = getattr(db, object_type)
     else:
-        objs = db.bills.find(state=abbr, session=session)
-        objs = chain.from_iterable(imap(itemgetter(object_type), objs))
+        collection = db.bills
 
-    counter = defaultdict(Decimal)
-    _cache = set()
-    vals = set()
-    total = Decimal()
-    
-    for obj in objs:
-        
-        try:
-            val = dumps(obj[key], cls=JSONDateEncoder)
-        except KeyError:
-            continue
+    total = collection.find(spec).count()
+    collection.ensure_index(key)
+    objs = collection.find(spec).distinct(key)
 
-        total += 1
-        counter[val] += 1            
+    pdb.set_trace()
 
     params = lambda val: urlencode(dict(object_type=object_type,
                                         key=key, val=val, session=session))
     
-    vals = sorted(counter, key=counter.get, reverse=True)
-    vals = ((val, counter[val]/total, params(val)) for val in vals)
-
+    ojbs = ((obj, collection.find(obj).count()/total, params(obj))
+            for obj in objs)
+    objs = sorted(objs, key=itemgetter(1), reverse=True)
+    
     return render_to_response('billy/summary_object_key.html', locals())
     
 
@@ -218,39 +211,20 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
     key = request.GET['key']
     val = json.loads(request.GET['val'])
 
-    def get_objects():
+    spec = {'state': abbr, 'session': session}
+    fields = {'_id': 1}
+    
+    if object_type in collections:
+        spec.update({key: val})
+        objects = getattr(db, object_type).find(spec, fields)
+        objects = ((object_type, obj['_id']) for obj in objects)
         
-        if object_type in collections:
-            for obj in getattr(db, object_type).find({'state': abbr,
-                                                      'session': session}):
-                try:
-                    keyval = obj[key]
-                except KeyError:
-                    continue
+    else:
+        spec.update({'.'.join([object_type, key]): val})
+        objects = db.bills.find(spec, fields)
+        objects = (('bills', obj['_id']) for obj in objects)
 
-                if keyval == val:
-                    yield object_type, obj['_id'], obj
-            
-        else:
-            for bill in db.bills.find(state=abbr, session=session):
-                try:
-                    objs = bill[object_type]
-                except KeyError:
-                    continue
-
-                if not objs:
-                    continue
-                
-                for obj in objs:                    
-                    try:
-                        keyval = obj[key]
-                    except KeyError:
-                        continue
-
-                if keyval == val:
-                    yield 'bills', bill['_id'], bill
-
-    objects = get_objects()
+    spec = json.dumps(spec, cls=JSONDateEncoder, indent=4)
 
     return render_to_response('billy/summary_object_keyvals.html', locals())
 
@@ -258,7 +232,14 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
     
-    obj = getattr(db, collection).find({'_id': _id})[0]
+    obj = getattr(db, collection).find_one(_id)
+    obj_isbill = (obj['_type'] == 'bill')
+    if obj_isbill:
+        try:
+            obj_url = obj['sources'][0]['url']
+        except:
+            pass
+        
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
     keys = sorted(obj)
@@ -268,7 +249,11 @@ def object_json(request, collection, _id,
         return tmpl % (val, val)
     
     for k in obj:
-        obj_json = re_attr.sub(subfunc, obj_json)                               
+        obj_json = re_attr.sub(subfunc, obj_json)
+
+    tmpl = '<a href="{0}">{0}</a>'
+    obj_json = re.sub('"(http://.+?)"',
+                      lambda m: tmpl.format(*m.groups()), obj_json)
     
     return render_to_response('billy/object_json.html', locals())
     

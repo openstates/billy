@@ -12,7 +12,7 @@ def sorted_items(value):
     return sorted(value.items())
 
 @register.filter
-def decimal_format(value, TWOPLACES=Decimal(10) ** -2 ):
+def decimal_format(value, TWOPLACES=Decimal(100) ** -2 ):
     n = Decimal(str(value))
     n = n.quantize(TWOPLACES)#, context=Context(traps=[Inexact]))
     return n
