@@ -2,19 +2,25 @@
 
 {% block script %}
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $("tr").hover(
-        function(){$(this).find("td").css("color", "black")},
-        function(){$(this).find("td").css("color", "black")},
-        );
-      });    
+  <script type="text/javascript"> 
   </script>
 {% endblock %}
 
 {% block style %}
   <style>
-  tr:hover {font-weight: bold;}
+  tr:hover {color: black}
+
+  tr:hover > td.good {
+    background-color: green;
+    }
+
+  tr:hover > td.bad {
+    background-color: red;
+    }
+
+  tr:hover > td.warning {
+    background-color: yellow;
+    }
   </style> 
 {% endblock %}
 
