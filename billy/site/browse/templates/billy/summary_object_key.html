@@ -23,11 +23,15 @@ tr:hover {cursor: pointer;}
 <h3>All values for "{{object_type}}.{{key}}"</h3>
 <table class="zebra-striped bordered-table condensed-table">
   <thead>
-  <tr><th>%</th><th>value</th></tr>
+  <tr><th>%</th><th>#</th><th>value</th></tr>
   </thead>
   <tbody>
-  {% for val, count, params in vals  %}
-  <tr class="link" href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}"><td>{{ count|decimal_format }}</td><td>{{ val|truncatewords:20 }}</td></tr>
+  {% for obj, count, percentage, params in objs  %}
+  <tr class="link" href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">
+    <td>{{ percentage|decimal_format }}</td>
+    <td>{{count}}</td>
+    <td>{{ obj|truncatewords:20 }}</td>
+  </tr>
   {% endfor %}
   </tbody>
 </table>

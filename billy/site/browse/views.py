@@ -19,6 +19,7 @@ from django.template.loader import render_to_string
 
 from billy import db
 from billy.utils import metadata
+from billy.scrape import JSONDateEncoder
 
 
 def keyfunc(obj):
@@ -174,7 +175,6 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                        dumps=json.dumps, Decimal=decimal.Decimal):
     
     meta = metadata(abbr)
-
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
@@ -182,23 +182,38 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
 
     if object_type in collections:
         collection = getattr(db, object_type)
+        fields_key = key
+        objs = collection.find(spec, {fields_key: 1})
+        objs = imap(itemgetter(key), objs)
     else:
         collection = db.bills
+        fields_key = '%s.%s' % (object_type, key)
+        objs = collection.find(spec, {fields_key: 1})
+        objs = imap(itemgetter(object_type), objs)
+        def get_objects(objs):
+            for _list in objs:
+                for _obj in _list:
+                    try:
+                        yield _obj[key]
+                    except KeyError:
+                        pass
+        objs = get_objects(objs)
 
-    total = collection.find(spec).count()
-    collection.ensure_index(key)
-    objs = collection.find(spec).distinct(key)
-
-    pdb.set_trace()
+    objs = (dumps(obj, cls=JSONDateEncoder) for obj in objs)
+    counter = defaultdict(Decimal)
+    for obj in objs:
+        counter[obj] += 1
 
     params = lambda val: urlencode(dict(object_type=object_type,
                                         key=key, val=val, session=session))
-    
-    ojbs = ((obj, collection.find(obj).count()/total, params(obj))
-            for obj in objs)
-    objs = sorted(objs, key=itemgetter(1), reverse=True)
+
+    total = len(counter)
+    objs = sorted(counter, key=counter.get, reverse=True)
+    objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
     
     return render_to_response('billy/summary_object_key.html', locals())
+
+
     
 
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
@@ -317,7 +332,7 @@ def bill(request, abbr, session, id):
 
     return render_to_response('billy/bill.html', {'bill': bill})
 
-from billy.scrape import JSONDateEncoder
+
 def bill_json(request, abbr, session, id):
     level = metadata(abbr)['level']
     bill = db.bills.find_one({'level': level, level: abbr,
