@@ -1,5 +1,4 @@
 import re
-import csv
 import random
 import pdb
 import functools
@@ -9,6 +8,7 @@ import decimal
 from collections import defaultdict
 from operator import itemgetter
 from itertools import chain, imap
+import unicodecsv
 
 import pymongo
 
@@ -31,7 +31,7 @@ def keyfunc(obj):
 def _csv_response(request, template, data):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
-        out = csv.writer(resp)
+        out = unicodecsv.writer(resp)
         for item in data:
             out.writerow(item)
         return resp

@@ -1,4 +1,4 @@
-import csv
+import unicodecsv
 from collections import defaultdict
 
 from billy import db
@@ -21,7 +21,7 @@ class DistrictCSV(BaseCommand):
 
     def handle(self, args):
         fields = ('abbr', 'chamber', 'name', 'num_seats', 'boundary_id')
-        out = csv.writer(open(args.abbr+'_districts.csv', 'w'))
+        out = unicodecsv.writer(open(args.abbr+'_districts.csv', 'w'))
         out.writerow(fields)
 
         counts = defaultdict(int)

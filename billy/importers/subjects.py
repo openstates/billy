@@ -1,5 +1,5 @@
 import os
-import csv
+import unicodecsv
 from collections import defaultdict
 
 from billy import db
@@ -16,7 +16,7 @@ class SubjectCategorizer(object):
         filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR,
                                 'subjects', abbr + '.csv')
         try:
-            reader = csv.reader(open(filename))
+            reader = unicodecsv.reader(open(filename))
 
             # build category mapping
             for n,row in enumerate(reader):

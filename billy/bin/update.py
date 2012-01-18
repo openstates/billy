@@ -3,9 +3,9 @@ import glob
 import logging
 import os
 import sys
-import csv
 import argparse
 import json
+import unicodecsv
 
 from billy import db
 from billy.conf import settings, base_arg_parser
@@ -133,7 +133,7 @@ def _do_imports(abbrev, args):
     dist_filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR, 'districts',
                                  '%s.csv' % abbrev)
     if os.path.exists(dist_filename):
-        dist_csv = csv.DictReader(open(dist_filename))
+        dist_csv = unicodecsv.DictReader(open(dist_filename))
         for dist in dist_csv:
             dist['_id'] = '%(abbr)s-%(chamber)s-%(name)s' % dist
             dist['boundary_id'] = dist['boundary_id'] % dist

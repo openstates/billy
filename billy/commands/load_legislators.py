@@ -1,4 +1,4 @@
-import csv
+import unicodecsv
 
 from billy import db
 from billy.commands import BaseCommand
@@ -20,7 +20,7 @@ of their data'''
         # print initial missing counts (a hack)
         state = args.filename.split('_')[0]
 
-        namefile = csv.DictReader(open(args.filename))
+        namefile = unicodecsv.DictReader(open(args.filename))
 
         for row in namefile:
             # get the legislator

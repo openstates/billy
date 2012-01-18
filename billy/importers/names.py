@@ -1,5 +1,5 @@
 import re
-import csv
+import unicodecsv
 import os.path
 
 from billy import db
@@ -93,7 +93,7 @@ class NameMatcher(object):
                             "leg_ids/%s.csv" % self._abbr)
         try:
             with open(path) as f:
-                reader = csv.reader(f)
+                reader = unicodecsv.reader(f)
 
                 for (term, chamber, name, leg_id) in reader:
                     if term == self._term and leg_id:

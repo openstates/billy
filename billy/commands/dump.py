@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import datetime
-import csv
 import json
 import logging
 import os
@@ -8,6 +7,7 @@ import re
 import urllib
 import shutil
 import zipfile
+import unicodecsv
 
 from billy.conf import settings
 from billy.utils import metadata, extract_fields
@@ -66,7 +66,7 @@ def api_url(path):
 
 def _make_csv(abbr, name, fields):
     filename = '/tmp/{0}_{1}'.format(abbr, name)
-    f = csv.DictWriter(open(filename, 'w'), fields)
+    f = unicodecsv.DictWriter(open(filename, 'w'), fields)
     f.writerow(dict(zip(fields, fields)))
     return filename, f
 

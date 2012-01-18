@@ -1,5 +1,3 @@
-import csv
-
 from billy import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
