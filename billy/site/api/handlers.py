@@ -204,6 +204,14 @@ class BillSearchHandler(BillyHandler):
         if sponsor_id:
             _filter['sponsors.leg_id'] = sponsor_id
 
+
+        count = db.bills.find(_filter, bill_fields).count()
+        if count > 5000:
+            resp = rc.BAD_REQUEST
+            resp.write('Request too large, try narrowing your search by adding'
+                       ' more filters.')
+            return resp
+
         query = db.bills.find(_filter, bill_fields)
 
         # sorting
