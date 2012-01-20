@@ -482,7 +482,7 @@ class LegislatorGeoHandler(BillyHandler):
             resp.write(': Need lat and long parameters')
             return resp
 
-        url = "%sboundary/?contains=%s,%s&sets=sldl,sldu&limit=0" % (
+        url = "%sboundary/?shape_type=none&contains=%s,%s&sets=sldl,sldu&limit=0" % (
             self.base_url, latitude, longitude)
 
         resp = json.load(urllib2.urlopen(url))
@@ -545,7 +545,7 @@ class BoundaryHandler(BillyHandler):
 
 
     def read(self, request, boundary_id):
-        url = "%sshape/%s/" % (self.base_url, boundary_id)
+        url = "%sboundary/%s/?shape_type=simple" % (self.base_url, boundary_id)
         try:
             data = json.load(urllib2.urlopen(url))
         except urllib2.HTTPError, e:
@@ -555,7 +555,7 @@ class BoundaryHandler(BillyHandler):
             else:
                 raise e
 
-        shape = data['shape']
+        shape = data['simple_shape']
         centroid = data['centroid']['coordinates']
 
         all_lon = []
