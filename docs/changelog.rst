@@ -3,19 +3,27 @@ scrapelib changelog
 
 0.9.4
 -----
+**20 January 2012**
     * lots of fixes and improvements to browse
-    * new utils
+        * new /bills/ view
+        * row highlighting
+        * unmatched_leg_ids page
+        * other_actions page
+        * json views
+        * random_bill/?bad_vote_counts
+    * new and fixed utils
         * districtcsv for generating district CSV stubs
         * prunecommittees for removing old committees
-    * fixed utils
         * load_legislators fixed
-    * promote legislator's url to a non + field
-    * random_bill/?bad_vote_counts
     * improve session handling
         * session_list in metadata file
         * missing sessions trigger an error
     * new capitol_maps feature in metadata
     * latest_only can be a flag on scrapers that only work for latest term
+    * addition of optional mimetype on documents & versions
+    * promote legislator's url to a non + field
+    * replace all csv usage with unicodecsv
+    * API: block requests for over 5000 bills at once
 
 
 0.9.3
