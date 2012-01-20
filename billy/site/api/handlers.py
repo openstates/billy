@@ -555,12 +555,11 @@ class BoundaryHandler(BillyHandler):
             else:
                 raise e
 
-        shape = data['simple_shape']
         centroid = data['centroid']['coordinates']
 
         all_lon = []
         all_lat = []
-        for shape in data['shape']['coordinates']:
+        for shape in data['simple_shape']['coordinates']:
             for coord_set in shape:
                 all_lon.extend(c[0] for c in coord_set)
                 all_lat.extend(c[1] for c in coord_set)
