@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: /browse/
-Disallow: /jenkins/
-Disallow: /api/v1/
