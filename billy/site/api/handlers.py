@@ -571,7 +571,7 @@ class BoundaryHandler(BillyHandler):
                  }
 
         district = db.districts.find_one({'boundary_id': boundary_id})
-        district['shape'] = shape
+        district['shape'] = data['simple_shape']['coordinates']
         district['region'] = region
 
         return district
