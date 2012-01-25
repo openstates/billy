@@ -278,7 +278,7 @@ def other_actions(request, abbr):
     if not report:
         raise Http404
     return _csv_response(request, 'billy/other_actions.html',
-                         sorted(report['bills']['other_actions'].items()))
+                         sorted(report['bills']['other_actions']))
 
 
 def unmatched_leg_ids(request, abbr):
