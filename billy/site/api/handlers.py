@@ -488,6 +488,8 @@ class LegislatorGeoHandler(BillyHandler):
         resp = json.load(urllib2.urlopen(url))
 
         filters = []
+        boundary_mapping = {}
+
         for dist in resp['objects']:
             state = dist['name'][0:2].lower()
             chamber = {'/1.0/boundary-set/sldu/': 'upper',
@@ -498,16 +500,22 @@ class LegislatorGeoHandler(BillyHandler):
             districts = db.districts.find({'chamber': chamber,
                                            'boundary_id': census_name})
             count = districts.count()
-            if count == 1:
+            if count:
                 filters.append({'state': state,
                                 'district': districts[0]['name'],
                                 'chamber': chamber})
+                boundary_mapping[(state, districts[0]['name'], chamber)] = census_name
 
         if not filters:
             return []
 
-        return list(db.legislators.find({'$or': filters},
-                                        _build_field_list(request)))
+        legislators = list(db.legislators.find({'$or': filters},
+                                               _build_field_list(request)))
+        for leg in legislators:
+            leg['boundary_id'] = boundary_mapping[(leg['state'],
+                                                   leg['district'],
+                                                   leg['chamber'])]
+        return legislators
 
 
 class DistrictHandler(BillyHandler):
