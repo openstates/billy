@@ -1,6 +1,12 @@
 scrapelib changelog
 ===================
 
+0.9.5
+-----
+    * bugfix for boundary API method
+    * add boundary_id to legislator responses
+    * fix for other_actions dotted keys in mongodb
+
 0.9.4
 -----
 **20 January 2012**
