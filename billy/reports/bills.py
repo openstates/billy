@@ -49,6 +49,7 @@ def scan_bills(abbr):
     duplicate_sources = defaultdict(int)
     duplicate_versions = defaultdict(int)
     other_actions = defaultdict(int)
+    uncategorized_subjects = defaultdict(int)
     sessions = defaultdict(_bill_report_dict)
 
     for bill in db.bills.find({'level': level, level: abbr}):
