@@ -297,7 +297,7 @@ def uncategorized_subjects(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
-    subjects = sorted(report['bills']['uncategorized_subjects'].items(),
+    subjects = sorted(report['bills']['uncategorized_subjects'],
                       key=lambda t: (t[1],t[0]), reverse=True)
     return _csv_response(request, 'billy/uncategorized_subjects.html',
                          subjects)
