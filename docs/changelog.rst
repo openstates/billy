@@ -5,7 +5,7 @@ scrapelib changelog
 -----
     * bugfix for boundary API method
     * add boundary_id to legislator responses
-    * fix for other_actions dotted keys in mongodb
+    * fix for dotted keys in reports
 
 0.9.4
 -----
