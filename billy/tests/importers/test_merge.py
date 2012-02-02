@@ -47,3 +47,6 @@ def test_role_migration():
 
 def test_role_migration_two():
     _test_logic( "role_conflict_with_prev_roles" )
+
+def test_vanishing_photo():
+    _test_logic( "vanishing_photo_url" )
