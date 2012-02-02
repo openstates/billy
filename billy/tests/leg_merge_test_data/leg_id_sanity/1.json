@@ -1,5 +1,8 @@
 {
-    "_id"    : "LOL100",
-    "leg_id" : "LOL100",
-    "_all_ids" : [ "LOL100" ]
+    "_all_ids": [
+        "LOL100"
+    ], 
+    "_id": "LOL100", 
+    "leg_id": "LOL100",
+    "_locked_fields": []
 }
