@@ -19,10 +19,15 @@ def _load_test_data( test_name ):
 def _check_results( one, two ):
     return set(one) == set(two)
 
+def _test_logic( name ):
+    leg1, leg2, compare = _load_test_data( name )
+    produced = merge_legislators( leg1, leg2 )
+    assert _check_results( produced, compare ) == True
 ##########
 # Cut below the line
 
 def test_legid_sanity():
-    leg1, leg2, compare = _load_test_data( "leg_id_sanity" )
-    produced = merge_legislators( leg1, leg2 )
-    assert _check_results( produced, compare ) == True
+    _test_logic( "leg_id_sanity" )
+
+def test_scraped_name_sanity():
+    _test_logic( "scraped_name_sanity" )
