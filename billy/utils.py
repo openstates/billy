@@ -108,3 +108,38 @@ def configure_logging(verbosity_count=0, module=None):
     else:
         format = "%(asctime)s %(name)s %(levelname)s %(message)s"
     logging.basicConfig(level=verbosity, format=format, datefmt="%H:%M:%S")
+
+def merge_legislators(leg1, leg2):
+    assert leg1['_id'] != leg2['_id']
+    if leg1['_id'] > leg2['_id']:
+        leg1, leg2 = leg2, leg1
+
+    no_compare = set(('_id', 'leg_id', '_all_ids', '_locked_fields',
+        'created_at', 'updated_at', 'roles', 'old_roles' ))
+
+    leg1['_all_ids'] += leg2['_all_ids']
+
+    # get set of keys that appear in both legislators and are not blacklisted
+    leg1keys = set(leg1.keys())
+    leg2keys = set(leg2.keys())
+    compare_keys = (leg1keys & leg2keys) - no_compare
+    leg1_locked = leg1.get('_locked_fields', [])
+    leg2_locked = leg2.get('_locked_fields', [])
+
+    # if a key is in both, copy 2 to 1 if they differ and key is locked in 2
+    # or unlocked in 1
+    for key in compare_keys:
+        if (leg1[key] != leg2[key] and leg2[key] and (key in leg2_locked or
+                                                      key not in leg1_locked)):
+            leg1[key] = leg2[key]
+
+    # locked is now union of the two
+    leg1['_locked_fields'] = list(set(leg1_locked + leg2_locked))
+
+    # copy new keys over to old legislator
+    for key in leg2keys - leg1keys:
+        leg1[key] = leg2[key]
+
+    # XXX: Set updated_at
+
+    return leg1
