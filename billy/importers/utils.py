@@ -243,8 +243,11 @@ def merge_legislators(leg1, leg2):
     if leg1['_id'] > leg2['_id']:
         leg1, leg2 = leg2, leg1
 
+    roles     = 'roles'
+    old_roles = 'old_roles'
+
     no_compare = set(('_id', 'leg_id', '_all_ids', '_locked_fields',
-        'created_at', 'updated_at', 'roles', 'old_roles' ))
+        'created_at', 'updated_at', roles, old_roles ))
 
     leg1['_all_ids'] += leg2['_all_ids']
 
@@ -270,5 +273,21 @@ def merge_legislators(leg1, leg2):
         leg1[key] = leg2[key]
 
     # XXX: Set updated_at
-
+    if leg1[roles] != leg2[roles]:
+        # OK. Let's dump the current roles into the old roles.
+        # WARNING: This code *WILL* drop current ctty appointments.
+        #  What this means:
+        #      In the case where someone goes from chamber L->U, and is on
+        #      joint-ctty A, moves to U, we will *LOOSE* joint-ctty from 
+        #      old_roles & roles!! There's a potenital for data loss, but it's
+        #      not that big of a thing.
+        #   -- paultag & jamesturk, 02-02-2012
+        crole = leg1[roles][0]
+        try:
+            leg1[old_roles][crole['term']].append( crole )
+        except KeyError:
+            leg1[old_roles][crole['term']] = [crole]
+        # OK. We've migrated the newly old roles to the old_roles entry.
+        leg1[roles] = [ leg2[roles][0] ]
     return leg1
+
