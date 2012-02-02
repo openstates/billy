@@ -8,8 +8,11 @@ from billy import db
 from viewdata import overview
 
 
-def simple(f):
-
+def simplify(f):
+	'''
+	Render the decorated view to response with the template
+	bearing the same name as the view function. 
+	'''
 	@wraps(f)
 	def wrapper(*args, **kwargs):
 		dictionary = f(*args, **kwargs)
@@ -17,13 +20,11 @@ def simple(f):
 		context_instance = RequestContext(args[0])
 		return render_to_response(template_name, dictionary, context_instance)
 
-	wrapper.isview = True
-
 	return wrapper
 
 
 
-@simple
+@simplify
 def state(request, abbr):
 	'''
 	2-12-2012
@@ -44,6 +45,8 @@ def state(request, abbr):
 	- current session
 	- committees
 
+
+
 	'''
 	metadata = db.metadata.find_one({'_id': abbr})
 	report = db.reports.find_one({'_id': abbr})
@@ -62,6 +65,10 @@ def state(request, abbr):
 
 	chambers['lower']['name'] = metadata['lower_chamber_name']
 	chambers['upper']['name'] = metadata['upper_chamber_name']
+
+
+	import pdb
+	pdb.set_trace()
 
 	return locals()
 

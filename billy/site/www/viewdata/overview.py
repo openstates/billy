@@ -42,3 +42,8 @@ def chamber(abbr, chamber):
 
 	return res
 
+
+def bills(state, chamber):
+	'''
+	'''
+	#db.bills.find({'state': 'de' }, {'bill_id': 1, 'actions': {'$slice': 1}}).sort('actions.1.date', -1).limit(10)
