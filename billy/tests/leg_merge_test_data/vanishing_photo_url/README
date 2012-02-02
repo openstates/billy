@@ -1,0 +1,10 @@
+This check is to make sure we don't overwrite keys that have a 'falseish' value.
+
+leg1:
+ photo_url : "<content>"
+
+leg2:
+ photo_url : ""
+
+This will copy over "", since it's a key, so we need to make sure that we don't
+do the migration for falseish values.

@@ -108,3 +108,4 @@ def configure_logging(verbosity_count=0, module=None):
     else:
         format = "%(asctime)s %(name)s %(levelname)s %(message)s"
     logging.basicConfig(level=verbosity, format=format, datefmt="%H:%M:%S")
+

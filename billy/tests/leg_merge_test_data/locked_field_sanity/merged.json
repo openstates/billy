@@ -1,0 +1,17 @@
+{
+    "roles" : [],
+    "L00": "info2", 
+    "L01": "info2", 
+    "L10": "info1", 
+    "L11": "info2", 
+    "_all_ids": [
+        "LOL100", 
+        "LOL200"
+    ], 
+    "_id": "LOL100", 
+    "_locked_fields": [
+        "L10", 
+        "L01", 
+        "L00"
+    ]
+}
