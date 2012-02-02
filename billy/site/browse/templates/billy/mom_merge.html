@@ -1,0 +1,25 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <div class = 'container' >
+        <div class="alert-message block-message error">
+            <p><strong>Warning! Read me! This voids the warranty!!</strong></p>
+            <br />
+            <p>If you doubt what you're doing, or don't feel like you know exactly
+            what's going to happen, <b>don't do it!</b> This has the potental
+            to break the API for folks, so please do think twice.</p>
+        </div>
+        <h1>Merge Plan</h1>
+        <div class = 'alert-message block-message info' >
+            <p><strong>These changes won't take effect until you approve it</strong></p>
+            <br />
+            <p>Because these changes are so error-prone, you must approve every
+            merge manually. This merge has not gone through until you approve it.</p>
+        </div>
+        <div class = 'merge-plan' >
+
+        </div>
+    </div>
+{% endblock %}

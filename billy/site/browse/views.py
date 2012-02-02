@@ -403,4 +403,4 @@ def mom_index(request):
     return render_to_response('billy/mom_index.html')
 
 def mom_merge(request):
-    pass
+    return render_to_response('billy/mom_merge.html')
