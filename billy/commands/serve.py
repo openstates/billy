@@ -18,6 +18,7 @@ class Serve(BaseCommand):
                            INSTALLED_APPS=('django.contrib.humanize',
                                            'billy.site.api',
                                            'billy.site.browse',
+                                           'billy.site.www',
                                           ),
                            DATE_FORMAT='Y-m-d',
                            TIME_FORMAT='H:i:s',
