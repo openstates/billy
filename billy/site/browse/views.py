@@ -398,3 +398,9 @@ def committees(request, abbr):
         'joint_coms': joint_coms,
         'metadata': meta,
     })
+
+def mom_index(request):
+    return render_to_response('billy/mom_index.html')
+
+def mom_merge(request):
+    pass

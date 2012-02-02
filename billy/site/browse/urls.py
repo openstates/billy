@@ -21,4 +21,8 @@ urlpatterns = patterns('billy.site.browse.views',
     url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators'),
     url(r'^(?P<abbr>[a-z]{2})/committees/$', 'committees'),
     url(r'^legislators/(?P<id>.*)/$', 'legislator'),
+
+    # Merge-o-matic URLs.
+    url(r'^mom$', 'mom_index'),
+    url(r'^mom/merge$', 'mom_merge', name="mom_merge" ),
 )
