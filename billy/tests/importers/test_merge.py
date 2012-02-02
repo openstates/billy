@@ -44,3 +44,6 @@ def test_locked_sanity():
 
 def test_role_migration():
     _test_logic( "role_conflict" )
+
+def test_role_migration_two():
+    _test_logic( "role_conflict_with_prev_roles" )
