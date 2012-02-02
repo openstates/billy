@@ -1,0 +1,3 @@
+This test is designed to make sure that the _scraped_name of the newer
+legislator is merged into the older legislator - this is used for cases where
+someone switches a role and a name.
