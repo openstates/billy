@@ -298,5 +298,5 @@ def merge_legislators(leg1, leg2):
 
         # OK. We've migrated the newly old roles to the old_roles entry.
         leg1[roles] = [ leg2[roles][0] ]
-    return ( leg1, leg2['leg_id'] )
+    return ( leg1, leg2['_id'] )
 
