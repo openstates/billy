@@ -404,16 +404,29 @@ def mom_index(request):
     return render(request, 'billy/mom_index.html' )
 
 def mom_commit(request):
+    actions = []
+
     leg1 = request.POST['leg1']
     leg2 = request.POST['leg2']
 
     leg1 = db.legislators.find_one({'_id' : leg1 })
+    actions.append( "Loaded Legislator '%s as `leg1''" % leg1['leg_id'] )
     leg2 = db.legislators.find_one({'_id' : leg2 })
+    actions.append( "Loaded Legislator '%s as `leg2''" % leg2['leg_id'] )
 
-    merged = merge_legislators( leg1, leg2 )
+    merged, remove = merge_legislators( leg1, leg2 )
+    actions.append( "Merged Legislators as '%s'" % merged['leg_id'] )
+
+    db.legislators.remove({ '_id' : remove }, safe=True)
+    actions.append( "Deleted Legislator (which had the ID of %s)" %
+        remove )
+
+    db.legislators.save( merged, safe=True )
+    actions.append( "Saved Legislator %s with merged data" % merged['leg_id'] )
 
     return render( request, 'billy/mom_commit.html', {
-        "merged" : merged
+            "merged"  : merged,
+            "actions" : actions
         })
 
 def mom_merge(request):
@@ -425,7 +438,8 @@ def mom_merge(request):
 
     leg1  = db.legislators.find_one({'_id' : leg1})
     leg2  = db.legislators.find_one({'_id' : leg2})
-    merge = merge_legislators( leg1, leg2 )
+
+    merge, toRemove = merge_legislators( leg1, leg2 )
     mv    = {}
     mv_info = {
         "1" : "Root Legislator",
@@ -452,5 +466,6 @@ def mom_merge(request):
     return render(request, 'billy/mom_merge.html', {
        'leg1'  : leg1, 'leg2' : leg2,
        'merge' : merge, 'merge_view' : mv,
+       'remove' : toRemove,
        'merge_view_info' : mv_info })
 

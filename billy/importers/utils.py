@@ -239,6 +239,7 @@ def next_big_id(abbr, letter, collection):
     return "%s%s%08d" % (abbr.upper(), letter, seq)
 
 def merge_legislators(leg1, leg2):
+    assert leg1['_id'][:3] == leg2['_id'][:3]
     assert leg1['_id'] != leg2['_id']
     if leg1['_id'] > leg2['_id']:
         leg1, leg2 = leg2, leg1
@@ -297,5 +298,5 @@ def merge_legislators(leg1, leg2):
 
         # OK. We've migrated the newly old roles to the old_roles entry.
         leg1[roles] = [ leg2[roles][0] ]
-    return leg1
+    return ( leg1, leg2['leg_id'] )
 

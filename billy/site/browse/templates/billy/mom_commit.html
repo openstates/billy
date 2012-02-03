@@ -18,6 +18,17 @@
             </p>
         </div>
         <div class = 'merge-results' >
+            <h2>Actions Taken</h2>
+            <p>In the event of a bad merge, please include this action
+            summary</p>
+
+            <ul>
+            {% for action in actions %}
+                <li>{{ action }}</li>
+            {% endfor %}
+            </ul>
+
+            <h2>Merged Legislator</h2>
             <table>
             {% for key, val in merged.items %}
                 <tr>
