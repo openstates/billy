@@ -19,7 +19,34 @@
             merge manually. This merge has not gone through until you approve it.</p>
         </div>
         <div class = 'merge-plan' >
-
+        <table>
+            {% for attr in merge %}
+            <tr>
+                <td> {{ attr }} </td>
+                <td>
+                {% if attr in leg1 %}
+                    {{ leg1|key:attr  }}
+                {% else %}
+                    None
+                {% endif %}
+                </td>
+                <td>
+                {% if attr in merge %}
+                    {{ merge|key:attr }}
+                {% else %}
+                    None
+                {% endif %}
+                </td>
+                <td>
+                {% if attr in leg2 %}
+                {{ leg2|key:attr  }}
+                {% else %}
+                    None
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
         </div>
     </div>
 {% endblock %}

@@ -16,6 +16,9 @@ def decimal_format(value, TWOPLACES=Decimal(100) ** -2 ):
     n = Decimal(str(value))
     n = n.quantize(TWOPLACES)#, context=Context(traps=[Inexact]))
     return n
-        
+
+@register.filter
+def key(d, key_name):
+    return d[key_name]
 
 quote_plus=register.filter(urllib.quote_plus)

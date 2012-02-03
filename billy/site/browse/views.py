@@ -19,6 +19,7 @@ from django.template.loader import render_to_string
 
 from billy import db
 from billy.utils import metadata
+from billy.importers.utils import merge_legislators
 from billy.scrape import JSONDateEncoder
 
 
@@ -403,4 +404,16 @@ def mom_index(request):
     return render_to_response('billy/mom_index.html')
 
 def mom_merge(request):
-    return render_to_response('billy/mom_merge.html')
+    leg1 = "leg1"
+    leg2 = "leg2"
+
+    leg1 = request.GET[leg1]
+    leg2 = request.GET[leg2]
+
+    leg1 = db.legislators.find_one({'_id' : leg1})
+    leg2 = db.legislators.find_one({'_id' : leg2})
+
+    return render_to_response('billy/mom_merge.html', {
+       'leg1'  : leg1, 'leg2' : leg2,
+       'merge' : merge_legislators( leg1, leg2 )
+    })
