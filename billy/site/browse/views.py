@@ -429,6 +429,31 @@ def mom_commit(request):
             "actions" : actions
         })
 
+def _mom_attr_diff( merge, leg1, leg2 ):
+    mv_info = {
+        "1" : "Root Legislator",
+        "2" : "Duplicate Legislator",
+        "U" : "Unchanged",
+        "N" : "New Information"
+    }
+
+    mv = {}
+    for key in merge:
+        if key in leg1 and key in leg2:
+            if leg1[key] == leg2[key]:
+                mv[key] = "U"
+            elif key == leg1[key]:
+                mv[key] = "1"
+            else:
+                mv[key] = "2"
+        elif key in leg1:
+            mv[key] = "1"
+        elif key in leg2:
+            mv[key] = "2"
+        else:
+            mv[key] = "N"
+    return ( mv, mv_info )
+
 def mom_merge(request):
     leg1 = "leg1"
     leg2 = "leg2"
@@ -439,7 +464,8 @@ def mom_merge(request):
     leg1_db  = db.legislators.find_one({'_id' : leg1})
     leg2_db  = db.legislators.find_one({'_id' : leg2})
 
-    if leg1_db == None or leg2_db == None:
+    if leg1_db == None or leg2_db == None: # XXX: Break this out into it's own
+        #                                         error page.
         nonNull = leg1_db if leg1_db != None        else leg2_db
         if nonNull != None:
             nonID   = leg1    if nonNull['_id'] == leg1 else leg2
@@ -456,34 +482,15 @@ def mom_merge(request):
         })
 
     leg1, leg2 = leg1_db, leg2_db
-
     merge, toRemove = merge_legislators( leg1, leg2 )
-    mv    = {}
-    mv_info = {
-        "1" : "Root Legislator",
-        "2" : "Duplicate Legislator",
-        "U" : "Unchanged",
-        "N" : "New Information"
-    }
+    mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
 
-    for key in merge:
-        if key in leg1 and key in leg2:
-            if leg1[key] == leg2[key]:
-                mv[key] = "U"
-            elif key == leg1[key]:
-                mv[key] = "1"
-            else:
-                mv[key] = "2"
-        elif key in leg1:
-            mv[key] = "1"
-        elif key in leg2:
-            mv[key] = "2"
-        else:
-            mv[key] = "N"
 
     return render(request, 'billy/mom_merge.html', {
-       'leg1'  : leg1, 'leg2' : leg2,
-       'merge' : merge, 'merge_view' : mv,
-       'remove' : toRemove,
+       'leg1'   : leg1,
+       'leg2'   : leg2,
+       'merge'  : merge,
+       'merge_view'      : mv,
+       'remove'          : toRemove,
        'merge_view_info' : mv_info })
 
