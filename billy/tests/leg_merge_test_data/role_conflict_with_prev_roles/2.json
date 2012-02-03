@@ -1,0 +1,15 @@
+{
+    "_all_ids": [
+        "LOL200"
+    ], 
+    "_id": "LOL200", 
+    "_locked_fields": [], 
+    "old_roles" : {},
+    "roles": [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ]
+}
+

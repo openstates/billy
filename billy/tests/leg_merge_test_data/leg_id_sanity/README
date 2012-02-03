@@ -1,0 +1,4 @@
+This test is designed to check to make sure the leg_id gets translated
+correctly to the merged version.
+
+This test is duplicated in almost every other test.

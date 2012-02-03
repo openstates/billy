@@ -1,0 +1,2 @@
+This test ensures that the roles attribute gets pushed to the merged object
+in a sane way.

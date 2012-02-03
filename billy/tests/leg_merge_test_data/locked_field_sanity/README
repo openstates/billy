@@ -1,0 +1,22 @@
+This test checks to make sure that the locked fields keep their sanity through
+the merge.
+
+
+       Legislator 1
+
+    Locked     Unlocked
+ +-----------+-----------+
+ |Leg2 (L00) | Leg2 (L01)| Locked
+ +-----------+-----------+           Legislator 2
+ |Leg1 (L10) | Leg2 (L11)| Unlocked
+ +-----------+-----------+
+
+(in all cases except Leg1 has a field that's locked and Leg2's is unlocked,
+ copy the value from Leg2 to Leg1)
+
+ L00 L2 -> L1
+ L01 L2 -> L1
+ L10 L1 -> L1
+ L11 L2 -> L1
+
+This might help explain the attributes and their values a bit more.
