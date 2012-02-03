@@ -3,6 +3,13 @@
 {% load billy_utiltags %}
 
 {% block content %}
+    <style>
+
+.merge-from-1 { background-color: #f2c58b; }
+.merge-from-2 { background-color: #d1acc0; }
+.merge-from-N { background-color: #abdb3b; }
+
+    </style>
     <div class = 'container' >
         <!--
             I was written with LOVE, a new scripting language where you write
@@ -25,40 +32,20 @@
             merge manually. This merge has not gone through until you approve it.</p>
         </div>
         <div class = 'merge-plan' >
-        <table>
-            <tr>
-                <th>attr</th>
-                <th>leg1</th>
-                <th>merge</th>
-                <th>leg2</th>
-            </tr>
-            {% for attr in merge %}
-            <tr>
-                <td> {{ attr }} </td>
-                <td>
-                {% if attr in leg1 %}
-                    {{ leg1|key:attr  }}
-                {% else %}
-                    None
-                {% endif %}
-                </td>
-                <td>
-                {% if attr in merge %}
-                    {{ merge|key:attr }}
-                {% else %}
-                    None
-                {% endif %}
-                </td>
-                <td>
-                {% if attr in leg2 %}
-                {{ leg2|key:attr  }}
-                {% else %}
-                    None
-                {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+            <table>
+                <tr>
+                    <th>attr</th>
+                    <th>info root</th>
+                    <th>value</th>
+                </tr>
+                {% for key, val in merge_view.items %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td class = 'merge-from-{{ val }}'>{{ merge_view_info|key:val }}</td>
+                        <td class = 'merge-from-{{ val }}'>{{ merge|key:key }}</td>
+                    </tr>
+                {% endfor %}
+            <table>
         </div>
     </div>
 {% endblock %}
