@@ -417,12 +417,15 @@ def mom_merge(request):
     mv_info = {
         "1" : "Root Legislator",
         "2" : "Duplicate Legislator",
+        "U" : "Unchanged",
         "N" : "New Information"
     }
 
     for key in merge:
         if key in leg1 and key in leg2:
-            if key == leg1[key]:
+            if leg1[key] == leg2[key]:
+                mv[key] = "U"
+            elif key == leg1[key]:
                 mv[key] = "1"
             else:
                 mv[key] = "2"
