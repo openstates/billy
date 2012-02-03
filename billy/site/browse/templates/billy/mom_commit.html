@@ -1,0 +1,21 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <div class = 'container' >
+        <div class="hero-unit">
+            <h1>Merge Complete <small>Ta-da.</small></h1>
+            <p>The merge <b>has</b> been executed. If there was a problem with
+            this merge, pleas <i>please</i> get it straightened out ASAP. Causing
+            disruption to the API users is pretty much the worst-case, so let's
+            make sure we maintain sanity.
+            <br />
+            <br />
+            The merge is shown below just for last-stage verification of the
+            results. Please do pay attention to it. Feel free to head back
+            home <a href = '{% url mom_index %}' >here</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

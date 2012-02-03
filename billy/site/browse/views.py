@@ -14,7 +14,7 @@ import pymongo
 
 from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.loader import render_to_string
 
 from billy import db
@@ -37,7 +37,7 @@ def _csv_response(request, template, data):
             out.writerow(item)
         return resp
     else:
-        return render_to_response(template, {'data':data})
+        return render(request, template, {'data':data})
 
 
 
@@ -60,7 +60,7 @@ def browse_index(request, template='billy/index.html'):
 
     rows.sort(key=lambda x: x['name'])
 
-    return render_to_response(template, {'rows': rows})
+    return render(request, template, {'rows': rows})
 
 
 def overview(request, abbr):
@@ -73,7 +73,7 @@ def overview(request, abbr):
     context['metadata'] = meta
     context['report'] = report
 
-    return render_to_response('billy/state_index.html', context)
+    return render(request, 'billy/state_index.html', context)
 
 
 @never_cache
@@ -138,7 +138,7 @@ def bills(request, abbr):
     render = functools.partial(render_to_string, 'billy/bills_table.html')
     tables = map(render, tables)
 
-    return render_to_response("billy/bills.html",
+    return render(request, "billy/bills.html",
                               dict(tables=tables, metadata=meta,
                                    sessions=sessions))
 
@@ -168,7 +168,7 @@ def summary_index(request, abbr):
         return res
     
     summary = build_state(abbr)
-    return render_to_response('billy/summary_index.html', locals())
+    return render(request, 'billy/summary_index.html', locals())
 
 
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
@@ -212,7 +212,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     objs = sorted(counter, key=counter.get, reverse=True)
     objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
     
-    return render_to_response('billy/summary_object_key.html', locals())
+    return rendert(request, 'billy/summary_object_key.html', locals())
 
 
     
@@ -242,7 +242,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
     spec = json.dumps(spec, cls=JSONDateEncoder, indent=4)
 
-    return render_to_response('billy/summary_object_keyvals.html', locals())
+    return render(request, 'billy/summary_object_keyvals.html', locals())
 
     
 def object_json(request, collection, _id,
@@ -271,7 +271,7 @@ def object_json(request, collection, _id,
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
     
-    return render_to_response('billy/object_json.html', locals())
+    return render(request, 'billy/object_json.html', locals())
     
 
 def other_actions(request, abbr):
@@ -321,7 +321,7 @@ def random_bill(request, abbr):
     count = db.bills.find(spec).count()
     bill = db.bills.find(spec)[random.randint(0, count - 1)]
 
-    return render_to_response('billy/bill.html', {'bill': bill})
+    return render(request, 'billy/bill.html', {'bill': bill})
 
 
 def bill(request, abbr, session, id):
@@ -331,7 +331,7 @@ def bill(request, abbr, session, id):
     if not bill:
         raise Http404
 
-    return render_to_response('billy/bill.html', {'bill': bill})
+    return render(request, 'billy/bill.html', {'bill': bill})
 
 
 def bill_json(request, abbr, session, id):
@@ -343,7 +343,7 @@ def bill_json(request, abbr, session, id):
 
     _json = json.dumps(bill, cls=JSONDateEncoder, indent=4)
 
-    return render_to_response('billy/bill_json.html', {'json': _json})
+    return render(request, 'billy/bill_json.html', {'json': _json})
 
 
 def legislators(request, abbr):
@@ -360,7 +360,7 @@ def legislators(request, abbr):
     lower_legs = sorted(lower_legs, key=keyfunc)
     inactive_legs = sorted(inactive_legs, key=lambda x: x['last_name'])
 
-    return render_to_response('billy/legislators.html', {
+    return response(request, 'billy/legislators.html', {
         'upper_legs': upper_legs,
         'lower_legs': lower_legs,
         'inactive_legs': inactive_legs,
@@ -375,7 +375,7 @@ def legislator(request, id):
 
     meta = metadata(leg[leg['level']])
 
-    return render_to_response('billy/legislator.html', {'leg': leg,
+    return render(request, 'billy/legislator.html', {'leg': leg,
                                                         'metadata': meta})
 
 
@@ -393,7 +393,7 @@ def committees(request, abbr):
     lower_coms = sorted(lower_coms)
     joint_coms = sorted(joint_coms)
 
-    return render_to_response('billy/committees.html', {
+    return render( request, 'billy/committees.html', {
         'upper_coms': upper_coms,
         'lower_coms': lower_coms,
         'joint_coms': joint_coms,
@@ -401,7 +401,20 @@ def committees(request, abbr):
     })
 
 def mom_index(request):
-    return render_to_response('billy/mom_index.html')
+    return render(request, 'billy/mom_index.html' )
+
+def mom_commit(request):
+    leg1 = request.POST['leg1']
+    leg2 = request.POST['leg2']
+
+    leg1 = db.legislators.find_one({'_id' : leg1 })
+    leg2 = db.legislators.find_one({'_id' : leg2 })
+
+    merged = merge_legislators( leg1, leg2 )
+
+    return render( request, 'billy/mom_commit.html', {
+        "merged" : merged
+        })
 
 def mom_merge(request):
     leg1 = "leg1"
@@ -436,7 +449,8 @@ def mom_merge(request):
         else:
             mv[key] = "N"
 
-    return render_to_response('billy/mom_merge.html', {
+    return render(request, 'billy/mom_merge.html', {
        'leg1'  : leg1, 'leg2' : leg2,
        'merge' : merge, 'merge_view' : mv,
        'merge_view_info' : mv_info })
+

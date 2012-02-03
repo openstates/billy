@@ -12,6 +12,7 @@
     <script type = 'text/javascript' >
 
 $(document).ready(function() {
+    /* Toggle the unmerging data */
     var _toggle_status = true; // hack!
     $(".root-merge-U").hide();
     $("#show-hidden").click(function() {
@@ -69,5 +70,21 @@ $(document).ready(function() {
                 {% endfor %}
             <table>
         </div>
+        <h1>Approve this change</h1>
+        <p>
+            Approving this change means that
+            you've looked over this data (very carefuly) and you consider this to
+            be a valid and meaningful merge that will result in <b>no</b> net
+            data loss. If you're not at all sure, this is your last chance to
+            avoid the merge.
+        </p>
+        <form action = '{% url mom_commit %}' method = 'POST' >
+            <input name = 'leg1' type = 'hidden' value = '{{ leg1.leg_id }}' />
+            <input name = 'leg2' type = 'hidden' value = '{{ leg2.leg_id }}' />
+            {% csrf_token %}
+            &nbsp;
+            <input name = 'sub'  type = 'submit' value = 'Make it so!'
+                class = 'btn danger' />
+        </form>
     </div>
 {% endblock %}
