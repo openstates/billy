@@ -4,12 +4,28 @@
 
 {% block content %}
     <style>
-
 .merge-from-1 { background-color: #f2c58b; }
 .merge-from-2 { background-color: #d1acc0; }
 .merge-from-N { background-color: #abdb3b; }
-
     </style>
+    <script type = 'text/javascript' src = 'http://code.jquery.com/jquery-1.7.1.min.js' ></script>
+    <script type = 'text/javascript' >
+
+$(document).ready(function() {
+    var _toggle_status = true; // hack!
+    $(".root-merge-U").hide();
+    $("#show-hidden").click(function() {
+        $(".root-merge-U").fadeToggle( 500 );
+        if ( _toggle_status ) {
+            $("#show-hidden").text( "Nevermind, nevermind!" );
+        } else {
+            $("#show-hidden").text( "I want it back!" );
+        }
+        _toggle_status = ! ( _toggle_status );
+    });
+});
+
+    </script>
     <div class = 'container' >
         <!--
             I was written with LOVE, a new scripting language where you write
@@ -26,10 +42,16 @@
         </div>
         <h1>Merge Plan</h1>
         <div class = 'alert-message block-message info' >
-            <p><strong>These changes won't take effect until you approve it</strong></p>
+            <strong>This is an incomplete listing!</strong>
             <br />
-            <p>Because these changes are so error-prone, you must approve every
-            merge manually. This merge has not gone through until you approve it.</p>
+            <p>
+            It's worth noting that all fields that have no change have been hidden
+            from the default view. If you'd like to show them, feel free to toggle
+            the fields on below.<br /><br />
+            <button class = 'btn secondary' id = 'show-hidden' >
+                gimme all you got
+            </button>
+            </p>
         </div>
         <div class = 'merge-plan' >
             <table>
@@ -39,7 +61,7 @@
                     <th>value</th>
                 </tr>
                 {% for key, val in merge_view.items %}
-                    <tr>
+                    <tr class = 'root-merge-{{ val }}' >
                         <td>{{ key }}</td>
                         <td class = 'merge-from-{{ val }}'>{{ merge_view_info|key:val }}</td>
                         <td class = 'merge-from-{{ val }}'>{{ merge|key:key }}</td>
