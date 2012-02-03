@@ -19,6 +19,7 @@ from django.template.loader import render_to_string
 
 from billy import db
 from billy.utils import metadata
+from billy.importers.utils import merge_legislators
 from billy.scrape import JSONDateEncoder
 
 
@@ -398,3 +399,44 @@ def committees(request, abbr):
         'joint_coms': joint_coms,
         'metadata': meta,
     })
+
+def mom_index(request):
+    return render_to_response('billy/mom_index.html')
+
+def mom_merge(request):
+    leg1 = "leg1"
+    leg2 = "leg2"
+
+    leg1 = request.GET[leg1]
+    leg2 = request.GET[leg2]
+
+    leg1  = db.legislators.find_one({'_id' : leg1})
+    leg2  = db.legislators.find_one({'_id' : leg2})
+    merge = merge_legislators( leg1, leg2 )
+    mv    = {}
+    mv_info = {
+        "1" : "Root Legislator",
+        "2" : "Duplicate Legislator",
+        "U" : "Unchanged",
+        "N" : "New Information"
+    }
+
+    for key in merge:
+        if key in leg1 and key in leg2:
+            if leg1[key] == leg2[key]:
+                mv[key] = "U"
+            elif key == leg1[key]:
+                mv[key] = "1"
+            else:
+                mv[key] = "2"
+        elif key in leg1:
+            mv[key] = "1"
+        elif key in leg2:
+            mv[key] = "2"
+        else:
+            mv[key] = "N"
+
+    return render_to_response('billy/mom_merge.html', {
+       'leg1'  : leg1, 'leg2' : leg2,
+       'merge' : merge, 'merge_view' : mv,
+       'merge_view_info' : mv_info })

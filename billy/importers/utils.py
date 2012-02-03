@@ -243,6 +243,9 @@ def merge_legislators(leg1, leg2):
     if leg1['_id'] > leg2['_id']:
         leg1, leg2 = leg2, leg1
 
+    leg1 = leg1.copy()
+    leg2 = leg2.copy()
+
     roles     = 'roles'
     old_roles = 'old_roles'
 
@@ -286,7 +289,12 @@ def merge_legislators(leg1, leg2):
         try:
             leg1[old_roles][crole['term']].append( crole )
         except KeyError:
-            leg1[old_roles][crole['term']] = [crole]
+            try:
+                leg1[old_roles][crole['term']] = [crole]
+            except KeyError:
+                # dear holy god this needs to be fixed.
+                leg1[old_roles] = { crole['term'] : [ crole ] }
+
         # OK. We've migrated the newly old roles to the old_roles entry.
         leg1[roles] = [ leg2[roles][0] ]
     return leg1

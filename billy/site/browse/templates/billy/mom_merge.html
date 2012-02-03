@@ -1,0 +1,73 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <style>
+.merge-from-1 { background-color: #f2c58b; }
+.merge-from-2 { background-color: #d1acc0; }
+.merge-from-N { background-color: #abdb3b; }
+    </style>
+    <script type = 'text/javascript' src = 'http://code.jquery.com/jquery-1.7.1.min.js' ></script>
+    <script type = 'text/javascript' >
+
+$(document).ready(function() {
+    var _toggle_status = true; // hack!
+    $(".root-merge-U").hide();
+    $("#show-hidden").click(function() {
+        $(".root-merge-U").fadeToggle( 500 );
+        if ( _toggle_status ) {
+            $("#show-hidden").text( "Nevermind, nevermind!" );
+        } else {
+            $("#show-hidden").text( "I want it back!" );
+        }
+        _toggle_status = ! ( _toggle_status );
+    });
+});
+
+    </script>
+    <div class = 'container' >
+        <!--
+            I was written with LOVE, a new scripting language where you write
+            applications using 'feelings'. I feel good about that. How do you
+            feel?
+               - MOM (World of Goo)
+        -->
+        <div class="alert-message block-message error">
+            <p><strong>Warning! Read me! This voids the warranty!!</strong></p>
+            <br />
+            <p>If you doubt what you're doing, or don't feel like you know exactly
+            what's going to happen, <b>don't do it!</b> This has the potental
+            to break the API for folks, so please do think twice.</p>
+        </div>
+        <h1>Merge Plan</h1>
+        <div class = 'alert-message block-message info' >
+            <strong>This is an incomplete listing!</strong>
+            <br />
+            <p>
+            It's worth noting that all fields that have no change have been hidden
+            from the default view. If you'd like to show them, feel free to toggle
+            the fields on below.<br /><br />
+            <button class = 'btn secondary' id = 'show-hidden' >
+                gimme all you got
+            </button>
+            </p>
+        </div>
+        <div class = 'merge-plan' >
+            <table>
+                <tr>
+                    <th>attr</th>
+                    <th>info root</th>
+                    <th>value</th>
+                </tr>
+                {% for key, val in merge_view.items %}
+                    <tr class = 'root-merge-{{ val }}' >
+                        <td>{{ key }}</td>
+                        <td class = 'merge-from-{{ val }}'>{{ merge_view_info|key:val }}</td>
+                        <td class = 'merge-from-{{ val }}'>{{ merge|key:key }}</td>
+                    </tr>
+                {% endfor %}
+            <table>
+        </div>
+    </div>
+{% endblock %}

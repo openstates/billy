@@ -1,0 +1,37 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <div class = 'container' >
+        <div class="hero-unit">
+            <h1>Merge-o-matic <small>(but you can call me mom)</small></h1>
+            <p>
+            The Merge-o-matic (or MOM for short) will try to automagically
+            merge two legislators into a single ultra-legislator. This comes in
+            super handy for people who have moved chambers, changed their name,
+            or messed up what we remember as their scraped name.
+            </p>
+        </div>
+        
+        <form action = '{% url mom_merge %}' action = 'GET' >
+            <fieldset>
+                <div class = 'clearfix' >
+                    <label>Legislator 1</label>
+                    <div class = 'input' >
+                        <input type = 'text' name = 'leg1' />
+                    </div>
+                </div>
+                <div class = 'clearfix' >
+                    <label>Legislator 2</label>
+                    <div class = 'input'>
+                        <input type = 'text' name = 'leg2' />
+                    </div>
+                </div>
+                <div class = 'actions' >
+                    <input type = 'submit' class = 'btn primary' />
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
