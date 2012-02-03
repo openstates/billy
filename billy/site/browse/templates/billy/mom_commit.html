@@ -17,5 +17,15 @@
             home <a href = '{% url mom_index %}' >here</a>
             </p>
         </div>
+        <div class = 'merge-results' >
+            <table>
+            {% for key, val in merged.items %}
+                <tr>
+                <td> {{ key }} </td>
+                <td> {{ val }} </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
     </div>
 {% endblock %}
