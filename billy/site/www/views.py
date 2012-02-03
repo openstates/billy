@@ -14,10 +14,10 @@ def simplify(f):
 	bearing the same name as the view function. 
 	'''
 	@wraps(f)
-	def wrapper(*args, **kwargs):
-		dictionary = f(*args, **kwargs)
+	def wrapper(request, *args, **kwargs):
+		dictionary = f(request, *args, **kwargs)
 		template_name = f.__name__ + '.html'
-		context_instance = RequestContext(args[0])
+		context_instance = RequestContext(request)
 		return render_to_response(template_name, dictionary, context_instance)
 
 	return wrapper
@@ -44,9 +44,6 @@ def state(request, abbr):
 	- bills
 	- current session
 	- committees
-
-
-
 	'''
 	metadata = db.metadata.find_one({'_id': abbr})
 	report = db.reports.find_one({'_id': abbr})
@@ -65,10 +62,6 @@ def state(request, abbr):
 
 	chambers['lower']['name'] = metadata['lower_chamber_name']
 	chambers['upper']['name'] = metadata['upper_chamber_name']
-
-
-	import pdb
-	pdb.set_trace()
 
 	return locals()
 
