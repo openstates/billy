@@ -243,6 +243,9 @@ def merge_legislators(leg1, leg2):
     if leg1['_id'] > leg2['_id']:
         leg1, leg2 = leg2, leg1
 
+    leg1 = leg1.copy()
+    leg2 = leg2.copy()
+
     roles     = 'roles'
     old_roles = 'old_roles'
 
