@@ -2,7 +2,7 @@ import os
 
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
-MONGO_DATABASE = 'billy'
+MONGO_DATABASE = 'fiftystates'
 
 API_BASE_URL = 'http://openstates.org/api/v1/'
 

@@ -50,3 +50,6 @@ def test_role_migration_two():
 
 def test_vanishing_photo():
     _test_logic( "vanishing_photo_url" )
+
+def test_order():
+    _test_logic( "test_legi_order" )
