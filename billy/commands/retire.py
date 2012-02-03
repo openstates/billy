@@ -2,6 +2,8 @@ from billy import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
 
+import datetime
+
 class Retire(BaseCommand):
     name = 'retire'
     help = '''retire a legislator with a given end_date'''
