@@ -436,8 +436,26 @@ def mom_merge(request):
     leg1 = request.GET[leg1]
     leg2 = request.GET[leg2]
 
-    leg1  = db.legislators.find_one({'_id' : leg1})
-    leg2  = db.legislators.find_one({'_id' : leg2})
+    leg1_db  = db.legislators.find_one({'_id' : leg1})
+    leg2_db  = db.legislators.find_one({'_id' : leg2})
+
+    if leg1_db == None or leg2_db == None:
+        nonNull = leg1_db if leg1_db != None        else leg2_db
+        if nonNull != None:
+            nonID   = leg1    if nonNull['_id'] == leg1 else leg2
+        else:
+            nonID   = None
+
+        return render(request, 'billy/mom_error.html', {
+            "leg1"    : leg1,
+            "leg2"    : leg2,
+            "leg1_db" : leg1_db,
+            "leg2_db" : leg2_db,
+            "same"    : nonNull,
+            "sameid"  : nonID
+        })
+
+    leg1, leg2 = leg1_db, leg2_db
 
     merge, toRemove = merge_legislators( leg1, leg2 )
     mv    = {}
