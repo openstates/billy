@@ -1,0 +1,55 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <div class = 'container' >
+        <div class="hero-unit">
+            <h1>Oh dear! I've done goofed!</h1>
+            <p>
+                Something's gone wrong! Sorry about this, but I think you're
+                giving me bum data (as mom always says: garbage in, garbage out!)
+                Chances are one of the Legislators you've given me don't exist
+                anymore.
+            </p>
+        </div>
+        <div class = 'merge-error' >
+            <p>
+                <h1>Auto-smarts</h1>
+
+                {% if same != None %}
+                    It looks like only {{ sameid }} exists. It could be that
+                    this merge was already done. {# XXX: FIXME - _leg_ids #}
+                {% else %}
+                    Neither {{ leg1 }} nor {{ leg2 }} exist.
+                {% endif %}
+
+                <h2>Detailed Report</h2>
+
+                {% if leg1_db == None %}
+                    <b>Warning:</b>
+                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    is removed from the Database or merged with another
+                    Legislator.
+                {% else %}
+                    I've found
+                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    in the DB, and is a root legislator currently. This means I
+                    am able to merge this Legislator with another.
+                {% endif %}
+                <br />
+                {% if leg2_db == None %}
+                    <b>Warning:</b>
+                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    is removed from the Database or merged with another
+                    Legislator.
+                {% else %}
+                    I've found
+                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    in the DB, and is a root legislator currently. This means I
+                    am able to merge this Legislator with another.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+{% endblock %}

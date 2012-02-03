@@ -3,6 +3,7 @@ import random
 import pdb
 import functools
 import json
+import types
 import urllib
 import decimal
 from collections import defaultdict
@@ -484,7 +485,6 @@ def mom_merge(request):
     leg1, leg2 = leg1_db, leg2_db
     merge, toRemove = merge_legislators( leg1, leg2 )
     mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
-
 
     return render(request, 'billy/mom_merge.html', {
        'leg1'   : leg1,
