@@ -455,6 +455,14 @@ def _mom_attr_diff( merge, leg1, leg2 ):
             mv[key] = "N"
     return ( mv, mv_info )
 
+def _mom_mangle( attr ):
+    ret = ""
+    if isinstance( attr, types.ListType ):
+        # do display list mangling.
+        for el in attr:
+            ret += str(el)
+    return ret
+
 def mom_merge(request):
     leg1 = "leg1"
     leg2 = "leg2"
@@ -467,7 +475,7 @@ def mom_merge(request):
 
     if leg1_db == None or leg2_db == None: # XXX: Break this out into it's own
         #                                         error page.
-        nonNull = leg1_db if leg1_db != None        else leg2_db
+        nonNull = leg1_db if leg1_db != None else leg2_db
         if nonNull != None:
             nonID   = leg1    if nonNull['_id'] == leg1 else leg2
         else:
@@ -485,6 +493,9 @@ def mom_merge(request):
     leg1, leg2 = leg1_db, leg2_db
     merge, toRemove = merge_legislators( leg1, leg2 )
     mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
+
+    for attr in merge:
+        merge[attr] = _mom_mangle( merge[attr] )
 
     return render(request, 'billy/mom_merge.html', {
        'leg1'   : leg1,

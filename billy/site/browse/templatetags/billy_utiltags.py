@@ -21,4 +21,11 @@ def decimal_format(value, TWOPLACES=Decimal(100) ** -2 ):
 def key(d, key_name):
     return d[key_name]
 
+@register.filter
+def private(d, key_name):
+    try:
+        return d[( "_" + key_name )]
+    except KeyError:
+        return None
+
 quote_plus=register.filter(urllib.quote_plus)

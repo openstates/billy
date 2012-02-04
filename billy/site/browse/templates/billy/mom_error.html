@@ -15,13 +15,27 @@
         </div>
         <div class = 'merge-error' >
             <p>
-                <h1>Auto-smarts</h1>
+                <h1>Auto-smarts (common error autodetection)</h1>
 
                 {% if same != None %}
-                    It looks like only {{ sameid }} exists. It could be that
-                    this merge was already done. {# XXX: FIXME - _leg_ids #}
+                    {% if sameid == leg1 and leg2 in same|private:'all_ids' %}
+                        Legislator 2 has already been merged into Legislator 1.
+                        No additional merge needed.
+                    {% else %}
+                        {% if sameid == leg2 and leg1 in same|private:'all_ids' %}
+                            Legislator 1 has already been merged into Legislator 2.
+                            No additional merge needed.
+                        {% else %}
+                            Neither Legislator 1 nor Legislator 2 have been
+                            merged into eachother. If one of the Legislators
+                            show up as missing or merged, they might (check
+                            the hrefs) be already merged or missing.
+                        {% endif %}
+                    {% endif %}
                 {% else %}
-                    Neither {{ leg1 }} nor {{ leg2 }} exist.
+                    Neither {{ leg1 }} nor {{ leg2 }} exist as root
+                    Legislators - they might be already merged, missing, or some
+                    crazy combo of both.
                 {% endif %}
 
                 <h2>Detailed Report</h2>
@@ -30,7 +44,7 @@
                     <b>Warning:</b>
                     <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
                     is removed from the Database or merged with another
-                    Legislator.
+                    Legislator. Check my link for more info.
                 {% else %}
                     I've found
                     <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
@@ -42,7 +56,7 @@
                     <b>Warning:</b>
                     <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
                     is removed from the Database or merged with another
-                    Legislator.
+                    Legislator. Check my link for more info.
                 {% else %}
                     I've found
                     <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
