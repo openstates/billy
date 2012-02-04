@@ -54,8 +54,13 @@ $(document).ready(function() {
             </button>
             </p>
         </div>
-        <p>The actions here will <b>remove</b> legislator
-        <a href = '{% url legislator remove %}' >{{ remove }}</a></p>
+        <ul>
+            <li>The actions here will <b>remove</b> legislator
+            <a href = '{% url legislator remove %}' >{{ remove }}</a></li>
+            <li>The actions here will <b>add</b> legislator
+            <a href = '{% url legislator merge.leg_id %}' >{{ merge.leg_id }}</a>
+            </li>
+        </ul>
         <div class = 'merge-plan' >
             <table>
                 <tr>
