@@ -456,12 +456,16 @@ def _mom_attr_diff( merge, leg1, leg2 ):
     return ( mv, mv_info )
 
 def _mom_mangle( attr ):
-    ret = ""
+    jsonify = json.dumps
+    args    = {
+        "sort_keys" : True,
+        "indent"    : 4
+    }
     if isinstance( attr, types.ListType ):
-        # do display list mangling.
-        for el in attr:
-            ret += str(el)
-    return ret
+        return json.dumps( attr, **args )
+    if isinstance( attr, types.DictType ):
+        return json.dumps( attr, **args )
+    return attr
 
 def mom_merge(request):
     leg1 = "leg1"
