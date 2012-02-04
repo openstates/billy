@@ -7,6 +7,10 @@
 .merge-from-1 { background-color: #f2c58b; }
 .merge-from-2 { background-color: #d1acc0; }
 .merge-from-N { background-color: #abdb3b; }
+.dim          {
+    /* to cut down ADD */
+    opacity: .6;
+}
     </style>
     <script type = 'text/javascript' src = 'http://code.jquery.com/jquery-1.7.1.min.js' ></script>
     <script type = 'text/javascript' >
@@ -72,7 +76,34 @@ $(document).ready(function() {
                     <tr class = 'root-merge-{{ val }}' >
                         <td>{{ key }}</td>
                         <td class = 'merge-from-{{ val }}'>{{ merge_view_info|key:val }}</td>
-                        <td class = 'merge-from-{{ val }}'><pre>{{ merge|key:key }}</pre></td>
+                        <td class = 'merge-from-{{ val }}'>
+                            <table>
+                                <tr>
+                                    <td><b>New Value</b></td>
+                                    <td><pre>{{ merge|key:key }}</pre></td>
+                                </tr>
+                                <tr class = 'dim' >
+                                    <td>
+                                    {% if leg1.leg_id == remove %}
+                                        "Duplicated" Legislator
+                                    {% else %}
+                                        "Original" Legislator
+                                    {% endif %}
+                                    </td>
+                                    <td><pre>{{ leg1|key:key }}</pre></td>
+                                </tr>
+                                <tr class = 'dim' >
+                                    <td>
+                                    {% if leg2.leg_id == remove %}
+                                        "Duplicated" Legislator
+                                    {% else %}
+                                        "Original" Legislator
+                                    {% endif %}
+                                    </td>
+                                    <td><pre>{{ leg2|key:key }}</pre></td>
+                                </tr>
+                            </table>
+                        </td>
                     </tr>
                 {% endfor %}
             <table>

@@ -44,7 +44,9 @@
                     {% for key, val in merged.items %}
                         <tr class = 'root-merge-fin' >
                             <td><b>{{ key }}</b></td>
-                            <td class = 'merge-from-{{ val }}'><pre>{{ merged|key:key }}</pre></td>
+                            <td class = 'merge-from-{{ val }}'>
+                                <pre>{{ merged|key:key }}</pre>
+                            </td>
                         </tr>
                     {% endfor %}
                 <table>

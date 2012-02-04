@@ -503,8 +503,9 @@ def mom_merge(request):
     merge, toRemove = merge_legislators( leg1, leg2 )
     mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
 
-    for attr in merge:
-        merge[attr] = _mom_mangle( merge[attr] )
+    for foo in [ leg1, leg2, merge ]:
+        for attr in foo:
+            foo[attr] = _mom_mangle( foo[attr] )
 
     return render(request, 'billy/mom_merge.html', {
        'leg1'   : leg1,
