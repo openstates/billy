@@ -418,11 +418,11 @@ def mom_commit(request):
     merged, remove = merge_legislators( leg1, leg2 )
     actions.append( "Merged Legislators as '%s'" % merged['leg_id'] )
 
-    #db.legislators.remove({ '_id' : remove }, safe=True)
+    db.legislators.remove({ '_id' : remove }, safe=True)
     actions.append( "Deleted Legislator (which had the ID of %s)" %
         remove )
 
-    #db.legislators.save( merged, safe=True )
+    db.legislators.save( merged, safe=True )
     actions.append( "Saved Legislator %s with merged data" % merged['leg_id'] )
 
     for attr in merged:
