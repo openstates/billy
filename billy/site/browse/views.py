@@ -415,6 +415,8 @@ def mom_commit(request):
     leg2 = db.legislators.find_one({'_id' : leg2 })
     actions.append( "Loaded Legislator '%s as `leg2''" % leg2['leg_id'] )
 
+    # XXX: Re-direct on None
+
     merged, remove = merge_legislators( leg1, leg2 )
     actions.append( "Merged Legislators as '%s'" % merged['leg_id'] )
 
