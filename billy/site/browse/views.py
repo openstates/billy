@@ -3,6 +3,7 @@ import random
 import pdb
 import functools
 import json
+import types
 import urllib
 import decimal
 from collections import defaultdict
@@ -360,7 +361,7 @@ def legislators(request, abbr):
     lower_legs = sorted(lower_legs, key=keyfunc)
     inactive_legs = sorted(inactive_legs, key=lambda x: x['last_name'])
 
-    return response(request, 'billy/legislators.html', {
+    return render(request, 'billy/legislators.html', {
         'upper_legs': upper_legs,
         'lower_legs': lower_legs,
         'inactive_legs': inactive_legs,
@@ -414,6 +415,8 @@ def mom_commit(request):
     leg2 = db.legislators.find_one({'_id' : leg2 })
     actions.append( "Loaded Legislator '%s as `leg2''" % leg2['leg_id'] )
 
+    # XXX: Re-direct on None
+
     merged, remove = merge_legislators( leg1, leg2 )
     actions.append( "Merged Legislators as '%s'" % merged['leg_id'] )
 
@@ -424,23 +427,15 @@ def mom_commit(request):
     db.legislators.save( merged, safe=True )
     actions.append( "Saved Legislator %s with merged data" % merged['leg_id'] )
 
+    for attr in merged:
+        merged[attr] = _mom_mangle( merged[attr] )
+
     return render( request, 'billy/mom_commit.html', {
             "merged"  : merged,
             "actions" : actions
         })
 
-def mom_merge(request):
-    leg1 = "leg1"
-    leg2 = "leg2"
-
-    leg1 = request.GET[leg1]
-    leg2 = request.GET[leg2]
-
-    leg1  = db.legislators.find_one({'_id' : leg1})
-    leg2  = db.legislators.find_one({'_id' : leg2})
-
-    merge, toRemove = merge_legislators( leg1, leg2 )
-    mv    = {}
+def _mom_attr_diff( merge, leg1, leg2 ):
     mv_info = {
         "1" : "Root Legislator",
         "2" : "Duplicate Legislator",
@@ -448,6 +443,7 @@ def mom_merge(request):
         "N" : "New Information"
     }
 
+    mv = {}
     for key in merge:
         if key in leg1 and key in leg2:
             if leg1[key] == leg2[key]:
@@ -462,10 +458,60 @@ def mom_merge(request):
             mv[key] = "2"
         else:
             mv[key] = "N"
+    return ( mv, mv_info )
+
+def _mom_mangle( attr ):
+    jsonify = json.dumps
+    args    = {
+        "sort_keys" : True,
+        "indent"    : 4
+    }
+    if isinstance( attr, types.ListType ):
+        return json.dumps( attr, **args )
+    if isinstance( attr, types.DictType ):
+        return json.dumps( attr, **args )
+    return attr
+
+def mom_merge(request):
+    leg1 = "leg1"
+    leg2 = "leg2"
+
+    leg1 = request.GET[leg1]
+    leg2 = request.GET[leg2]
+
+    leg1_db  = db.legislators.find_one({'_id' : leg1})
+    leg2_db  = db.legislators.find_one({'_id' : leg2})
+
+    if leg1_db == None or leg2_db == None: # XXX: Break this out into it's own
+        #                                         error page.
+        nonNull = leg1_db if leg1_db != None else leg2_db
+        if nonNull != None:
+            nonID   = leg1    if nonNull['_id'] == leg1 else leg2
+        else:
+            nonID   = None
+
+        return render(request, 'billy/mom_error.html', {
+            "leg1"    : leg1,
+            "leg2"    : leg2,
+            "leg1_db" : leg1_db,
+            "leg2_db" : leg2_db,
+            "same"    : nonNull,
+            "sameid"  : nonID
+        })
+
+    leg1, leg2 = leg1_db, leg2_db
+    merge, toRemove = merge_legislators( leg1, leg2 )
+    mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
+
+    for foo in [ leg1, leg2, merge ]:
+        for attr in foo:
+            foo[attr] = _mom_mangle( foo[attr] )
 
     return render(request, 'billy/mom_merge.html', {
-       'leg1'  : leg1, 'leg2' : leg2,
-       'merge' : merge, 'merge_view' : mv,
-       'remove' : toRemove,
+       'leg1'   : leg1,
+       'leg2'   : leg2,
+       'merge'  : merge,
+       'merge_view'      : mv,
+       'remove'          : toRemove,
        'merge_view_info' : mv_info })
 

@@ -1,0 +1,69 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+    <div class = 'container' >
+        <div class="hero-unit">
+            <h1>Oh dear! I've done goofed!</h1>
+            <p>
+                Something's gone wrong! Sorry about this, but I think you're
+                giving me bum data (as mom always says: garbage in, garbage out!)
+                Chances are one of the Legislators you've given me don't exist
+                anymore.
+            </p>
+        </div>
+        <div class = 'merge-error' >
+            <p>
+                <h1>Auto-smarts (common error autodetection)</h1>
+
+                {% if same != None %}
+                    {% if sameid == leg1 and leg2 in same|private:'all_ids' %}
+                        Legislator 2 has already been merged into Legislator 1.
+                        No additional merge needed.
+                    {% else %}
+                        {% if sameid == leg2 and leg1 in same|private:'all_ids' %}
+                            Legislator 1 has already been merged into Legislator 2.
+                            No additional merge needed.
+                        {% else %}
+                            Neither Legislator 1 nor Legislator 2 have been
+                            merged into eachother. If one of the Legislators
+                            show up as missing or merged, they might (check
+                            the hrefs) be already merged or missing.
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    Neither {{ leg1 }} nor {{ leg2 }} exist as root
+                    Legislators - they might be already merged, missing, or some
+                    crazy combo of both.
+                {% endif %}
+
+                <h2>Detailed Report</h2>
+
+                {% if leg1_db == None %}
+                    <b>Warning:</b>
+                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    is removed from the Database or merged with another
+                    Legislator. Check my link for more info.
+                {% else %}
+                    I've found
+                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    in the DB, and is a root legislator currently. This means I
+                    am able to merge this Legislator with another.
+                {% endif %}
+                <br />
+                {% if leg2_db == None %}
+                    <b>Warning:</b>
+                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    is removed from the Database or merged with another
+                    Legislator. Check my link for more info.
+                {% else %}
+                    I've found
+                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    in the DB, and is a root legislator currently. This means I
+                    am able to merge this Legislator with another.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+{% endblock %}
