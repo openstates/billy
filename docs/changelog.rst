@@ -5,7 +5,9 @@ scrapelib changelog
 -----
     * bugfix for boundary API method
     * add boundary_id to legislator responses
-    * fix for dotted keys in reports
+    * bugfix for dotted keys in reports
+    * bugfix for billy-util retire
+    * MOM legislator merge tool from Paul
 
 0.9.4
 -----
