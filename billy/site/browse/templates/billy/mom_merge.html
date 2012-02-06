@@ -74,7 +74,7 @@ $(document).ready(function() {
                 </tr>
                 {% for key, val in merge_view.items %}
                     <tr class = 'root-merge-{{ val }}' >
-                        <td>{{ key }}</td>
+                        <td><b>{{ key }}</b></td>
                         <td class = 'merge-from-{{ val }}'>{{ merge_view_info|key:val }}</td>
                         <td class = 'merge-from-{{ val }}'>
                             <table>
