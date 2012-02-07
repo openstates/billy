@@ -15,7 +15,7 @@ import pymongo
 
 from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.template.loader import render_to_string
 
 from billy import db
@@ -139,7 +139,7 @@ def bills(request, abbr):
     render = functools.partial(render_to_string, 'billy/bills_table.html')
     tables = map(render, tables)
 
-    return render(request, "billy/bills.html",
+    return render_to_response( "billy/bills.html",
                               dict(tables=tables, metadata=meta,
                                    sessions=sessions))
 
