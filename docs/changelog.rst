@@ -3,11 +3,13 @@ scrapelib changelog
 
 0.9.5
 -----
-    * bugfix for boundary API method
     * add boundary_id to legislator responses
+    * MOM legislator merge tool from Paul
+    * _partial_vote_bill_id flag added for Rhode Island
+    * bugfix for boundary API method
     * bugfix for dotted keys in reports
     * bugfix for billy-util retire
-    * MOM legislator merge tool from Paul
+
 
 0.9.4
 -----
