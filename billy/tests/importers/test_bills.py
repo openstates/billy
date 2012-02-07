@@ -147,6 +147,8 @@ def test_fix_bill_id():
         assert bills.fix_bill_id(bill_id) == expect
 
     assert bills.fix_bill_id('PR19-0041') == 'PR 19-0041'
+    assert bills.fix_bill_id(' 999') == '999'
+    assert bills.fix_bill_id('999') == '999'
 
 
 
