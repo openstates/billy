@@ -100,7 +100,6 @@ def import_bill(data, votes, categorizer):
     # determine the full bill_id, if this key is in the metadata
     # we just use the numeric portion, not ideal as it won't work
     # in states where HB/SBs overlap, but in RI they never do
-    print metadata(abbr)
     if metadata(abbr).get('_partial_vote_bill_id'):
         # pull off numeric portion of bill_id
         numeric_bill_id = data['bill_id'].split()[1]
