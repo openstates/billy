@@ -324,7 +324,10 @@ def random_bill(request, abbr):
     count = db.bills.find(spec).count()
     bill = db.bills.find(spec)[random.randint(0, count - 1)]
 
-    return render(request, 'billy/bill.html', {'bill': bill})
+    return render(request, 'billy/bill.html', {
+        'bill'   : bill,
+        'random' : True
+    })
 
 
 def bill(request, abbr, session, id):

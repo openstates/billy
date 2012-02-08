@@ -5,6 +5,12 @@
 {{ bill.state|upper }} {{ bill.bill_id }}
 {% endblock %}
 
+{% block menu %}
+    {% if random %}
+        {% include "billy/random_toolbar.html" %}
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="pull-right">
 <a href="/browse/{{bill.state}}/{{bill.session}}/{{bill.bill_id}}/json">json dump</a>
