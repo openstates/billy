@@ -1,11 +1,13 @@
+import pdb
 from functools import wraps
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render, redirect
 from django.template import RequestContext
 
-from billy import db
+from billy.models import *
 
 from viewdata import overview
+from forms import StateSelectForm
 
 
 def simplify(f):
@@ -16,9 +18,8 @@ def simplify(f):
 	@wraps(f)
 	def wrapper(request, *args, **kwargs):
 		dictionary = f(request, *args, **kwargs)
-		template_name = f.__name__ + '.html'
-		context_instance = RequestContext(request)
-		return render_to_response(template_name, dictionary, context_instance)
+		template = f.__name__ + '.html'
+		return render(request, template, dictionary)
 
 	return wrapper
 
@@ -44,15 +45,15 @@ def state(request, abbr):
 	- bills
 	- current session
 	- committees
-	'''
-	metadata = db.metadata.find_one({'_id': abbr})
+	'''	
+	metadata = Metadata.get(abbr)
 	report = db.reports.find_one({'_id': abbr})
 
 	# Put this in a state wrapper class...
-	session_details = metadata['session_details']
-	sessions = [(k, session_details[k]['display_name']) 
-	            for k in report['bills']['sessions']]
+	
+	sessions = report.session_link_data
 
+	            
 	#------------------------------------------------------------------------
 	# Legislators
 	chambers = {
@@ -65,3 +66,31 @@ def state(request, abbr):
 
 	return locals()
 
+
+def state_selection(request):
+	'''
+	Handle the "state" dropdown form at the top of the page.
+	'''
+	form = StateSelectForm(request.POST)
+	abbr = form.data['abbr']
+	return redirect('/www/%s/' % abbr)
+
+
+
+
+@simplify
+def legislators(request, abbr):
+	state = Metadata.get(abbr)
+	return locals()
+
+
+@simplify
+def committees(request, abbr):
+	state = Metadata.get(abbr)
+	return locals()
+
+
+@simplify
+def bills(request, abbr):
+	state = Metadata.get(abbr)
+	return locals()

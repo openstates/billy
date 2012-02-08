@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load sitebase %}
+
+{% block title %}{{state.name}} Legislators{% endblock %}
+
+{% block sidebar %}{% states_sidebar abbr %}{% endblock %}
+
+{% block content %}
+<h1>{{state.legislature_name}} Legislators</h1>
+
+
+
+{% endblock %}

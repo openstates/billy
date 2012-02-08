@@ -1,226 +1,109 @@
 import pdb
-from functools import partial 
 
-from django.conf import settings
-from billy.models.customfields import *
+from pymongo import Connection
+from pymongo.son_manipulator import SONManipulator
 
+from billy.conf import settings
 
-from mongoengine import *
-
-connect(settings.MONGO_DATABASE, 
-        host=settings.MONGO_HOST, port=settings.MONGO_PORT)
-
-def embedded_document_list(class_or_name):
-    return ListField(EmbeddedDocumentField(class_or_name))
-
-class Source(Document):
-    url = StringField()
-
-    def __unicode__(self):
-        return self.url
-
-
-class Term(EmbeddedDocument):
-
-    meta = {
-        'allow_inheritance': False,
-        }
-
-    name = StringField()
-    end_year = IntField()
-    start_year = IntField()
-
-
-class SessionDetail(EmbeddedDocument):
-
-    meta = {
-        'allow_inheritance': False,
-        }
-
-    display_name = StringField()
-    _scraped_name = StringField()
-
-
-class Sponsor(Document):
-    type = StringField()
-    name = StringField()
-    chamber = StringField()
-    leg_id = StringField()
-    
-    @property
-    def legislator(self):
-        return Legislator.objects.get(_id=self.leg_id)
-
-
-class State(Document):
-
-    meta = {
-        'collection': 'metadata',
-        'allow_inheritance': False,
-        }
-
-    _id   = StringField()
-    _type = StringField()
-
-    name  = StringField()
-    level = StringField()
-    abbreviation  = StringField()
-    latest_update = DateTimeField()
-    feature_flags = ListField()
-    legislature_name = StringField()
-    lower_chamber_name = StringField()
-    upper_chamber_term = IntField()
-    upper_chamber_name = StringField()
-    lower_chamber_term = IntField()
-    lower_chamber_title = StringField()
-    upper_chamber_title = StringField()
-    terms = embedded_document_list('Term')
-    session_details = embedded_document_list('SessionDetail')
-
-    _ignored_scraped_sessions = ListField()
-
-
-class Action(EmbeddedDocument):
-    date = DateTimeField()
-    type = ListField()
-    actor = StringField()
-    action = StringField()
-
-
-class BillVersion(EmbeddedDocument):
-    url = StringField()
-    name = StringField()
-
-
-class BillDocument(Document):
-    url = StringField()
-    name = StringField()
-
-
-class Bill(Document):
-
-    meta = {
-        'collection': 'bills',
-        'allow_inheritance': False,
-        }
-
-    _id = StringField()
-    _type = StringField()
-    _term = StringField()
-    _keywords = ListField(StringField())
-    _all_ids = ListField(StringField())
-
-    type = ListField(StringField())
-    title = StringField()
-    
-    level = StringField()
-    country = StringField()
-    chamber = StringField()
-    bill_id = StringField()
-    updated_at = DateTimeField()
-    created_at = DateTimeField()
-    alternate_titles = ListField()
-
-    state = CrossReferenceField(State)
-    votes = embedded_document_list('Vote')
-    actions = embedded_document_list('Action')
-    sources = embedded_document_list('Source')
-    sponsors = embedded_document_list('Sponsor')
-    versions = embedded_document_list('BillVersion')
-    documents = embedded_document_list('BillDocument')
-
-    session_id = StringField(db_field='session')
-    @property
-    def session(self):
-        session = self.state.session_details[self.session_id]
-        session.id = self.session_id
-        return session
+import billy.utils
 
 
 
-class Legislator(Document):
-
-    meta = {
-    'collection': 'legislators',
-    'allow_inheritance': False,
-    }
+db = Connection(host=settings.MONGO_HOST, port=settings.MONGO_PORT)
+db = getattr(db, settings.MONGO_DATABASE)
 
 
-    url = StringField()
-    _id = StringField()
-    state = StringField()
-    party = StringField()
-    _type = StringField()
-    roles = ListField()
-    level = StringField()
-    leg_id = StringField()
-    active = BooleanField()
-    country = StringField()
-    chamber = StringField()
-    district = StringField()
-    _all_ids = ListField()
-    suffixes = StringField()
-    last_name = StringField()
-    full_name = StringField()
-    photo_url = StringField()
-    updated_at = DateTimeField()
-    first_name = StringField()
-    created_at = DateTimeField()
-    middle_name = StringField()
-    _scraped_name = StringField()
-    sources = embedded_document_list('Source')
+# ---------------------------------------------------------------------------
+# 
+class ReadOnlyAttribute(object):
 
-class Committee(Document):
-
-    meta = {
-    'collection': 'committees',
-    'allow_inheritance': False,
-    }
-
-    _id = StringField()
-    _type = StringField()
-    level = StringField()
-    country = StringField()
-    members = ListField()
-    chamber = StringField()
-    _all_ids = ListField()
-    committee = StringField()
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
-    state = CrossReferenceField('State')
-    sources = embedded_document_list('Source')
+	def __set__(self, instance, value):
+		msg = self.__class__.__name__ + " is instance is read-only."
+		raise Exception(msg)
 
 
-class Vote(Document):
 
-    date = DateTimeField()
-    _type = StringField()
-    vote_id = StringField()
 
-    type = StringField()
-    motion = StringField()
-    passed = BooleanField()
-    chamber = StringField()
+# ---------------------------------------------------------------------------
+# 
+class SessionDetails(ReadOnlyAttribute, dict):
 
-    no_count    = IntField()
-    yes_count   = IntField()
-    other_count = IntField()
+	def __get__(self, instance, collection=db.metadata):
+		return instance.metadata['session_details']
 
-    no_votes    = embedded_document_list('Voter')
-    yes_votes   = embedded_document_list('Voter')
-    other_votes = embedded_document_list('Voter')
 
-    sources = embedded_document_list('Source')
 
-class Voter(Document):
-    name = StringField()
-    legislator = CrossReferenceField('Legislator')
 
-    def __unicode__(self):
-        return self.name
+
+
+# ---------------------------------------------------------------------------
+#
+class Metadata(dict):
+
+	@classmethod
+	def get(cls, abbr):
+		return cls(billy.utils.metadata(abbr))
+
+	@property
+	def abbr(self):
+		return self['_id']
+
+	def legislators(self, spec=None, **kw):
+		_spec = {'state': self['_id']}
+		if spec:
+			_spec.update(spec)
+		return db.legislators.find(_spec, **kw)
+
+	
+	
+
+class Bill(dict):
+
+	@property
+	def metadata(self, get_metadata=billy.utils.metadata):
+		return get_metadata(self['state'])
+
+	session_details = SessionDetails()
+
+
+class Report(dict):
+
+	@property
+	def metadata(self, get_metadata=billy.utils.metadata):
+		return get_metadata(self['_id'])
+
+	@property
+	def session_link_data(self):
+		'''
+		An iterable of tuples like ('821', '82nd Legislature, 1st Called Session')
+		'''
+		session_details = self.metadata['session_details']
+		for s in self['bills']['sessions']:
+			yield (s, session_details[s]['display_name'])
+	
+
+
+# ---------------------------------------------------------------------------
+# 
+class_dict = {'bills': Bill,
+			  'reports': Report,
+			  'metadata': Metadata}
+
+class Transformer(SONManipulator):
+    def transform_outgoing(self, son, collection, class_dict=class_dict):
+    	name = collection.name 
+    	if name in class_dict:
+        	return class_dict[name](son)
+        else:
+        	return son
+
+db.add_son_manipulator(Transformer())
+
 
 
 
 if __name__ == "__main__":
-	import pdb
-	pdb.set_trace()
+    bb = db.bills.find_one()
+    print bb.session_details
+    import pdb
+    pdb.set_trace()

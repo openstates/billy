@@ -39,14 +39,21 @@
       </div>
     </div>
 
+    
+
     <div class="container-fluid">
-      <div class="sidebar">
+
+      <div class="sidebar" style="max-width: 15em;">
         <div class="well">
-          {% states_sidebar %}
+          {% block sidebar %}{% endblock %}
         </div>
       </div>
 
       <div class="content">
+
+      <div class="pull-right">{% states_selection %}</div></div>
+      
+      <div class="content" style="clear: both;">
     {% block content %}
     {% endblock %}
     </div>
