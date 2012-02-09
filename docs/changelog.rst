@@ -6,9 +6,12 @@ scrapelib changelog
     * add boundary_id to legislator responses
     * MOM legislator merge tool from Paul
     * _partial_vote_bill_id flag added for Rhode Island
+    * improved browse templates & random_bill
+    * --cache_dir argument added
     * bugfix for boundary API method
     * bugfix for dotted keys in reports
     * bugfix for billy-util retire
+    * bugfix for unicode error in loadlegislators
 
 
 0.9.4
