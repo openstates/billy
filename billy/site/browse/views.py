@@ -291,24 +291,29 @@ def random_bill(request, abbr):
         "no_actions"  : { 'actions'  : [] }
     }
 
-    default = False
+    default = True
+    spec = {
+        'level' : level,
+        level   : abbr.lower(),
+        'session': latest_session
+    }
+
     if modi_flag == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr})['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
-    else:
-        default = True
-        spec = { 'level': level, level: abbr.lower(), 'session': latest_session }
+        default = False
 
     if modi_flag in basic_specs:
         default = False
-        spec = basic_specs[modi_flag]
+        spec.update( basic_specs[modi_flag] )
 
     count = db.bills.find(spec).count()
     bill = db.bills.find(spec)[random.randint(0, count - 1)]
 
     context = {
         'bill'   : bill,
-        'random' : True
+        'random' : True,
+        'state' : abbr.lower()
     }
 
     if default and modi_flag != "":
