@@ -334,6 +334,7 @@ def random_bill(request, abbr):
         spec = { 'level': level, level: abbr.lower(), 'session': latest_session }
 
     if modi_flag in basic_specs:
+        default = False
         spec = basic_specs[modi_flag]
 
     count = db.bills.find(spec).count()
