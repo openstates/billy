@@ -61,7 +61,7 @@ def browse_index(request, template='billy/index.html'):
 
     rows.sort(key=lambda x: x['name'])
 
-    return render(request, template, {'rows': rows})
+    return render(request, template, {'rows': rows, 'nocontainer' : True})
 
 
 def overview(request, abbr):

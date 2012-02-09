@@ -27,8 +27,12 @@
         </div>
         </div>
     </div>
-    <div class = 'container' >
+    {% if not nocontainer %}
+        <div class = 'container' >
+    {% endif %}
         {% block content %}{% endblock %}
-    </div>
+    {% if not nocontainer %}
+        </div>
+    {% endif %}
   </body>
 </html>
