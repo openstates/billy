@@ -25,12 +25,20 @@ billy-scrape = billy.bin.update:scrape_compat_main
 billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
-    install_requires=["argparse==1.1",
-                      "jellyfish>=0.1.2",
-                      "lxml>=2.2",
-                      "name_tools>=0.1.2",
-                      "pymongo>=1.8.1",
-                      "scrapelib>=0.5.4",
-                      "validictory>=0.7.1",
-                     ]
+    install_requires=[
+        "Django>=1.3",
+        "argparse==1.1",
+        "boto",
+        "django-piston==0.2.2",
+        "icalendar==2.1",
+        "jellyfish>=0.1.2",
+        "lxml>=2.2",
+        "name_tools>=0.1.2",
+        "nose",
+        "pymongo>=2.0.0",
+        "python-votesmart",
+        "scrapelib>=0.5.4",
+        "unicodecsv",
+        "validictory>=0.7.1",
+    ]
 )
