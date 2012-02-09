@@ -313,29 +313,47 @@ def random_bill(request, abbr):
     level = meta['level']
     latest_session = meta['terms'][-1]['sessions'][-1]
 
+    random_flag = "limit"
+
+    modi_flag = ""
+    if random_flag in request.GET:
+        modi_flag = request.GET[random_flag]
+
     basic_specs = {
-        "no_version" : { 'versions' : [] },
-        "no_sponsor" : { 'sponsors' : [] },
-        "no_actions" : { 'actions'  : [] }
+        "no_versions" : { 'versions' : [] },
+        "no_sponsors" : { 'sponsors' : [] },
+        "no_actions"  : { 'actions'  : [] }
     }
 
-    if 'bad_vote_counts' in request.GET:
+    default = False
+    if modi_flag == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr})['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
     else:
+        default = True
         spec = { 'level': level, level: abbr.lower(), 'session': latest_session }
 
-    for el in basic_specs:
-        if el in request.GET:
-            spec = basic_specs[el]
+    if modi_flag in basic_specs:
+        spec = basic_specs[modi_flag]
 
     count = db.bills.find(spec).count()
     bill = db.bills.find(spec)[random.randint(0, count - 1)]
 
-    return render(request, 'billy/bill.html', {
+    context = {
         'bill'   : bill,
         'random' : True
-    })
+    }
+
+    if default and modi_flag != "":
+        context["warning"] = \
+"""
+ It looks like you've set a limit flag, but the flag was not processed by
+ billy. Sorry about that. This might be due to a programming error, or a
+ bad guess of the URL flag. Rather then making a big fuss over this, i've just
+ got a list of all random bills. Better luck next time!
+"""
+
+    return render(request, 'billy/bill.html', context)
 
 
 def bill(request, abbr, session, id):

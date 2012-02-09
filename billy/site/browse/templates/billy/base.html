@@ -30,6 +30,11 @@
     {% if not nocontainer %}
         <div class = 'container' >
     {% endif %}
+        {% if warning %}
+            <div class = "alert-message block-message error" >
+                {{ warning }}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     {% if not nocontainer %}
         </div>
