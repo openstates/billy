@@ -1,5 +1,6 @@
 import pdb
 
+from django.db import models
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
 
@@ -38,6 +39,7 @@ class SessionDetails(ReadOnlyAttribute, dict):
 
 # ---------------------------------------------------------------------------
 #
+
 class Metadata(dict):
 
 	@classmethod
@@ -54,7 +56,10 @@ class Metadata(dict):
 			_spec.update(spec)
 		return db.legislators.find(_spec, **kw)
 
-	
+
+class Legislator(dict):
+	pass
+
 	
 
 class Bill(dict):
@@ -87,7 +92,8 @@ class Report(dict):
 # 
 class_dict = {'bills': Bill,
 			  'reports': Report,
-			  'metadata': Metadata}
+			  'metadata': Metadata,
+			  'legislators': Legislator,}
 
 class Transformer(SONManipulator):
     def transform_outgoing(self, son, collection, class_dict=class_dict):

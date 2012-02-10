@@ -1,5 +1,6 @@
 import pdb
 from functools import wraps
+from itertools import repeat
 
 from django.shortcuts import render, redirect
 from django.template import RequestContext
@@ -9,6 +10,9 @@ from billy.models import *
 from viewdata import overview
 from forms import StateSelectForm
 
+from django.core.urlresolvers import reverse
+
+repeat1 = repeat(1)
 
 def simplify(f):
 	'''
@@ -28,31 +32,11 @@ def simplify(f):
 @simplify
 def state(request, abbr):
 	'''
-	2-12-2012
-	Per the wireframes/spec, this view needs:
-
-	for each house
-	- number of legislators
-	- partisan breakdown
-	- etc...
-	current session overview
-	- # active
-	- # passed
-	- etc...
-	related links
-	- session overview
-	- legislators
-	- bills
-	- current session
-	- committees
 	'''	
 	metadata = Metadata.get(abbr)
 	report = db.reports.find_one({'_id': abbr})
 
-	# Put this in a state wrapper class...
-	
 	sessions = report.session_link_data
-
 	            
 	#------------------------------------------------------------------------
 	# Legislators
@@ -73,15 +57,55 @@ def state_selection(request):
 	'''
 	form = StateSelectForm(request.POST)
 	abbr = form.data['abbr']
-	return redirect('/www/%s/' % abbr)
+	return redirect('state', abbr=abbr)
 
 
+
+def legislators(request, abbr):
+	state = Metadata.get(abbr)
+	return redirect('legislators_chamber', abbr, 'upper')
+
+@simplify
+def legislators_chamber(request, abbr, chamber):
+	
+	state = Metadata.get(abbr)
+	chamber_name = state['%s_chamber_name' % chamber]
+
+	# Query params
+	spec = {'chamber': chamber}
+
+	fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party']
+	fields = dict(zip(fields, repeat1))
+
+	sort_key = 'last_name'
+	sort_order = 1
+
+	if request.GET:
+		sort_key = request.GET['key']
+		sort_order = int(request.GET['order'])
+		
+	legislators = state.legislators(spec, fields=fields, sort=[(sort_key, sort_order)])
+
+	# Sort in python if the key was "district"
+	if sort_key == 'district':
+		legislators = sorted(legislators, key=lambda obj: int(obj['district']),
+		                     reverse=(sort_order == -1))
+
+	sort_order = {1: -1, -1: 1}[sort_order]
+
+	return locals()
 
 
 @simplify
-def legislators(request, abbr):
+def legislators_lower(request, abbr):
 	state = Metadata.get(abbr)
+	chamber_name = state['lower_chamber_name']
+	legislators = state.legislators({'chamber': 'lower'})
 	return locals()
+
+@simplify
+def legislator(request, abbr, leg_id):
+	pass
 
 
 @simplify
