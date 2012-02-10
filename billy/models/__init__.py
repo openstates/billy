@@ -39,7 +39,6 @@ class SessionDetails(ReadOnlyAttribute, dict):
 
 # ---------------------------------------------------------------------------
 #
-
 class Metadata(dict):
 
 	@classmethod
@@ -56,11 +55,35 @@ class Metadata(dict):
 			_spec.update(spec)
 		return db.legislators.find(_spec, **kw)
 
+	def committees(self, spec=None, **kw):
+		_spec = {'state': self['_id']}
+		if spec:
+			_spec.update(spec) 
+		return db.committees.find(_spec, **kw)		
+
 
 class Legislator(dict):
 	pass
 
-	
+
+class Committee(dict):
+
+	@property
+	def id(self):
+		return self['_id']
+
+	def members(self):
+		return map(Legislator, self['members'])
+
+	def display_name(self):
+		try:
+			return self['committee']
+		except KeyError:
+			try:
+				return self['subcommittee']
+			except KeyError:
+				raise
+		
 
 class Bill(dict):
 
@@ -93,7 +116,8 @@ class Report(dict):
 class_dict = {'bills': Bill,
 			  'reports': Report,
 			  'metadata': Metadata,
-			  'legislators': Legislator,}
+			  'legislators': Legislator,
+			  'committees': Committee}
 
 class Transformer(SONManipulator):
     def transform_outgoing(self, son, collection, class_dict=class_dict):

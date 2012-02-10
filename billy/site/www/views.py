@@ -60,9 +60,8 @@ def state_selection(request):
 	return redirect('state', abbr=abbr)
 
 
-
+#----------------------------------------------------------------------------
 def legislators(request, abbr):
-	state = Metadata.get(abbr)
 	return redirect('legislators_chamber', abbr, 'upper')
 
 @simplify
@@ -77,7 +76,7 @@ def legislators_chamber(request, abbr, chamber):
 	fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party']
 	fields = dict(zip(fields, repeat1))
 
-	sort_key = 'last_name'
+	sort_key = 'district'
 	sort_order = 1
 
 	if request.GET:
@@ -97,23 +96,45 @@ def legislators_chamber(request, abbr, chamber):
 
 
 @simplify
-def legislators_lower(request, abbr):
-	state = Metadata.get(abbr)
-	chamber_name = state['lower_chamber_name']
-	legislators = state.legislators({'chamber': 'lower'})
-	return locals()
-
-@simplify
 def legislator(request, abbr, leg_id):
 	pass
 
+#----------------------------------------------------------------------------
+def committees(request, abbr):
+	return redirect('committees_chamber', abbr, 'upper')
+
 
 @simplify
-def committees(request, abbr):
+def committees_chamber(request, abbr, chamber):
+	
 	state = Metadata.get(abbr)
+	chamber_name = state['%s_chamber_name' % chamber]
+
+	# Query params
+	spec = {'chamber': chamber}
+
+	fields = ['committee', 'subcommittee', 'members']
+	fields = dict(zip(fields, repeat1))
+
+	sort_key = 'committee'
+	sort_order = 1
+
+	if request.GET:
+		sort_key = request.GET['key']
+		sort_order = int(request.GET['order'])
+		
+	committees = state.committees(spec, fields=fields, sort=[(sort_key, sort_order)])
+
+	sort_order = {1: -1, -1: 1}[sort_order] 
+
 	return locals()
 
 
+@simplify
+def committee(request, abbr, committee_id):
+	pass
+
+#----------------------------------------------------------------------------	
 @simplify
 def bills(request, abbr):
 	state = Metadata.get(abbr)
