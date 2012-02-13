@@ -8,9 +8,13 @@
   <tr>
     <td><a href={% url 'committee' abbr committee.id %}>{{ committee.display_name }}</td>
     <td>
-      {% for legislator in committee.members|dictsort:"name" %}
-        <a href={% url 'legislator' abbr legislator.leg_id %}>{{ legislator.name }}</a>{% if not forloop.last %}; {% endif %}
-      {% endfor %}
+      {% if not committee.members %}
+        [data not yet available]
+      {% else %}
+        {% for legislator in committee.members|dictsort:"name" %}
+          <a href="{% url 'legislator' abbr legislator.leg_id %}">{{ legislator.name }}</a>{% if not forloop.last %}; {% endif %}
+        {% endfor %}
+      {% endif %}
     </td>
   </tr>
   {% endfor %}

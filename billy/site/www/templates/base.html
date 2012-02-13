@@ -1,3 +1,4 @@
+{% load cache %}
 {% load sitebase %}
 <!DOCTYPE html>
 <html lang="en">
@@ -51,11 +52,22 @@
 
       <div class="content">
 
-      <div class="pull-right">{% states_selection %}</div></div>
+      <div class="pull-right">
+        {% cache 86400 states_selection %}{% states_selection %}{% endcache %}
+      </div></div>
       
       <div class="content" style="clear: both;">
     {% block content %}
     {% endblock %}
+    </div>
+
+    <div id="sources">
+    <h3>Sources</h3>
+    <ul>
+    {% for source in sources %}
+      <li>{{ source.url|urlize }}</li>
+    {% endfor %}
+    </ul>
     </div>
     
         <footer>

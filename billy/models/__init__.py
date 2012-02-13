@@ -1,8 +1,8 @@
 import pdb
 
-from django.db import models
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
+from bson.code import Code
 
 from billy.conf import settings
 
@@ -45,6 +45,10 @@ class Metadata(dict):
 	def get(cls, abbr):
 		return cls(billy.utils.metadata(abbr))
 
+	@classmethod
+	def all(cls):
+		return cls()
+
 	@property
 	def abbr(self):
 		return self['_id']
@@ -63,7 +67,48 @@ class Metadata(dict):
 
 
 class Legislator(dict):
-	pass
+	
+	@staticmethod
+	def get(**spec):
+		return db.legislators.find_one(spec)
+
+	def committees(self):
+		'''
+		This simple method doesn't currently account for subcomittee membership.
+		'''
+		committees = db.committees.find({}, {'committee': 1, 'members': 1})
+		leg_id = self['_id']
+		res = []
+		for c in committees:
+			for m in c['members']:
+				if leg_id == m['leg_id']:
+					res.append(c)
+					break
+		return res
+
+	def sponsored_bills(self):
+		
+		_id = self['_id']
+		spec = {'state': self['state']}
+		fields = {'actions': 1, 'title': 1, 'bill_id': 1, 'sponsors': 1}
+		bills = db.bills.find(spec, fields)
+		sponsored_bills = []
+		for bill in bills:
+			for s in bill['sponsors']:
+				if s['leg_id'] == _id:
+					sponsored_bills.append(bill)
+
+		pdb.set_trace()
+		# Sort them in with primary first, them cosponsor.
+		return bills
+
+
+class CommitteeMember(dict):
+
+	def legislator(self):
+		leg_id = self['leg_id']
+		if leg_id:
+			return Legislator.get(_id=leg_id)
 
 
 class Committee(dict):
@@ -72,8 +117,12 @@ class Committee(dict):
 	def id(self):
 		return self['_id']
 
-	def members(self):
-		return map(Legislator, self['members'])
+	def members_objects(self):
+		'''
+		Return a list of CommitteeMember objects.
+		'''
+		m = map(CommitteeMember, self['members'])
+		return map(CommitteeMember, self['members'])
 
 	def display_name(self):
 		try:
@@ -83,15 +132,26 @@ class Committee(dict):
 				return self['subcommittee']
 			except KeyError:
 				raise
+
+	@staticmethod
+	def get(**spec):
+		return db.committees.find_one(spec)
+
 		
 
 class Bill(dict):
+
+	def id(self):
+		return self['_id']
 
 	@property
 	def metadata(self, get_metadata=billy.utils.metadata):
 		return get_metadata(self['state'])
 
 	session_details = SessionDetails()
+
+	def most_recent_action(self):
+		return self['actions'][-1]
 
 
 class Report(dict):
