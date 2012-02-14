@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse
 
 repeat1 = repeat(1)
 
-def simplify(f):
+def simplified(f):
     '''
     Render the decorated view to response with the template
     bearing the same name as the view function. 
@@ -29,7 +29,7 @@ def simplify(f):
 
 
 
-@simplify
+@simplified
 def state(request, abbr):
     '''
     ''' 
@@ -64,7 +64,7 @@ def state_selection(request):
 def legislators(request, abbr):
     return redirect('legislators_chamber', abbr, 'upper')
 
-@simplify
+@simplified
 def legislators_chamber(request, abbr, chamber):
     
     state = Metadata.get(abbr)
@@ -95,7 +95,7 @@ def legislators_chamber(request, abbr, chamber):
     return locals()
 
 
-@simplify
+@simplified
 def legislator(request, abbr, leg_id):
     '''
     Note - changes needed before we can display "sessions served" info.
@@ -110,7 +110,7 @@ def committees(request, abbr):
     return redirect('committees_chamber', abbr, 'upper')
 
 
-@simplify
+@simplified
 def committees_chamber(request, abbr, chamber):
     
     state = Metadata.get(abbr)
@@ -136,14 +136,21 @@ def committees_chamber(request, abbr, chamber):
     return locals()
 
 
-@simplify
+@simplified
 def committee(request, abbr, committee_id):
     committee = Committee.get(_id=committee_id)
     sources = committee['sources']
     return locals()
 
 #----------------------------------------------------------------------------   
-@simplify
+@simplified
 def bills(request, abbr):
     state = Metadata.get(abbr)
+    return locals()
+
+@simplified
+def bill(request, abbr, bill_id):
+    state = Metadata.get(abbr)
+    bill = Bill.get(_id=bill_id)
+    sources = bill['sources']
     return locals()
