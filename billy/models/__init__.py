@@ -30,7 +30,7 @@ class ReadOnlyAttribute(object):
 class SessionDetails(ReadOnlyAttribute, dict):
 
 	def __get__(self, instance, collection=db.metadata):
-		return instance.metadata['session_details']
+		return instance.metadata['session_details'][instance['session']]
 
 
 
@@ -157,6 +157,10 @@ class Bill(dict):
 
 	def most_recent_action(self):
 		return self['actions'][-1]
+
+	def chamber_name(self):
+		'''"lower" --> "House of Representatives"'''
+		return self.metadata['%s_chamber_name' % self['chamber']]
 
 
 class Report(dict):

@@ -154,3 +154,17 @@ def bill(request, abbr, bill_id):
     bill = Bill.get(_id=bill_id)
     sources = bill['sources']
     return locals()
+
+
+#----------------------------------------------------------------------------   
+@simplified
+def votes(request, abbr):
+    state = Metadata.get(abbr)
+    return locals()
+
+@simplified
+def vote(request, abbr, bill_id, vote_index):
+    state = Metadata.get(abbr)
+    bill = Bill.get(_id=bill_id)
+    sources = bill['sources']
+    return locals()
