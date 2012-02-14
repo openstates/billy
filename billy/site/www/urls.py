@@ -29,7 +29,11 @@ urlpatterns = patterns('',
 	    committees_chamber, name='committees_chamber'),	     
 
 	url(r'^(?P<abbr>[a-z]{2})/committee/(?P<committee_id>\w+)/$', 
-	    committee, name='committee'),	    	 
+	    committee, name='committee'),	    
+	    
+	#------------------------------------------------------------------------
+	url(r'^(?P<abbr>[a-z]{2})/bill/(?P<bill_id>\w+)/$', 
+	    bill, name='bill'),	     
 )
 
 
