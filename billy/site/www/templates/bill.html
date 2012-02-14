@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load sitebase %}
+
+
+{% block title %}{{bill.bill_id }}{% endblock %}
+
+{% block sidebar %}{% states_sidebar abbr %}{% endblock %}
+
+{% block content %}
+<h1>{{ state.name }} {{ chamber_name }}</h1>
+<h2>{{ bill.bill_id }}</h2>
+
+
+
+<h3>Votes</h3>
+<ul>
+{% for vote in legislator.votes %}
+  <li>
+
+  </li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}
+
+
