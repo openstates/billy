@@ -1,12 +1,17 @@
+'''
+Cleanup plan for this module:
+- Create a superclass, basically for documentation purposes
+- change .get to .get_object
+- get rid of pointless property decorators
+
+'''
 import pdb
 
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
-from bson.code import Code
 
 from billy.conf import settings
-
-import billy.utils
+from billy.utils import metadata as get_metadata
 
 
 
@@ -40,16 +45,18 @@ class SessionDetails(ReadOnlyAttribute, dict):
 # ---------------------------------------------------------------------------
 #
 class Metadata(dict):
+	'''
+	The metadata can also be though as the "state" (i.e., Montana, Texas) when
+	it's an attribute of another object. For example, if you have a bill, you
+	can do this:
+	>>> bill.state.abbr
+	'de'
+	'''
 
-	@classmethod
-	def get(cls, abbr):
-		return cls(billy.utils.metadata(abbr))
+	@staticmethod
+	def get_object(abbr):
+		return get_metadata(abbr)
 
-	@classmethod
-	def all(cls):
-		return cls()
-
-	@property
 	def abbr(self):
 		return self['_id']
 
@@ -69,7 +76,7 @@ class Metadata(dict):
 class Legislator(dict):
 	
 	@staticmethod
-	def get(**spec):
+	def get_object(**spec):
 		return db.legislators.find_one(spec)
 
 	def committees(self):
@@ -135,7 +142,7 @@ class Committee(dict):
 				raise
 
 	@staticmethod
-	def get(**spec):
+	def get_object(**spec):
 		return db.committees.find_one(spec)
 
 		
@@ -150,7 +157,7 @@ class Bill(dict):
 		return self['_id']
 
 	@property
-	def metadata(self, get_metadata=billy.utils.metadata):
+	def metadata(self):
 		return get_metadata(self['state'])
 
 	session_details = SessionDetails()
@@ -166,7 +173,7 @@ class Bill(dict):
 class Report(dict):
 
 	@property
-	def metadata(self, get_metadata=billy.utils.metadata):
+	def metadata(self):
 		return get_metadata(self['_id'])
 
 	@property
