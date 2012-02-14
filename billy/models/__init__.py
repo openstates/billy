@@ -87,7 +87,10 @@ class Legislator(dict):
 		return res
 
 	def sponsored_bills(self):
-		
+		'''
+		This overly-simple method would be a good candidate for optimization.
+		I tried map/reduce and it forced me to eat a gigantic pail of FAIL...
+		'''
 		_id = self['_id']
 		spec = {'state': self['state']}
 		fields = {'actions': 1, 'title': 1, 'bill_id': 1, 'sponsors': 1}
@@ -98,9 +101,7 @@ class Legislator(dict):
 				if s['leg_id'] == _id:
 					sponsored_bills.append(bill)
 
-		pdb.set_trace()
-		# Sort them in with primary first, them cosponsor.
-		return bills
+		return sponsored_bills[:5]
 
 
 class CommitteeMember(dict):
@@ -140,6 +141,10 @@ class Committee(dict):
 		
 
 class Bill(dict):
+
+	@staticmethod
+	def get(**spec):
+		return db.bills.find_one(spec)
 
 	def id(self):
 		return self['_id']
