@@ -33,7 +33,7 @@ def simplified(f):
 def state(request, abbr):
     '''
     ''' 
-    metadata = Metadata.get(abbr)
+    metadata = Metadata.get_object(abbr)
     report = db.reports.find_one({'_id': abbr})
 
     sessions = report.session_link_data
@@ -67,7 +67,7 @@ def legislators(request, abbr):
 @simplified
 def legislators_chamber(request, abbr, chamber):
     
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     chamber_name = state['%s_chamber_name' % chamber]
 
     # Query params
@@ -100,7 +100,7 @@ def legislator(request, abbr, leg_id):
     '''
     Note - changes needed before we can display "sessions served" info.
     '''
-    legislator = Legislator.get(_id=leg_id)
+    legislator = Legislator.get_object(_id=leg_id)
     sources = legislator['sources']
     return locals()
     
@@ -113,7 +113,7 @@ def committees(request, abbr):
 @simplified
 def committees_chamber(request, abbr, chamber):
     
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     chamber_name = state['%s_chamber_name' % chamber]
 
     # Query params
@@ -138,19 +138,19 @@ def committees_chamber(request, abbr, chamber):
 
 @simplified
 def committee(request, abbr, committee_id):
-    committee = Committee.get(_id=committee_id)
+    committee = Committee.get_object(_id=committee_id)
     sources = committee['sources']
     return locals()
 
 #----------------------------------------------------------------------------   
 @simplified
 def bills(request, abbr):
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     return locals()
 
 @simplified
 def bill(request, abbr, bill_id):
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     bill = Bill.get(_id=bill_id)
     sources = bill['sources']
     return locals()
@@ -159,12 +159,13 @@ def bill(request, abbr, bill_id):
 #----------------------------------------------------------------------------   
 @simplified
 def votes(request, abbr):
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     return locals()
 
 @simplified
 def vote(request, abbr, bill_id, vote_index):
-    state = Metadata.get(abbr)
+    state = Metadata.get_object(abbr)
     bill = Bill.get(_id=bill_id)
+    vote = bill['votes'][int(vote_index)]
     sources = bill['sources']
     return locals()
