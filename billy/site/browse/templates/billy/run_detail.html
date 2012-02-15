@@ -61,16 +61,16 @@ function new_chart( key ) {
 
 function pieize( key, val ) {
     new_chart( key );
-    var plot1 = jQuery.jqplot( "chartdiv-" + key, [val], { 
+    var plot1 = jQuery.jqplot( "chartdiv-" + key, [val], {
         seriesDefaults: {
             // Make this a pie chart.
-            renderer: jQuery.jqplot.PieRenderer, 
+            renderer: jQuery.jqplot.PieRenderer,
             rendererOptions: {
                 // Put data labels on the pie slices.
                 // By default, labels show the percentage of the slice.
                 showDataLabels: true
             }
-        }, 
+        },
         legend: {
             placement: 'outsideGrid',
             show:true,
@@ -89,7 +89,7 @@ function stackize( key, val ) {
             rendererOptions: {
                 fillToZero: true,
                 barMargin: 30,
-                highlightMouseDown: true   
+                highlightMouseDown: true
             }
         },
         series:[
@@ -129,11 +129,11 @@ function lineize( key, val ) {
                 tickRenderer:$.jqplot.CanvasAxisTickRenderer,
                 label:"POSIX Timestamp",
                 labelRenderer: $.jqplot.CanvasAxisLabelRenderer
-            }, 
+            },
             yaxis:{
                 renderer:$.jqplot.LogAxisRenderer,
                 tickOptions:{
-                    labelPosition: 'middle', 
+                    labelPosition: 'middle',
                     angle:-30
                 },
                 tickRenderer:$.jqplot.CanvasAxisTickRenderer,
