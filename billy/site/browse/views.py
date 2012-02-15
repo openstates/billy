@@ -1,6 +1,7 @@
 import re
 import pdb
 import json
+import time
 import types
 import urllib
 import random
@@ -39,8 +40,6 @@ def _csv_response(request, template, data):
     else:
         return render(request, template, {'data':data})
 
-
-
 def browse_index(request, template='billy/index.html'):
     rows = []
 
@@ -56,7 +55,6 @@ def browse_index(request, template='billy/index.html'):
 
     return render(request, template, {'rows': rows, 'nocontainer' : True})
 
-
 def overview(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
@@ -67,8 +65,178 @@ def overview(request, abbr):
     context['metadata'] = meta
     context['report'] = report
 
+    try:
+        runlog = db.billy_runs.find({
+            "scrape.state" : abbr
+        }).sort( "scrape.start", direction=pymongo.DESCENDING )[0]
+        # This hack brought to you by Django's inability to do subtraction
+        # in the templte :)
+        runlog['scrape']['time_delta'] = ( runlog['scrape']['end'] - \
+                                          runlog['scrape']['start'] )
+        context['runlog'] = runlog
+        if "ftbfs" in runlog:
+            context['warning_title'] = "This build is currently broken!"
+            context['warning'] = \
+"""
+The last scrape was a failre. Check in the run log secion for more details,
+or check out the scrape run report page for this state.
+"""
+    except IndexError:
+        runlog = False
+
     return render(request, 'billy/state_index.html', context)
 
+def run_detail_graph_data(request, abbr):
+    def rolling_average( oldAverage, newItem, oldAverageCount ):
+        """
+        Simple, unweighted rolling average. If you don't get why we have
+        to factor the oldAverageCount back in, it's because new values will
+        have as much weight as the last sum combined if you put it over 2.
+        """
+        return float(
+            ( newItem +  ( oldAverageCount * ( oldAverage ) ) ) /
+                        ( oldAverageCount + 1 )
+            )
+
+    def _do_pie( runs ):
+        excs = {}
+        for run in runs:
+            if "ftbfs" in run:
+                for r in run['scrape']['run_record']:
+                    if "exception" in r:
+                        ex = r['exception']
+                        try:
+                            excs[ex['type']] += 1
+                        except KeyError:
+                            excs[ex['type']] = 1
+        ret = []
+        for l in excs:
+            ret.append([ l, excs[l] ])
+        return ret
+
+    def _do_stacked( runs ):
+        fields = [ "legislators", "bills", "votes", "committees" ]
+        ret = {}
+        for field in fields:
+            ret[field] = []
+
+        for run in runs:
+            guy = run['scrape']['run_record']
+            for field in fields:
+                try:
+                    g = None
+                    for x in guy:
+                        if x['type'] == field:
+                            g = x
+                    if not g:
+                        raise KeyError("Missing kruft")
+
+                    delt = ( g['end_time'] - g['start_time'] ).total_seconds()
+                    ret[field].append(delt)
+                except KeyError:
+                    ret[field].append(0)
+        l = []
+        for line in fields:
+            l.append(ret[line])
+        return l
+
+    def _do_digest( runs ):
+        oldAverage      = 0
+        oldAverageCount = 0
+        data = { "runs" : [], "avgs" : [], "stat" : [] }
+        for run in runs:
+            timeDelta = (
+                run['scrape']['end'] - run['scrape']['start']
+            ).total_seconds()
+            oldAverage = rolling_average( oldAverage, timeDelta, oldAverageCount )
+            oldAverageCount += 1
+            stat = "Failure" if "ftbfs" in run else ""
+
+            s = time.mktime(run['scrape']['start'].timetuple())
+
+            data['runs'].append([ s, timeDelta,  stat ])
+            data['avgs'].append([ s, oldAverage, '' ])
+            data['stat'].append( stat )
+        return data
+    history_count = 50
+
+    default_spec = { "scrape.state" : abbr }
+    data = {
+        "lines"   : {},
+        "pies"    : {},
+        "stacked" : {}
+    }
+
+    speck = {
+        "default-stacked" : { "run" : _do_stacked,
+            "type" : "stacked",
+            "spec" : {}
+        },
+        "default" : { "run" : _do_digest,
+            "type" : "lines",
+            "spec" : {}
+        },
+        "clean"   : { "run" : _do_digest,
+            "type" : "lines",
+            "spec" : {
+                "ftbfs" : { "$exists" : False }
+            }
+        },
+        "ftbfs"   : { "run" : _do_digest,
+            "type" : "lines",
+            "spec" : {
+                "ftbfs" : { "$exists" : True  }
+            }
+        },
+        "ftbfs-pie": { "run" : _do_pie,
+            "type" : "pies",
+            "spec" : {
+                "ftbfs" : { "$exists" : True  }
+            }
+        },
+    }
+
+    for line in speck:
+        query = speck[line]["spec"].copy()
+        query.update( query )
+        runs = db.billy_runs.find(query).sort(
+            "scrape.start", direction=pymongo.ASCENDING )[:history_count]
+        data[speck[line]['type']][line] = speck[line]["run"](runs)
+
+    return HttpResponse(
+        json.dumps( data ),
+        #content_type="text/json"
+        content_type="text/plain"
+    )
+
+def run_detail(request, abbr):
+    runlog = db.billy_runs.find({
+        "scrape.state" : abbr
+    }).sort( "scrape.start", direction=pymongo.DESCENDING )[0]
+
+    # pre-process goodies for the template
+    runlog['scrape']['t_delta'] = (
+        runlog['scrape']['end'] - runlog['scrape']['start']
+    )
+    for entry in runlog['scrape']['run_record']:
+        entry['t_delta'] = (
+            entry['end_time'] - entry['start_time']
+        )
+
+    context = {
+        "runlog" : runlog,
+        "state"  : abbr
+    }
+
+    if "ftbfs" in runlog:
+        context['warning_title'] = "Exception during Execution"
+        context['warning'] = \
+"""
+This build had an exception during it's execution. Please check below
+for the exception and error message.
+"""
+
+    return render(request, 'billy/run_detail.html', context)
 
 @never_cache
 def bills(request, abbr):

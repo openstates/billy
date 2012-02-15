@@ -29,6 +29,26 @@
         </tr>
         {% endfor %}
     </table>
+    <h4><a href = "/browse/run-detail/{{ metadata|key:"_id" }}" >Last run information</a></h4>
+    <ul>
+    {% if runlog %}
+        <li>This run took {{ runlog.scrape.time_delta }}, and was started on
+        {{ runlog.scrape.start }}</li>
+        <li>{% if runlog.ftbfs %}
+            <b>There was a failure during runtime</b>
+        {% else %}
+            The scrape took place without exception
+        {% endif %}</li>
+        {% for key, val in runlog.import.items %}
+            <li>{{ key }} - out of {{ val.total }} records, {{ val.insert }}
+            records were inserted, and {{ val.update }} were updated</li>
+        {% endfor %}
+    {% else %}
+        <li>No records found, sadly. You might have run the import with an old
+        version of Billy, or perhaps haven't run this state yet. However,
+        the fact you're here might throw a wrench in all that.</li>
+    {% endif %}
+    </ul>
 </div>
 
 <div class="span-one-third" id="bills">

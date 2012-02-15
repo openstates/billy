@@ -30,9 +30,18 @@ def import_legislators(abbr, data_dir):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'legislators', '*.json')
     paths = glob.glob(pattern)
+
+    counts = {
+        "update" : 0,
+        "insert" : 0,
+        "total"  : 0
+    }
+
     for path in paths:
         with open(path) as f:
-            import_legislator(json.load(f))
+            counts["total"] += 1
+            ret = import_legislator(json.load(f))
+            counts[ret] += 1
 
     logger.info('imported %s legislator files' % len(paths))
 
@@ -44,6 +53,8 @@ def import_legislators(abbr, data_dir):
     deactivate_legislators(current_term, abbr, level)
 
     ensure_indexes()
+
+    return counts
 
 
 def activate_legislators(current_term, abbr, level):
@@ -183,5 +194,7 @@ def import_legislator(data):
             data['roles'] = leg['roles']
 
         update(leg, data, db.legislators)
+        return "update"
     else:
         insert_with_id(data)
+        return "insert"
