@@ -82,6 +82,8 @@ class RelatedDocument(ReadOnlyAttribute):
 
     def __get__(self, instance, type_=None):
 
+        self.instance = instance
+
         model = self.model
         if isinstance(model, basestring):
             model = self.model = get_model(model)
@@ -269,7 +271,7 @@ class Transformer(SONManipulator):
 
 db.add_son_manipulator(Transformer())
 
-
+models_list = _collection_model_dict.values()
 
 
 if __name__ == "__main__":
@@ -282,7 +284,3 @@ if __name__ == "__main__":
     pdb.set_trace()
 
 
-
-#--------------------------------------------
-# Create a unit test to make sure there's no conflict
-# between model method/attr names and document keys.
