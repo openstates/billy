@@ -59,9 +59,15 @@ function new_chart( key ) {
     );
 }
 
-function pieize( key, val ) {
+function pieize( key, val, title ) {
+
+    if ( val.length <= 0 ) {
+        return;
+    }
+
     new_chart( key );
     var plot1 = jQuery.jqplot( "chartdiv-" + key, [val], {
+        title: title,
         seriesDefaults: {
             // Make this a pie chart.
             renderer: jQuery.jqplot.PieRenderer,
@@ -79,9 +85,14 @@ function pieize( key, val ) {
     });
 }
 
-function stackize( key, val ) {
+function stackize( key, val, title ) {
+    if ( val.length <= 0 ) {
+        return;
+    }
+
     new_chart( key );
     var plot1 = $.jqplot('chartdiv-' + key, val, {
+        title: title,
         stackSeries: true,
         seriesDefaults:{
             pointLabels: {show: true},
@@ -106,12 +117,17 @@ function stackize( key, val ) {
     });
 }
 
-function lineize( key, val ) {
+function lineize( key, val, title ) {
     runs = val.runs;
     avgs = val.avgs;
+
+    if ( runs.length <= 0 && avgs <= 0 ) {
+        return;
+    }
+
     new_chart( key );
     var plot1 = $.jqplot("chartdiv-" + key, [runs, avgs], {
-        title: "Graph",
+        title: title,
         legend: {
             location: 'w',
             placement: 'outsideGrid',
@@ -162,15 +178,15 @@ $(document).ready(function(){
     $.getJSON( "/browse/run-detail-data/{{ state }}", function(data) {
         d = data['stacked'];
         $.each(d, function(key, val) {
-            stackize( key, val );
+            stackize( key, val, data['title'][key] );
         });
         d = data['lines'];
         $.each(d, function(key, val) {
-            lineize( key, val );
+            lineize( key, val, data['title'][key] );
         });
         d = data['pies'];
         $.each(d, function(key, val) {
-            pieize( key, val );
+            pieize( key, val, data['title'][key] );
         });
     });
 });

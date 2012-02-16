@@ -156,7 +156,7 @@ def run_detail_graph_data(request, abbr):
 
             data['runs'].append([ s, timeDelta,  stat ])
             data['avgs'].append([ s, oldAverage, '' ])
-            data['stat'].append( stat )
+#            data['stat'].append( stat )
         return data
     history_count = 50
 
@@ -164,31 +164,37 @@ def run_detail_graph_data(request, abbr):
     data = {
         "lines"   : {},
         "pies"    : {},
-        "stacked" : {}
+        "stacked" : {},
+        "title"   : {}
     }
 
     speck = {
         "default-stacked" : { "run" : _do_stacked,
+            "title" : "Last %s runs" % ( history_count ),
             "type" : "stacked",
             "spec" : {}
         },
         "default" : { "run" : _do_digest,
+            "title" : "Last %s runs" % ( history_count ),
             "type" : "lines",
             "spec" : {}
         },
         "clean"   : { "run" : _do_digest,
+            "title" : "Last %s non-failed runs" % ( history_count ),
             "type" : "lines",
             "spec" : {
                 "ftbfs" : { "$exists" : False }
             }
         },
         "ftbfs"   : { "run" : _do_digest,
+            "title" : "Last %s failed runs" % ( history_count ),
             "type" : "lines",
             "spec" : {
                 "ftbfs" : { "$exists" : True  }
             }
         },
         "ftbfs-pie": { "run" : _do_pie,
+            "title" : "Digest of what exceptions have been thrown",
             "type" : "pies",
             "spec" : {
                 "ftbfs" : { "$exists" : True  }
@@ -202,6 +208,7 @@ def run_detail_graph_data(request, abbr):
         runs = db.billy_runs.find(query).sort(
             "scrape.start", direction=pymongo.ASCENDING )[:history_count]
         data[speck[line]['type']][line] = speck[line]["run"](runs)
+        data['title'][line] = speck[line]['title']
 
     return HttpResponse(
         json.dumps( data ),
