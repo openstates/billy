@@ -319,7 +319,7 @@ def random_bill(request, abbr):
     context = {
         'bill'   : bill,
         'random' : True,
-        'state' : abbr.lower()
+        'state' : abbr.lower(),
         'warning': warning,
     }
 
