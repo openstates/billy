@@ -400,14 +400,13 @@ def main(old_scrape_compat=False):
         if args.do_import:
             import_report = _do_imports(abbrev, args)
             scrape_data['import'] = import_report
+            # We're tying the run-logging into the import stage - since import
+            # already writes to the DB, we might as well throw this in too.
+            db.billy_runs.save( scrape_data, safe=True )
 
         # reports
         if args.report:
             _do_reports(abbrev, args)
-
-
-        if "scrape" in scrape_data:
-            db.billy_runs.save( scrape_data, safe=True )
 
     except ScrapeError as e:
         print 'Error:', e
