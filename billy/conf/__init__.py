@@ -19,6 +19,7 @@ global_group.add_argument('--mongo_port', help='mongo port', dest='MONGO_PORT')
 global_group.add_argument('--mongo_db', help='mongo database name',
                           dest='MONGO_DATABASE')
 global_group.add_argument('--manual_data_dir', dest='BILLY_MANUAL_DATA_DIR')
+global_group.add_argument('--cache_dir', dest='BILLY_CACHE_DIR')
 
 
 class Settings(object):

@@ -3,9 +3,16 @@ scrapelib changelog
 
 0.9.5
 -----
-    * bugfix for boundary API method
-    * add boundary_id to legislator responses
-    * fix for dotted keys in reports
+    * API: add boundary_id to legislator responses (experimental)
+    * browse: MOM legislator merge tool
+    * browse: improved browse templates & random_bill
+    * scrapers: --cache_dir argument added
+    * scrapers: _partial_vote_bill_id flag added for Rhode Island
+    * bugfix: boundary API method returning first polygon
+    * bugfix: dotted keys in reports
+    * bugfix: billy-util retire
+    * bugfix: unicode error in loadlegislators
+
 
 0.9.4
 -----

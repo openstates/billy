@@ -1,27 +1,26 @@
 import re
-import random
 import pdb
-import functools
 import json
 import types
 import urllib
+import random
+import pymongo
 import decimal
-from collections import defaultdict
+import functools
+import unicodecsv
 from operator import itemgetter
 from itertools import chain, imap
-import unicodecsv
-
-import pymongo
+from collections import defaultdict
 
 from django.http import Http404, HttpResponse
-from django.views.decorators.cache import never_cache
-from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.views.decorators.cache import never_cache
+from django.shortcuts import render, render_to_response
 
 from billy import db
 from billy.utils import metadata
-from billy.importers.utils import merge_legislators
 from billy.scrape import JSONDateEncoder
+from billy.importers.utils import merge_legislators
 
 
 def keyfunc(obj):
@@ -51,17 +50,11 @@ def browse_index(request, template='billy/index.html'):
         report['name'] = meta['name']
         report['bills']['typed_actions'] = (100 -
                                 report['bills']['actions_per_type'].get('other', 100))
-        # districts
-        #districts = list(db.districts.find({'abbr': report['id']}))
-        #report['upper_districts'] = sum(d['num_seats'] for d in districts
-        #                             if d['chamber'] == 'upper')
-        #report['lower_districts'] = sum(d['num_seats'] for d in districts
-        #                             if d['chamber'] == 'lower')
         rows.append(report)
 
     rows.sort(key=lambda x: x['name'])
 
-    return render(request, template, {'rows': rows})
+    return render(request, template, {'rows': rows, 'nocontainer' : True})
 
 
 def overview(request, abbr):
@@ -92,18 +85,12 @@ def bills(request, abbr):
     # ------------------------------------------------------------------------
     # Get data for the tables for counts, types, etc. 
     tablespecs = [
-        
-        ('Bill Counts', {'rownames': ['upper_count','lower_count',
+        ('Bill Counts',      {'rownames': ['upper_count','lower_count',
                                       'version_count', 'versionless_count']}),
-
-        ('Bill Types',  {'keypath': ['bill_types']}),
-
-        ('Actions by Type', {'keypath': ['actions_per_type']}),
-
+        ('Bill Types',       {'keypath': ['bill_types']}),
+        ('Actions by Type',  {'keypath': ['actions_per_type']}),
         ('Actions by Actor', {'keypath': ['actions_per_actor']}),
-
-       ]
-                               
+    ]
 
     tables = []
 
@@ -114,32 +101,23 @@ def bills(request, abbr):
         tabledata = {'title': name,
                      'column_names': column_names,
                      'rows': rows}
-        
         for session, context in sessions.items():
-
             if 'keypath' in spec:
                 for k in spec['keypath']:
                     context = context[k]
-                
             column_names.append(session)
-
             rownames = spec.get('rownames', context)
-
             for r in rownames:
                 rows[r].append(context[r])
-
-        # Get rid of defaultdict.
         tabledata['rows'] = dict(rows)
-        
         tables.append(tabledata)
-
 
     # ------------------------------------------------------------------------
     # Render the tables.
     render = functools.partial(render_to_string, 'billy/bills_table.html')
     tables = map(render, tables)
 
-    return render(request, "billy/bills.html",
+    return render_to_response( "billy/bills.html",
                               dict(tables=tables, metadata=meta,
                                    sessions=sessions))
 
@@ -167,7 +145,6 @@ def summary_index(request, abbr):
         res.update(bills=build(bills))
 
         return res
-    
     summary = build_state(abbr)
     return render(request, 'billy/summary_index.html', locals())
 
@@ -175,7 +152,6 @@ def summary_index(request, abbr):
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                        collections=("bills", "legislators", "committees"),
                        dumps=json.dumps, Decimal=decimal.Decimal):
-    
     meta = metadata(abbr)
     session = request.GET['session']
     object_type = request.GET['object_type']
@@ -212,30 +188,22 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     total = len(counter)
     objs = sorted(counter, key=counter.get, reverse=True)
     objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
-    
     return rendert(request, 'billy/summary_object_key.html', locals())
-
-
-    
 
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
                             collections=("bills", "legislators", "committees")):
-    
     meta = metadata(abbr)
-
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
     val = json.loads(request.GET['val'])
-
     spec = {'state': abbr, 'session': session}
     fields = {'_id': 1}
-    
+
     if object_type in collections:
         spec.update({key: val})
         objects = getattr(db, object_type).find(spec, fields)
         objects = ((object_type, obj['_id']) for obj in objects)
-        
     else:
         spec.update({'.'.join([object_type, key]): val})
         objects = db.bills.find(spec, fields)
@@ -245,10 +213,9 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
     return render(request, 'billy/summary_object_keyvals.html', locals())
 
-    
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
-    
+
     obj = getattr(db, collection).find_one(_id)
     obj_isbill = (obj['_type'] == 'bill')
     if obj_isbill:
@@ -256,7 +223,7 @@ def object_json(request, collection, _id,
             obj_url = obj['sources'][0]['url']
         except:
             pass
-        
+
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
     keys = sorted(obj)
@@ -264,16 +231,15 @@ def object_json(request, collection, _id,
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
         return tmpl % (val, val)
-    
+
     for k in obj:
         obj_json = re_attr.sub(subfunc, obj_json)
 
     tmpl = '<a href="{0}">{0}</a>'
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
-    
+
     return render(request, 'billy/object_json.html', locals())
-    
 
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
@@ -313,16 +279,60 @@ def random_bill(request, abbr):
     level = meta['level']
     latest_session = meta['terms'][-1]['sessions'][-1]
 
-    if 'bad_vote_counts' in request.GET:
+    random_flag = "limit"
+
+    modi_flag = ""
+    if random_flag in request.GET:
+        modi_flag = request.GET[random_flag]
+
+    basic_specs = {
+        "no_versions" : { 'versions' : [] },
+        "no_sponsors" : { 'sponsors' : [] },
+        "no_actions"  : { 'actions'  : [] }
+    }
+
+    default = True
+    spec = {
+        'level' : level,
+        level   : abbr.lower(),
+        'session': latest_session
+    }
+
+    if modi_flag == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr})['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
-    else:
-        spec = {'level': level, level: abbr.lower(), 'session': latest_session}
+        default = False
+
+    if modi_flag in basic_specs:
+        default = False
+        spec.update( basic_specs[modi_flag] )
 
     count = db.bills.find(spec).count()
-    bill = db.bills.find(spec)[random.randint(0, count - 1)]
+    if count:
+        bill = db.bills.find(spec)[random.randint(0, count - 1)]
+        warning = None
+    else:
+        bill = None
+        warning = 'No bills matching the criteria were found.'
 
-    return render(request, 'billy/bill.html', {'bill': bill})
+
+    context = {
+        'bill'   : bill,
+        'random' : True,
+        'state' : abbr.lower(),
+        'warning': warning,
+    }
+
+    if default and modi_flag != "":
+        context["warning"] = \
+"""
+ It looks like you've set a limit flag, but the flag was not processed by
+ billy. Sorry about that. This might be due to a programming error, or a
+ bad guess of the URL flag. Rather then making a big fuss over this, i've just
+ got a list of all random bills. Better luck next time!
+"""
+
+    return render(request, 'billy/bill.html', context)
 
 
 def bill(request, abbr, session, id):

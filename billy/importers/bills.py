@@ -6,7 +6,7 @@ import json
 import logging
 from collections import defaultdict
 
-from billy.utils import keywordize, term_for_session
+from billy.utils import metadata, keywordize, term_for_session
 from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
@@ -96,9 +96,20 @@ def import_bill(data, votes, categorizer):
     if categorizer:
         categorizer.categorize_bill(data)
 
-    # add loaded votes to data
-    bill_votes = votes.pop((data['chamber'], data['session'],
-                            data['bill_id']), [])
+    # this is a hack added for Rhode Island where we can't
+    # determine the full bill_id, if this key is in the metadata
+    # we just use the numeric portion, not ideal as it won't work
+    # in states where HB/SBs overlap, but in RI they never do
+    if metadata(abbr).get('_partial_vote_bill_id'):
+        # pull off numeric portion of bill_id
+        numeric_bill_id = data['bill_id'].split()[1]
+        bill_votes = votes.pop((data['chamber'], data['session'],
+                                numeric_bill_id), [])
+    else:
+        # add loaded votes to data
+        bill_votes = votes.pop((data['chamber'], data['session'],
+                                data['bill_id']), [])
+
     data['votes'].extend(bill_votes)
 
     bill = db.bills.find_one({'level': level, level: abbr,
@@ -198,7 +209,7 @@ _bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
 
 def fix_bill_id(bill_id):
     bill_id = bill_id.replace('.', '')
-    return _bill_id_re.sub(r'\1 \2', bill_id)
+    return _bill_id_re.sub(r'\1 \2', bill_id).strip()
 
 
 def bill_keywords(bill):

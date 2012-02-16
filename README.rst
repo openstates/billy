@@ -9,17 +9,6 @@ Features:
     * Bulk data export.
     * Server that includes a data browser and API.
 
-Requirements
-------------
-
-* python >= 2.6
-* argparse
-* pymongo
-* scrapelib
-* validictory
-* lxml
-* name_tools
-
 Installation
 ------------
 
