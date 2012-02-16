@@ -33,10 +33,10 @@ def simplified(f):
 def state(request, abbr):
     '''
     ''' 
-    metadata = Metadata.get_object(abbr)
+    metadata = Metadata.get_object({'_id': abbr})
     report = db.reports.find_one({'_id': abbr})
 
-    sessions = report.session_link_data
+    sessions = report.session_link_data()
                 
     #------------------------------------------------------------------------
     # Legislators
@@ -64,10 +64,11 @@ def state_selection(request):
 def legislators(request, abbr):
     return redirect('legislators_chamber', abbr, 'upper')
 
+
 @simplified
 def legislators_chamber(request, abbr, chamber):
     
-    state = Metadata.get_object(abbr)
+    state = Metadata.get_object({'_id': abbr})
     chamber_name = state['%s_chamber_name' % chamber]
 
     # Query params
@@ -83,7 +84,8 @@ def legislators_chamber(request, abbr, chamber):
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
         
-    legislators = state.legislators(spec, fields=fields, sort=[(sort_key, sort_order)])
+    legislators = state.legislators(extra_spec=spec, fields=fields, 
+                                    sort=[(sort_key, sort_order)])
 
     # Sort in python if the key was "district"
     if sort_key == 'district':

@@ -41,7 +41,7 @@ class Document(dict):
 
     Methods that return related documents from other collections, 
     like `state.legislators` or `bill.sponsors` should return a cursor 
-    object that can be limited, sorted, courted, etc.
+    object that can be limited, sorted, counted, etc.
 
     Methods that dereference embedded objects into list of objects from
     other collections, such as a list of bill sponsors deferenced into actual 
@@ -69,7 +69,7 @@ class Document(dict):
 
 class RelatedDocument(ReadOnlyAttribute):
     '''
-    Set an isntance of this discriptor as a class attribute on a 
+    Set an instance of this discriptor as a class attribute on a 
     Document subclass, and when accessed from a document it will deference
     the related document's _id and return the related object.
 
@@ -105,8 +105,9 @@ class RelatedDocument(ReadOnlyAttribute):
         return self
 
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, extra_spec={}, *args, **kwargs):
         spec = {'_id': self.model_id}
+        spec.update(extra_spec)
         return self.model.collection.find_one(spec, *args, **kwargs) 
 
 
@@ -135,8 +136,9 @@ class RelatedDocuments(ReadOnlyAttribute):
         return self
         
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, extra_spec={}, *args, **kwargs):
         spec = {self.model_key: self.instance_val}
+        spec.update(extra_spec)
         return self.model.collection.find(spec, *args, **kwargs)
 
 

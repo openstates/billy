@@ -9,7 +9,6 @@ urlpatterns = patterns('',
     url(r'^state_selection/$', state_selection, 
         name='state_selection'),
 
-	url(r'^(?P<abbr>[a-z]{2})/bills', bills, name='bills'),
 
 	#------------------------------------------------------------------------
 	url(r'^(?P<abbr>[a-z]{2})/legislators/$', 
@@ -32,6 +31,8 @@ urlpatterns = patterns('',
 	    committee, name='committee'),	    
 	    
 	#------------------------------------------------------------------------
+	url(r'^(?P<abbr>[a-z]{2})/bills', bills, name='bills'),
+	
 	url(r'^(?P<abbr>[a-z]{2})/(?P<bill_id>\w+)/$', 
 	    bill, name='bill'),	     
 
