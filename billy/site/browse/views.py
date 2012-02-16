@@ -156,7 +156,7 @@ def run_detail_graph_data(request, abbr):
 
             data['runs'].append([ s, timeDelta,  stat ])
             data['avgs'].append([ s, oldAverage, '' ])
-#            data['stat'].append( stat )
+            data['stat'].append( stat )
         return data
     history_count = 50
 
