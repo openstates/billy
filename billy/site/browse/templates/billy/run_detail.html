@@ -200,9 +200,10 @@ $(document).ready(function(){
     </div>
 {% endif %}
 
-<h1>Last run report for {{ runlog.scrape.state }}</h1>
+<h1>run report for {{ runlog.scrape.state }}</h1>
 
-Scrape took <b>{{ runlog.scrape.t_delta }}</b><br /><br />
+The last scrape took <b>{{ runlog.scrape.t_delta }}</b><br /><br />
+
 <code>{% for key in runlog.scrape.args %}{{ key }} {% endfor %}</code><br />
 <br />
 {% for key in runlog.scrape.run_record %}
