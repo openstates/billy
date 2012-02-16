@@ -324,6 +324,8 @@ def main(old_scrape_compat=False):
             args.committees = True
 
 
+        scrape_data = {}
+
         # do full scrape if not solo bills, import only, or report only
         if args.scrape:
             # validate then write metadata
@@ -355,7 +357,6 @@ def main(old_scrape_compat=False):
                 "state"      : abbrev
             }
 
-            scrape_data = {}
             lex = None
 
             # run scrapers

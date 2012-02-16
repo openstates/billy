@@ -53,7 +53,7 @@ function new_chart( key ) {
     var width  = 500;
     var height = 200;
     $("#chart-area").append(
-        "<div style='width:" + width +" px;height:" + height +
+        "<div class='billy-chart' style='width:" + width +" px;height:" + height +
             "px;' id = '" + "chartdiv-" +
             key + "' ></div>"
     );
@@ -194,18 +194,22 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block content %}
+<p>
 {% if not warning %}
     <div class="alert-message block-message info">
         <strong>Scrape last ran with success</strong><br />
     </div>
 {% endif %}
-
+</p>
+<p>
 <h1>run report for {{ runlog.scrape.state }}</h1>
 
 The last scrape took <b>{{ runlog.scrape.t_delta }}</b><br /><br />
 
 <code>{% for key in runlog.scrape.args %}{{ key }} {% endfor %}</code><br />
 <br />
+</p>
+<p>
 {% for key in runlog.scrape.run_record %}
     <!-- <h4>{{ key.chamber }} {{ key.type }} ({{ key.time }})</h4>
     Scrape took <b>{{ key.t_delta }}</b> -->
@@ -216,8 +220,15 @@ The last scrape took <b>{{ runlog.scrape.t_delta }}</b><br /><br />
     {% endif %}
     <br />
 {% endfor %}
+</p>
+<p>
+<h3>some charts & stats</h3>
+In order to help digest some of the raw numbers, here are some handy charts.
+</p><br /><br />
 
+<p>
 <div id = 'chart-area' >
 </div>
+</p>
 
 {% endblock %}
