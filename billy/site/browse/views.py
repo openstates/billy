@@ -198,7 +198,7 @@ def run_detail_graph_data(request, abbr):
 
     for line in speck:
         query = speck[line]["spec"].copy()
-        query.update( query )
+        query.update( default_spec )
         runs = db.billy_runs.find(query).sort(
             "scrape.start", direction=pymongo.ASCENDING )[:history_count]
         data[speck[line]['type']][line] = speck[line]["run"](runs)
