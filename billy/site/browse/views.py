@@ -308,12 +308,19 @@ def random_bill(request, abbr):
         spec.update( basic_specs[modi_flag] )
 
     count = db.bills.find(spec).count()
-    bill = db.bills.find(spec)[random.randint(0, count - 1)]
+    if count:
+        bill = db.bills.find(spec)[random.randint(0, count - 1)]
+        warning = None
+    else:
+        bill = None
+        warning = 'No bills matching the criteria were found.'
+
 
     context = {
         'bill'   : bill,
         'random' : True,
         'state' : abbr.lower()
+        'warning': warning,
     }
 
     if default and modi_flag != "":

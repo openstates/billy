@@ -12,6 +12,9 @@
 {% endblock %}
 
 {% block content %}
+
+{% if bill %}
+
 <div class="pull-right">
 <a href="/browse/{{bill.state}}/{{bill.session}}/{{bill.bill_id}}/json">json dump</a>
 </div>
@@ -137,4 +140,6 @@
     {% endfor %}
   </ul>
 </div>
+
+{% endif %}
 {% endblock %}
