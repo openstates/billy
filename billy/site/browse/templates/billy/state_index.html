@@ -34,7 +34,7 @@
     {% if runlog %}
         <li>This run took {{ runlog.scrape.time_delta }}, and was started on
         {{ runlog.scrape.start }}</li>
-        <li>{% if runlog.ftbfs %}
+        <li>{% if runlog.failure %}
             <b>There was a failure during runtime</b>
         {% else %}
             The scrape took place without exception

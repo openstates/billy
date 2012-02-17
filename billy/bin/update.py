@@ -388,7 +388,7 @@ def main(old_scrape_compat=False):
                         "type"    : ex.__class__.__name__,
                         "message" : ex.message
                     }
-                    scrape_data['ftbfs'] = True
+                    scrape_data['failure'] = True
 
             if lex:
                 db.billy_runs.save( scrape_data, safe=True )

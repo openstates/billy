@@ -74,7 +74,7 @@ def overview(request, abbr):
         runlog['scrape']['time_delta'] = ( runlog['scrape']['end'] - \
                                           runlog['scrape']['start'] )
         context['runlog'] = runlog
-        if "ftbfs" in runlog:
+        if "failure" in runlog:
             context['warning_title'] = "This build is currently broken!"
             context['warning'] = \
 """
@@ -101,7 +101,7 @@ def run_detail_graph_data(request, abbr):
     def _do_pie( runs ):
         excs = {}
         for run in runs:
-            if "ftbfs" in run:
+            if "failure" in run:
                 for r in run['scrape']['run_record']:
                     if "exception" in r:
                         ex = r['exception']
@@ -150,7 +150,7 @@ def run_detail_graph_data(request, abbr):
             ).total_seconds()
             oldAverage = rolling_average( oldAverage, timeDelta, oldAverageCount )
             oldAverageCount += 1
-            stat = "Failure" if "ftbfs" in run else ""
+            stat = "Failure" if "failure" in run else ""
 
             s = time.mktime(run['scrape']['start'].timetuple())
 
@@ -183,21 +183,21 @@ def run_detail_graph_data(request, abbr):
             "title" : "Last %s non-failed runs" % ( history_count ),
             "type" : "lines",
             "spec" : {
-                "ftbfs" : { "$exists" : False }
+                "failure" : { "$exists" : False }
             }
         },
-        "ftbfs"   : { "run" : _do_digest,
+        "failure"   : { "run" : _do_digest,
             "title" : "Last %s failed runs" % ( history_count ),
             "type" : "lines",
             "spec" : {
-                "ftbfs" : { "$exists" : True  }
+                "failure" : { "$exists" : True  }
             }
         },
-        "ftbfs-pie": { "run" : _do_pie,
+        "falure-pie": { "run" : _do_pie,
             "title" : "Digest of what exceptions have been thrown",
             "type" : "pies",
             "spec" : {
-                "ftbfs" : { "$exists" : True  }
+                "failure" : { "$exists" : True  }
             }
         },
     }
@@ -235,7 +235,7 @@ def run_detail(request, abbr):
         "state"  : abbr
     }
 
-    if "ftbfs" in runlog:
+    if "failure" in runlog:
         context['warning_title'] = "Exception during Execution"
         context['warning'] = \
 """
