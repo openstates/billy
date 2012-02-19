@@ -17,7 +17,15 @@
         <dt>TransparencyData ID</dt>
         <dd><a href="http://influenceexplorer.com/politician/id/{{leg.transparencydata_id}}?cycle=-1">{{leg.transparencydata_id}}</a></dd>
     {% endif %}
-
+    <div class="email">
+	{% if leg.email %}
+	<h4>Email:</h4>
+	<a href="{{leg.email}}">{{leg.email}}</a>
+	{% else %}
+	<h4>No Email:</h4>
+	{% endif %}
+	
+    </div>
     {% for k,v in leg.items %}
     {% if "+" in k %}
         <dt>{{k}}</dt><dd>{{v}}</dd>
