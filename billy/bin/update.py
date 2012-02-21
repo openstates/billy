@@ -114,7 +114,7 @@ def _run_scraper(scraper_type, options, metadata):
                 scrape['exception'] = e
                 runs.append(scrape)
                 e._billy_scrape_runlog = runs
-                raise e
+                raise
 
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
@@ -392,7 +392,7 @@ def main(old_scrape_compat=False):
 
             if lex:
                 db.billy_runs.save( scrape_data, safe=True )
-                raise lex
+                raise
 
         elif args.solo_bills:
             _scrape_solo_bills(args, metadata)
