@@ -71,7 +71,7 @@ def overview(request, abbr):
         }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
         # This hack brought to you by Django's inability to do subtraction
         # in the templte :)
-        runlog['scraped']['time_delta'] = ( runlog['scrape']['ended'] - \
+        runlog['scraped']['time_delta'] = ( runlog['scraped']['ended'] - \
                                           runlog['scraped']['started'] )
         context['runlog'] = runlog
         if "failure" in runlog:
