@@ -306,6 +306,7 @@ def random_bill(request, abbr):
     if modi_flag in basic_specs:
         default = False
         spec.update( basic_specs[modi_flag] )
+        spec.pop('session') # all sessions
 
     count = db.bills.find(spec).count()
     if count:
