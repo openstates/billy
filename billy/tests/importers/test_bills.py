@@ -199,14 +199,14 @@ def test_votematcher():
             ]
     vm = bills.VoteMatcher('ex')
 
-    vm.set_vote_ids(votes)
+    vm.set_ids(votes)
     assert votes[0]['vote_id'] == 'EXV00000001'
     assert votes[1]['vote_id'] == 'EXV00000002'
     assert votes[2]['vote_id'] == 'EXV00000003'
 
     # a brand new matcher has to learn first
     vm = bills.VoteMatcher('ex')
-    vm.learn_vote_ids(votes)
+    vm.learn_ids(votes)
 
     # clear vote_ids & add a new vote
     for v in votes:
@@ -215,7 +215,7 @@ def test_votematcher():
                   'yes_count': 5, 'no_count': 5, 'other_count': 5})
 
     # setting ids now should restore old ids & give the new vote a new id
-    vm.set_vote_ids(votes)
+    vm.set_ids(votes)
     assert votes[0]['vote_id'] == 'EXV00000001'
     assert votes[1]['vote_id'] == 'EXV00000002'
     assert votes[2]['vote_id'] == 'EXV00000004'
