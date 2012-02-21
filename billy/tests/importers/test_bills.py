@@ -34,8 +34,13 @@ def test_import_bill():
                          {'name': 'Jackson', 'type': 'cosponsor'}],
             'title': 'main title',
             'alternate_titles': ['second title'],
-            'versions': [{'title': 'old title'},
-                         {'title': 'main title'}],
+            'versions': [{'title': 'old title',
+                          'url': 'http://example.com/old'},
+                         {'title': 'main title',
+                          'url': 'http://example.com/current'},
+                         ],
+            'documents':[{'title': 'fiscal note',
+                          'url': 'http://example.com/fn'}],
             'votes': [{'motion': 'passage', 'chamber': 'upper', 'date': None,
                        'yes_count': 1, 'no_count': 1, 'other_count': 0,
                        'yes_votes': ['John Adams'],
@@ -87,8 +92,14 @@ def test_import_bill():
     assert 'second title' in bill['alternate_titles']
     assert 'old title' in bill['alternate_titles']
 
+    # test version/document import
+    assert bill['versions'][0]['doc_id'] == 'EXD00000001'
+    assert bill['versions'][1]['doc_id'] == 'EXD00000002'
+    assert bill['documents'][0]['doc_id'] == 'EXD00000003'
+
     # now test an update
-    data['versions'].append({'title': 'third title'})
+    data['versions'].append({'title': 'third title',
+                             'url': 'http://example.com/3rd'})
     data['sponsors'].pop()
     bills.import_bill(data, standalone_votes, None)
 
@@ -102,6 +113,11 @@ def test_import_bill():
     assert len(bill['versions']) == 3
     assert len(bill['sponsors']) == 1
     assert 'third title' in bill['alternate_titles']
+    # check that old doc ids haven't changed, and new one is 4
+    assert bill['versions'][0]['doc_id'] == 'EXD00000001'
+    assert bill['versions'][1]['doc_id'] == 'EXD00000002'
+    assert bill['versions'][2]['doc_id'] == 'EXD00000004'
+    assert bill['documents'][0]['doc_id'] == 'EXD00000003'
 
 
 @with_setup(setup_func)
@@ -117,6 +133,7 @@ def test_import_bill_with_partial_bill_vote_id():
             'title': 'main title',
             'sponsors': [],
             'versions': [],
+            'documents': [],
             'votes': [],
            }
     standalone_votes = {

@@ -117,10 +117,14 @@ def import_bill(data, votes, categorizer):
                               'chamber': data['chamber'],
                               'bill_id': data['bill_id']})
 
+    # keep vote/doc ids consistent
     vote_matcher = VoteMatcher(abbr)
+    doc_matcher = DocumentMatcher(abbr)
     if bill:
         vote_matcher.learn_ids(bill['votes'])
+        doc_matcher.learn_ids(bill['versions'] + bill['documents'])
     vote_matcher.set_ids(data['votes'])
+    doc_matcher.set_ids(data['versions'] + data['documents'])
 
     # match sponsor leg_ids
     for sponsor in data['sponsors']:
@@ -281,16 +285,22 @@ class GenericIDMatcher(object):
             item[self.id_key] = self.ids.get(key) or self._get_next_id()
 
 class VoteMatcher(GenericIDMatcher):
-
     id_letter = 'V'
     id_collection = 'vote_ids'
     id_key = 'vote_id'
 
     def key_for_item(self, vote):
-        key = (vote['motion'], vote['chamber'], vote['date'],
-               vote['yes_count'], vote['no_count'], vote['other_count'])
-        return key
+        return (vote['motion'], vote['chamber'], vote['date'],
+                vote['yes_count'], vote['no_count'], vote['other_count'])
 
+class DocumentMatcher(GenericIDMatcher):
+    id_letter = 'D'
+    id_collection = 'document_ids'
+    id_key = 'doc_id'
+
+    def key_for_item(self, document):
+        # URL is good enough as a key
+        return (document['url'],)
 
 
 __committee_ids = {}
