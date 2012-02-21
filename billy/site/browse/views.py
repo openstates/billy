@@ -67,12 +67,12 @@ def overview(request, abbr):
 
     try:
         runlog = db.billy_runs.find({
-            "scrape.state" : abbr
-        }).sort( "scrape.start", direction=pymongo.DESCENDING )[0]
+            "scraped.state" : abbr
+        }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
         # This hack brought to you by Django's inability to do subtraction
         # in the templte :)
-        runlog['scrape']['time_delta'] = ( runlog['scrape']['end'] - \
-                                          runlog['scrape']['start'] )
+        runlog['scraped']['time_delta'] = ( runlog['scrape']['ended'] - \
+                                          runlog['scraped']['started'] )
         context['runlog'] = runlog
         if "failure" in runlog:
             context['warning_title'] = "This build is currently broken!"
@@ -102,7 +102,7 @@ def run_detail_graph_data(request, abbr):
         excs = {}
         for run in runs:
             if "failure" in run:
-                for r in run['scrape']['run_record']:
+                for r in run['scraped']['run_record']:
                     if "exception" in r:
                         ex = r['exception']
                         try:
@@ -121,7 +121,7 @@ def run_detail_graph_data(request, abbr):
             ret[field] = []
 
         for run in runs:
-            guy = run['scrape']['run_record']
+            guy = run['scraped']['run_record']
             for field in fields:
                 try:
                     g = None
@@ -146,13 +146,13 @@ def run_detail_graph_data(request, abbr):
         data = { "runs" : [], "avgs" : [], "stat" : [] }
         for run in runs:
             timeDelta = (
-                run['scrape']['end'] - run['scrape']['start']
+                run['scraped']['ended'] - run['scraped']['started']
             ).total_seconds()
             oldAverage = rolling_average( oldAverage, timeDelta, oldAverageCount )
             oldAverageCount += 1
             stat = "Failure" if "failure" in run else ""
 
-            s = time.mktime(run['scrape']['start'].timetuple())
+            s = time.mktime(run['scraped']['started'].timetuple())
 
             data['runs'].append([ s, timeDelta,  stat ])
             data['avgs'].append([ s, oldAverage, '' ])
@@ -160,7 +160,7 @@ def run_detail_graph_data(request, abbr):
         return data
     history_count = 50
 
-    default_spec = { "scrape.state" : abbr }
+    default_spec = { "scraped.state" : abbr }
     data = {
         "lines"   : {},
         "pies"    : {},
@@ -218,14 +218,14 @@ def run_detail_graph_data(request, abbr):
 
 def run_detail(request, abbr):
     runlog = db.billy_runs.find({
-        "scrape.state" : abbr
-    }).sort( "scrape.start", direction=pymongo.DESCENDING )[0]
+        "scraped.state" : abbr
+    }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
 
     # pre-process goodies for the template
-    runlog['scrape']['t_delta'] = (
-        runlog['scrape']['end'] - runlog['scrape']['start']
+    runlog['scraped']['t_delta'] = (
+        runlog['scraped']['ended'] - runlog['scraped']['started']
     )
-    for entry in runlog['scrape']['run_record']:
+    for entry in runlog['scraped']['run_record']:
         entry['t_delta'] = (
             entry['end_time'] - entry['start_time']
         )

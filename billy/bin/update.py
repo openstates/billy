@@ -168,18 +168,18 @@ def _do_imports(abbrev, args):
     report = {}
 
     if args.legislators:
-        report['legislator_report'] = \
+        report['legislators'] = \
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if args.bills:
-        report['bill_report'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
 
     if args.committees:
-        report['committee_report'] = \
+        report['committees'] = \
                 import_committees(abbrev, settings.BILLY_DATA_DIR)
 
     if args.events:
-        report['event_report'] = \
+        report['events'] = \
                 import_events(abbrev, settings.BILLY_DATA_DIR)
 
     return report
@@ -377,9 +377,9 @@ def main(old_scrape_compat=False):
                 lex = e
             exec_end  = dt.datetime.utcnow()
 
-            exec_record['start']  = exec_start
-            exec_record['end']    = exec_end
-            scrape_data['scrape'] = exec_record
+            exec_record['started']  = exec_start
+            exec_record['ended']    = exec_end
+            scrape_data['scraped'] = exec_record
 
             for record in run_record:
                 if "exception" in record:
@@ -400,7 +400,7 @@ def main(old_scrape_compat=False):
         # imports
         if args.do_import:
             import_report = _do_imports(abbrev, args)
-            scrape_data['import'] = import_report
+            scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import
             # already writes to the DB, we might as well throw this in too.
             db.billy_runs.save( scrape_data, safe=True )

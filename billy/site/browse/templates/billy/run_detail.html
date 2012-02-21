@@ -202,15 +202,15 @@ $(document).ready(function(){
 {% endif %}
 </p>
 <p>
-<h1>run report for {{ runlog.scrape.state }}</h1>
+<h1>run report for {{ runlog.scraped.state }}</h1>
 
-The last scrape took <b>{{ runlog.scrape.t_delta }}</b><br /><br />
+The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 
-<code>{% for key in runlog.scrape.args %}{{ key }} {% endfor %}</code><br />
+<code>{% for key in runlog.scraped.args %}{{ key }} {% endfor %}</code><br />
 <br />
 </p>
 <p>
-{% for key in runlog.scrape.run_record %}
+{% for key in runlog.scraped.run_record %}
     <!-- <h4>{{ key.chamber }} {{ key.type }} ({{ key.time }})</h4>
     Scrape took <b>{{ key.t_delta }}</b> -->
     {% if key.exception %}
