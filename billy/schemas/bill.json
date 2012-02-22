@@ -11,7 +11,7 @@
     "title": {"type": "string"},
     "type": {"type": "array", "items": {"type": "string"}},
     "alternate_titles": {"type": "array", "items": {"type": "string"}},
-    "alternate_bill_ids": {"type": "array", "items": {"type": "string"}, "required": "false"},
+    "alternate_bill_ids": {"type": "array", "items": {"type": "string"}, "required": false},
     "versions": {"type": "array", "items": {"type": "object", "properties": {
         "name": {"type": "string"},
         "url": {"type": "string", "blank": true},
