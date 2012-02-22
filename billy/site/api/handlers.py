@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 from billy import db
 from billy.conf import settings
-from billy.utils import keywordize, metadata
+from billy.utils import keywordize, metadata, find_bill
 
 import pymongo
 
@@ -145,7 +145,7 @@ class BillHandler(BillyHandler):
         query = {level: abbr, 'session': session, 'bill_id': bill_id}
         if chamber:
             query['chamber'] = chamber.lower()
-        return db.bills.find_one(query, fields=_build_field_list(request))
+        return find_bill(query, fields=_build_field_list(request))
 
 
 class BillSearchHandler(BillyHandler):

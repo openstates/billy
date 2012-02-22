@@ -18,7 +18,7 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render, render_to_response
 
 from billy import db
-from billy.utils import metadata
+from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 
@@ -306,6 +306,7 @@ def random_bill(request, abbr):
     if modi_flag in basic_specs:
         default = False
         spec.update( basic_specs[modi_flag] )
+        spec.pop('session') # all sessions
 
     count = db.bills.find(spec).count()
     if count:
@@ -337,8 +338,8 @@ def random_bill(request, abbr):
 
 def bill(request, abbr, session, id):
     level = metadata(abbr)['level']
-    bill = db.bills.find_one({'level': level, level: abbr,
-                              'session':session, 'bill_id':id.upper()})
+    bill = find_bill({'level': level, level: abbr,
+                      'session':session, 'bill_id':id.upper()})
     if not bill:
         raise Http404
 
@@ -347,8 +348,8 @@ def bill(request, abbr, session, id):
 
 def bill_json(request, abbr, session, id):
     level = metadata(abbr)['level']
-    bill = db.bills.find_one({'level': level, level: abbr,
-                              'session':session, 'bill_id':id.upper()})
+    bill = find_bill({'level': level, level: abbr,
+                      'session':session, 'bill_id':id.upper()})
     if not bill:
         raise Http404
 

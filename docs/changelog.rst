@@ -3,6 +3,8 @@ scrapelib changelog
 
 0.9.5
 -----
+**21 February 2012**
+    * added doc_ids on versions and documents
     * API: add boundary_id to legislator responses (experimental)
     * browse: MOM legislator merge tool
     * browse: improved browse templates & random_bill

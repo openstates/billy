@@ -117,10 +117,14 @@ def import_bill(data, votes, categorizer):
                               'chamber': data['chamber'],
                               'bill_id': data['bill_id']})
 
+    # keep vote/doc ids consistent
     vote_matcher = VoteMatcher(abbr)
+    doc_matcher = DocumentMatcher(abbr)
     if bill:
-        vote_matcher.learn_vote_ids(bill['votes'])
-    vote_matcher.set_vote_ids(data['votes'])
+        vote_matcher.learn_ids(bill['votes'])
+        doc_matcher.learn_ids(bill['versions'] + bill['documents'])
+    vote_matcher.set_ids(data['votes'])
+    doc_matcher.set_ids(data['versions'] + data['documents'])
 
     # match sponsor leg_ids
     for sponsor in data['sponsors']:
@@ -245,41 +249,58 @@ def populate_current_fields(level, abbr):
 
         db.bills.save(bill, safe=True)
 
-
-class VoteMatcher(object):
+class GenericIDMatcher(object):
 
     def __init__(self, abbr):
         self.abbr = abbr
-        self.vote_ids = {}
+        self.ids = {}
 
     def _reset_sequence(self):
-        self.seq_for_vote_key = defaultdict(int)
+        self.seq_for_key = defaultdict(int)
 
     def _get_next_id(self):
-        return next_big_id(self.abbr, 'V', 'vote_ids')
+        return next_big_id(self.abbr, self.id_letter, self.id_collection)
 
-    def _key_for_vote(self, vote):
-        key = (vote['motion'], vote['chamber'], vote['date'],
-               vote['yes_count'], vote['no_count'], vote['other_count'])
+    def nondup_key_for_item(self, item):
+        # call user's key_for_item
+        key = self.key_for_item(item)
         # running count of how many of this key we've seen
-        seq_num = self.seq_for_vote_key[key]
-        self.seq_for_vote_key[key] += 1
-        # append seq_num to key to avoid sharing key for multiple votes
+        seq_num = self.seq_for_key[key]
+        self.seq_for_key[key] += 1
+        # append seq_num to key to avoid sharing key for multiple items
         return key + (seq_num,)
 
-    def learn_vote_ids(self, votes_list):
-        """ read in already set vote_ids on bill objects """
+    def learn_ids(self, item_list):
+        """ read in already set ids on objects """
         self._reset_sequence()
-        for vote in votes_list:
-            key = self._key_for_vote(vote)
-            self.vote_ids[key] = vote['vote_id']
+        for item in item_list:
+            key = self.nondup_key_for_item(item)
+            self.ids[key] = item[self.id_key]
 
-    def set_vote_ids(self, votes_list):
-        """ set vote ids on an object, using internal mapping then new ids """
+    def set_ids(self, item_list):
+        """ set ids on an object, using internal mapping then new ids """
         self._reset_sequence()
-        for vote in votes_list:
-            key = self._key_for_vote(vote)
-            vote['vote_id'] = self.vote_ids.get(key) or self._get_next_id()
+        for item in item_list:
+            key = self.nondup_key_for_item(item)
+            item[self.id_key] = self.ids.get(key) or self._get_next_id()
+
+class VoteMatcher(GenericIDMatcher):
+    id_letter = 'V'
+    id_collection = 'vote_ids'
+    id_key = 'vote_id'
+
+    def key_for_item(self, vote):
+        return (vote['motion'], vote['chamber'], vote['date'],
+                vote['yes_count'], vote['no_count'], vote['other_count'])
+
+class DocumentMatcher(GenericIDMatcher):
+    id_letter = 'D'
+    id_collection = 'document_ids'
+    id_key = 'doc_id'
+
+    def key_for_item(self, document):
+        # URL is good enough as a key
+        return (document['url'],)
 
 
 __committee_ids = {}
