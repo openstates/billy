@@ -1,6 +1,12 @@
 scrapelib changelog
 ===================
 
+0.9.6
+-----
+    * add alternate_bill_ids and related functionality
+    * updated oysterize command to work with oyster >= 0.3
+    * bugfix: random_bill restricted session
+
 0.9.5
 -----
 **21 February 2012**
