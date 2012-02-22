@@ -114,7 +114,7 @@ def _run_scraper(scraper_type, options, metadata):
                 scrape['exception'] = e
                 runs.append(scrape)
                 e._billy_scrape_runlog = runs
-                raise
+                raise e
 
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
@@ -373,6 +373,7 @@ def main(old_scrape_compat=False):
                 if args.bills:
                     run_record += _run_scraper('bills', args, metadata)
             except Exception as e :
+                print e
                 run_record += e._billy_scrape_runlog
                 lex = e
             exec_end  = dt.datetime.utcnow()
