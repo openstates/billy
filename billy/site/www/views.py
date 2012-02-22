@@ -3,9 +3,11 @@ from functools import wraps
 from itertools import repeat
 
 from django.shortcuts import render, redirect
-from django.template import RequestContext
+from django.template import RequestContext, loader
 
-from billy.models import *
+
+
+from billy.models import db, Bill, Metadata, Legislator, Committee
 
 from viewdata import overview
 from forms import StateSelectForm
@@ -22,7 +24,7 @@ def simplified(f):
     @wraps(f)
     def wrapper(request, *args, **kwargs):
         dictionary = f(request, *args, **kwargs)
-        template = f.__name__ + '.html'
+        template = '%s.html' % f.__name__
         return render(request, template, dictionary)
 
     return wrapper
@@ -33,7 +35,7 @@ def simplified(f):
 def state(request, abbr):
     '''
     ''' 
-    metadata = Metadata.get_object({'_id': abbr})
+    metadata = Metadata.get_object(abbr)
     report = db.reports.find_one({'_id': abbr})
 
     sessions = report.session_link_data()
@@ -68,7 +70,7 @@ def legislators(request, abbr):
 @simplified
 def legislators_chamber(request, abbr, chamber):
     
-    state = Metadata.get_object({'_id': abbr})
+    state = Metadata.get_object(abbr)
     chamber_name = state['%s_chamber_name' % chamber]
 
     # Query params

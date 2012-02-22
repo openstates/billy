@@ -52,6 +52,7 @@ class Document(dict):
     # Each subclass represents a document from a specific collection.
     collection = None
 
+    @property
     def id(self):
         '''
         Alias '_id' to avoid django template complaints about names
@@ -59,7 +60,7 @@ class Document(dict):
         '''
         return self['_id']
 
-    
+    @property
     def metadata(self):
         '''
         For collections like reports and bills that have a 'state' key.
@@ -208,7 +209,7 @@ class Metadata(Document):
         '''
         return cls(get_metadata(abbr))
 
-
+    @property
     def abbr(self):
         '''Return the state's two letter abbreviation.'''
         return self['_id']
@@ -221,7 +222,7 @@ class Bill(Document):
     collection = db.bills
 
     def session_details(self):
-        metadata = self.metadata()
+        metadata = self.metadata
         return metadata['session_details'][self['session']]
 
     def most_recent_action(self):
@@ -251,17 +252,16 @@ class Report(Document):
 # Setup the SON manipulator.
 _collection_model_dict = {}
 
-for name, value in locals().items():
+models_list = [
+    Metadata,
+    Report,
+    Bill,
+    Legislator,
+    Committee,
+    ]
 
-    try:
-        is_model = issubclass(value, Document) and not (value == Document)
-    except TypeError:
-        # This name didn't refer to a class.
-        continue
-
-    if is_model:
-        # Key this model's collection to its class.
-        _collection_model_dict[value.collection.name] = value
+for m in models_list:
+    _collection_model_dict[m.collection.name] = m
 
 class Transformer(SONManipulator):
     def transform_outgoing(self, son, collection, 
@@ -273,7 +273,6 @@ class Transformer(SONManipulator):
 
 db.add_son_manipulator(Transformer())
 
-models_list = _collection_model_dict.values()
 
 
 if __name__ == "__main__":

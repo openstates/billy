@@ -185,10 +185,7 @@ class Jenkins(BaseCommand):
 
         if 'all' in args.states:
             _states = states
-
-        # CA just doesn't work. "Out of memory", complains my laptop.
-        _states.remove('ca')
-    
+   
         for state in _states:
 
             if args.data:

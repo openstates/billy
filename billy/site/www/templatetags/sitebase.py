@@ -12,10 +12,10 @@ register = template.Library()
 
 @register.inclusion_tag('sitebase/states_selection.html')
 def states_selection():
-	form = StateSelectForm
-	return locals()
+    form = StateSelectForm
+    return locals()
 
 @register.inclusion_tag('sitebase/states_sidebar.html')
 def states_sidebar(abbr):
-	return locals()
+    return locals()
 

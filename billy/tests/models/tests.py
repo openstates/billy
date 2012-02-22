@@ -1,8 +1,9 @@
-import pdb
+
 import unittest
 from random import choice
 
-from billy.models import *
+from billy.models import Bill, Metadata, Legislator, CommitteeMember
+from billy.models import models_list
 from billy import db
 
 class TestNoConflict(unittest.TestCase):
@@ -12,7 +13,7 @@ class TestNoConflict(unittest.TestCase):
 	def conflict_exists(self, model_attrs, doc_keys):
 		return model_attrs & doc_keys
 
-	def _test_all_models(self):
+	def test_all_models(self):
 		conflict_exists = self.conflict_exists
 		for model in models_list:
 			model_attrs = set(dir(model))
@@ -20,7 +21,7 @@ class TestNoConflict(unittest.TestCase):
 				doc_keys = set(document)
 				self.assertFalse(conflict_exists(model_attrs, doc_keys))
 
-	def _test_bogus_key(self, model=Bill):
+	def test_bogus_key(self, model=Bill):
 		document = model.collection.find_one()
 		model_attrs = set(dir(model))
 		doc_keys = set(document)
@@ -87,7 +88,7 @@ class TestDereferencing(unittest.TestCase):
 				
 			leg_id = leg['_id']
 
-			# Get the committees manually. 
+			# Get the legislator's bills manually. 
 			bills1 = list(db.bills.find({'sponsors.leg_id': leg_id}))
 
 			# Now the spiffy way.
