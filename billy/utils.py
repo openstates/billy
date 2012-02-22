@@ -134,3 +134,12 @@ def textual_diff( l1, l2 ):
             "line" : lastfix
         }
     return lines
+
+
+def find_bill(query, fields=None):
+    bill = db.bills.find_one(query, fields=fields)
+    if not bill and 'bill_id' in query:
+        bill_id = query.pop('bill_id')
+        query['alternate_bill_ids'] = bill_id
+        bill = db.bills.find_one(query, fields=fields)
+    return bill

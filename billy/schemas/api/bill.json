@@ -9,6 +9,7 @@
     "title": {"type": "string"},
     "type": {"type": "array", "items": {"type": "string"}},
     "alternate_titles": {"type": "array", "items": {"type": "string"}},
+    "alternate_bill_ids": {"type": "array", "items": {"type": "string"}, "required": "false"},
     "created_at": {"type": "datetime"},
     "updated_at": {"type": "datetime"},
     "versions": {"type": "array", "items": {"type": "object", "properties": {
