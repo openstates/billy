@@ -114,7 +114,7 @@ def _run_scraper(scraper_type, options, metadata):
                 scrape['exception'] = e
                 runs.append(scrape)
                 e._billy_scrape_runlog = runs
-                raise e
+                raise
 
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
