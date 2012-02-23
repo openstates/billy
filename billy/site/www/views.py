@@ -24,7 +24,7 @@ def simplified(f):
     @wraps(f)
     def wrapper(request, *args, **kwargs):
         dictionary = f(request, *args, **kwargs)
-        template = '%s.html' % f.__name__
+        template = 'billy/www/%s.html' % f.__name__
         return render(request, template, dictionary)
 
     return wrapper
@@ -104,8 +104,9 @@ def legislator(request, abbr, leg_id):
     '''
     Note - changes needed before we can display "sessions served" info.
     '''
-    legislator = Legislator.get_object(_id=leg_id)
+    legislator = db.legislators.find_one({'_id': leg_id})
     sources = legislator['sources']
+    sponsored_bills = legislator.sponsored_bills(limit=5)
     return locals()
     
 
@@ -142,7 +143,7 @@ def committees_chamber(request, abbr, chamber):
 
 @simplified
 def committee(request, abbr, committee_id):
-    committee = Committee.get_object(_id=committee_id)
+    committee = db.committees.find_one({'_id': committee_id})
     sources = committee['sources']
     return locals()
 
@@ -155,7 +156,7 @@ def bills(request, abbr):
 @simplified
 def bill(request, abbr, bill_id):
     state = Metadata.get_object(abbr)
-    bill = Bill.get(_id=bill_id)
+    bill = db.bills.find_one({'_id': bill_id})
     sources = bill['sources']
     return locals()
 
@@ -169,7 +170,7 @@ def votes(request, abbr):
 @simplified
 def vote(request, abbr, bill_id, vote_index):
     state = Metadata.get_object(abbr)
-    bill = Bill.get(_id=bill_id)
+    bill = db.bills.find_one({'_id': bill_id})
     vote = bill['votes'][int(vote_index)]
     sources = bill['sources']
     return locals()
