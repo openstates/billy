@@ -107,14 +107,7 @@ def _run_scraper(scraper_type, options, metadata):
     # run scraper against year/session/term
     for time in times:
         for chamber in options.chambers:
-            try:
-                scraper.scrape(chamber, time)
-            except Exception as e: #We're re-raising.
-                scrape['end_time']  = dt.datetime.utcnow()
-                scrape['exception'] = e
-                runs.append(scrape)
-                e._billy_scrape_runlog = runs
-                raise
+            scraper.scrape(chamber, time)
 
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
@@ -373,8 +366,7 @@ def main(old_scrape_compat=False):
                 if args.bills:
                     run_record += _run_scraper('bills', args, metadata)
             except Exception as e :
-                print e
-                run_record += e._billy_scrape_runlog
+                run_record += [{ "exception" : e }]
                 lex = e
             exec_end  = dt.datetime.utcnow()
 
