@@ -392,7 +392,8 @@ def main(old_scrape_compat=False):
                     scrape_data['failure'] = True
 
             if lex:
-                db.billy_runs.save( scrape_data, safe=True )
+                if args.do_import:
+                    db.billy_runs.save( scrape_data, safe=True )
                 raise
 
         elif args.solo_bills:
