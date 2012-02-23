@@ -84,8 +84,9 @@ def import_bill(data, votes, categorizer):
 
     # clean up bill_ids
     data['bill_id'] = fix_bill_id(data['bill_id'])
-    data['alternate_bill_ids'] = [fix_bill_id(bid) for bid in
-                                  data.get('alternate_bill_ids', [])]
+    if 'alternate_bill_ids' in data:
+        data['alternate_bill_ids'] = [fix_bill_id(bid) for bid in
+                                      data['alternate_bill_ids']]
 
     # move subjects to scraped_subjects
     # NOTE: intentionally doesn't copy blank lists of subjects
