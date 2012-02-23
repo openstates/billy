@@ -4,6 +4,7 @@ import sys
 import base64
 import logging
 import subprocess
+import urllib
 
 from StringIO import StringIO
 from zipfile import ZipFile, BadZipfile
@@ -103,7 +104,7 @@ def _import(abbr, folder, path=path):
 
     # Get the data.
     abbr = abbr.lower()
-    state = states.get(abbr)
+    state = urllib.pathname2url(states.get(abbr))
     zip_url = urls[folder].format(**locals())
 
     logger.info('requesting {folder} folder for {state}...'.format(**locals()))
@@ -114,7 +115,7 @@ def _import(abbr, folder, path=path):
         # resp = open('foo', 'w')
         # resp.write(urlopen(req))
     except HTTPError:
-        logger.warn('CRAP: %s' % zip_url)
+        logger.warn('Could\'t fetch from url: %s' % zip_url)
         return
         
     size = len(resp)
@@ -185,10 +186,7 @@ class Jenkins(BaseCommand):
 
         if 'all' in args.states:
             _states = states
-
-        # CA just doesn't work. "Out of memory", complains my laptop.
-        _states.remove('ca')
-    
+   
         for state in _states:
 
             if args.data:

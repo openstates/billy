@@ -1,0 +1,48 @@
+{% extends "billy/www/base.html" %}
+{% load url from future %}
+{% load sitebase %}
+
+
+{% block title %}{{legislator.full_name }}{% endblock %}
+
+{% block sidebar %}{% states_sidebar abbr %}{% endblock %}
+
+{% block content %}
+<h1>{{ state.name }} {{ chamber_name }}</h1>
+<h2>{{ legislator.full_name }}</h2>
+{{ legislator.party }}, District {{ legislator.district }}
+
+<h3>Media</h3>
+Media stuff here.
+
+<h3>Committees</h3>
+<ul>
+{% for committee in legislator.committees %}
+  <li><a href="{% url 'committee' abbr committee.id %}">{{committee.committee}}</a></li>
+{% endfor %}
+</ul>
+
+<h3>Bills</h3>
+<ul>
+{% for bill in sponsored_bills %}
+  <li>
+    {{ bill.most_recent_action.date|date:"M j, Y"}}<br>
+    <a href="{% url 'bill' abbr bill.id %}">{{bill.id}}</a><br>
+    {{ bill.title }}
+  </li>
+{% endfor %}
+</ul>
+
+<h3>Votes</h3>
+<ul>
+{% for vote in legislator.votes %}
+  <li>
+
+  </li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}
+
+

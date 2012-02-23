@@ -22,6 +22,7 @@ COMMAND_MODULES = (
     'billy.commands.update_external_ids',
     'billy.commands.update_leg_ids',
     'billy.commands.validate_api',
+    'billy.commands.jenkins',
 )
 
 def import_command_module(mod):
