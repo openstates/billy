@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "billy/www/base.html" %}
 {% load url from future %}
 {% load sitebase %}
 
@@ -32,7 +32,7 @@
     
 
     {% if obj.leg_id %}
-        {% with legislator=obj.legislator %}
+        {% with legislator=obj.legislator_object %}
           <td>{{ legislator.district }}</td>
           <td>{{ legislator.party }}</td>
         {% endwith %}

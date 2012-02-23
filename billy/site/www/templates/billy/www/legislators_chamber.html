@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "billy/www/base.html" %}
 {% load sitebase %}
 
 
@@ -9,6 +9,6 @@
 {% block content %}
 <h1>{{ state.name }} {{ chamber_name }}</h1>
 <h2>Legislators</h2>
-{% include "legislator_table.html" %}
+{% include "billy/www/legislator_table.html" %}
 
 {% endblock %}

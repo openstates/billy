@@ -11,7 +11,7 @@
       {% if not committee.members %}
         [data not yet available]
       {% else %}
-        {% for legislator in committee.members|dictsort:"name" %}
+        {% for legislator in committee.members_objects|dictsort:"name" %}
           <a href="{% url 'legislator' abbr legislator.leg_id %}">{{ legislator.name }}</a>{% if not forloop.last %}; {% endif %}
         {% endfor %}
       {% endif %}

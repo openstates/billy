@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "billy/www/base.html" %}
 {% load url from future %}
 {% load sitebase %}
 
@@ -24,7 +24,7 @@ Media stuff here.
 
 <h3>Bills</h3>
 <ul>
-{% for bill in legislator.sponsored_bills %}
+{% for bill in sponsored_bills %}
   <li>
     {{ bill.most_recent_action.date|date:"M j, Y"}}<br>
     <a href="{% url 'bill' abbr bill.id %}">{{bill.id}}</a><br>
