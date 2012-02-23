@@ -226,9 +226,10 @@ def run_detail(request, abbr):
         runlog['scraped']['ended'] - runlog['scraped']['started']
     )
     for entry in runlog['scraped']['run_record']:
-        entry['t_delta'] = (
-            entry['end_time'] - entry['start_time']
-        )
+        if not "exception" in entry:
+            entry['t_delta'] = (
+                entry['end_time'] - entry['start_time']
+            )
 
     context = {
         "runlog" : runlog,
