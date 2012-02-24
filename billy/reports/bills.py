@@ -21,7 +21,6 @@ def _bill_report_dict():
             'actions_per_type': defaultdict(int),
             'actions_per_actor': defaultdict(int),
             'actions_per_month': defaultdict(int),
-            'other_actions': defaultdict(int),
             'sponsorless_count': 0,
             '_sponsor_count': 0,
             '_sponsors_with_leg_id_count': 0,
@@ -36,7 +35,6 @@ def _bill_report_dict():
             '_rollcalls_with_leg_id_count': 0,
             '_subjects_count': 0,
             'bills_per_subject': defaultdict(int),
-            'uncategorized_subjects': defaultdict(int),
             'sourceless_count': 0,
             'versionless_count': 0,
             'version_count': 0,
@@ -50,6 +48,8 @@ def scan_bills(abbr):
 
     duplicate_sources = defaultdict(int)
     duplicate_versions = defaultdict(int)
+    other_actions = defaultdict(int)
+    uncategorized_subjects = defaultdict(int)
     sessions = defaultdict(_bill_report_dict)
 
     for bill in db.bills.find({'level': level, level: abbr}):
@@ -75,7 +75,7 @@ def scan_bills(abbr):
             for type in action['type']:
                 session_d['actions_per_type'][type] += 1
             if 'other' in action['type']:
-                session_d['other_actions'][action['action']] += 1
+                other_actions[action['action']] += 1
             session_d['actions_per_actor'][action['actor']] += 1
             session_d['actions_per_month'][date.strftime('%Y-%m')] += 1
         if not bill['actions']:
@@ -136,7 +136,7 @@ def scan_bills(abbr):
 
         # subjects
         for subj in bill.get('scraped_subjects', []):
-            session_d['uncategorized_subjects'][subj] += 1
+            uncategorized_subjects[subj] += 1
         if bill.get('subjects'):
             session_d['_subjects_count'] += 1
             for subject in bill['subjects']:
@@ -167,6 +167,8 @@ def scan_bills(abbr):
 
     return {'duplicate_versions': dup_version_urls,
             'duplicate_sources': dup_source_urls,
+            'other_actions': other_actions.items(),
+            'uncategorized_subjects': uncategorized_subjects.items(),
             'sessions': sessions,
            }
 

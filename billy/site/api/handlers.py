@@ -482,12 +482,14 @@ class LegislatorGeoHandler(BillyHandler):
             resp.write(': Need lat and long parameters')
             return resp
 
-        url = "%sboundary/?contains=%s,%s&sets=sldl,sldu&limit=0" % (
+        url = "%sboundary/?shape_type=none&contains=%s,%s&sets=sldl,sldu&limit=0" % (
             self.base_url, latitude, longitude)
 
         resp = json.load(urllib2.urlopen(url))
 
         filters = []
+        boundary_mapping = {}
+
         for dist in resp['objects']:
             state = dist['name'][0:2].lower()
             chamber = {'/1.0/boundary-set/sldu/': 'upper',
@@ -498,16 +500,22 @@ class LegislatorGeoHandler(BillyHandler):
             districts = db.districts.find({'chamber': chamber,
                                            'boundary_id': census_name})
             count = districts.count()
-            if count == 1:
+            if count:
                 filters.append({'state': state,
                                 'district': districts[0]['name'],
                                 'chamber': chamber})
+                boundary_mapping[(state, districts[0]['name'], chamber)] = census_name
 
         if not filters:
             return []
 
-        return list(db.legislators.find({'$or': filters},
-                                        _build_field_list(request)))
+        legislators = list(db.legislators.find({'$or': filters},
+                                               _build_field_list(request)))
+        for leg in legislators:
+            leg['boundary_id'] = boundary_mapping[(leg['state'],
+                                                   leg['district'],
+                                                   leg['chamber'])]
+        return legislators
 
 
 class DistrictHandler(BillyHandler):
@@ -545,7 +553,7 @@ class BoundaryHandler(BillyHandler):
 
 
     def read(self, request, boundary_id):
-        url = "%sshape/%s/" % (self.base_url, boundary_id)
+        url = "%sboundary/%s/?shape_type=simple" % (self.base_url, boundary_id)
         try:
             data = json.load(urllib2.urlopen(url))
         except urllib2.HTTPError, e:
@@ -555,12 +563,11 @@ class BoundaryHandler(BillyHandler):
             else:
                 raise e
 
-        shape = data['shape']
         centroid = data['centroid']['coordinates']
 
         all_lon = []
         all_lat = []
-        for shape in data['shape']['coordinates']:
+        for shape in data['simple_shape']['coordinates']:
             for coord_set in shape:
                 all_lon.extend(c[0] for c in coord_set)
                 all_lat.extend(c[1] for c in coord_set)
@@ -572,7 +579,7 @@ class BoundaryHandler(BillyHandler):
                  }
 
         district = db.districts.find_one({'boundary_id': boundary_id})
-        district['shape'] = shape
+        district['shape'] = data['simple_shape']['coordinates']
         district['region'] = region
 
         return district

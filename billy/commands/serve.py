@@ -25,4 +25,4 @@ class Serve(BaseCommand):
                            USE_LOCKSMITH=False,
                           )
 
-        management.call_command('runserver','0.0.0.0:8000')
+        management.call_command('runserver')
