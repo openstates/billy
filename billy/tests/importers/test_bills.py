@@ -104,40 +104,6 @@ def test_import_bill():
     assert 'third title' in bill['alternate_titles']
 
 
-@with_setup(setup_func)
-def test_import_bill_with_partial_bill_vote_id():
-    # test a hack added for Rhode Island where vote bill_ids are missing
-    # their prefix (ie. 7033 instead of HB 7033)
-    db.metadata.insert({'level': 'state', '_id': 'zz',
-                        'terms': [{'name': 'T1', 'sessions': ['S1', 'S2']}],
-                        '_partial_vote_bill_id': True,
-                       })
-    data = {'_type': 'bill', 'level': 'state', 'state': 'zz', 'bill_id': 'S1',
-            'chamber': 'upper', 'session': 'S1',
-            'title': 'main title',
-            'sponsors': [],
-            'versions': [],
-            'votes': [],
-           }
-    standalone_votes = {
-        # chamber, session, bill id -> vote list
-        ('upper', 'S1', '1'): [
-          {'motion': 'house passage', 'chamber': 'lower', 'date': None,
-           'yes_count': 1, 'no_count': 0, 'other_count': 0,
-           'yes_votes': [], 'no_votes': [], 'other_votes': [],
-          }
-        ]
-    }
-
-    bills.import_bill(copy.deepcopy(data), copy.deepcopy(standalone_votes),
-                      None)
-
-    bill = db.bills.find_one()
-    assert bill['bill_id'] == 'S 1'
-    assert bill['votes'][0]['motion'] == 'house passage'
-    assert bill['votes'][0]['chamber'] == 'lower'
-
-
 def test_fix_bill_id():
     expect = 'AB 74'
     bill_ids = ['A.B. 74', 'A.B.74', 'AB74', 'AB 0074',
@@ -147,8 +113,6 @@ def test_fix_bill_id():
         assert bills.fix_bill_id(bill_id) == expect
 
     assert bills.fix_bill_id('PR19-0041') == 'PR 19-0041'
-    assert bills.fix_bill_id(' 999') == '999'
-    assert bills.fix_bill_id('999') == '999'
 
 
 

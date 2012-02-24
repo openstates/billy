@@ -228,6 +228,16 @@ def prepare_obj(obj):
 
     return make_plus_fields(obj)
 
+
+def merge_legislators(old, new):
+    all_ids = set(old['_all_ids']).union(new['_all_ids'])
+    new['_all_ids'] = list(all_ids)
+    db.legislators.remove({'_id': new['_id']})
+    new['_id'] = old['_id']
+    new['leg_id'] = new['_id']
+    db.legislators.save(new, safe=True)
+
+
 def next_big_id(abbr, letter, collection):
     query = SON([('_id', abbr)])
     update = SON([('$inc', SON([('seq', 1)]))])
@@ -237,66 +247,4 @@ def next_big_id(abbr, letter, collection):
                           ('new', True),
                           ('upsert', True)]))['value']['seq']
     return "%s%s%08d" % (abbr.upper(), letter, seq)
-
-def merge_legislators(leg1, leg2):
-    assert leg1['_id'][:3] == leg2['_id'][:3]
-    assert leg1['_id'] != leg2['_id']
-    if leg1['_id'] > leg2['_id']:
-        leg1, leg2 = leg2, leg1
-
-    leg1 = leg1.copy()
-    leg2 = leg2.copy()
-
-    roles     = 'roles'
-    old_roles = 'old_roles'
-
-    no_compare = set(('_id', 'leg_id', '_all_ids', '_locked_fields',
-        'created_at', 'updated_at', roles, old_roles ))
-
-    leg1['_all_ids'] += leg2['_all_ids']
-
-    # get set of keys that appear in both legislators and are not blacklisted
-    leg1keys = set(leg1.keys())
-    leg2keys = set(leg2.keys())
-    compare_keys = (leg1keys & leg2keys) - no_compare
-    leg1_locked = leg1.get('_locked_fields', [])
-    leg2_locked = leg2.get('_locked_fields', [])
-
-    # if a key is in both, copy 2 to 1 if they differ and key is locked in 2
-    # or unlocked in 1
-    for key in compare_keys:
-        if (leg1[key] != leg2[key] and leg2[key] and (key in leg2_locked or
-                                                      key not in leg1_locked)):
-            leg1[key] = leg2[key]
-
-    # locked is now union of the two
-    leg1['_locked_fields'] = list(set(leg1_locked + leg2_locked))
-
-    # copy new keys over to old legislator
-    for key in leg2keys - leg1keys:
-        leg1[key] = leg2[key]
-
-    # XXX: Set updated_at
-    if leg1[roles] != leg2[roles]:
-        # OK. Let's dump the current roles into the old roles.
-        # WARNING: This code *WILL* drop current ctty appointments.
-        #  What this means:
-        #      In the case where someone goes from chamber L->U, and is on
-        #      joint-ctty A, moves to U, we will *LOOSE* joint-ctty from 
-        #      old_roles & roles!! There's a potenital for data loss, but it's
-        #      not that big of a thing.
-        #   -- paultag & jamesturk, 02-02-2012
-        crole = leg1[roles][0]
-        try:
-            leg1[old_roles][crole['term']].append( crole )
-        except KeyError:
-            try:
-                leg1[old_roles][crole['term']] = [crole]
-            except KeyError:
-                # dear holy god this needs to be fixed.
-                leg1[old_roles] = { crole['term'] : [ crole ] }
-
-        # OK. We've migrated the newly old roles to the old_roles entry.
-        leg1[roles] = [ leg2[roles][0] ]
-    return ( leg1, leg2['_id'] )
 

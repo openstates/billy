@@ -40,7 +40,7 @@ of their data'''
                        'photo_url'])
             keys.intersection_update(namefile.fieldnames)
             for key in keys:
-                row[key] = row[key]
+                row[key] = row[key].decode('utf-8')
                 fileval = (row[key] or u'').strip()
                 dbval = (leg.get(key, u'') or u'').strip()
                 if fileval != dbval:
