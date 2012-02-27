@@ -16,7 +16,6 @@ from billy.conf import settings
 from billy.commands import BaseCommand
 
 
-
 #-------------------------------------------------------------------------
 # The code formerly known as "janky"
 states = {
@@ -102,6 +101,17 @@ logger.addHandler(ch)
 
 def _import(abbr, folder, path=path):
 
+    # Get credentials.
+    username = getattr(settings, 'JENKINS_USER', None)
+    password = getattr(settings, 'JENKINS_PASSWORD', None)
+    if username is None:
+        username = raw_input('jenkins username: ')
+    if password is None:
+        password = getpass.getpass('jenkins password: ')
+
+    auth_header = '%s:%s' % (username, password)
+    auth_header = 'Basic ' + base64.encodestring(auth_header)[:-1]
+
     # Get the data.
     abbr = abbr.lower()
     state = urllib.pathname2url(states.get(abbr))
@@ -117,7 +127,7 @@ def _import(abbr, folder, path=path):
     except HTTPError:
         logger.warn('Could\'t fetch from url: %s' % zip_url)
         return
-        
+
     size = len(resp)
     logger.info('response ok [%d bytes]. Unzipping files...' % size)
 
@@ -132,12 +142,12 @@ def _import(abbr, folder, path=path):
     except BadZipfile:
         logger.warn('%s response wasn\'t a zip file. Skipping.' % state)
         return
-        
+
     file_count = len(zipfile.namelist())
     zipfile.extractall(path)
     logger.info('Extracted %d files to %s.' % (file_count, path))
 
-    
+
 def import_data(abbr, path=path):
     path = join(path, 'data')
     _import(abbr, 'data', path)
@@ -150,16 +160,6 @@ def import_cache(abbr):
 funcs = {'data': import_data,
          'cache': import_cache}
 
-# Get credentials.
-username = getattr(settings, 'JENKINS_USER', None)
-password = getattr(settings, 'JENKINS_PASSWORD', None)
-if username is None:
-    username = raw_input('jenkins username: ')
-if password is None:
-    password = getpass.getpass('jenkins password: ')
-
-auth_header = '%s:%s' % (username, password)
-auth_header = 'Basic ' + base64.encodestring(auth_header)[:-1]         
 
 #--------------------------------------------------------------------------------
 # Setup the management command.
@@ -175,7 +175,7 @@ class Jenkins(BaseCommand):
         self.add_argument('--data', dest='data', default=True,
                           help='whether to download data.')
         self.add_argument('--imp', dest='imp', default=True,
-                          help='whether to import downloaded data.')                          
+                          help='whether to import downloaded data.')
         self.add_argument('--cache', dest='cache', default=False,
                           help='whether to download cache files')
 
@@ -186,7 +186,7 @@ class Jenkins(BaseCommand):
 
         if 'all' in args.states:
             _states = states
-   
+
         for state in _states:
 
             if args.data:
@@ -198,4 +198,4 @@ class Jenkins(BaseCommand):
             if args.imp:
                 c = 'billy-update %s --import --report --alldata -vvv' % state
                 subprocess.call(c, shell=True)
-        
+
