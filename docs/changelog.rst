@@ -3,8 +3,12 @@ scrapelib changelog
 
 0.9.6
 -----
-    * add alternate_bill_ids and related functionality
+    * add alternate_bill_ids and related functionality (needed for TN)
     * updated oysterize command to work with oyster >= 0.3
+    * added initial work on class-based models
+    * added new beginning of web frontend
+    * added run logging work
+    * bugfix: billy-util broken by jenkins command
     * bugfix: random_bill restricted session
 
 0.9.5
