@@ -1,0 +1,234 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block script %}
+    <script type="text/javascript" src="http://s3.amazonaws.com/assets.sunlightlabs.com/openstates/v1/js/jquery-1.5.min.js"></script>
+    <script type="text/javascript" src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.jqplot.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.jqplot.min.css" ></link>
+    <!--
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.min.js"
+    ></script>
+    -->
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.pieRenderer.min.js"
+    ></script>
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.barRenderer.min.js"
+    ></script>
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.pointLabels.min.js"
+    ></script>
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.canvasAxisTickRenderer.min.js"
+    ></script>
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.canvasTextRenderer.min.js"
+    ></script>
+    <script
+        type="text/javascript"
+        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.categoryAxisRenderer.min.js"
+    ></script>
+    <style>
+.jqplot-table-legend {
+    width:   auto;
+}
+.jqplot-point-label {
+    font-weight: bold;
+    font-size:   0.8em;
+}
+    </style>
+
+    <script type = "text/javascript" >
+
+function new_chart( key ) {
+    /* let's create a new chart */
+    var width  = 500;
+    var height = 200;
+    $("#chart-area").append(
+        "<div class='billy-chart' style='width:" + width +" px;height:" + height +
+            "px;' id = '" + "chartdiv-" +
+            key + "' ></div>"
+    );
+}
+
+function pieize( key, val, title ) {
+
+    if ( val.length <= 0 ) {
+        return;
+    }
+
+    new_chart( key );
+    var plot1 = jQuery.jqplot( "chartdiv-" + key, [val], {
+        title: title,
+        seriesDefaults: {
+            // Make this a pie chart.
+            renderer: jQuery.jqplot.PieRenderer,
+            rendererOptions: {
+                // Put data labels on the pie slices.
+                // By default, labels show the percentage of the slice.
+                showDataLabels: true
+            }
+        },
+        legend: {
+            placement: 'outsideGrid',
+            show:true,
+            location: 'w'
+        }
+    });
+}
+
+function stackize( key, val, title ) {
+    if ( val.length <= 0 ) {
+        return;
+    }
+
+    new_chart( key );
+    var plot1 = $.jqplot('chartdiv-' + key, val, {
+        title: title,
+        stackSeries: true,
+        seriesDefaults:{
+            pointLabels: {show: true},
+            renderer:$.jqplot.BarRenderer,
+            rendererOptions: {
+                fillToZero: true,
+                barMargin: 30,
+                highlightMouseDown: true
+            }
+        },
+        series:[
+            {label:'legislators'},
+            {label:'bills'},
+            {label:'votes'},
+            {label:'committees'},
+        ],
+        legend: {
+            location: 'w',
+            show: true,
+            placement: 'outsideGrid'
+        },
+    });
+}
+
+function lineize( key, val, title ) {
+    runs = val.runs;
+    avgs = val.avgs;
+
+    if ( runs.length <= 0 && avgs <= 0 ) {
+        return;
+    }
+
+    new_chart( key );
+    var plot1 = $.jqplot("chartdiv-" + key, [runs, avgs], {
+        title: title,
+        legend: {
+            location: 'w',
+            placement: 'outsideGrid',
+            show: true,
+            labels: [
+                "Run",
+                "Rolling Average"
+            ]
+        },
+        axes : {
+            xaxis : {
+                tickOptions: {
+                    angle: -30
+                },
+                tickRenderer:$.jqplot.CanvasAxisTickRenderer,
+                label:"POSIX Timestamp",
+                labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+            },
+            yaxis:{
+                renderer:$.jqplot.LogAxisRenderer,
+                tickOptions:{
+                    labelPosition: 'middle',
+                    angle:-30
+                },
+                tickRenderer:$.jqplot.CanvasAxisTickRenderer,
+                labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                label: "Time (in seconds)",
+            }
+        },
+        fillBetween: {
+            series1: 0,
+            series2: 1,
+            color: "rgba(227, 167, 111, 0.7)",
+            baseSeries: 0,
+            fill: true
+        },
+        seriesDefaults: {
+            pointLabels: {
+                show: true
+             },
+            rendererOptions: {
+                smooth: true
+            }
+        }
+    });
+}
+$(document).ready(function(){
+    $.getJSON( "/browse/run-detail-data/{{ state }}", function(data) {
+        d = data['stacked'];
+        $.each(d, function(key, val) {
+            stackize( key, val, data['title'][key] );
+        });
+        d = data['lines'];
+        $.each(d, function(key, val) {
+            lineize( key, val, data['title'][key] );
+        });
+        d = data['pies'];
+        $.each(d, function(key, val) {
+            pieize( key, val, data['title'][key] );
+        });
+    });
+});
+    </script>
+{% endblock %}
+
+{% block content %}
+<p>
+{% if not warning %}
+    <div class="alert-message block-message info">
+        <strong>Scrape last ran with success</strong><br />
+    </div>
+{% endif %}
+</p>
+<p>
+<h1>run report for {{ runlog.scraped.state }}</h1>
+
+The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
+
+<code>{% for key in runlog.scraped.args %}{{ key }} {% endfor %}</code><br />
+<br />
+</p>
+<p>
+{% for key in runlog.scraped.run_record %}
+    <!-- <h4>{{ key.chamber }} {{ key.type }} ({{ key.time }})</h4>
+    Scrape took <b>{{ key.t_delta }}</b> -->
+    {% if key.exception %}
+        <b>Exception Recieved</b>
+        <code>{{ key.exception.type }}</code> was thrown.<br /><br />
+        <pre>{{ key.exception.message }}</pre>
+    {% endif %}
+    <br />
+{% endfor %}
+</p>
+<p>
+<h3>some charts & stats</h3>
+In order to help digest some of the raw numbers, here are some handy charts.
+</p><br /><br />
+
+<p>
+<div id = 'chart-area' >
+</div>
+</p>
+
+{% endblock %}

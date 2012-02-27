@@ -32,6 +32,9 @@
     {% endif %}
         {% if warning %}
             <div class = "alert-message block-message error" >
+                {% if warning_title %}
+                    <strong>{{ warning_title }}</strong><br />
+                {% endif %}
                 {{ warning }}
             </div>
         {% endif %}

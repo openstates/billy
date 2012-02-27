@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import glob
-import logging
 import os
 import sys
-import argparse
 import json
+import glob
+import logging
+import argparse
 import unicodecsv
+
+import datetime as dt
 
 from billy import db
 from billy.conf import settings, base_arg_parser
@@ -59,7 +61,7 @@ def _run_scraper(scraper_type, options, metadata):
     _clear_scraped_data(options.output_dir, scraper_type)
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
-        return
+        return []
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
@@ -94,12 +96,26 @@ def _run_scraper(scraper_type, options, metadata):
         for time in times:
             scraper.validate_term(time, scraper.latest_only)
 
+    runs = []
+
+    scrape = {
+        "type"       : scraper_type
+    } # Removed from the inner loop due to non-universal
+    #   bicameral states
+    scrape['start_time'] = dt.datetime.utcnow()
+
     # run scraper against year/session/term
     for time in times:
         for chamber in options.chambers:
             scraper.scrape(chamber, time)
+
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
+
+    scrape['end_time']  = dt.datetime.utcnow()
+    runs.append(scrape)
+
+    return runs
 
 
 def _scrape_solo_bills(options, metadata):
@@ -142,15 +158,24 @@ def _do_imports(abbrev, args):
     else:
         print "%s not found, continuing without districts" % dist_filename
 
-    if args.legislators:
-        import_legislators(abbrev, settings.BILLY_DATA_DIR)
-    if args.bills:
-        import_bills(abbrev, settings.BILLY_DATA_DIR)
-    if args.committees:
-        import_committees(abbrev, settings.BILLY_DATA_DIR)
-    if args.events:
-        import_events(abbrev, settings.BILLY_DATA_DIR)
+    report = {}
 
+    if args.legislators:
+        report['legislators'] = \
+                import_legislators(abbrev, settings.BILLY_DATA_DIR)
+
+    if args.bills:
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
+
+    if args.committees:
+        report['committees'] = \
+                import_committees(abbrev, settings.BILLY_DATA_DIR)
+
+    if args.events:
+        report['events'] = \
+                import_events(abbrev, settings.BILLY_DATA_DIR)
+
+    return report
 
 def _do_reports(abbrev, args):
     from billy import db
@@ -292,6 +317,8 @@ def main(old_scrape_compat=False):
             args.committees = True
 
 
+        scrape_data = {}
+
         # do full scrape if not solo bills, import only, or report only
         if args.scrape:
             # validate then write metadata
@@ -316,29 +343,65 @@ def main(old_scrape_compat=False):
             with open(os.path.join(args.output_dir, 'metadata.json'), 'w') as f:
                 json.dump(metadata, f, cls=JSONDateEncoder)
 
+            run_record = []
+            exec_record = {
+                "run_record" : run_record,
+                "args"       : sys.argv,
+                "state"      : abbrev
+            }
+
+            lex = None
+
             # run scrapers
-            if args.legislators:
-                _run_scraper('legislators', args, metadata)
-            if args.committees:
-                _run_scraper('committees', args, metadata)
-            if args.votes:
-                _run_scraper('votes', args, metadata)
-            if args.events:
-                _run_scraper('events', args, metadata)
-            if args.bills:
-                _run_scraper('bills', args, metadata)
+            exec_start = dt.datetime.utcnow()
+            try:
+                if args.legislators:
+                    run_record += _run_scraper('legislators', args, metadata)
+                if args.committees:
+                    run_record += _run_scraper('committees', args, metadata)
+                if args.votes:
+                    run_record += _run_scraper('votes', args, metadata)
+                if args.events:
+                    run_record += _run_scraper('events', args, metadata)
+                if args.bills:
+                    run_record += _run_scraper('bills', args, metadata)
+            except Exception as e :
+                run_record += [{ "exception" : e }]
+                lex = e
+            exec_end  = dt.datetime.utcnow()
+
+            exec_record['started']  = exec_start
+            exec_record['ended']    = exec_end
+            scrape_data['scraped'] = exec_record
+
+            for record in run_record:
+                if "exception" in record:
+                    ex = record['exception']
+                    record['exception'] = {
+                        "type"    : ex.__class__.__name__,
+                        "message" : ex.message
+                    }
+                    scrape_data['failure'] = True
+
+            if lex:
+                if args.do_import:
+                    db.billy_runs.save( scrape_data, safe=True )
+                raise
 
         elif args.solo_bills:
             _scrape_solo_bills(args, metadata)
 
         # imports
         if args.do_import:
-            _do_imports(abbrev, args)
+            import_report = _do_imports(abbrev, args)
+            scrape_data['imported'] = import_report
+            # We're tying the run-logging into the import stage - since import
+            # already writes to the DB, we might as well throw this in too.
+            db.billy_runs.save( scrape_data, safe=True )
 
         # reports
         if args.report:
             _do_reports(abbrev, args)
-
 
     except ScrapeError as e:
         print 'Error:', e

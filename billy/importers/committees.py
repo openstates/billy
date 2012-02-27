@@ -83,11 +83,15 @@ def import_committee(data, current_session, current_term):
     # insert/update the actual committee object
     committee = db.committees.find_one(spec)
 
+    committee_return_status = None
+
     if not committee:
         insert_with_id(data)
         committee = data
+        committee_return_status = "insert"
     else:
         update(committee, data, db.committees)
+        committee_return_status = "update"
 
     # deal with the members, add roles
     for member in committee['members']:
@@ -137,11 +141,18 @@ def import_committee(data, current_session, current_term):
             db.legislators.save(legislator, safe=True)
 
     db.committees.save(committee, safe=True)
+    return committee_return_status
 
 
 def import_committees(abbr, data_dir):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'committees', '*.json')
+
+    counts = {
+        "update" : 0,
+        "insert" : 0,
+        "total"  : 0
+    }
 
     meta = db.metadata.find_one({'_id': abbr})
     current_term = meta['terms'][-1]['name']
@@ -162,13 +173,16 @@ def import_committees(abbr, data_dir):
         with open(path) as f:
             data = prepare_obj(json.load(f))
 
-        import_committee(data, current_session, current_term)
+        counts["total"] += 1
+        ret = import_committee(data, current_session, current_term)
+        counts[ret] += 1
 
     logger.info('imported %s committee files' % len(paths))
 
     link_parents(level, abbr)
 
     ensure_indexes()
+    return counts
 
 
 def link_parents(level, abbr):
