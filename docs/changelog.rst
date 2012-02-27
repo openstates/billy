@@ -3,6 +3,7 @@ scrapelib changelog
 
 0.9.6
 -----
+**27 Februrary 2012**
     * add alternate_bill_ids and related functionality (needed for TN)
     * updated oysterize command to work with oyster >= 0.3
     * added initial work on class-based models
