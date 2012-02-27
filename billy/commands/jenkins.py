@@ -83,11 +83,10 @@ states = {
     'wy': 'Wyoming'}
 
 urls = {'data': ('http://staging.openstates.org/jenkins/job/'
-                     '{state}/ws/data/{abbr}/*zip*/{abbr}.zip'),
-            'cache': ('http://staging.openstates.org/jenkins/job/'
-                      '{state}/ws/cache/*zip*/cache.zip')}
+                 '{state}/ws/data/{abbr}/*zip*/{abbr}.zip'),
+        'cache': ('http://staging.openstates.org/jenkins/job/'
+                  '{state}/ws/cache/*zip*/cache.zip')}
 
-path = split(settings.SCRAPER_PATHS[0])[0]
 
 # Logging config
 logger = logging.getLogger('janky-import')
@@ -99,7 +98,8 @@ formatter = logging.Formatter('%(name)s %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-def _import(abbr, folder, path=path):
+def _import(abbr, folder):
+    path = split(settings.SCRAPER_PATHS[0])[0]
 
     # Get credentials.
     username = getattr(settings, 'JENKINS_USER', None)
@@ -148,7 +148,7 @@ def _import(abbr, folder, path=path):
     logger.info('Extracted %d files to %s.' % (file_count, path))
 
 
-def import_data(abbr, path=path):
+def import_data(abbr, path):
     path = join(path, 'data')
     _import(abbr, 'data', path)
 
@@ -161,7 +161,7 @@ funcs = {'data': import_data,
          'cache': import_cache}
 
 
-#--------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Setup the management command.
 class Jenkins(BaseCommand):
 
