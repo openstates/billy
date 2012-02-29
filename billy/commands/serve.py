@@ -16,6 +16,7 @@ class Serve(BaseCommand):
                            ),
                            ROOT_URLCONF='billy.site.urls',
                            INSTALLED_APPS=('django.contrib.humanize',
+                                           'django.contrib.staticfiles',
                                            'billy.site.api',
                                            'billy.site.browse',
                                            'billy.site.www',
@@ -23,6 +24,7 @@ class Serve(BaseCommand):
                            DATE_FORMAT='Y-m-d',
                            TIME_FORMAT='H:i:s',
                            DATETIME_FORMAT='Y-m-d H:i:s',
+                           STATIC_URL='/static/',
                            USE_LOCKSMITH=False,
                           )
 

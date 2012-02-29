@@ -16,7 +16,7 @@ from collections import defaultdict
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -290,12 +290,12 @@ def bills(request, abbr):
 
     # ------------------------------------------------------------------------
     # Render the tables.
-    render = functools.partial(render_to_string, 'billy/bills_table.html')
-    tables = map(render, tables)
+    _render = functools.partial(render_to_string, 'billy/bills_table.html')
+    tables = map(_render, tables)
 
-    return render_to_response( "billy/bills.html",
-                              dict(tables=tables, metadata=meta,
-                                   sessions=sessions))
+    return render(request, "billy/bills.html",
+                  dict(tables=tables, metadata=meta, sessions=sessions))
+
 
 def summary_index(request, abbr):
 
