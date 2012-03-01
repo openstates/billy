@@ -53,8 +53,8 @@
                         <li><a href="{% url other_actions metadata.abbreviation %}">Other Actions</a> </li>
                         </ul>
                     </li>
-                    {% endif %}
                     <li> <a href="{% url run_detail metadata.abbreviation %}">Run Detail</a> </li>
+                    {% endif %}
                     {% block menu %}{% endblock %}
                 </ul>
             </div>
