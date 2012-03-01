@@ -525,7 +525,7 @@ def random_bill(request, abbr):
 
 def bill(request, abbr, session, id):
     meta = metadata(abbr)
-    level = metadata['level']
+    level = meta['level']
     bill = find_bill({'level': level, level: abbr,
                       'session':session, 'bill_id':id.upper()})
     if not bill:
