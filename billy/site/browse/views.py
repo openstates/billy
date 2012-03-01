@@ -217,9 +217,16 @@ def run_detail_graph_data(request, abbr):
     )
 
 def run_detail(request, abbr):
-    runlog = db.billy_runs.find({
-        "scraped.state" : abbr
-    }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
+    try:
+        runlog = db.billy_runs.find({
+            "scraped.state" : abbr
+        }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
+    except IndexError as e:
+        return render(request, 'billy/run_empty.html', {
+            "warning" : "No records exist. Fetch returned a(n) %s" % (
+                    e.__class__.__name__
+            )
+        })
 
     # pre-process goodies for the template
     runlog['scraped']['t_delta'] = (

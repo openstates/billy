@@ -34,9 +34,8 @@ urlpatterns = patterns('billy.site.browse.views',
     url(r'^legislators/(?P<id>.*)/$', 'legislator', name='legislator'),
 
     # runlog URLs.
-    url(r'^run-detail/(?P<abbr>[a-z]{2})$', 'run_detail', name="run_detail"),
-
-    url(r'^run-detail-data/(?P<abbr>[a-z]{2})$','run_detail_graph_data',
+    url(r'^run-detail/(?P<abbr>[a-z]{2})/$', 'run_detail', name="run_detail"),
+    url(r'^run-detail-data/(?P<abbr>[a-z]{2})/$','run_detail_graph_data',
         name="run_detail-data"),
 
     # Merge-o-matic URLs.
