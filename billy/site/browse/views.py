@@ -498,6 +498,7 @@ def random_bill(request, abbr):
         'random' : True,
         'state' : abbr.lower(),
         'warning': warning,
+        'metadata': meta,
     }
 
     if default and modi_flag != "":
@@ -513,13 +514,15 @@ def random_bill(request, abbr):
 
 
 def bill(request, abbr, session, id):
-    level = metadata(abbr)['level']
+    meta = metadata(abbr)
+    level = metadata['level']
     bill = find_bill({'level': level, level: abbr,
                       'session':session, 'bill_id':id.upper()})
     if not bill:
         raise Http404
 
-    return render(request, 'billy/bill.html', {'bill': bill})
+    return render(request, 'billy/bill.html',
+                  {'bill': bill, 'metadata': meta})
 
 
 def bill_json(request, abbr, session, id):

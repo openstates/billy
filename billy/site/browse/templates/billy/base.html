@@ -33,7 +33,12 @@
                             data-toggle="dropdown">Bills<b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                        <li> <a href='{% url admin_bills metadata.abbreviation %}'>Bill Overview</a> </li>
+                        <li> <a href="{% url admin_bills metadata.abbreviation %}">Bill Overview</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}">Random Bill</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=bad_vote_counts">Bad Vote Counts</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
                         </ul>
                     </li>
                     <li> <a href='{% url admin_legislators metadata.abbreviation %}'>Legislators</a> </li>
