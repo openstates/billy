@@ -195,8 +195,8 @@ def import_bills(abbr, data_dir):
     votes = import_votes(data_dir)
     try:
         categorizer = SubjectCategorizer(abbr)
-    except Exception:
-        logger.debug('Proceeding without subject categorizer')
+    except Exception as e:
+        logger.debug('Proceeding without subject categorizer: %s' % e)
         categorizer = None
 
     paths = glob.glob(pattern)
