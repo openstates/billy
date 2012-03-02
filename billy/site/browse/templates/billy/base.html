@@ -6,21 +6,55 @@
       <style>
           body { padding-top: 50px; }
       </style>
+      <script src="{{STATIC_URL}}scripts/jquery-1.7.1.min.js"></script>
+      <script src="{{STATIC_URL}}scripts/bootstrap-dropdown.js"></script>
+      <script>
+          $('.dropdown-toggle').dropdown();
+      </script>
       {% block script %}
       {% endblock %}
 
       {% block style %}
       {% endblock %}
-      
+
   </head>
   <body>
       <div class="topbar">
         <div class="topbar-inner">
         <div class="container">
-            <a class="brand" href="/browse/">billy</a>
+            <a class="brand" href="{% url admin_index %}">billy admin
+            </a>
             <div class="container">
                 <ul class="nav">
-                    <li> <a href='/browse/'>Overview</a> </li>
+                    {% if metadata %}
+                    <li> <a href='{% url admin_overview metadata.abbreviation %}'>{{metadata.name}}</a> </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"
+                            data-toggle="dropdown">Bills<b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li> <a href="{% url admin_bills metadata.abbreviation %}">Bill Overview</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}">Random Bill</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=bad_vote_counts">Bad Vote Counts</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
+                        <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
+                        </ul>
+                    </li>
+                    <li> <a href='{% url admin_legislators metadata.abbreviation %}'>Legislators</a> </li>
+                    <li> <a href='{% url admin_committees metadata.abbreviation %}'>Committees</a> </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"
+                            data-toggle="dropdown">Missing Data<b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li><a href="{% url uncategorized_subjects metadata.abbreviation %}">Subjects</a> </li>
+                        <li><a href="{% url unmatched_leg_ids metadata.abbreviation %}">Leg IDs</a> </li>
+                        <li><a href="{% url other_actions metadata.abbreviation %}">Other Actions</a> </li>
+                        </ul>
+                    </li>
+                    <li> <a href="{% url run_detail metadata.abbreviation %}">Run Detail</a> </li>
+                    {% endif %}
                     {% block menu %}{% endblock %}
                 </ul>
             </div>

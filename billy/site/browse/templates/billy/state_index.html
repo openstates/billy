@@ -32,8 +32,9 @@
     <h4><a href = "/browse/run-detail/{{ metadata|key:"_id" }}" >Last run information</a></h4>
     <ul>
     {% if runlog %}
-        <li>This run took {{ runlog.scrape.time_delta }}, and was started on
-        {{ runlog.scrape.start }}</li>
+    <li>This run took {{ runlog.scraped.time_delta }} seconds, and was
+        started on
+        {{ runlog.scraped.started }}</li>
         <li>{% if runlog.failure %}
             <b>There was a failure during runtime</b>
         {% else %}

@@ -16,7 +16,7 @@ from collections import defaultdict
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -30,15 +30,17 @@ def keyfunc(obj):
     except ValueError:
         return obj['district']
 
-def _csv_response(request, template, data):
+def _csv_response(request, template, data, abbr):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
+        resp['Content-Disposition'] = 'attachment; filename=%s.csv' % abbr
         out = unicodecsv.writer(resp)
         for item in data:
             out.writerow(item)
         return resp
     else:
-        return render(request, template, {'data':data})
+        return render(request, template,
+                      {'data':data, 'metadata': metadata(abbr)})
 
 def browse_index(request, template='billy/index.html'):
     rows = []
@@ -217,9 +219,17 @@ def run_detail_graph_data(request, abbr):
     )
 
 def run_detail(request, abbr):
-    runlog = db.billy_runs.find({
-        "scraped.state" : abbr
-    }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
+    try:
+        allruns = db.billy_runs.find({
+            "scraped.state" : abbr
+        }).sort( "scraped.started", direction=pymongo.DESCENDING )[:25]
+        runlog = allruns[0]
+    except IndexError as e:
+        return render(request, 'billy/run_empty.html', {
+            "warning" : "No records exist. Fetch returned a(n) %s" % (
+                    e.__class__.__name__
+            )
+        })
 
     # pre-process goodies for the template
     runlog['scraped']['t_delta'] = (
@@ -232,8 +242,10 @@ def run_detail(request, abbr):
             )
 
     context = {
-        "runlog" : runlog,
-        "state"  : abbr
+        "runlog"   : runlog,
+        "allruns"  : allruns,
+        "state"    : abbr,
+        "metadata" : metadata(abbr),
     }
 
     if "failure" in runlog:
@@ -290,12 +302,12 @@ def bills(request, abbr):
 
     # ------------------------------------------------------------------------
     # Render the tables.
-    render = functools.partial(render_to_string, 'billy/bills_table.html')
-    tables = map(render, tables)
+    _render = functools.partial(render_to_string, 'billy/bills_table.html')
+    tables = map(_render, tables)
 
-    return render_to_response( "billy/bills.html",
-                              dict(tables=tables, metadata=meta,
-                                   sessions=sessions))
+    return render(request, "billy/bills.html",
+                  dict(tables=tables, metadata=meta, sessions=sessions))
+
 
 def summary_index(request, abbr):
 
@@ -422,7 +434,7 @@ def other_actions(request, abbr):
     if not report:
         raise Http404
     return _csv_response(request, 'billy/other_actions.html',
-                         sorted(report['bills']['other_actions']))
+                         sorted(report['bills']['other_actions']), abbr)
 
 
 def unmatched_leg_ids(request, abbr):
@@ -435,7 +447,7 @@ def unmatched_leg_ids(request, abbr):
                          report['committees']['unmatched_leg_ids'])
     combined_sets = bill_unmatched | com_unmatched
     return _csv_response(request, 'billy/unmatched_leg_ids.html',
-                         sorted(combined_sets))
+                         sorted(combined_sets), abbr)
 
 def uncategorized_subjects(request, abbr):
     report = db.reports.find_one({'_id': abbr})
@@ -444,7 +456,7 @@ def uncategorized_subjects(request, abbr):
     subjects = sorted(report['bills']['uncategorized_subjects'],
                       key=lambda t: (t[1],t[0]), reverse=True)
     return _csv_response(request, 'billy/uncategorized_subjects.html',
-                         subjects)
+                         subjects, abbr)
 
 @never_cache
 def random_bill(request, abbr):
@@ -498,6 +510,7 @@ def random_bill(request, abbr):
         'random' : True,
         'state' : abbr.lower(),
         'warning': warning,
+        'metadata': meta,
     }
 
     if default and modi_flag != "":
@@ -513,13 +526,15 @@ def random_bill(request, abbr):
 
 
 def bill(request, abbr, session, id):
-    level = metadata(abbr)['level']
+    meta = metadata(abbr)
+    level = meta['level']
     bill = find_bill({'level': level, level: abbr,
                       'session':session, 'bill_id':id.upper()})
     if not bill:
         raise Http404
 
-    return render(request, 'billy/bill.html', {'bill': bill})
+    return render(request, 'billy/bill.html',
+                  {'bill': bill, 'metadata': meta})
 
 
 def bill_json(request, abbr, session, id):

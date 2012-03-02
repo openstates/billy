@@ -2,7 +2,6 @@ import json
 import datetime
 
 from billy.utils import chamber_name
-from billy.site.api.feeds import EventFeed
 
 from django.template import defaultfilters
 from piston.emitters import Emitter, JSONEmitter
@@ -67,18 +66,6 @@ class BillyJSONEmitter(JSONEmitter):
                 else:
                     obj.__dict__[key] = self._clean(value)
         return obj
-
-
-class FeedEmitter(Emitter):
-    """
-    Emits an RSS feed from a list of billy 'event' objects.
-
-    Expects a list of objects from the handler. Non-event objects will be
-    ignored.
-    """
-
-    def render(self, request):
-        return EventFeed()(request, self.construct())
 
 
 class _vDatetime(icalendar.vDatetime):
