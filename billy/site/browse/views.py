@@ -566,18 +566,6 @@ def bill(request, abbr, session, id):
                   {'bill': bill, 'metadata': meta, 'id': bill['_id']})
 
 
-def bill_json(request, abbr, session, id):
-    level = metadata(abbr)['level']
-    bill = find_bill({'level': level, level: abbr,
-                      'session':session, 'bill_id':id.upper()})
-    if not bill:
-        raise Http404
-
-    _json = json.dumps(bill, cls=JSONDateEncoder, indent=4)
-
-    return render(request, 'billy/bill_json.html', {'json': _json})
-
-
 def legislators(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']

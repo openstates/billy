@@ -26,10 +26,6 @@ urlpatterns = patterns('billy.site.browse.views',
     url(r'^(?P<abbr>[a-z]{2})/district_stub/$', 'district_stub',
         name='district_stub'),
 
-
-    url(r'^(?P<abbr>[a-z]{2})/(?P<session>.+)/(?P<id>.*)/json/$', 'bill_json',
-        name='bill_json'),
-
     # Summary urls.
     url(r'^(?P<abbr>[a-z]{2})/summary/$', 'summary_index'),
     url(r'^(?P<abbr>[a-z]{2})/summary_object_key/$', 'summary_object_key'),
