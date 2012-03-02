@@ -12,7 +12,6 @@ logger = logging.getLogger('billy')
 configure_logging(1)
 
 COMMAND_MODULES = (
-    'billy.commands.district_csv_stub',
     'billy.commands.dump',
     'billy.commands.load_legislators',
     'billy.commands.oysterize',
@@ -22,7 +21,6 @@ COMMAND_MODULES = (
     'billy.commands.update_external_ids',
     'billy.commands.update_leg_ids',
     'billy.commands.validate_api',
-    'billy.commands.jenkins',
 )
 
 def import_command_module(mod):
