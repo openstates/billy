@@ -4,23 +4,21 @@
 
 <a class="btn" href="./?csv">Download CSV</a>
 
-<div class="container">
-    <table class="table table-condensed">
-        <thead> <tr>
-            {% for col in columns %}
-            <th>{{col}}</th>
+<table class="table table-condensed">
+    <thead> <tr>
+        {% for col in columns %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr> </thead>
+    <tbody>
+        {% for row in data %}
+        <tr>
+            {% for item in row %}
+                <td>{{item}}</td>
             {% endfor %}
-        </tr> </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                {% for item in row %}
-                    <td>{{item}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
