@@ -220,6 +220,11 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     {% endif %}
     <br />
 {% endfor %}
+<table>
+{% for run in runlog %}
+    <tr><td>{{ run.scraped.state }}</td></tr>
+{% endfor %}
+</table>
 </p>
 <p>
 <h3>some charts & stats</h3>
