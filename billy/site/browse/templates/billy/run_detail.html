@@ -225,7 +225,7 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <table>
 {% for run in allruns %}
     <tr{% if run.failure %} class = 'error' {% endif %}>
-        <td>{{ run.state }}</td>
+        <td>{{ run.scraped.state }}</td>
         <td>{{ run.scraped.started }}</td>
     </tr>
 {% endfor %}
