@@ -1,6 +1,11 @@
 scrapelib changelog
 ===================
 
+0.9.7
+-----
+    * further improvements to billy admin
+    * removal of never-used RSS emitter
+
 0.9.6
 -----
 **27 Februrary 2012**
