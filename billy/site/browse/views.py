@@ -531,6 +531,7 @@ def random_bill(request, abbr):
 
     context = {
         'bill'   : bill,
+        'id': bill['_id'],
         'random' : True,
         'state' : abbr.lower(),
         'warning': warning,
@@ -558,7 +559,7 @@ def bill(request, abbr, session, id):
         raise Http404
 
     return render(request, 'billy/bill.html',
-                  {'bill': bill, 'metadata': meta})
+                  {'bill': bill, 'metadata': meta, 'id': bill['_id']})
 
 
 def bill_json(request, abbr, session, id):
