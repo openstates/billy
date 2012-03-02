@@ -94,7 +94,7 @@ class BillyHandlerMetaClass(HandlerMetaClass):
             def new_read(*args, **kwargs):
                 request = args[1]
                 fmt = request.GET.get('format')
-                if fmt in ['xml', 'rss', 'ics'] and 'fields' in request.GET:
+                if fmt in ['xml', 'ics'] and 'fields' in request.GET:
                     resp = rc.BAD_REQUEST
                     resp.write(": cannot specify fields param if format=%s" %
                                fmt)

@@ -2,7 +2,6 @@ import json
 import datetime
 
 from billy.utils import chamber_name
-from billy.site.api.feeds import EventFeed
 from billy.site.api import xml
 
 from django.template import defaultfilters
@@ -83,18 +82,6 @@ class BillyXMLEmitter(Emitter):
         return lxml.etree.tostring(results, pretty_print=True,
                                    xml_declaration=True,
                                    encoding='UTF-8')
-
-
-class FeedEmitter(Emitter):
-    """
-    Emits an RSS feed from a list of billy 'event' objects.
-
-    Expects a list of objects from the handler. Non-event objects will be
-    ignored.
-    """
-
-    def render(self, request):
-        return EventFeed()(request, self.construct())
 
 
 class _vDatetime(icalendar.vDatetime):
