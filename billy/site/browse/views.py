@@ -458,6 +458,30 @@ def uncategorized_subjects(request, abbr):
     return _csv_response(request, 'billy/uncategorized_subjects.html',
                          subjects, abbr)
 
+def district_stub(request, abbr):
+    def keyfunc(x):
+        try:
+            district = int(x[2])
+        except ValueError:
+            district = x[2]
+        return x[1], district
+
+    fields = ('abbr', 'chamber', 'name', 'num_seats', 'boundary_id')
+
+    counts = defaultdict(int)
+    for leg in db.legislators.find({'state': abbr, 'active': True}):
+        if 'chamber' in leg:
+            counts[(leg['chamber'], leg['district'])] += 1
+
+    data = []
+    for key, count in counts.iteritems():
+        chamber, district =  key
+        data.append((abbr, chamber, district, count, ''))
+
+    data.sort(key=keyfunc)
+
+    return _csv_response(request, "billy/districts.html", data, abbr)
+
 @never_cache
 def random_bill(request, abbr):
     meta = metadata(abbr)
