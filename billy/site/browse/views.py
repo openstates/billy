@@ -30,17 +30,19 @@ def keyfunc(obj):
     except ValueError:
         return obj['district']
 
-def _csv_response(request, template, data, abbr):
+def _csv_response(request, csv_name, columns, data, abbr):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
-        resp['Content-Disposition'] = 'attachment; filename=%s.csv' % abbr
+        resp['Content-Disposition'] = 'attachment; filename=%s_%s.csv' % (
+            abbr, csv_name)
         out = unicodecsv.writer(resp)
         for item in data:
             out.writerow(item)
         return resp
     else:
-        return render(request, template,
-                      {'data':data, 'metadata': metadata(abbr)})
+        return render(request, 'billy/generic_table.html',
+                      {'columns': columns,
+                       'data':data, 'metadata': metadata(abbr)})
 
 def browse_index(request, template='billy/index.html'):
     rows = []
@@ -433,7 +435,7 @@ def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
-    return _csv_response(request, 'billy/other_actions.html',
+    return _csv_response(request, 'other_actions', ('action', '#'),
                          sorted(report['bills']['other_actions']), abbr)
 
 
@@ -446,7 +448,7 @@ def unmatched_leg_ids(request, abbr):
     com_unmatched = set(tuple(i) for i in
                          report['committees']['unmatched_leg_ids'])
     combined_sets = bill_unmatched | com_unmatched
-    return _csv_response(request, 'billy/unmatched_leg_ids.html',
+    return _csv_response(request, 'leg_ids', ('term', 'chamber', 'name'),
                          sorted(combined_sets), abbr)
 
 def uncategorized_subjects(request, abbr):
@@ -455,7 +457,7 @@ def uncategorized_subjects(request, abbr):
         raise Http404
     subjects = sorted(report['bills']['uncategorized_subjects'],
                       key=lambda t: (t[1],t[0]), reverse=True)
-    return _csv_response(request, 'billy/uncategorized_subjects.html',
+    return _csv_response(request, 'uncategorized_subjects', ('subject', '#'),
                          subjects, abbr)
 
 def district_stub(request, abbr):
@@ -480,7 +482,9 @@ def district_stub(request, abbr):
 
     data.sort(key=keyfunc)
 
-    return _csv_response(request, "billy/districts.html", data, abbr)
+    return _csv_response(request, "districts",
+                         ('abbr', 'chamber', 'district', 'count', ''),
+                         data, abbr)
 
 @never_cache
 def random_bill(request, abbr):
