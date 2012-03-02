@@ -220,9 +220,10 @@ def run_detail_graph_data(request, abbr):
 
 def run_detail(request, abbr):
     try:
-        runlog = db.billy_runs.find({
+        allruns = db.billy_runs.find({
             "scraped.state" : abbr
-        }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
+        }).sort( "scraped.started", direction=pymongo.DESCENDING )[:25]
+        runlog = allruns[0]
     except IndexError as e:
         return render(request, 'billy/run_empty.html', {
             "warning" : "No records exist. Fetch returned a(n) %s" % (
@@ -242,6 +243,7 @@ def run_detail(request, abbr):
 
     context = {
         "runlog"   : runlog,
+        "allruns"  : allruns,
         "state"    : abbr,
         "metadata" : metadata(abbr),
     }

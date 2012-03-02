@@ -44,6 +44,10 @@
     font-weight: bold;
     font-size:   0.8em;
 }
+.error {
+    background-color:#c74248;
+    color:           #FFFFFF;
+}
     </style>
 
     <script type = "text/javascript" >
@@ -211,8 +215,6 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 </p>
 <p>
 {% for key in runlog.scraped.run_record %}
-    <!-- <h4>{{ key.chamber }} {{ key.type }} ({{ key.time }})</h4>
-    Scrape took <b>{{ key.t_delta }}</b> -->
     {% if key.exception %}
         <b>Exception Recieved</b>
         <code>{{ key.exception.type }}</code> was thrown.<br /><br />
@@ -221,8 +223,11 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     <br />
 {% endfor %}
 <table>
-{% for run in runlog %}
-    <tr><td>{{ run.scraped.state }}</td></tr>
+{% for run in allruns %}
+    <tr{% if run.failure %} class = 'error' {% endif %}>
+        <td>{{ run.state }}</td>
+        <td>{{ run.scraped.started }}</td>
+    </tr>
 {% endfor %}
 </table>
 </p>
@@ -230,7 +235,6 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <h3>some charts & stats</h3>
 In order to help digest some of the raw numbers, here are some handy charts.
 </p><br /><br />
-
 <p>
 <div id = 'chart-area' >
 </div>

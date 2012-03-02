@@ -61,7 +61,12 @@ def _run_scraper(scraper_type, options, metadata):
     _clear_scraped_data(options.output_dir, scraper_type)
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
-        return []
+        return [{
+            "type"       : scraper_type,
+            "start_time" : dt.datetime.utcnow(),
+            "noscraper" : True,
+            "end_time" : dt.datetime.utcnow()
+        }]
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
@@ -361,18 +366,19 @@ def main(old_scrape_compat=False):
                     run_record += _run_scraper('committees', args, metadata)
                 if args.votes:
                     run_record += _run_scraper('votes', args, metadata)
-                if args.events:
-                    run_record += _run_scraper('events', args, metadata)
                 if args.bills:
                     run_record += _run_scraper('bills', args, metadata)
+                if args.events:
+                    run_record += _run_scraper('events', args, metadata)
             except Exception as e :
                 run_record += [{ "exception" : e }]
                 lex = e
-            exec_end  = dt.datetime.utcnow()
 
+            exec_end  = dt.datetime.utcnow()
             exec_record['started']  = exec_start
             exec_record['ended']    = exec_end
             scrape_data['scraped'] = exec_record
+            scrape_data['state']   = abbrev
 
             for record in run_record:
                 if "exception" in record:
