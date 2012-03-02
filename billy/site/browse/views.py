@@ -376,7 +376,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     total = len(counter)
     objs = sorted(counter, key=counter.get, reverse=True)
     objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
-    return rendert(request, 'billy/summary_object_key.html', locals())
+    return render(request, 'billy/summary_object_key.html', locals())
 
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
                             collections=("bills", "legislators", "committees")):
