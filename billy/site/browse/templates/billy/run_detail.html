@@ -34,11 +34,14 @@
 </p>
 <p>
 <h3>Scrape Statistics</h3>
+<dl>
     {% for scrape in run.scraped.run_record %}
-        {{ scrape.type }}
+        <dt>{{ scrape.type }}
         {% if scrape.noscraper %}
             ( no scraper )
-        {% endif %}<br />
+        {% endif %}</dt>
+        <dd>took {{ scrape.end_time|minus:scrape.start_time }}</dd>
     {% endfor %}
+</dl>
 </p>
 {% endblock %}

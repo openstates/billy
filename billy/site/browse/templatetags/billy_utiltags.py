@@ -25,6 +25,10 @@ def key(d, key_name):
         return None
 
 @register.filter
+def minus(d1, d2):
+    return d1 - d2
+
+@register.filter
 def private(d, key_name):
     try:
         return d[( "_" + key_name )]
