@@ -137,7 +137,7 @@ def run_detail_graph_data(request, abbr):
 
                     delt = ( g['end_time'] - g['start_time'] ).total_seconds()
                     ret[field].append(delt)
-                except KeyError:
+                except KeyError: # XXX: THIS MESSES STUFF UP. REVISE.
                     ret[field].append(0)
         l = []
         for line in fields:
@@ -258,7 +258,7 @@ This build had an exception during it's execution. Please check below
 for the exception and error message.
 """
 
-    return render(request, 'billy/run_detail.html', context)
+    return render(request, 'billy/state_run_detail.html', context)
 
 @never_cache
 def bills(request, abbr):

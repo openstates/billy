@@ -356,22 +356,28 @@ def main(old_scrape_compat=False):
             }
 
             lex = None
+            last_scraper = None
 
             # run scrapers
             exec_start = dt.datetime.utcnow()
             try:
                 if args.legislators:
+                    last_scraper = 'legislators'
                     run_record += _run_scraper('legislators', args, metadata)
                 if args.committees:
+                    last_scraper = 'committees'
                     run_record += _run_scraper('committees', args, metadata)
                 if args.votes:
+                    last_scraper = 'votes'
                     run_record += _run_scraper('votes', args, metadata)
                 if args.bills:
+                    last_scraper = 'bills'
                     run_record += _run_scraper('bills', args, metadata)
                 if args.events:
+                    last_scraper = 'events'
                     run_record += _run_scraper('events', args, metadata)
             except Exception as e :
-                run_record += [{ "exception" : e }]
+                run_record += [{ "exception" : e, "type" : last_scraper }]
                 lex = e
 
             exec_end  = dt.datetime.utcnow()
