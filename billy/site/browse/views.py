@@ -220,7 +220,7 @@ def run_detail_graph_data(request, abbr):
         content_type="text/plain"
     )
 
-def run_detail(request, abbr):
+def state_run_detail(request, abbr):
     try:
         allruns = db.billy_runs.find({
             "scraped.state" : abbr
