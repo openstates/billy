@@ -1,42 +1,30 @@
 {% extends "billy/base.html" %}
 
+{% block title %} index {% endblock %}
+
 {% block script %}
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript"> 
-  </script>
 {% endblock %}
 
 {% block style %}
-  <style>
-  tr:hover {color: black}
-
-  tr:hover > td.good {
-    background-color: green;
-    }
-
-  tr:hover > td.bad {
-    background-color: red;
-    }
-
-  tr:hover > td.warning {
-    background-color: yellow;
-    }
-  </style> 
-{% endblock %}
-
-{% block content %}
-<style type="text/css">
-    td.good { background-color: #b0ff66; }
-    td.bad { background-color: #fc7c7d; }
-    td.warning { background-color: #fcde7c; }
+<style>
+    .table tr:hover {color: black}
+    .table tr:hover > td.good { background-color: green; }
+    .table tr:hover > td.bad { background-color: red; }
+    .table  tr:hover > td.warning { background-color: yellow; }
+    .table  td.good { background-color: #b0ff66; }
+    .table  td.bad { background-color: #fc7c7d; }
+    .table  td.warning { background-color: #fcde7c; }
     /* collapse left margin */
-    .container-fluid { padding-left: 0px; } 
+    .container-fluid { padding-left: 0px; }
     .container-fluid > .content { margin-left: 10px; }
 </style>
+{% endblock %}
 
+{% block content-nocontainer %}
 <div class="container-fluid">
 <div class="content">
-<table class="condensed-table bordered-table">
+<table class="table table-bordered table-condensed">
     <thead>
     <tr>
         <th>&nbsp;</th>

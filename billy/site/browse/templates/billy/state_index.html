@@ -10,7 +10,7 @@
 <div class="container">
 <div class="row">
 
-<div class="span-one-third" id="metadata">
+<div class="span4" id="metadata">
     <h4>Metadata</h4>
     <dl>
     {% for k, v in metadata|sorted_items %}
@@ -52,7 +52,7 @@
     </ul>
 </div>
 
-<div class="span-one-third" id="bills">
+<div class="span4" id="bills">
     <h4>Bills<a href="random_bill/">(random bill)</a></h4>
   <dl>
       <dt>Upper:</dt><dd>{{report.bills.upper_count}}</dd>
@@ -67,28 +67,28 @@
       <dt>Updated This Year:</dt><dd>{{report.bills.updated_this_year}}%</dd>
   </dl>
   <h4>Bill Types</h4>
-  <table>
+  <table class="table">
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.bill_types|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
   <h4>Action Types</h4>
-  <table>
+  <table class="table">
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_type|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
   <h4>Actors</h4>
-  <table>
+  <table class="table">
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_actor|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
       {% endfor %}
   </table>
   <h4>Actions by Month</h4>
-  <table>
+  <table class="table">
       <tr><th>Type</th><th>#</th></tr>
       {% for name, num in report.bills.actions_per_month|sorted_items %}
       <tr><td>{{name}}</td><td>{{num}}</td></tr>
@@ -97,7 +97,7 @@
 
 </div>
 
-<div class="span-one-third" id="legislators">
+<div class="span4" id="legislators">
     <h4><a href="legislators/">Legislators</a></h4>
     <dl>
       <dt>Upper:</dt><dd>{{report.legislators.upper_active_count}}</dd>

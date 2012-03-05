@@ -45,8 +45,11 @@
     font-size:   0.8em;
 }
 .error {
-    background-color:#c74248;
-    color:           #FFFFFF;
+    background-color: #ffff8c;
+    /* color:           #FFFFFF; */
+}
+.success {
+    background-color: #d8d4fa;
 }
     </style>
 
@@ -214,6 +217,8 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <br />
 </p>
 <p>
+<div id = 'chart-area' >
+</div>
 {% for key in runlog.scraped.run_record %}
     {% if key.exception %}
         <b>Exception Recieved</b>
@@ -222,22 +227,20 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     {% endif %}
     <br />
 {% endfor %}
-<table>
+<table class='table table-bordered'>
+    <tr>
+        <th>State</th>
+        <th>Time</th>
+        <th>Outcome</th>
+    </tr>
 {% for run in allruns %}
-    <tr{% if run.failure %} class = 'error' {% endif %}>
+<tr class='{% if run.failure %}error{% else %}success{% endif %}'>
         <td>{{ run.scraped.state }}</td>
-        <td>{{ run.scraped.started }}</td>
+        <td>{{ run.scraped.started|date_display }}</td>
+        <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
     </tr>
 {% endfor %}
 </table>
 </p>
 <p>
-<h3>some charts & stats</h3>
-In order to help digest some of the raw numbers, here are some handy charts.
-</p><br /><br />
-<p>
-<div id = 'chart-area' >
-</div>
-</p>
-
 {% endblock %}
