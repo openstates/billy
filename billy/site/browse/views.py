@@ -176,25 +176,25 @@ def run_detail_graph_data(request, abbr):
             "type" : "stacked",
             "spec" : {}
         },
-        "default" : { "run" : _do_digest,
-            "title" : "Last %s runs" % ( history_count ),
-            "type" : "lines",
-            "spec" : {}
-        },
-        "clean"   : { "run" : _do_digest,
-            "title" : "Last %s non-failed runs" % ( history_count ),
-            "type" : "lines",
-            "spec" : {
-                "failure" : { "$exists" : False }
-            }
-        },
-        "failure"   : { "run" : _do_digest,
-            "title" : "Last %s failed runs" % ( history_count ),
-            "type" : "lines",
-            "spec" : {
-                "failure" : { "$exists" : True  }
-            }
-        },
+        #"default" : { "run" : _do_digest,
+        #    "title" : "Last %s runs" % ( history_count ),
+        #    "type" : "lines",
+        #    "spec" : {}
+        #},
+        #"clean"   : { "run" : _do_digest,
+        #    "title" : "Last %s non-failed runs" % ( history_count ),
+        #    "type" : "lines",
+        #    "spec" : {
+        #        "failure" : { "$exists" : False }
+        #    }
+        #},
+        #"failure"   : { "run" : _do_digest,
+        #    "title" : "Last %s failed runs" % ( history_count ),
+        #    "type" : "lines",
+        #    "spec" : {
+        #        "failure" : { "$exists" : True  }
+        #    }
+        #},
         "falure-pie": { "run" : _do_pie,
             "title" : "Digest of what exceptions have been thrown",
             "type" : "pies",

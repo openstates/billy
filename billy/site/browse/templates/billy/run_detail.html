@@ -214,6 +214,8 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <br />
 </p>
 <p>
+<div id = 'chart-area' >
+</div>
 {% for key in runlog.scraped.run_record %}
     {% if key.exception %}
         <b>Exception Recieved</b>
@@ -226,18 +228,10 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 {% for run in allruns %}
     <tr{% if run.failure %} class = 'error' {% endif %}>
         <td>{{ run.scraped.state }}</td>
-        <td>{{ run.scraped.started }}</td>
+        <td>{{ run.scraped.started|date_display }}</td>
     </tr>
 {% endfor %}
 </table>
 </p>
 <p>
-<h3>some charts & stats</h3>
-In order to help digest some of the raw numbers, here are some handy charts.
-</p><br /><br />
-<p>
-<div id = 'chart-area' >
-</div>
-</p>
-
 {% endblock %}
