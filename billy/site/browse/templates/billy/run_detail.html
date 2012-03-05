@@ -3,4 +3,37 @@
 {% load billy_utiltags %}
 
 {% block content %}
+<p>
+    <h1>Run Detail <small>( for the <b>{{ run.state }}</b> scraper)</small></h1>
+</p>
+<p>
+<b>Primary details:</b><br />
+<br />
+    Scrape took place <b>{{ run.scraped.started|date_display }}</b><br />
+<br />
+</p>
+<p>
+<h3>Import Statistics</h3>
+<br />
+<table class = 'table table-bordered' >
+    <tr>
+        <th>Stage</th>
+        <th>Total</th>
+        <th>Inserted</th>
+        <th>Updated</th>
+    </tr>
+{% for import in run.imported %}
+    <tr>
+        <td>{{ import }}</td>
+        <td>{{ run.imported|key:import|key:'total' }}</td>
+        <td>{{ run.imported|key:import|key:'insert' }}</td>
+        <td>{{ run.imported|key:import|key:'update' }}</td>
+    </tr>
+{% endfor %}
+</table>
+</p>
+<p>
+<h3>Scrape Statistics</h3>
+
+</p>
 {% endblock %}

@@ -13,10 +13,12 @@ from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict
 
+from pymongo.objectid import ObjectId
+
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -219,6 +221,21 @@ def run_detail_graph_data(request, abbr):
         #content_type="text/json"
         content_type="text/plain"
     )
+
+def run_detail(request, obj=None):
+    try:
+        run = db.billy_runs.find({
+            "_id" : ObjectId(obj)
+        })[0]
+    except IndexError as e:
+        return render(request, 'billy/run_empty.html', {
+            "warning" : "No records exist. Fetch returned a(n) %s" % (
+                    e.__class__.__name__
+            )
+        })
+    return render(request, 'billy/run_detail.html', {
+        "run" : run
+    })
 
 def state_run_detail(request, abbr):
     try:

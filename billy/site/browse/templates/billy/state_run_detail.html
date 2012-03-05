@@ -235,7 +235,7 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     </tr>
 {% for run in allruns %}
 <tr class='{% if run.failure %}error{% else %}success{% endif %}'>
-        <td>{{ run.scraped.state }}</td>
+    <td><a href = '/browse/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
         <td>{{ run.scraped.started|date_display }}</td>
         <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
     </tr>
