@@ -504,10 +504,15 @@ def random_bill(request, abbr):
         bill = None
         warning = 'No bills matching the criteria were found.'
 
+    try:
+        bill_id = bill['_id']
+    except TypeError:
+        # Bill was none (see above).
+        bill_id = None
 
     context = {
         'bill'   : bill,
-        'id': bill['_id'],
+        'id': bill_id,
         'random' : True,
         'state' : abbr.lower(),
         'warning': warning,
