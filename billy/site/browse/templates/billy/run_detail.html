@@ -45,8 +45,11 @@
     font-size:   0.8em;
 }
 .error {
-    background-color:#c74248;
-    color:           #FFFFFF;
+    background-color: #ffff8c;
+    /* color:           #FFFFFF; */
+}
+.success {
+    background-color: #d8d4fa;
 }
     </style>
 
@@ -224,9 +227,9 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     {% endif %}
     <br />
 {% endfor %}
-<table>
+<table class='table table-bordered'>
 {% for run in allruns %}
-    <tr{% if run.failure %} class = 'error' {% endif %}>
+<tr class='{% if run.failure %}error{% else %}success{% endif %}'>
         <td>{{ run.scraped.state }}</td>
         <td>{{ run.scraped.started|date_display }}</td>
     </tr>
