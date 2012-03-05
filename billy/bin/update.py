@@ -377,8 +377,8 @@ def main(old_scrape_compat=False):
             exec_end  = dt.datetime.utcnow()
             exec_record['started']  = exec_start
             exec_record['ended']    = exec_end
-            scrape_data['scraped'] = exec_record
-            scrape_data['state']   = abbrev
+            scrape_data['scraped']  = exec_record
+            scrape_data['state']    = abbrev
 
             for record in run_record:
                 if "exception" in record:
@@ -388,7 +388,6 @@ def main(old_scrape_compat=False):
                         "message" : ex.message
                     }
                     scrape_data['failure'] = True
-
             if lex:
                 if args.do_import:
                     db.billy_runs.save( scrape_data, safe=True )
