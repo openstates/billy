@@ -3,39 +3,27 @@
 {% load billy_utiltags %}
 
 {% block script %}
-    <script type="text/javascript" src="http://s3.amazonaws.com/assets.sunlightlabs.com/openstates/v1/js/jquery-1.5.min.js"></script>
-    <script type="text/javascript" src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.jqplot.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.jqplot.min.css" ></link>
-    <!--
+    <script type="text/javascript" src="{{STATIC_URL}}scripts/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{STATIC_URL}}scripts/jquery.jqplot.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}scripts/jquery.jqplot.min.css" ></link>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/jquery.min.js"
-    ></script>
-    -->
+        src="{{STATIC_URL}}scripts/plugins/jqplot.pieRenderer.min.js"></script>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.pieRenderer.min.js"
-    ></script>
+        src="{{STATIC_URL}}scripts/plugins/jqplot.barRenderer.min.js"></script>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.barRenderer.min.js"
-    ></script>
+        src="{{STATIC_URL}}scripts/plugins/jqplot.pointLabels.min.js"></script>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.pointLabels.min.js"
-    ></script>
+        src="{{STATIC_URL}}scripts/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.canvasAxisTickRenderer.min.js"
-    ></script>
+        src="{{STATIC_URL}}scripts/plugins/jqplot.canvasTextRenderer.min.js"></script>
     <script
         type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.canvasTextRenderer.min.js"
-    ></script>
-    <script
-        type="text/javascript"
-        src="http://assets.openstates.org/media/js/jqplot-1.0.0b2/plugins/jqplot.categoryAxisRenderer.min.js"
-    ></script>
+        src="{{STATIC_URL}}scripts/plugins/jqplot.categoryAxisRenderer.min.js"></script>
     <style>
 .jqplot-table-legend {
     width:   auto;
