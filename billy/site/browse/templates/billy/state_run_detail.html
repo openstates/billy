@@ -204,8 +204,11 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <br />
 </p>
 <p>
-<h3>Run history</h3>
+<h3>Percent of Exceptions Thrown</h3>
 <div id = 'chart-area-pie' ></div>
+<br />
+<br />
+<h3>Time of each scrape, by Scraper Type</h3>
 <div id = 'chart-area-stack' ></div>
 {% for key in runlog.scraped.run_record %}
     {% if key.exception %}
