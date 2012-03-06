@@ -15,7 +15,7 @@
 <a href="{{obj_url}}">remote</a>
 {% if not forloop.last %} | {% endif %}
 {% if obj_isbill %}
- <a href="/browse/{{obj.state}}/{{obj.session}}/{{obj.bill_id}}/">billy</a>
+    <a href="{% url bill obj.state obj.session obj.bill_id %}">billy</a>
 {% endif %}
 <h3>[{{collection}}] {{obj_id}}</h3>
 

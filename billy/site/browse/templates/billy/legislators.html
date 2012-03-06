@@ -5,8 +5,8 @@
 {% block content %}
 <h1>{{metadata.name}} legislators</h1>
 
-<div style="float: left; padding-right: 3em;">
-<h3 width="100%"> {{metadata.upper_chamber_title}}s </h3>
+<div class="span4">
+<h3> {{metadata.upper_chamber_title}}s </h3>
 <table class="table">
 <thead>
 <tr>
@@ -18,7 +18,7 @@
 <tbody>
 {% for leg in upper_legs %}
 <tr>
-    <td><a href="/browse/legislators/{{leg.leg_id}}/">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td><a href="{% url legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
 </tr>
@@ -26,8 +26,8 @@
 </table>
 </div>
 
-<div style="float: left; padding-right: 3em;">
-<h3 width="100%"> {{metadata.lower_chamber_title}}s </h3>
+<div class="span4">
+<h3> {{metadata.lower_chamber_title}}s </h3>
 <table class="table">
 <thead>
 <tr>
@@ -39,7 +39,7 @@
 <tbody>
 {% for leg in lower_legs %}
 <tr>
-    <td><a href="/browse/legislators/{{leg.leg_id}}/">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td><a href="{% url legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
 </tr>
@@ -48,8 +48,8 @@
 </table>
 </div>
 
-<div style="float: left; padding-right: 3em;">
-<h3 width="100%"> inactive legislators </h3>
+<div class="span4">
+<h3> inactive legislators </h3>
 <table class="table">
 <thead>
 <tr>
@@ -60,7 +60,7 @@
 <tbody>
 {% for leg in inactive_legs %}
 <tr>
-    <td><a href="/browse/legislators/{{leg.leg_id}}/">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td><a href="{% url legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
     <td>
         <dl>
             {% for k,v in leg.old_roles.iteritems %}

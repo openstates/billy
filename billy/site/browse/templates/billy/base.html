@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html>
-  <head>
-      <title>{% block title %}{% endblock %} : billy admin</title>
-      <link rel="stylesheet" href="{{STATIC_URL}}css/bootstrap.min.css">
-      <script src="{{STATIC_URL}}scripts/jquery-1.7.1.min.js"></script>
-      <script src="{{STATIC_URL}}scripts/bootstrap-dropdown.js"></script>
-      <script>
-          $('.dropdown-toggle').dropdown();
-      </script>
-      {% block script %}
-      {% endblock %}
-
-      {% block style %}
-      {% endblock %}
-
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} : billy admin</title>
+    <link rel="stylesheet" href="{{STATIC_URL}}css/bootstrap.min.css">
+    <script src="{{STATIC_URL}}scripts/jquery-1.7.1.min.js"></script>
+    <script src="{{STATIC_URL}}scripts/bootstrap-dropdown.js"></script>
+    <script>
+      $('.dropdown-toggle').dropdown();
+    </script>
+    {% block script %}
+    {% endblock %}
+    {% block style %}
+    {% endblock %}
+</head>
   <body>
       <div class="navbar">
         <div class="navbar-inner">
