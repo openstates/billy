@@ -236,7 +236,7 @@ def run_detail(request, obj=None):
         "run" : run,
         "metadata" : {
             "abbreviation" : run['state'],
-            "name" : run['state']
+            "name"         : run['state']
         }
     })
 
