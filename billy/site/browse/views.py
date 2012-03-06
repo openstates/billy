@@ -234,6 +234,10 @@ def run_detail(request, obj=None):
         })
     return render(request, 'billy/run_detail.html', {
         "run" : run,
+        "metadata" : {
+            "abbreviation" : run['state'],
+            "name" : run['state']
+        }
     })
 
 def state_run_detail(request, abbr):
