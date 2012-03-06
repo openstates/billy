@@ -6,11 +6,12 @@ scrapelib changelog
     * lots of improvements to billy admin
     * removal of never-used RSS emitter
     * drop billy-util districtcsv in favor of an admin view
+    * addition of billy-update --oyster argument, adds tracking of versions
     * bugfix: stop silently swallowing errors in subject csvs
 
 0.9.6
 -----
-**27 Februrary 2012**
+**27 February 2012**
     * add alternate_bill_ids and related functionality (needed for TN)
     * updated oysterize command to work with oyster >= 0.3
     * added initial work on class-based models
