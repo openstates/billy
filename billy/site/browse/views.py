@@ -76,15 +76,14 @@ def overview(request, abbr):
             "scraped.state" : abbr
         }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
         # This hack brought to you by Django's inability to do subtraction
-        # in the templte :)
-        runlog['scraped']['time_delta'] = ( runlog['scraped']['ended'] - \
-                                          runlog['scraped']['started'] )
+        # in the template :)
+        runlog['scraped']['time_delta'] = (runlog['scraped']['ended'] -
+                                           runlog['scraped']['started'])
         context['runlog'] = runlog
         if "failure" in runlog:
             context['warning_title'] = "This build is currently broken!"
-            context['warning'] = \
-"""
-The last scrape was a failre. Check in the run log secion for more details,
+            context['warning'] = """
+The last scrape was a failure. Check in the run log section for more details,
 or check out the scrape run report page for this state.
 """
     except IndexError:
