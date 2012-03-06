@@ -23,10 +23,8 @@ urlpatterns = patterns('billy.site.browse.views',
         name='other_actions'),
     url(r'^(?P<abbr>[a-z]{2})/unmatched_leg_ids/$', 'unmatched_leg_ids',
         name='unmatched_leg_ids'),
-
-
-    url(r'^(?P<abbr>[a-z]{2})/(?P<session>.+)/(?P<id>.*)/json/$', 'bill_json',
-        name='bill_json'),
+    url(r'^(?P<abbr>[a-z]{2})/district_stub/$', 'district_stub',
+        name='district_stub'),
 
     # Summary urls.
     url(r'^(?P<abbr>[a-z]{2})/summary/$', 'summary_index'),
@@ -34,10 +32,11 @@ urlpatterns = patterns('billy.site.browse.views',
     url(r'^(?P<abbr>[a-z]{2})/summary_object_key_vals/$',
         'summary_object_key_vals'),
     url(r'^object_json/(?P<collection>.{,100})/(?P<_id>.{,100})/',
-        'object_json'),
+        'object_json', name='object_json'),
 
     # runlog URLs.
-    url(r'^run-detail/(?P<abbr>[a-z]{2})/$', 'run_detail', name="run_detail"),
+    url(r'^state-run-detail/(?P<abbr>[a-z]{2})/$', 'state_run_detail', name="state_run_detail"),
+    url(r'^run-detail/(?P<obj>.*)/$', 'run_detail', name="run_detail"),
     url(r'^run-detail-data/(?P<abbr>[a-z]{2})/$','run_detail_graph_data',
         name="run_detail-data"),
 

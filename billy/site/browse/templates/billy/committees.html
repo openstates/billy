@@ -4,9 +4,9 @@
 
 {% block content %}
 
-<div style="float: left; padding-right: 3em;">
-    <h3 width="100%">{{metadata.upper_chamber_name}} Committees </h3>
-    <table>
+<div>
+    <h3>{{metadata.upper_chamber_name}} Committees </h3>
+    <table class="table table-bordered table-striped">
     <tr>
         <td>Committee</td>
         <td>Members</td>
@@ -19,7 +19,7 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="/browse/legislators/{{m.leg_id}}/"> {%endif%}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
                 {{ m.name }}
                 {% if m.leg_id %}</a> {%endif%}
             ({{m.role}})
@@ -36,9 +36,9 @@
     </table>
 </div>
 
-<div style="float: left; padding-right: 3em;">
-    <h3 width="100%">{{metadata.lower_chamber_name}} Committees </h3>
-    <table>
+<div>
+    <h3>{{metadata.lower_chamber_name}} Committees </h3>
+    <table class="table table-bordered table-striped">
     <tr>
         <td>Committee</td>
         <td>Members</td>
@@ -51,7 +51,7 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="/browse/legislators/{{m.leg_id}}/"> {%endif%}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
                 {{ m.name }}
                 {% if m.leg_id %}</a> {%endif%}
             ({{m.role}})
@@ -69,9 +69,9 @@
 </div>
 
 
-<div style="float: left; padding-right: 3em;">
-    <h3 width="100%">Joint Committees </h3>
-    <table>
+<div>
+    <h3>Joint Committees </h3>
+    <table class="table table-bordered table-striped">
     <tr>
         <td>Committee</td>
         <td>Members</td>
@@ -84,7 +84,7 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="/browse/legislators/{{m.leg_id}}/"> {%endif%}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
                 {{ m.name }}
                 {% if m.leg_id %}</a> {%endif%}
             ({{m.role}})

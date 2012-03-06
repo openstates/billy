@@ -4,7 +4,6 @@
 
 {% block content %}
 
-<div class="container">
 <h2>{{ metadata.name }} bill summary</h2>
 {{meta}}
 <div id="tables">
@@ -18,7 +17,7 @@
 <div>
 {% for session, data in sessions.items %}
 <div class="pull-left">
-<table class="zebra-striped bordered-table condensed-table">
+<table class="table table-bordered table-striped table-condensed">
   <tr><th style="text-align: center;" colspan="2">{{session}}</th></tr>
   {% for name, num in data.actions_per_month|sorted_items %}
     <tr><td>{{name}}</td><td>{{num|decimal_format}}</td></tr>
@@ -26,8 +25,6 @@
 </table>
 </div>
 {% endfor %}
-</div>
-
 </div>
 
 {% endblock %}

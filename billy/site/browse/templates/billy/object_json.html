@@ -1,7 +1,7 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
 
-{% block content %}
+{% block content-nocontainer %}
 <div class="container-fluid">
 <div class="sidebar" style="left: 10px; position: fixed; top: 50px; width: 100px;">
 <ul style="list-style-type: none; margin-left: 0px;">
@@ -15,7 +15,7 @@
 <a href="{{obj_url}}">remote</a>
 {% if not forloop.last %} | {% endif %}
 {% if obj_isbill %}
- <a href="/browse/{{obj.state}}/{{obj.session}}/{{obj.bill_id}}/">billy</a>
+    <a href="{% url bill obj.state obj.session obj.bill_id %}">billy</a>
 {% endif %}
 <h3>[{{collection}}] {{obj_id}}</h3>
 
