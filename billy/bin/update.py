@@ -400,7 +400,18 @@ def main(old_scrape_compat=False):
                     scrape_data['failure'] = True
             if lex:
                 if args.do_import:
-                    db.billy_runs.save( scrape_data, safe=True )
+                    try:
+                        db.billy_runs.save( scrape_data, safe=True )
+                    except Exception:
+                        raise lex # XXX: This should *NEVER* happen, but it has
+                        # in the past, so we're going to catch any errors writing
+                        # to pymongo, and raise the original exception rather
+                        # then let it look like Mongo's fault. Thanks for catching
+                        # this, Thom.
+                        #
+                        # We loose the stack trace, but the Exception is the
+                        # same in every other way.
+                        #  -- paultag
                 raise
 
         elif args.solo_bills:
