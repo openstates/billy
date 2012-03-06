@@ -170,7 +170,8 @@ def _do_imports(abbrev, args):
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if args.bills:
-        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR,
+                                       args.oyster)
 
     if args.committees:
         report['committees'] = \
@@ -240,7 +241,10 @@ def main(old_scrape_compat=False):
                             help="scrape all available types of data")
         scrape.add_argument('--strict', action='store_true', dest='strict',
                             default=False, help="fail immediately when"
-                            "encountering validation warning")
+                            " encountering validation warning")
+        scrape.add_argument('--oyster', action='store_true', dest='oyster',
+                            default=False, help="push documents to oyster"
+                            " document tracking daemon")
         scrape.add_argument('-n', '--no_cache', action='store_true',
                             dest='no_cache', help="don't use web page cache")
         scrape.add_argument('--fastmode', help="scrape in fast mode",

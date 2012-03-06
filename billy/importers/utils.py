@@ -8,10 +8,19 @@ from collections import defaultdict
 
 from pymongo.son import SON
 import pymongo.errors
+import name_tools
+
+oyster_import_exception = None
+try:
+    from oyster.core import kernel
+except Exception as e:
+    kernel = None
+    oyster_import_exception = e
+
+
 
 from billy import db
 
-import name_tools
 
 
 def _get_property_dict(schema):
@@ -300,3 +309,9 @@ def merge_legislators(leg1, leg2):
         leg1[roles] = [ leg2[roles][0] ]
     return ( leg1, leg2['_id'] )
 
+
+def oysterize(url, doc_class, id, **kwargs):
+    if not kernel:
+        raise oyster_import_exception
+    # kwargs pass through as metadata
+    kernel.track_url(url, doc_class, id=id, **kwargs)
