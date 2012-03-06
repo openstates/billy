@@ -45,11 +45,10 @@
     font-size:   0.8em;
 }
 .error {
-    background-color: #ffff8c;
-    /* color:           #FFFFFF; */
+    background-color: #faf0a5;
 }
 .success {
-    background-color: #d8d4fa;
+    background-color: #d6ff99;
 }
     </style>
 
@@ -230,14 +229,14 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <table class='table table-bordered'>
     <tr>
         <th>State</th>
-        <th>Time</th>
         <th>Outcome</th>
+        <th>Time</th>
     </tr>
 {% for run in allruns %}
-<tr class='{% if run.failure %}error{% else %}success{% endif %}'>
-    <td><a href = '/browse/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
-        <td>{{ run.scraped.started|date_display }}</td>
+    <tr class='{% if run.failure %}error{% else %}success{% endif %}'>
+        <td><a href = '/browse/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
         <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
+        <td>{{ run.scraped.started|date_display }}</td>
     </tr>
 {% endfor %}
 </table>
