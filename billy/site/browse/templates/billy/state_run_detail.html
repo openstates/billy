@@ -54,11 +54,11 @@
 
     <script type = "text/javascript" >
 
-function new_chart( key ) {
+function new_chart( key, area ) {
     /* let's create a new chart */
     var width  = 500;
     var height = 200;
-    $("#chart-area").append(
+    $("#" + area).append(
         "<div class='billy-chart' style='width:" + width +" px;height:" + height +
             "px;' id = '" + "chartdiv-" +
             key + "' ></div>"
@@ -71,7 +71,7 @@ function pieize( key, val, title ) {
         return;
     }
 
-    new_chart( key );
+    new_chart( key, "chart-area-pie" );
     var plot1 = jQuery.jqplot( "chartdiv-" + key, [val], {
         title: title,
         seriesDefaults: {
@@ -96,7 +96,7 @@ function stackize( key, val, title ) {
         return;
     }
 
-    new_chart( key );
+    new_chart( key, "chart-area-stack" );
     var plot1 = $.jqplot('chartdiv-' + key, val, {
         title: title,
         stackSeries: true,
@@ -131,7 +131,7 @@ function lineize( key, val, title ) {
         return;
     }
 
-    new_chart( key );
+    new_chart( key, "chart-area-line" );
     var plot1 = $.jqplot("chartdiv-" + key, [runs, avgs], {
         title: title,
         legend: {
@@ -216,8 +216,9 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 <br />
 </p>
 <p>
-<div id = 'chart-area' >
-</div>
+<h3>Run history</h3>
+<div id = 'chart-area-pie' ></div>
+<div id = 'chart-area-stack' ></div>
 {% for key in runlog.scraped.run_record %}
     {% if key.exception %}
         <b>Exception Recieved</b>
@@ -240,6 +241,6 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     </tr>
 {% endfor %}
 </table>
+<div id = 'chart-area-line' ></div>
 </p>
-<p>
 {% endblock %}
