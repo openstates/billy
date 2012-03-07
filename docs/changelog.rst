@@ -4,9 +4,12 @@ scrapelib changelog
 0.9.7
 -----
     * lots of improvements to billy admin
+        * general style overhaul
+        * duplicate_versions view
     * removal of never-used RSS emitter
     * drop billy-util districtcsv in favor of an admin view
     * addition of billy-update --oyster argument, adds tracking of versions
+    * duplicate_versions is now just that, not versions+documents
     * bugfix: stop silently swallowing errors in subject csvs
 
 0.9.6
