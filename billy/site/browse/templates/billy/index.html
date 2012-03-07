@@ -54,6 +54,7 @@
         <th>No Actions</th>
         <th>No Sponsors</th>
         <th>No Versions</th>
+        <th>Dup. Versions</th>
         <th>No Source</th>
         <th>Bill Types</th>
         <th>w/ Subjects</th>
@@ -152,6 +153,8 @@
             {{row.bills.sponsorless_count}}</td>
         <td class="{{row.bills.versionless_count|yesno:"bad,good"}}">
             {{row.bills.versionless_count}}</td>
+        <td class="{{row.bills.duplicate_versions|length|yesno:"bad,good"}}">
+            {{row.bills.duplicate_versions|length}}</td>
         <td class="{{row.bills.sourceless_count|yesno:"bad,good"}}">
            {{row.bills.sourceless_count}}</td>
         <td class="{{row.bills.bill_types|length_is:"1"|yesno:"bad,good"}}">
