@@ -103,10 +103,10 @@ def _run_scraper(scraper_type, options, metadata):
 
     runs = []
 
+    # Removed from the inner loop due to non-bicameral scrapers
     scrape = {
         "type"       : scraper_type
-    } # Removed from the inner loop due to non-universal
-    #   bicameral states
+    }
     scrape['start_time'] = dt.datetime.utcnow()
 
     # run scraper against year/session/term

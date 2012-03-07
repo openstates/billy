@@ -17,9 +17,6 @@ of their data'''
 
     def handle(self, args):
 
-        # print initial missing counts (a hack)
-        state = args.filename.split('_')[0]
-
         namefile = unicodecsv.DictReader(open(args.filename))
 
         for row in namefile:

@@ -19,15 +19,15 @@ class ValidateApi(BaseCommand):
     help = 'validate data from the API'
 
     def add_args(self):
-        self.add_argument('states', nargs='+', help='states to oysterize')
+        self.add_argument('abbrs', nargs='+', help='states to validate')
         self.add_argument('--sunlight_key', dest='SUNLIGHT_SERVICES_KEY',
                   help='the Sunlight API key to use')
         self.add_argument('--schema_dir', default=None,
                   help='directory to use for API schemas (optional)')
 
     def handle(self, args):
-        for state in args.states:
-            validate_api(state, args.schema_dir)
+        for abbr in args.abbrs:
+            validate_api(abbr, args.schema_dir)
 
 def get_xml_schema():
     cwd = os.path.split(__file__)[0]

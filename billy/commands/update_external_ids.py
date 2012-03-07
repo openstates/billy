@@ -28,15 +28,11 @@ def update_votesmart_legislators(meta):
     # get officials
     abbrev = meta['_id'].upper()
 
-    if meta['level'] == 'state':
-        upper_officials = votesmart.officials.getByOfficeState(9, abbrev)
-        try:
-            lower_officials = votesmart.officials.getByOfficeState(8, abbrev)
-        except VotesmartApiError:
-            lower_officials = votesmart.officials.getByOfficeState(7, abbrev)
-    elif meta['level'] == 'country':
-        lower_officials = votesmart.officials.getByOfficeState(5, abbrev)
-        upper_officials = votesmart.officials.getByOfficeState(6, abbrev)
+    upper_officials = votesmart.officials.getByOfficeState(9, abbrev)
+    try:
+        lower_officials = votesmart.officials.getByOfficeState(8, abbrev)
+    except VotesmartApiError:
+        lower_officials = votesmart.officials.getByOfficeState(7, abbrev)
 
     def _match(chamber, vsofficials):
         updated = 0
