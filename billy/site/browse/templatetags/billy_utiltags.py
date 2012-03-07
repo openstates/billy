@@ -1,6 +1,7 @@
 from decimal import Decimal, Context, Inexact
 import urllib
 import pdb
+import datetime as dt
 
 from django import template
 
@@ -24,10 +25,23 @@ def key(d, key_name):
         return None
 
 @register.filter
+def minus(d1, d2):
+    return d1 - d2
+
+@register.filter
 def private(d, key_name):
     try:
         return d[( "_" + key_name )]
     except KeyError:
         return None
+@register.filter
+def date_display(d):
+    formal_date = d.strftime("%a, %B %d")
+    ago         = dt.datetime.utcnow() - d
+    ago_str     = "%s days" % ( ago.days )
+    return "%s (%s ago)" % (
+        formal_date,
+        ago_str
+    )
 
 quote_plus=register.filter(urllib.quote_plus)

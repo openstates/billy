@@ -1,6 +1,13 @@
 scrapelib changelog
 ===================
 
+0.9.7
+-----
+    * lots of improvements to billy admin
+    * removal of never-used RSS emitter
+    * drop billy-util districtcsv in favor of an admin view
+    * bugfix: stop silently swallowing errors in subject csvs
+
 0.9.6
 -----
 **27 Februrary 2012**

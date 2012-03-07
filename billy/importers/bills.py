@@ -11,7 +11,7 @@ from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
-                                   next_big_id)
+                                   next_big_id, oysterize)
 
 import pymongo
 
@@ -46,19 +46,6 @@ def ensure_indexes():
                            ('sponsors.leg_id', pymongo.ASCENDING)])
 
 
-def _versions_differ(old, new):
-    """ sneaky update filter for versions, ignore _oyster_id """
-    old = old[:]
-    for ov in old:
-        ov.pop('_oyster_id', None)
-    return old != new
-
-
-bill_sneaky_update_filter = {
-    'versions': _versions_differ,
-}
-
-
 def import_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
     paths = glob.glob(pattern)
@@ -78,7 +65,7 @@ def import_votes(data_dir):
     return votes
 
 
-def import_bill(data, votes, categorizer):
+def import_bill(data, votes, categorizer, oyster_documents=False):
     level = data['level']
     abbr = data[level]
 
@@ -156,9 +143,18 @@ def import_bill(data, votes, categorizer):
 
     data['_term'] = term_for_session(abbr, data['session'])
 
-    # Merge any version titles into the alternate_titles list
     alt_titles = set(data.get('alternate_titles', []))
+
     for version in data['versions']:
+        # push versions to oyster
+        if oyster_documents:
+            oysterize(version['url'], bill['state'] + ':billtext',
+                      id=version['doc_id'],
+                      # metadata
+                      name=version['name'], state=bill['state'],
+                      session=bill['session'], chamber=bill['chamber'],
+                      bill_id=bill['bill_id'], openstates_bill_id=bill['_id'])
+        # Merge any version titles into the alternate_titles list
         if 'title' in version:
             alt_titles.add(version['title'])
         if '+short_title' in version:
@@ -178,11 +174,11 @@ def import_bill(data, votes, categorizer):
         insert_with_id(data)
         return "insert"
     else:
-        update(bill, data, db.bills, bill_sneaky_update_filter)
+        update(bill, data, db.bills)
         return "update"
 
 
-def import_bills(abbr, data_dir):
+def import_bills(abbr, data_dir, oyster_documents=False):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'bills', '*.json')
 
@@ -205,7 +201,7 @@ def import_bills(abbr, data_dir):
             data = prepare_obj(json.load(f))
 
         counts["total"] += 1
-        ret = import_bill(data, votes, categorizer)
+        ret = import_bill(data, votes, categorizer, oyster_documents)
         counts[ret] += 1
 
     logger.info('imported %s bill files' % len(paths))

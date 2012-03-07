@@ -61,7 +61,12 @@ def _run_scraper(scraper_type, options, metadata):
     _clear_scraped_data(options.output_dir, scraper_type)
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
-        return []
+        return [{
+            "type"       : scraper_type,
+            "start_time" : dt.datetime.utcnow(),
+            "noscraper" : True,
+            "end_time" : dt.datetime.utcnow()
+        }]
 
     # times: the list to iterate over for second scrape param
     if scraper_type in ('bills', 'votes', 'events'):
@@ -165,7 +170,8 @@ def _do_imports(abbrev, args):
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if args.bills:
-        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR,
+                                       args.oyster)
 
     if args.committees:
         report['committees'] = \
@@ -235,7 +241,10 @@ def main(old_scrape_compat=False):
                             help="scrape all available types of data")
         scrape.add_argument('--strict', action='store_true', dest='strict',
                             default=False, help="fail immediately when"
-                            "encountering validation warning")
+                            " encountering validation warning")
+        scrape.add_argument('--oyster', action='store_true', dest='oyster',
+                            default=False, help="push documents to oyster"
+                            " document tracking daemon")
         scrape.add_argument('-n', '--no_cache', action='store_true',
                             dest='no_cache', help="don't use web page cache")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
@@ -351,28 +360,35 @@ def main(old_scrape_compat=False):
             }
 
             lex = None
+            last_scraper = None
 
             # run scrapers
             exec_start = dt.datetime.utcnow()
             try:
                 if args.legislators:
+                    last_scraper = 'legislators'
                     run_record += _run_scraper('legislators', args, metadata)
                 if args.committees:
+                    last_scraper = 'committees'
                     run_record += _run_scraper('committees', args, metadata)
                 if args.votes:
+                    last_scraper = 'votes'
                     run_record += _run_scraper('votes', args, metadata)
-                if args.events:
-                    run_record += _run_scraper('events', args, metadata)
                 if args.bills:
+                    last_scraper = 'bills'
                     run_record += _run_scraper('bills', args, metadata)
+                if args.events:
+                    last_scraper = 'events'
+                    run_record += _run_scraper('events', args, metadata)
             except Exception as e :
-                run_record += [{ "exception" : e }]
+                run_record += [{ "exception" : e, "type" : last_scraper }]
                 lex = e
-            exec_end  = dt.datetime.utcnow()
 
+            exec_end  = dt.datetime.utcnow()
             exec_record['started']  = exec_start
             exec_record['ended']    = exec_end
-            scrape_data['scraped'] = exec_record
+            scrape_data['scraped']  = exec_record
+            scrape_data['state']    = abbrev
 
             for record in run_record:
                 if "exception" in record:
@@ -382,10 +398,20 @@ def main(old_scrape_compat=False):
                         "message" : ex.message
                     }
                     scrape_data['failure'] = True
-
             if lex:
                 if args.do_import:
-                    db.billy_runs.save( scrape_data, safe=True )
+                    try:
+                        db.billy_runs.save( scrape_data, safe=True )
+                    except Exception:
+                        raise lex # XXX: This should *NEVER* happen, but it has
+                        # in the past, so we're going to catch any errors writing
+                        # to pymongo, and raise the original exception rather
+                        # then let it look like Mongo's fault. Thanks for catching
+                        # this, Thom.
+                        #
+                        # We loose the stack trace, but the Exception is the
+                        # same in every other way.
+                        #  -- paultag
                 raise
 
         elif args.solo_bills:

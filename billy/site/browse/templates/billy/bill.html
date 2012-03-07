@@ -10,10 +10,10 @@
 {% if bill %}
 
 <div class="pull-right">
-<a href="/browse/{{bill.state}}/{{bill.session}}/{{bill.bill_id}}/json">json dump</a>
+    <a href="{% url object_json "bills" id %}">json dump</a>
 </div>
 
-<a href="/browse/{{bill.state}}/{{bill.session}}/{{bill.bill_id}}">
+<a href="{% url bill bill.state bill.session bill.bill_id %}">
   <h3>{{bill.state|upper}} {{bill.bill_id}}</h3>
 </a>
 
@@ -55,7 +55,7 @@
   <h4>Sponsors:</h4>
   <ul>
     {% for sponsor in bill.sponsors %}
-    <li>{% if sponsor.leg_id %}<a href="/browse/legislators/{{sponsor.leg_id}}/">{% endif %}{{sponsor.name}}{% if sponsor.leg_id %}</a>{% endif %} [{{sponsor.type}}]</li>
+    <li>{% if sponsor.leg_id %}<a href="{% url legislator sponsor.leg_id %}">{% endif %}{{sponsor.name}}{% if sponsor.leg_id %}</a>{% endif %} [{{sponsor.type}}]</li>
     {% endfor %}
   </ul>
 </div>
@@ -77,7 +77,7 @@
 <div class="votes">
   <h4>Votes:</h4>
   {% if bill.votes %}
-  <table>
+  <table class="table">
       <tr>
           <th>Motion</th>
           <th>Chamber</th>
