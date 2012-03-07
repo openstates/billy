@@ -153,8 +153,9 @@ def scan_bills(abbr):
         else:
             # total num of versions
             session_d['version_count'] += len(bill['versions'])
-        for doc in (bill['versions'] + bill['documents']):
+        for doc in bill['versions']:
             duplicate_versions[doc['url']] += 1
+        # TODO: add a duplicate documents back in?
 
     dup_version_urls = []
     dup_source_urls = []
