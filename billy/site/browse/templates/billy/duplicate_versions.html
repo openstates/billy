@@ -1,0 +1,20 @@
+{% extends "billy/base.html" %}
+
+{% block title %} {{metadata.name}} duplicate versions {% endblock title %}
+
+{% block content %}
+
+<h2>{{meta.name}} bills with duplicate versions</h2>
+
+<table class="table table-condensed">
+    <thead> <tr> <th> URL </th> <th> bills </th> </tr> </thead>
+    <tbody>
+        {% for vurl in report.bills.duplicate_versions %}
+        <tr>
+            <td>{{vurl}}</td><td><a href="{% url bill_list metadata.abbreviation %}?version_url={{vurl}}">bills</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

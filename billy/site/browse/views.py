@@ -26,6 +26,14 @@ from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 
 
+def _meta_and_report(abbr):
+    meta = metadata(abbr)
+    report = db.reports.find_one({'_id': abbr})
+    if not meta or not report:
+        raise Http404
+    return meta, report
+
+
 def keyfunc(obj):
     try:
         return int(obj['district'])
@@ -62,11 +70,7 @@ def browse_index(request, template='billy/index.html'):
     return render(request, template, {'rows': rows})
 
 def overview(request, abbr):
-    meta = metadata(abbr)
-    report = db.reports.find_one({'_id': abbr})
-    if not meta or not report:
-        raise Http404
-
+    meta, report = _meta_and_report(abbr)
     context = {}
     context['metadata'] = meta
     context['report'] = report
@@ -282,12 +286,7 @@ for the exception and error message.
 
 @never_cache
 def bills(request, abbr):
-
-    meta = metadata(abbr)
-
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404
+    meta, report = _meta_and_report(abbr)
 
     sessions = report['bills']['sessions']
 
@@ -506,6 +505,16 @@ def district_stub(request, abbr):
                          ('abbr', 'chamber', 'district', 'count', ''),
                          data, abbr)
 
+
+def duplicate_versions(request, abbr):
+    meta, report = _meta_and_report(abbr)
+
+    data = report['bills']['duplicate_versions']
+
+    return render(request, "billy/duplicate_versions.html",
+                  {'metadata': meta, 'report': report})
+
+
 @never_cache
 def random_bill(request, abbr):
     meta = metadata(abbr)
@@ -577,6 +586,28 @@ def random_bill(request, abbr):
 """
 
     return render(request, 'billy/bill.html', context)
+
+
+def bill_list(request, abbr):
+    meta = metadata(abbr)
+    if not meta:
+        raise Http404
+
+    level = meta['level']
+    spec = {'level': level, level: abbr}
+
+    if 'version_url' in request.GET:
+        version_url = request.GET.get('version_url')
+        spec['versions.url'] = version_url
+
+    bills = db.bills.find(spec)
+    query_text = repr(spec)
+
+    context = {'metadata': meta,
+               'query_text': query_text,
+               'bills': bills}
+
+    return render(request, 'billy/bill_list.html', context)
 
 
 def bill(request, abbr, session, id):
