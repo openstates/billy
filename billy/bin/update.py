@@ -5,6 +5,7 @@ import json
 import glob
 import logging
 import argparse
+import traceback
 import unicodecsv
 
 import datetime as dt
@@ -381,7 +382,13 @@ def main(old_scrape_compat=False):
                     last_scraper = 'events'
                     run_record += _run_scraper('events', args, metadata)
             except Exception as e :
-                run_record += [{ "exception" : e, "type" : last_scraper }]
+                # Format the full traceback for the run_detail.
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                trace = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                trace = ''.join(trace)
+                
+                run_record += [{"exception" : e, "type" : last_scraper,
+                                "traceback": trace}]
                 lex = e
 
             exec_end  = dt.datetime.utcnow()
@@ -403,14 +410,13 @@ def main(old_scrape_compat=False):
                     try:
                         db.billy_runs.save( scrape_data, safe=True )
                     except Exception:
-                        raise lex # XXX: This should *NEVER* happen, but it has
+                        print trace
+                        sys.exit(1)
+                        # XXX: This should *NEVER* happen, but it has
                         # in the past, so we're going to catch any errors writing
                         # to pymongo, and raise the original exception rather
                         # then let it look like Mongo's fault. Thanks for catching
                         # this, Thom.
-                        #
-                        # We loose the stack trace, but the Exception is the
-                        # same in every other way.
                         #  -- paultag
                 raise
 
