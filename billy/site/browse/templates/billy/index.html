@@ -73,8 +73,12 @@
         <!-- legislators -->
         <td class="{{row.legislators.upper_active_count|yesno:"good,bad"}}">
             {{row.legislators.upper_active_count}}</td>
-        <td class="{{row.legislators.lower_active_count|yesno:"good,bad"}}">
-            {{row.legislators.lower_active_count}}</td>
+        {% if row.unicameral %}
+            <td class="good">---</td>
+        {% else %}
+            <td class="{{row.legislators.lower_active_count|yesno:"good,bad"}}">
+                {{row.legislators.lower_active_count}}</td>
+        {% endif %}
         <td class="{{row.legislators.sourceless_count|yesno:"bad,good"}}">
             {{row.legislators.sourceless_count}}</td>
         <td
@@ -125,8 +129,12 @@
         <!-- committees -->
         <td class="{{row.committees.upper_count|yesno:"good,bad"}}">
             {{row.committees.upper_count}}</td>
-        <td class="{{row.committees.lower_count|yesno:"good,bad"}}">
-            {{row.committees.lower_count}}</td>
+        {% if row.unicameral %}
+            <td class="good">---</td>
+        {% else %}
+            <td class="{{row.committees.lower_count|yesno:"good,bad"}}">
+                {{row.committees.lower_count}}</td>
+        {% endif %}
         <td class="{{row.committees.joint_count|yesno:"good,warning"}}">
             {{row.committees.joint_count}}</td>
         <td class="{{row.committees.empty_count|yesno:"bad,good"}}">
