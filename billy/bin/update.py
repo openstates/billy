@@ -29,6 +29,7 @@ def _clear_scraped_data(output_dir, scraper_type):
             for f in glob.glob(path + '/*.json'):
                 os.remove(f)
 
+
 def _get_configured_scraper(scraper_type, options, metadata):
     try:
         ScraperClass = get_scraper(options.module, scraper_type)
@@ -54,6 +55,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
     scraper = ScraperClass(metadata, **opts)
     return scraper
 
+
 def _run_scraper(scraper_type, options, metadata):
     """
         scraper_type: bills, legislators, committees, votes
@@ -62,10 +64,10 @@ def _run_scraper(scraper_type, options, metadata):
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
         return [{
-            "type"       : scraper_type,
-            "start_time" : dt.datetime.utcnow(),
-            "noscraper" : True,
-            "end_time" : dt.datetime.utcnow()
+            "type": scraper_type,
+            "start_time": dt.datetime.utcnow(),
+            "noscraper": True,
+            "end_time": dt.datetime.utcnow()
         }]
 
     # times: the list to iterate over for second scrape param
@@ -105,7 +107,7 @@ def _run_scraper(scraper_type, options, metadata):
 
     # Removed from the inner loop due to non-bicameral scrapers
     scrape = {
-        "type"       : scraper_type
+        "type": scraper_type
     }
     scrape['start_time'] = dt.datetime.utcnow()
 
@@ -117,7 +119,7 @@ def _run_scraper(scraper_type, options, metadata):
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
 
-    scrape['end_time']  = dt.datetime.utcnow()
+    scrape['end_time'] = dt.datetime.utcnow()
     runs.append(scrape)
 
     return runs
@@ -182,6 +184,7 @@ def _do_imports(abbrev, args):
                 import_events(abbrev, settings.BILLY_DATA_DIR)
 
     return report
+
 
 def _do_reports(abbrev, args):
     from billy import db
@@ -325,7 +328,6 @@ def main(old_scrape_compat=False):
             args.votes = True
             args.committees = True
 
-
         scrape_data = {}
 
         # do full scrape if not solo bills, import only, or report only
@@ -346,17 +348,18 @@ def main(old_scrape_compat=False):
                 validator = DatetimeValidator()
                 validator.validate(metadata, schema)
             except ValueError as e:
-                logging.getLogger('billy').warning('metadata validation error: '
-                                                         + str(e))
+                logging.getLogger('billy').warning(
+                    'metadata validation error: ' + str(e))
 
-            with open(os.path.join(args.output_dir, 'metadata.json'), 'w') as f:
+            with open(os.path.join(args.output_dir, 'metadata.json'),
+                      'w') as f:
                 json.dump(metadata, f, cls=JSONDateEncoder)
 
             run_record = []
             exec_record = {
-                "run_record" : run_record,
-                "args"       : sys.argv,
-                "state"      : abbrev
+                "run_record": run_record,
+                "args": sys.argv,
+                "state": abbrev
             }
 
             lex = None
@@ -380,34 +383,35 @@ def main(old_scrape_compat=False):
                 if args.events:
                     last_scraper = 'events'
                     run_record += _run_scraper('events', args, metadata)
-            except Exception as e :
-                run_record += [{ "exception" : e, "type" : last_scraper }]
+            except Exception as e:
+                run_record += [{"exception": e, "type": last_scraper}]
                 lex = e
 
-            exec_end  = dt.datetime.utcnow()
-            exec_record['started']  = exec_start
-            exec_record['ended']    = exec_end
-            scrape_data['scraped']  = exec_record
-            scrape_data['state']    = abbrev
+            exec_end = dt.datetime.utcnow()
+            exec_record['started'] = exec_start
+            exec_record['ended'] = exec_end
+            scrape_data['scraped'] = exec_record
+            scrape_data['state'] = abbrev
 
             for record in run_record:
                 if "exception" in record:
                     ex = record['exception']
                     record['exception'] = {
-                        "type"    : ex.__class__.__name__,
-                        "message" : ex.message
+                        "type": ex.__class__.__name__,
+                        "message": ex.message
                     }
                     scrape_data['failure'] = True
             if lex:
                 if args.do_import:
                     try:
-                        db.billy_runs.save( scrape_data, safe=True )
+                        db.billy_runs.save(scrape_data, safe=True)
                     except Exception:
-                        raise lex # XXX: This should *NEVER* happen, but it has
-                        # in the past, so we're going to catch any errors writing
-                        # to pymongo, and raise the original exception rather
-                        # then let it look like Mongo's fault. Thanks for catching
-                        # this, Thom.
+                        raise lex
+                        # XXX: This should *NEVER* happen, but it has
+                        # in the past, so we're going to catch any errors
+                        # writing # to pymongo, and raise the original
+                        # exception rather then let it look like Mongo's fault.
+                        # Thanks for catching this, Thom.
                         #
                         # We loose the stack trace, but the Exception is the
                         # same in every other way.
@@ -423,7 +427,7 @@ def main(old_scrape_compat=False):
             scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import
             # already writes to the DB, we might as well throw this in too.
-            db.billy_runs.save( scrape_data, safe=True )
+            db.billy_runs.save(scrape_data, safe=True)
 
         # reports
         if args.report:
@@ -432,6 +436,7 @@ def main(old_scrape_compat=False):
     except ScrapeError as e:
         print 'Error:', e
         sys.exit(1)
+
 
 def scrape_compat_main():
     main(True)

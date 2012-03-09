@@ -1,6 +1,3 @@
-import os
-import sys
-import glob
 import argparse
 import logging
 
@@ -23,12 +20,14 @@ COMMAND_MODULES = (
     'billy.commands.validate_api',
 )
 
+
 def import_command_module(mod):
     try:
         __import__(mod)
     except ImportError, e:
         logger.warning(
             'error "{0}" prevented loading of {1} module'.format(e, mod))
+
 
 def main():
     parser = argparse.ArgumentParser(description='generic billy util',
