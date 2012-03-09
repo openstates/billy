@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('billy.site.browse.views',
     url(r'^$', 'browse_index', name='admin_index'),

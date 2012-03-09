@@ -1,5 +1,4 @@
 import re
-import pdb
 import json
 import time
 import types
@@ -18,7 +17,7 @@ from pymongo.objectid import ObjectId
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -40,6 +39,7 @@ def keyfunc(obj):
     except ValueError:
         return obj['district']
 
+
 def _csv_response(request, csv_name, columns, data, abbr):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
@@ -53,6 +53,7 @@ def _csv_response(request, csv_name, columns, data, abbr):
         return render(request, 'billy/generic_table.html',
                       {'columns': columns,
                        'data':data, 'metadata': metadata(abbr)})
+
 
 def browse_index(request, template='billy/index.html'):
     rows = []
@@ -69,6 +70,7 @@ def browse_index(request, template='billy/index.html'):
     rows.sort(key=lambda x: x['name'])
 
     return render(request, template, {'rows': rows})
+
 
 def overview(request, abbr):
     meta, report = _meta_and_report(abbr)
@@ -96,7 +98,9 @@ or check out the scrape run report page for this state.
 
     return render(request, 'billy/state_index.html', context)
 
+
 def run_detail_graph_data(request, abbr):
+
     def rolling_average( oldAverage, newItem, oldAverageCount ):
         """
         Simple, unweighted rolling average. If you don't get why we have
@@ -226,6 +230,7 @@ def run_detail_graph_data(request, abbr):
         content_type="text/plain"
     )
 
+
 def run_detail(request, obj=None):
     try:
         run = db.billy_runs.find({
@@ -244,6 +249,7 @@ def run_detail(request, obj=None):
             "name"         : run['state']
         }
     })
+
 
 def state_run_detail(request, abbr):
     try:
@@ -284,6 +290,7 @@ for the exception and error message.
 """
 
     return render(request, 'billy/state_run_detail.html', context)
+
 
 @never_cache
 def bills(request, abbr):
@@ -400,6 +407,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
     return render(request, 'billy/summary_object_key.html', locals())
 
+
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
                             collections=("bills", "legislators", "committees")):
     meta = metadata(abbr)
@@ -423,6 +431,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
     return render(request, 'billy/summary_object_keyvals.html', locals())
 
+
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
 
@@ -437,6 +446,7 @@ def object_json(request, collection, _id,
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
     keys = sorted(obj)
+
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)

@@ -19,7 +19,7 @@ repeat1 = repeat(1)
 def simplified(f):
     '''
     Render the decorated view to response with the template
-    bearing the same name as the view function. 
+    bearing the same name as the view function.
     '''
     @wraps(f)
     def wrapper(request, *args, **kwargs):
@@ -34,12 +34,12 @@ def simplified(f):
 @simplified
 def state(request, abbr):
     '''
-    ''' 
+    '''
     metadata = Metadata.get_object(abbr)
     report = db.reports.find_one({'_id': abbr})
 
     sessions = report.session_link_data()
-                
+
     #------------------------------------------------------------------------
     # Legislators
     chambers = {
@@ -69,7 +69,7 @@ def legislators(request, abbr):
 
 @simplified
 def legislators_chamber(request, abbr, chamber):
-    
+
     state = Metadata.get_object(abbr)
     chamber_name = state['%s_chamber_name' % chamber]
 
@@ -85,8 +85,8 @@ def legislators_chamber(request, abbr, chamber):
     if request.GET:
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
-        
-    legislators = state.legislators(extra_spec=spec, fields=fields, 
+
+    legislators = state.legislators(extra_spec=spec, fields=fields,
                                     sort=[(sort_key, sort_order)])
 
     # Sort in python if the key was "district"
@@ -108,7 +108,7 @@ def legislator(request, abbr, leg_id):
     sources = legislator['sources']
     sponsored_bills = legislator.sponsored_bills(limit=5)
     return locals()
-    
+
 
 #----------------------------------------------------------------------------
 def committees(request, abbr):
@@ -117,7 +117,7 @@ def committees(request, abbr):
 
 @simplified
 def committees_chamber(request, abbr, chamber):
-    
+
     state = Metadata.get_object(abbr)
     chamber_name = state['%s_chamber_name' % chamber]
 
@@ -133,10 +133,10 @@ def committees_chamber(request, abbr, chamber):
     if request.GET:
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
-        
+
     committees = state.committees(spec, fields=fields, sort=[(sort_key, sort_order)])
 
-    sort_order = {1: -1, -1: 1}[sort_order] 
+    sort_order = {1: -1, -1: 1}[sort_order]
 
     return locals()
 
@@ -147,7 +147,7 @@ def committee(request, abbr, committee_id):
     sources = committee['sources']
     return locals()
 
-#----------------------------------------------------------------------------   
+#----------------------------------------------------------------------------
 @simplified
 def bills(request, abbr):
     state = Metadata.get_object(abbr)
@@ -161,7 +161,7 @@ def bill(request, abbr, bill_id):
     return locals()
 
 
-#----------------------------------------------------------------------------   
+#----------------------------------------------------------------------------
 @simplified
 def votes(request, abbr):
     state = Metadata.get_object(abbr)
