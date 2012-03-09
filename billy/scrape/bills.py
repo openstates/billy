@@ -1,7 +1,7 @@
 import os
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class BillScraper(Scraper):

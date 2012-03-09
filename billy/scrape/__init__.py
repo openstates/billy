@@ -3,7 +3,6 @@ import time
 import logging
 import datetime
 import json
-from collections import defaultdict
 
 from billy.scrape.validator import DatetimeValidator
 
@@ -53,6 +52,7 @@ class JSONDateEncoder(json.JSONEncoder):
 
 # maps scraper_type -> scraper
 _scraper_registry = dict()
+
 
 class ScraperMeta(type):
     """ register derived scrapers in a central registry """
@@ -212,6 +212,7 @@ class Scraper(scrapelib.Scraper):
         # validate after writing, allows for inspection
         self.validate_json(obj)
 
+
 class SourcedObject(dict):
     """ Base object used for data storage.
 
@@ -260,13 +261,13 @@ def get_scraper(mod_path, scraper_type):
 
 
 def check_sessions(metadata, sessions):
-    all_sessions_in_terms = list(reduce(lambda x,y: x+y,
+    all_sessions_in_terms = list(reduce(lambda x, y: x + y,
                                    [x['sessions'] for x in metadata['terms']]))
     # copy the list to avoid modifying it
     metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
                                                  []))
 
-    for k,v in metadata['session_details'].iteritems():
+    for k, v in metadata['session_details'].iteritems():
         try:
             all_sessions_in_terms.remove(k)
         except ValueError:

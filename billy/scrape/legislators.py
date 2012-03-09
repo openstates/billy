@@ -1,7 +1,7 @@
 import os
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class LegislatorScraper(Scraper):
@@ -48,6 +48,7 @@ class LegislatorScraper(Scraper):
         """
         self.log("save_legislator: %s" % legislator['full_name'])
         self.save_object(legislator)
+
 
 class Person(SourcedObject):
     def __init__(self, full_name, first_name='', last_name='',
