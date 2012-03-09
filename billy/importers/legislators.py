@@ -12,6 +12,7 @@ import pymongo
 
 logger = logging.getLogger('billy')
 
+
 def ensure_indexes():
     db.legislators.ensure_index('_all_ids', pymongo.ASCENDING)
     db.legislators.ensure_index([('roles.state', pymongo.ASCENDING),
@@ -32,9 +33,9 @@ def import_legislators(abbr, data_dir):
     paths = glob.glob(pattern)
 
     counts = {
-        "update" : 0,
-        "insert" : 0,
-        "total"  : 0
+        "update": 0,
+        "insert": 0,
+        "total": 0
     }
 
     for path in paths:

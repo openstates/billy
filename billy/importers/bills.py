@@ -17,6 +17,7 @@ import pymongo
 
 logger = logging.getLogger('billy')
 
+
 def ensure_indexes():
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
@@ -184,9 +185,9 @@ def import_bills(abbr, data_dir, oyster_documents=False):
     pattern = os.path.join(data_dir, 'bills', '*.json')
 
     counts = {
-        "update" : 0,
-        "insert" : 0,
-        "total"  : 0
+        "update": 0,
+        "insert": 0,
+        "total": 0
     }
 
     votes = import_votes(data_dir)
@@ -211,8 +212,8 @@ def import_bills(abbr, data_dir, oyster_documents=False):
         logger.debug('Failed to match vote %s %s %s' % tuple([
             r.encode('ascii', 'replace') for r in remaining]))
 
-    meta = db.metadata.find_one({'_id': abbr})
-    level = meta['level']
+    #meta = db.metadata.find_one({'_id': abbr})
+    #level = meta['level']
     #populate_current_fields(level, abbr)
 
     ensure_indexes()
@@ -261,6 +262,7 @@ def populate_current_fields(level, abbr):
 
         db.bills.save(bill, safe=True)
 
+
 class GenericIDMatcher(object):
 
     def __init__(self, abbr):
@@ -296,6 +298,7 @@ class GenericIDMatcher(object):
             key = self.nondup_key_for_item(item)
             item[self.id_key] = self.ids.get(key) or self._get_next_id()
 
+
 class VoteMatcher(GenericIDMatcher):
     id_letter = 'V'
     id_collection = 'vote_ids'
@@ -304,6 +307,7 @@ class VoteMatcher(GenericIDMatcher):
     def key_for_item(self, vote):
         return (vote['motion'], vote['chamber'], vote['date'],
                 vote['yes_count'], vote['no_count'], vote['other_count'])
+
 
 class DocumentMatcher(GenericIDMatcher):
     id_letter = 'D'
@@ -338,4 +342,3 @@ def get_committee_id(level, abbr, chamber, committee):
         __committee_ids[key] = None
 
     return __committee_ids[key]
-
