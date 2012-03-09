@@ -1,4 +1,3 @@
-import datetime
 from collections import defaultdict
 
 from billy import db
@@ -65,10 +64,10 @@ def scan_legislators(abbr):
 def calculate_percentages(report):
     active_count = float(report['lower_active_count'] +
                          report['upper_active_count'])
-    total_count = float(active_count + report['inactive_count'])/100
+    total_count = float(active_count + report['inactive_count']) / 100
     if active_count:
         for key in checked_keys:
-            report[key] /= (active_count/100)
+            report[key] /= (active_count / 100)
     if total_count:
         report['updated_this_year'] = (report.pop('_updated_this_year_count') /
                                        total_count)
