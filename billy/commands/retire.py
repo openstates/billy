@@ -5,6 +5,7 @@ from billy.importers.legislators import deactivate_legislators
 
 import datetime
 
+
 class Retire(BaseCommand):
     name = 'retire'
     help = '''retire a legislator with a given end_date'''
@@ -30,4 +31,3 @@ class Retire(BaseCommand):
         db.legislators.save(legislator, safe=True)
         print('deactivating legislator {0}'.format(args.leg_id))
         deactivate_legislators(term, abbr, level)
-

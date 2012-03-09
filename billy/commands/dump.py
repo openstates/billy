@@ -5,7 +5,6 @@ import logging
 import os
 import re
 import urllib
-import shutil
 import zipfile
 import unicodecsv
 
@@ -18,6 +17,7 @@ import scrapelib
 import validictory
 import boto
 from boto.s3.key import Key
+
 
 # TODO: make prefix/use_cname configurable
 def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
@@ -48,8 +48,8 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
 
     logging.info('uploaded to %s' % s3_url)
 
+# JSON ################################
 
-# JSON ###########
 
 class APIValidator(validictory.SchemaValidator):
     def validate_type_datetime(self, val):
@@ -63,9 +63,8 @@ def api_url(path):
     return "%s%s/?apikey=%s" % (settings.API_BASE_URL, urllib.quote(path),
                                 settings.SUNLIGHT_SERVICES_KEY)
 
+# CSV ################################
 
-
-# CSV ################
 
 def _make_csv(abbr, name, fields):
     filename = '/tmp/{0}_{1}'.format(abbr, name)
@@ -234,7 +233,6 @@ class DumpJSON(BaseCommand):
             self.dump(abbr, args.file, not args.novalidate, args.schema_dir)
             if args.upload:
                 upload(abbr, args.file, 'json')
-
 
     def dump(self, abbr, filename, validate, schema_dir):
         scraper = scrapelib.Scraper(requests_per_minute=600,

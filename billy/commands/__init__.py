@@ -8,6 +8,8 @@
         add_args(): method that calls `self.add_argument`
         handle(args): method that does the command
 """
+
+
 class CommandMeta(type):
     """ register subcommands in a central registry """
 
@@ -22,6 +24,7 @@ class CommandMeta(type):
                 cls.subcommands.append(cls)
 
         return cls
+
 
 class BaseCommand(object):
 
@@ -41,4 +44,3 @@ class BaseCommand(object):
 
     def handle(self, args):
         raise NotImplementedError('commands must implement handle(args)')
-

@@ -10,6 +10,7 @@ from billy import db
 from billy.conf import settings
 from billy.commands import BaseCommand
 
+
 def update_votesmart_legislators(meta):
     current_term = meta['terms'][-1]['name']
 
@@ -89,7 +90,6 @@ def update_transparencydata_legislators(meta):
                                                              initial_count)
 
 
-
 class UpdateMissingIds(BaseCommand):
 
     name = 'update-ext-ids'
@@ -122,5 +122,3 @@ class UpdateMissingIds(BaseCommand):
             update_transparencydata_legislators(meta)
 
             time.sleep(30)
-
-

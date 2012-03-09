@@ -3,6 +3,7 @@ import datetime
 from billy import db
 from billy.commands import BaseCommand
 
+
 class PruneCommittees(BaseCommand):
     name = 'prunecommittees'
     help = '''prune all committees that are inactive'''
@@ -15,7 +16,6 @@ class PruneCommittees(BaseCommand):
                           'default)', action='store_true', default=False)
 
     def handle(self, args):
-        empty_and_old = []
         for com in db.committees.find({'state': args.abbr}):
             empty = len(com['members']) == 0
             old = (com['updated_at'] + datetime.timedelta(days=args.days) <
