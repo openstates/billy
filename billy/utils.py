@@ -110,28 +110,28 @@ def configure_logging(verbosity_count=0, module=None):
         format = "%(asctime)s %(name)s %(levelname)s %(message)s"
     logging.basicConfig(level=verbosity, format=format, datefmt="%H:%M:%S")
 
-def textual_diff( l1, l2 ):
+
+def textual_diff(l1, l2):
     lines = {}
     types = {
-        "?" : "info",
-        "-" : "sub",
-        "+" : "add",
-        ""  : "noop"
+        "?": "info",
+        "-": "sub",
+        "+": "add",
+        "": "noop"
     }
     lineno = 0
 
-    for line in '\n'.join(difflib.ndiff( l1, l2 )).split("\n"):
-        prefix  = line[:1].strip()
+    for line in '\n'.join(difflib.ndiff(l1, l2)).split("\n"):
+        prefix = line[:1].strip()
         lastfix = line[2:].rstrip()
 
         if lastfix == "":
             continue
 
         lineno += 1
-        cline = {}
-        lines[ lineno ] = {
-            "type" : types[prefix],
-            "line" : lastfix
+        lines[lineno] = {
+            "type": types[prefix],
+            "line": lastfix
         }
     return lines
 
