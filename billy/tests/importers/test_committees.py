@@ -4,6 +4,7 @@ from billy import db
 from billy.importers import committees
 from billy.importers import names
 
+
 def setup_func():
     db.metadata.drop()
     db.legislators.drop()
@@ -14,7 +15,7 @@ def setup_func():
                         'terms': [{'name': 'T1', 'sessions': ['S1']}]})
 
     leg_a = {'full_name': 'Richard Feynman', 'leg_id': 'EXL000001',
-             '_id':'EXL000001', 'level': 'state',
+             '_id': 'EXL000001', 'level': 'state',
              'state': 'ex', 'country': 'zz',
              '_scraped_name': 'Richard Feynman', 'first_name': 'Richard',
              'last_name': 'Feynman',
@@ -30,7 +31,7 @@ def setup_func():
                   'subcommittee': 'Tractors'},
               ]}
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
-             '_id':'EXL000002', 'level': 'state',
+             '_id': 'EXL000002', 'level': 'state',
              'state': 'ex', 'country': 'zz',
              '_scraped_name': 'Albert Einstein', 'first_name': 'Albert',
              'last_name': 'Einstein',
@@ -49,7 +50,7 @@ def setup_func():
               ]}
     # in a different term
     leg_c = {'full_name': 'Werner Heisenberg', 'leg_id': 'EXL000003',
-             '_id':'EXL000003', 'level': 'state',
+             '_id': 'EXL000003', 'level': 'state',
              'state': 'ex', 'country': 'zz',
              '_scraped_name': 'Werner Heisenberg', 'first_name': 'Werner',
              'last_name': 'Heisenberg',
@@ -71,6 +72,7 @@ def setup_func():
     db.legislators.insert(leg_a)
     db.legislators.insert(leg_b)
     db.legislators.insert(leg_c)
+
 
 @with_setup(setup_func)
 def test_committees_from_legislators():
@@ -102,6 +104,7 @@ def test_committees_from_legislators():
     feynman = db.legislators.find_one({'leg_id': 'EXL000001'})
     assert 'committee_id' in feynman['roles'][1]
 
+
 @with_setup(setup_func)
 def test_import_committee():
     committee = {'_type': 'committee', 'level': 'state', 'state': 'ex',
@@ -123,9 +126,10 @@ def test_import_committee():
     assert com['members'][0]['leg_id'] == 'EXL000001'
     assert com['members'][1]['name'] == 'A. Einstein'
 
-    leg = db.legislators.find_one({'_id':'EXL000001'})
+    leg = db.legislators.find_one({'_id': 'EXL000001'})
     assert leg['roles'][-1] == {'level': 'state', 'term': 'T1',
-                                'committee_id': 'EXC000001', 'chamber':'joint',
+                                'committee_id': 'EXC000001',
+                                'chamber': 'joint',
                                 'state': 'ex', 'country': 'zz',
                                 'type': 'committee member',
                                 'committee': 'Reptilian Task Force'}

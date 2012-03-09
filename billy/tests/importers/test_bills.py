@@ -4,6 +4,7 @@ from billy.importers import bills, names
 
 from nose.tools import with_setup
 
+
 def setup_func():
     db.metadata.drop()
     db.bills.drop()
@@ -39,7 +40,7 @@ def test_import_bill():
                          {'title': 'main title',
                           'url': 'http://example.com/current'},
                          ],
-            'documents':[{'title': 'fiscal note',
+            'documents': [{'title': 'fiscal note',
                           'url': 'http://example.com/fn'}],
             'votes': [{'motion': 'passage', 'chamber': 'upper', 'date': None,
                        'yes_count': 1, 'no_count': 1, 'other_count': 0,
@@ -168,7 +169,6 @@ def test_fix_bill_id():
     assert bills.fix_bill_id('999') == '999'
 
 
-
 def test_bill_keywords():
     bill = {'title': 'transportation of hazardous materials',
             'bill_id': 'HB 201',
@@ -179,6 +179,7 @@ def test_bill_keywords():
     expected = set(['201', 'elimin', 'garbag', 'materi', 'wast', 'hazard',
                     'marin', 'hb', 'dispos', 'cephalopod', 'transport'])
     assert bills.bill_keywords(bill) == expected
+
 
 @with_setup(setup_func)
 def test_populate_current_fields():

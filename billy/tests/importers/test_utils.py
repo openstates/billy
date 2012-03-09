@@ -7,6 +7,7 @@ from nose.tools import with_setup, assert_raises
 from billy import db
 from billy.importers import utils
 
+
 def drop_everything():
     db.metadata.drop()
     db.legislators.drop()
@@ -67,9 +68,9 @@ def test_insert_with_id_types():
 @with_setup(drop_everything)
 def test_insert_with_idlevels():
     state_obj = {'_type': 'person', 'level': 'state', 'state': 'ex',
-                 'country':'us'}
+                 'country': 'us'}
     country_obj = {'_type': 'person', 'level': 'country', 'state': 'ex',
-                   'country':'us'}
+                   'country': 'us'}
     assert utils.insert_with_id(state_obj).startswith('EX')
     assert utils.insert_with_id(country_obj).startswith('US')
 
@@ -107,7 +108,8 @@ def test_update():
 @with_setup(db.bills.drop)
 def test_update_sneaky_filter():
     obj = {'_type': 'bill', 'level': 'state', 'state': 'ex',
-            'normal_field': 1, 'set_field': [1,2,3]}
+            'normal_field': 1, 'set_field': [1, 2, 3]}
+
     def _set_changed(old, new):
         return set(old) != set(new)
     sneaky_filter = {'set_field': _set_changed}
@@ -116,13 +118,13 @@ def test_update_sneaky_filter():
     obj = db.bills.find_one(id)
 
     # the set will be the same, shouldn't update
-    utils.update(obj, {'set_field': [3,2,1]}, db.bills, sneaky_filter)
-    assert obj['set_field'] == [1,2,3]
+    utils.update(obj, {'set_field': [3, 2, 1]}, db.bills, sneaky_filter)
+    assert obj['set_field'] == [1, 2, 3]
     assert obj['updated_at'] == obj['created_at']
 
     # the set now differs, should update
-    utils.update(obj, {'set_field': [4,3,2,1]}, db.bills, sneaky_filter)
-    assert obj['set_field'] == [4,3,2,1]
+    utils.update(obj, {'set_field': [4, 3, 2, 1]}, db.bills, sneaky_filter)
+    assert obj['set_field'] == [4, 3, 2, 1]
     assert obj['updated_at'] > obj['created_at']
 
 

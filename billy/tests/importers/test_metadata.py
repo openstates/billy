@@ -4,6 +4,7 @@ from billy.importers.metadata import import_metadata, PRESERVED_FIELDS
 
 from nose.tools import with_setup
 
+
 @with_setup(db.metadata.drop)
 def test_import_metadata():
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),

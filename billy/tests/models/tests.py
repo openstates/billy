@@ -1,10 +1,10 @@
-
 import unittest
 from random import choice
 
 from billy.models import Bill, Metadata, Legislator, CommitteeMember
 from billy.models import models_list
 from billy import db
+
 
 class TestNoConflict(unittest.TestCase):
     '''
@@ -48,9 +48,7 @@ class TestDereferencing(unittest.TestCase):
 
             self.assertEqual(legislators1, legislators2)
 
-
     def test_state_committees(self):
-
         # Pick a state.
         meta = list(db.metadata.find())
 
@@ -64,15 +62,13 @@ class TestDereferencing(unittest.TestCase):
 
             self.assertEqual(committees1, committees2)
 
-
     def test_legislator_committees(self):
-
         # Pick a state.
         for leg in db.legislators.find():
-                
+
             leg_id = leg['_id']
 
-            # Get the committees manually. 
+            # Get the committees manually.
             committees1 = list(db.committees.find({'members.leg_id': leg_id}))
 
             # Now the spiffy way.
@@ -80,15 +76,13 @@ class TestDereferencing(unittest.TestCase):
 
             self.assertEqual(committees1, committees2)
 
-
     def test_legislator_sponsored_bills(self):
-
         # Pick a state.
         for leg in db.legislators.find():
-                
+
             leg_id = leg['_id']
 
-            # Get the legislator's bills manually. 
+            # Get the legislator's bills manually.
             bills1 = list(db.bills.find({'sponsors.leg_id': leg_id}))
 
             # Now the spiffy way.
@@ -97,7 +91,6 @@ class TestDereferencing(unittest.TestCase):
             self.assertEqual(bills1, bills2)
 
     def test_committeemember_legislator(self):
-
         for c in db.committees.find():
 
             for member in c['members']:
@@ -113,13 +106,11 @@ class TestDereferencing(unittest.TestCase):
                 # And the spiffy way.
                 leg2 = CommitteeMember(member).legislator_object()
 
-                if (leg1 is None) or (leg2 is None):
-                    pdb.set_trace()
+                assert leg1 is not None
+                assert leg2 is not None
 
                 self.assertEqual(leg1, leg2)
 
 
 if __name__ == "__main__":
-    unittest.main()             
-
-
+    unittest.main()

@@ -197,4 +197,3 @@ def test_import_legislator():
 
     legislators.import_legislator(leg4)
     assert db.legislators.count() == 3
-
