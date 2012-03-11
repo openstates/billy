@@ -240,7 +240,7 @@ def main(old_scrape_compat=False):
         what.add_argument('--events', action='store_true', dest='events',
                             default=False, help='scrape event data')
         what.add_argument('--alldata', action='store_true', dest='alldata',
-                            default=False,
+                            default=True,
                             help="scrape all available types of data")
         scrape.add_argument('--strict', action='store_true', dest='strict',
                             default=False, help="fail immediately when"
@@ -312,21 +312,19 @@ def main(old_scrape_compat=False):
 
         if not (args.scrape or args.do_import or args.report
                 or args.solo_bills):
-            raise ScrapeError("Must specify at least one of --scrape, "
-                              "--import, --report")
+            args.scrape = args.do_import = args.report = True
 
         # determine which types to process
-        if not (args.bills or args.legislators or args.votes or
-                args.committees or args.events or args.alldata or
-                args.solo_bills):
-            raise ScrapeError("Must specify at least one of --bills, "
-                              "--legislators, --committees, --votes, --events,"
-                              " --alldata")
-        if args.alldata:
+        if (args.bills or args.legislators or args.votes or args.committees or
+            args.events):
+            args.alldata = False
+        else:
+            # by default process everything
             args.bills = True
             args.legislators = True
             args.votes = True
             args.committees = True
+            args.events = True
 
         scrape_data = {}
 
