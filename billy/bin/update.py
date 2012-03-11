@@ -242,8 +242,8 @@ def main(old_scrape_compat=False):
         what.add_argument('--alldata', action='store_true', dest='alldata',
                             default=True,
                             help="scrape all available types of data")
-        scrape.add_argument('--strict', action='store_true', dest='strict',
-                            default=False, help="fail immediately when"
+        scrape.add_argument('--nonstrict', action='store_false', dest='strict',
+                            default=True, help="don't fail immediately when"
                             " encountering validation warning")
         scrape.add_argument('--oyster', action='store_true', dest='oyster',
                             default=False, help="push documents to oyster"
@@ -263,13 +263,14 @@ def main(old_scrape_compat=False):
         parser.add_argument('--bill', action='append', dest='solo_bills',
                             help='individual bill id(s) to scrape')
         # old_scrape_compat defaults scrape to true, if being called as scrape
-        parser.add_argument('--scrape', help="run specified scrapers",
-                            action="store_true", default=old_scrape_compat)
-        parser.add_argument('--import', dest="do_import",
+        parser.add_argument('--scrapeonly', help="run specified scrapers",
+                            dest='scrape', action="store_true",
+                            default=old_scrape_compat)
+        parser.add_argument('--importonly', dest="do_import",
                             help="run specified import process",
                             action="store_true", default=False)
-        parser.add_argument('--report', help="run specified reports",
-                            action="store_true", default=False)
+        parser.add_argument('--reportonly', help="run specified reports",
+                            dest='report', action="store_true", default=False)
 
         args = parser.parse_args()
 
