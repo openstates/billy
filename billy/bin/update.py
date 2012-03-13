@@ -285,7 +285,7 @@ def main(old_scrape_compat=False):
         metadata = module.metadata
         abbrev = metadata['abbreviation']
 
-        configure_logging(args.verbose, args.module)
+        configure_logging(args.module)
 
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)

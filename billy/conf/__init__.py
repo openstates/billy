@@ -10,10 +10,6 @@ base_arg_parser = argparse.ArgumentParser(add_help=False)
 global_group = base_arg_parser.add_argument_group('global settings',
                               'settings that apply to all billy commands')
 
-global_group.add_argument('-v', '--verbose', action='count',
-                          dest='verbose', default=False,
-                          help=("be verbose (use multiple times for "
-                                "more debugging information)"))
 global_group.add_argument('--mongo_host', help='mongo host', dest='MONGO_HOST')
 global_group.add_argument('--mongo_port', help='mongo port', dest='MONGO_PORT')
 global_group.add_argument('--mongo_db', help='mongo database name',
