@@ -265,12 +265,15 @@ def main(old_scrape_compat=False):
                 latest_term = metadata['terms'][-1]['name']
                 args.terms = [latest_term]
         # only set sessions from terms if sessions weren't set
-        if not args.sessions:
+        elif not args.sessions:
             for term in metadata['terms']:
                 if term['name'] in args.terms:
                     args.sessions.extend(term['sessions'])
             # dedup sessions
             args.sessions = list(set(args.sessions or []))
+
+        if not args.sessions:
+            args.sessions = [metadata['terms'][-1]['sessions'][-1]]
 
         # determine chambers
         if not args.chambers:
