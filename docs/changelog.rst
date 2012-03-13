@@ -7,6 +7,11 @@ scrapelib changelog
         * general style overhaul
         * duplicate_versions view
     * removal of never-used RSS emitter
+    * billy-update command line radically changed
+        * defaults to actually doing work
+        * -vvv dropped
+        * --strict dropped, --nostrict now exists
+        * simplification of how --session/--term work
     * drop billy-util districtcsv in favor of an admin view
     * addition of billy-update --oyster argument, adds tracking of versions
     * duplicate_versions is now just that, not versions+documents
