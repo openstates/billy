@@ -259,7 +259,8 @@ def main(old_scrape_compat=False):
             if args.sessions:
                 for session in args.sessions:
                     args.terms.append(
-                        term_for_session(metadata['abbreviation'], session))
+                        term_for_session(metadata['abbreviation'], session,
+                                         metadata))
                 args.terms = list(set(args.terms or []))
             else:
                 latest_term = metadata['terms'][-1]['name']

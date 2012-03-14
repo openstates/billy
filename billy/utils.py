@@ -70,8 +70,9 @@ def chamber_name(abbr, chamber):
     return metadata(abbr)['%s_chamber_name' % chamber].split()[0]
 
 
-def term_for_session(abbr, session):
-    meta = metadata(abbr)
+def term_for_session(abbr, session, meta=None):
+    if not meta:
+        meta = metadata(abbr)
 
     for term in meta['terms']:
         if session in term['sessions']:
