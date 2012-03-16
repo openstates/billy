@@ -6,7 +6,7 @@ from billy.utils import configure_logging
 from billy.commands import BaseCommand
 
 logger = logging.getLogger('billy')
-configure_logging(1)
+configure_logging()
 
 COMMAND_MODULES = (
     'billy.commands.dump',
