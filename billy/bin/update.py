@@ -284,7 +284,7 @@ def main(old_scrape_compat=False):
             if old_scrape_compat:
                 args.actions = ['scrape']
             else:
-                args.actions = ['scrape', 'update', 'report']
+                args.actions = ['scrape', 'import', 'report']
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
@@ -376,6 +376,7 @@ def main(old_scrape_compat=False):
 
         # imports
         if 'import' in args.actions:
+            print 'doing import'
             import_report = _do_imports(abbrev, args)
             scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import
