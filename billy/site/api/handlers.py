@@ -269,31 +269,6 @@ class CommitteeSearchHandler(BillyHandler):
         return list(db.committees.find(_filter, committee_fields))
 
 
-class StatsHandler(BillyHandler):
-    def read(self, request):
-        counts = {}
-
-        # db.bill_stats contains the output of a m/r run that generates counts
-        # of bills and bill sub-objects
-        for count in db.bill_stats.find():
-            val = count['value']
-            abbr = count['_id']
-
-            if abbr == 'total':
-                val['legislators'] = db.legislators.count()
-            else:
-                level = metadata(abbr)['level']
-                val['legislators'] = db.legislators.find({'level': level,
-                                                          level: abbr}).count()
-
-            counts[abbr] = val
-
-        stats = db.command('dbStats')
-        stats['counts'] = counts
-
-        return stats
-
-
 class EventsHandler(BillyHandler):
     def read(self, request, id=None, events=[]):
         if events:
