@@ -74,7 +74,10 @@ def insert_with_id(obj):
         new_id = 1
 
     while True:
-        obj['_id'] = '%s%06d' % (id_prefix, new_id)
+        if obj['_type'] == 'bill':
+            obj['_id'] = '%s%08d' % (id_prefix, new_id)
+        else:
+            obj['_id'] = '%s%06d' % (id_prefix, new_id)
         obj['_all_ids'] = [obj['_id']]
 
         if obj['_type'] in ['person', 'legislator']:

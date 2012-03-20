@@ -70,6 +70,7 @@ def test_import_bill():
 
     # test that basics work
     bill = db.bills.find_one()
+    assert bill['_id'] == 'EXB00000001'
     assert bill['bill_id'] == 'S 1'
     assert bill['chamber'] == 'upper'
     assert bill['scraped_subjects'] == data['subjects']
