@@ -13,6 +13,7 @@ import pymongo
 
 logger = logging.getLogger('billy')
 
+
 def ensure_indexes():
     db.events.ensure_index([('when', pymongo.ASCENDING),
                             ('state', pymongo.ASCENDING),
@@ -45,6 +46,7 @@ def import_events(abbr, data_dir, import_actions=False):
 
     ensure_indexes()
 
+
 def import_event(data):
     event = None
     level = data['level']
@@ -69,11 +71,11 @@ def import_event(data):
     else:
         update(event, data, db.events)
 
+
 # IMPORTANT: if/when actions_to_events is re-enabled it definitely
 # needs to be updated to support level
 #    if import_actions:
 #        actions_to_events(state)
-
 def actions_to_events(state):
     for bill in db.bills.find({'state': state}):
         count = 1

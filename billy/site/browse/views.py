@@ -1,5 +1,4 @@
 import re
-import pdb
 import json
 import time
 import types
@@ -18,7 +17,7 @@ from pymongo.objectid import ObjectId
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -26,11 +25,20 @@ from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 
 
+def _meta_and_report(abbr):
+    meta = metadata(abbr)
+    report = db.reports.find_one({'_id': abbr})
+    if not meta or not report:
+        raise Http404
+    return meta, report
+
+
 def keyfunc(obj):
     try:
         return int(obj['district'])
     except ValueError:
         return obj['district']
+
 
 def _csv_response(request, csv_name, columns, data, abbr):
     if 'csv' in request.REQUEST:
@@ -46,6 +54,7 @@ def _csv_response(request, csv_name, columns, data, abbr):
                       {'columns': columns,
                        'data':data, 'metadata': metadata(abbr)})
 
+
 def browse_index(request, template='billy/index.html'):
     rows = []
 
@@ -53,20 +62,18 @@ def browse_index(request, template='billy/index.html'):
         report['id'] = report['_id']
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
+        report['unicameral'] = ('lower_chamber_name' not in meta)
         report['bills']['typed_actions'] = (100 -
-                                report['bills']['actions_per_type'].get('other', 100))
+            report['bills']['actions_per_type'].get('other', 100))
         rows.append(report)
 
     rows.sort(key=lambda x: x['name'])
 
     return render(request, template, {'rows': rows})
 
-def overview(request, abbr):
-    meta = metadata(abbr)
-    report = db.reports.find_one({'_id': abbr})
-    if not meta or not report:
-        raise Http404
 
+def overview(request, abbr):
+    meta, report = _meta_and_report(abbr)
     context = {}
     context['metadata'] = meta
     context['report'] = report
@@ -91,7 +98,9 @@ or check out the scrape run report page for this state.
 
     return render(request, 'billy/state_index.html', context)
 
+
 def run_detail_graph_data(request, abbr):
+
     def rolling_average( oldAverage, newItem, oldAverageCount ):
         """
         Simple, unweighted rolling average. If you don't get why we have
@@ -221,6 +230,7 @@ def run_detail_graph_data(request, abbr):
         content_type="text/plain"
     )
 
+
 def run_detail(request, obj=None):
     try:
         run = db.billy_runs.find({
@@ -239,6 +249,7 @@ def run_detail(request, obj=None):
             "name"         : run['state']
         }
     })
+
 
 def state_run_detail(request, abbr):
     try:
@@ -280,14 +291,10 @@ for the exception and error message.
 
     return render(request, 'billy/state_run_detail.html', context)
 
+
 @never_cache
 def bills(request, abbr):
-
-    meta = metadata(abbr)
-
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404
+    meta, report = _meta_and_report(abbr)
 
     sessions = report['bills']['sessions']
 
@@ -400,6 +407,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
     return render(request, 'billy/summary_object_key.html', locals())
 
+
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
                             collections=("bills", "legislators", "committees")):
     meta = metadata(abbr)
@@ -423,6 +431,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
     return render(request, 'billy/summary_object_keyvals.html', locals())
 
+
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
 
@@ -437,6 +446,7 @@ def object_json(request, collection, _id,
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
     keys = sorted(obj)
+
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
@@ -505,6 +515,16 @@ def district_stub(request, abbr):
     return _csv_response(request, "districts",
                          ('abbr', 'chamber', 'district', 'count', ''),
                          data, abbr)
+
+
+def duplicate_versions(request, abbr):
+    meta, report = _meta_and_report(abbr)
+
+    data = report['bills']['duplicate_versions']
+
+    return render(request, "billy/duplicate_versions.html",
+                  {'metadata': meta, 'report': report})
+
 
 @never_cache
 def random_bill(request, abbr):
@@ -577,6 +597,28 @@ def random_bill(request, abbr):
 """
 
     return render(request, 'billy/bill.html', context)
+
+
+def bill_list(request, abbr):
+    meta = metadata(abbr)
+    if not meta:
+        raise Http404
+
+    level = meta['level']
+    spec = {'level': level, level: abbr}
+
+    if 'version_url' in request.GET:
+        version_url = request.GET.get('version_url')
+        spec['versions.url'] = version_url
+
+    bills = db.bills.find(spec)
+    query_text = repr(spec)
+
+    context = {'metadata': meta,
+               'query_text': query_text,
+               'bills': bills}
+
+    return render(request, 'billy/bill_list.html', context)
 
 
 def bill(request, abbr, session, id):

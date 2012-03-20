@@ -123,9 +123,9 @@ class BillyHandler(BaseHandler):
 
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
-        data = db.metadata.find(fields={'level':1, 'abbreviation':1,
-                                        'name':1, 'feature_flags': 1,
-                                        '_id':0}).sort('name')
+        data = db.metadata.find(fields={'level': 1, 'abbreviation': 1,
+                                        'name': 1, 'feature_flags': 1,
+                                        '_id': 0}).sort('name')
         return list(data)
 
 
@@ -204,7 +204,7 @@ class BillSearchHandler(BillyHandler):
         if sponsor_id:
             _filter['sponsors.leg_id'] = sponsor_id
 
-
+        # limit response size
         count = db.bills.find(_filter, bill_fields).count()
         if count > 5000:
             resp = rc.BAD_REQUEST
@@ -550,7 +550,6 @@ class DistrictHandler(BillyHandler):
 class BoundaryHandler(BillyHandler):
     base_url = getattr(settings, 'BOUNDARY_SERVICE_URL',
                        'http://localhost:8001/1.0/')
-
 
     def read(self, request, boundary_id):
         url = "%sboundary/%s/?shape_type=simple" % (self.base_url, boundary_id)

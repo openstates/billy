@@ -8,6 +8,7 @@ from billy.reports.utils import update_common
 
 logger = logging.getLogger('billy')
 
+
 def _bill_report_dict():
     return {'upper_count': 0,
             'lower_count': 0,
@@ -66,7 +67,7 @@ def scan_bills(abbr):
         update_common(bill, session_d)
 
         # actions
-        last_date = datetime.datetime(1900,1,1)
+        last_date = datetime.datetime(1900, 1, 1)
         for action in bill['actions']:
             date = action['date']
             if date < last_date:
@@ -153,8 +154,9 @@ def scan_bills(abbr):
         else:
             # total num of versions
             session_d['version_count'] += len(bill['versions'])
-        for doc in (bill['versions'] + bill['documents']):
+        for doc in bill['versions']:
             duplicate_versions[doc['url']] += 1
+        # TODO: add a duplicate documents back in?
 
     dup_version_urls = []
     dup_source_urls = []
@@ -171,6 +173,7 @@ def scan_bills(abbr):
             'uncategorized_subjects': uncategorized_subjects.items(),
             'sessions': sessions,
            }
+
 
 def combine_bill_reports(reports):
     report = _bill_report_dict()
@@ -193,20 +196,21 @@ def combine_bill_reports(reports):
             report[field] = list(value)
     return report
 
+
 def calculate_percentages(report):
     # general bill stuff
-    bill_count = float(report['upper_count'] + report['lower_count'])/100
+    bill_count = float(report['upper_count'] + report['lower_count']) / 100
     if bill_count:
         report['updated_this_year'] = (report.pop('_updated_this_year_count') /
                                        bill_count)
-        report['updated_this_month'] = (report.pop('_updated_this_month_count') /
-                                        bill_count)
+        report['updated_this_month'] = (report.pop('_updated_this_month_count')
+                                        / bill_count)
         report['updated_today'] = (report.pop('_updated_today_count') /
                                    bill_count)
         report['have_subjects'] = report.pop('_subjects_count') / bill_count
 
     # actions
-    action_count = float(report['action_count'])/100
+    action_count = float(report['action_count']) / 100
     if action_count:
         for k in report['actions_per_type'].iterkeys():
             report['actions_per_type'][k] /= action_count
@@ -216,7 +220,7 @@ def calculate_percentages(report):
             report['actions_per_month'][k] /= action_count
 
     # sponsors
-    _sponsor_count = float(report.pop('_sponsor_count'))/100
+    _sponsor_count = float(report.pop('_sponsor_count')) / 100
     if _sponsor_count:
         report['sponsors_with_leg_id'] = (
             report.pop('_sponsors_with_leg_id_count') / _sponsor_count)
@@ -224,7 +228,7 @@ def calculate_percentages(report):
             report['sponsors_per_type'][k] /= _sponsor_count
 
     # votes
-    vote_count = float(report['vote_count'])/100
+    vote_count = float(report['vote_count']) / 100
     if vote_count:
         report['votes_passed'] = report.pop('_passed_vote_count') / vote_count
         for k in report['votes_per_type'].iterkeys():
@@ -233,7 +237,7 @@ def calculate_percentages(report):
             report['votes_per_chamber'][k] /= vote_count
         for k in report['votes_per_month'].iterkeys():
             report['votes_per_month'][k] /= vote_count
-    rollcall_count = float(report.pop('_rollcall_count'))/100
+    rollcall_count = float(report.pop('_rollcall_count')) / 100
     if rollcall_count:
         report['rollcalls_with_leg_id'] = (
             report.pop('_rollcalls_with_leg_id_count') / rollcall_count

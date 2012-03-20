@@ -3,8 +3,9 @@ import unicodecsv
 from collections import defaultdict
 
 from billy import db
-from billy.conf import settings, base_arg_parser
+from billy.conf import settings
 from billy.utils import metadata
+
 
 class SubjectCategorizer(object):
 
@@ -19,7 +20,7 @@ class SubjectCategorizer(object):
             reader = unicodecsv.reader(open(filename))
 
             # build category mapping
-            for n,row in enumerate(reader):
+            for n, row in enumerate(reader):
                 for subj in row[1:]:
                     if subj:
                         subj = subj.strip()

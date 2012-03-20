@@ -70,8 +70,9 @@ def chamber_name(abbr, chamber):
     return metadata(abbr)['%s_chamber_name' % chamber].split()[0]
 
 
-def term_for_session(abbr, session):
-    meta = metadata(abbr)
+def term_for_session(abbr, session, meta=None):
+    if not meta:
+        meta = metadata(abbr)
 
     for term in meta['terms']:
         if session in term['sessions']:
@@ -100,38 +101,37 @@ def extract_fields(d, fields, delimiter='|'):
     return rd
 
 
-def configure_logging(verbosity_count=0, module=None):
-    verbosity = {0: logging.WARNING, 1: logging.INFO}.get(verbosity_count,
-                                                          logging.DEBUG)
+def configure_logging(module=None):
+    # TODO: make this a lot better
     if module:
         format = ("%(asctime)s %(name)s %(levelname)s " + module +
                   " %(message)s")
     else:
         format = "%(asctime)s %(name)s %(levelname)s %(message)s"
-    logging.basicConfig(level=verbosity, format=format, datefmt="%H:%M:%S")
+    logging.basicConfig(level=logging.DEBUG, format=format, datefmt="%H:%M:%S")
 
-def textual_diff( l1, l2 ):
+
+def textual_diff(l1, l2):
     lines = {}
     types = {
-        "?" : "info",
-        "-" : "sub",
-        "+" : "add",
-        ""  : "noop"
+        "?": "info",
+        "-": "sub",
+        "+": "add",
+        "": "noop"
     }
     lineno = 0
 
-    for line in '\n'.join(difflib.ndiff( l1, l2 )).split("\n"):
-        prefix  = line[:1].strip()
+    for line in '\n'.join(difflib.ndiff(l1, l2)).split("\n"):
+        prefix = line[:1].strip()
         lastfix = line[2:].rstrip()
 
         if lastfix == "":
             continue
 
         lineno += 1
-        cline = {}
-        lines[ lineno ] = {
-            "type" : types[prefix],
-            "line" : lastfix
+        lines[lineno] = {
+            "type": types[prefix],
+            "line": lastfix
         }
     return lines
 

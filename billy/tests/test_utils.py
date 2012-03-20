@@ -3,11 +3,13 @@ from billy import db
 
 from nose.tools import with_setup
 
+
 def drop_everything():
     db.metadata.drop()
     db.legislators.drop()
     db.bills.drop()
     db.committees.drop()
+
 
 @with_setup(drop_everything)
 def test_find_bill():

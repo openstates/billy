@@ -2,13 +2,13 @@ import os
 import re
 import time
 import json
-import logging
 import datetime
-from collections import defaultdict
 
 from pymongo.son import SON
 import pymongo.errors
 import name_tools
+
+from billy import db
 
 oyster_import_exception = None
 try:
@@ -16,11 +16,6 @@ try:
 except Exception as e:
     kernel = None
     oyster_import_exception = e
-
-
-
-from billy import db
-
 
 
 def _get_property_dict(schema):
@@ -139,7 +134,6 @@ def update(old, new, collection, sneaky_update_filter=None):
                 old[key] = value
                 need_save = True
 
-
         # remove old +key field if this field no longer has a +
         plus_key = '+%s' % key
         if plus_key in old:
@@ -237,6 +231,7 @@ def prepare_obj(obj):
 
     return make_plus_fields(obj)
 
+
 def next_big_id(abbr, letter, collection):
     query = SON([('_id', abbr)])
     update = SON([('$inc', SON([('seq', 1)]))])
@@ -247,6 +242,7 @@ def next_big_id(abbr, letter, collection):
                           ('upsert', True)]))['value']['seq']
     return "%s%s%08d" % (abbr.upper(), letter, seq)
 
+
 def merge_legislators(leg1, leg2):
     assert leg1['_id'][:3] == leg2['_id'][:3]
     assert leg1['_id'] != leg2['_id']
@@ -256,11 +252,11 @@ def merge_legislators(leg1, leg2):
     leg1 = leg1.copy()
     leg2 = leg2.copy()
 
-    roles     = 'roles'
+    roles = 'roles'
     old_roles = 'old_roles'
 
     no_compare = set(('_id', 'leg_id', '_all_ids', '_locked_fields',
-        'created_at', 'updated_at', roles, old_roles ))
+        'created_at', 'updated_at', roles, old_roles))
 
     leg1['_all_ids'] += leg2['_all_ids']
 
@@ -291,23 +287,23 @@ def merge_legislators(leg1, leg2):
         # WARNING: This code *WILL* drop current ctty appointments.
         #  What this means:
         #      In the case where someone goes from chamber L->U, and is on
-        #      joint-ctty A, moves to U, we will *LOOSE* joint-ctty from 
+        #      joint-ctty A, moves to U, we will *LOOSE* joint-ctty from
         #      old_roles & roles!! There's a potenital for data loss, but it's
         #      not that big of a thing.
         #   -- paultag & jamesturk, 02-02-2012
         crole = leg1[roles][0]
         try:
-            leg1[old_roles][crole['term']].append( crole )
+            leg1[old_roles][crole['term']].append(crole)
         except KeyError:
             try:
                 leg1[old_roles][crole['term']] = [crole]
             except KeyError:
                 # dear holy god this needs to be fixed.
-                leg1[old_roles] = { crole['term'] : [ crole ] }
+                leg1[old_roles] = {crole['term']: [crole]}
 
         # OK. We've migrated the newly old roles to the old_roles entry.
-        leg1[roles] = [ leg2[roles][0] ]
-    return ( leg1, leg2['_id'] )
+        leg1[roles] = [leg2[roles][0]]
+    return (leg1, leg2['_id'])
 
 
 def oysterize(url, doc_class, id, **kwargs):

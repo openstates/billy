@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns('billy.site.browse.views',
     url(r'^$', 'browse_index', name='admin_index'),
@@ -15,6 +15,7 @@ urlpatterns = patterns('billy.site.browse.views',
         name='bill'),
     url(r'^(?P<abbr>[a-z]{2})/random_bill/$', 'random_bill',
         name='random_bill'),
+    url(r'^(?P<abbr>[a-z]{2})/bill_list/$', 'bill_list', name='bill_list'),
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
@@ -25,6 +26,8 @@ urlpatterns = patterns('billy.site.browse.views',
         name='unmatched_leg_ids'),
     url(r'^(?P<abbr>[a-z]{2})/district_stub/$', 'district_stub',
         name='district_stub'),
+    url(r'^(?P<abbr>[a-z]{2})/duplicate_versions/$', 'duplicate_versions',
+        name='duplicate_versions'),
 
     # Summary urls.
     url(r'^(?P<abbr>[a-z]{2})/summary/$', 'summary_index'),

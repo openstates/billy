@@ -2,6 +2,7 @@ from billy import db
 from billy.commands import BaseCommand
 from oyster.core import kernel
 
+
 class Oysterize(BaseCommand):
     name = 'oysterize'
     help = 'send bill versions to oyster'

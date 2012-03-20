@@ -2,7 +2,7 @@ import os
 import itertools
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class VoteScraper(Scraper):

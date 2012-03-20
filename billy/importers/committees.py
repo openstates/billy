@@ -14,11 +14,13 @@ import pymongo
 
 logger = logging.getLogger('billy')
 
+
 def ensure_indexes():
     db.committees.ensure_index([('_all_ids', pymongo.ASCENDING)])
     db.committees.ensure_index([('state', pymongo.ASCENDING),
                                 ('committee', pymongo.ASCENDING),
                                 ('subcommittee', pymongo.ASCENDING)])
+
 
 def import_committees_from_legislators(current_term, level, abbr):
     """ create committees from legislators that have committee roles """
@@ -149,9 +151,9 @@ def import_committees(abbr, data_dir):
     pattern = os.path.join(data_dir, 'committees', '*.json')
 
     counts = {
-        "update" : 0,
-        "insert" : 0,
-        "total"  : 0
+        "update": 0,
+        "insert": 0,
+        "total": 0
     }
 
     meta = db.metadata.find_one({'_id': abbr})

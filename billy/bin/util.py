@@ -1,6 +1,3 @@
-import os
-import sys
-import glob
 import argparse
 import logging
 
@@ -9,7 +6,7 @@ from billy.utils import configure_logging
 from billy.commands import BaseCommand
 
 logger = logging.getLogger('billy')
-configure_logging(1)
+configure_logging()
 
 COMMAND_MODULES = (
     'billy.commands.dump',
@@ -23,12 +20,14 @@ COMMAND_MODULES = (
     'billy.commands.validate_api',
 )
 
+
 def import_command_module(mod):
     try:
         __import__(mod)
     except ImportError, e:
         logger.warning(
             'error "{0}" prevented loading of {1} module'.format(e, mod))
+
 
 def main():
     parser = argparse.ArgumentParser(description='generic billy util',
@@ -47,7 +46,7 @@ def main():
     # parse arguments, update settings, then run the appropriate function
     args = parser.parse_args()
     settings.update(args)
-    configure_logging(args.verbose)
+    configure_logging(args.subcommand)
     subcommands[args.subcommand].handle(args)
 
 if __name__ == '__main__':

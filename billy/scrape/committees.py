@@ -1,7 +1,7 @@
 import os
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class CommitteeScraper(Scraper):
@@ -63,4 +63,3 @@ class Committee(SourcedObject):
             name += '_%s' % self['subcommittee']
 
         return "%s_%s.json" % (self['chamber'], name.replace('/', ','))
-

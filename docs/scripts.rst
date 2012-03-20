@@ -16,7 +16,7 @@ Scraping
 
 .. option:: --scrape, --import, --report
 
-    Which portions of the update process to run, at least one must be specified.
+    Which portions of the update process to run, specifying none implies ``--scrape --import --report``
 
     --scrape crawls the specified sites and writes data to disk in JSON format
     --import imports the JSON format on disk to billy's MongoDB database
@@ -25,11 +25,7 @@ Scraping
 .. option:: --bills, --legislators, --votes, --committees, --events
 
     include (bill, legislator, vote, committee, event) data in (scrape/import/report)
-    (can specify multiple)
-
-.. option:: --alldata
-
-    same as specifying --bills --legislators --votes --committees
+    Specifying none is the same as specifying --bills --legislators --votes --committees
 
 .. option:: --upper, --lower
 

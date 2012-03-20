@@ -2,7 +2,7 @@ import os
 import uuid
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class EventScraper(Scraper):
@@ -47,4 +47,3 @@ class Event(SourcedObject):
 
     def get_filename(self):
         return "%s.json" % str(uuid.uuid1())
-

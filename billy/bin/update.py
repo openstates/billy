@@ -5,7 +5,6 @@ import json
 import glob
 import logging
 import argparse
-import traceback
 import unicodecsv
 
 import datetime as dt
@@ -14,7 +13,7 @@ from billy import db
 from billy.conf import settings, base_arg_parser
 from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
                           check_sessions)
-from billy.utils import configure_logging
+from billy.utils import configure_logging, term_for_session
 from billy.scrape.validator import DatetimeValidator
 
 
@@ -30,13 +29,14 @@ def _clear_scraped_data(output_dir, scraper_type):
             for f in glob.glob(path + '/*.json'):
                 os.remove(f)
 
+
 def _get_configured_scraper(scraper_type, options, metadata):
     try:
         ScraperClass = get_scraper(options.module, scraper_type)
     except ScrapeError as e:
-        # silence error only for --alldata
-        if (options.alldata and str(e.orig_exception) ==
-            'No module named %s' % scraper_type):
+        # silence error only when alldata is present
+        if ('alldata' in options.types and
+            str(e.orig_exception) == 'No module named %s' % scraper_type):
             return None
         else:
             raise e
@@ -55,6 +55,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
     scraper = ScraperClass(metadata, **opts)
     return scraper
 
+
 def _run_scraper(scraper_type, options, metadata):
     """
         scraper_type: bills, legislators, committees, votes
@@ -63,52 +64,29 @@ def _run_scraper(scraper_type, options, metadata):
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
         return [{
-            "type"       : scraper_type,
-            "start_time" : dt.datetime.utcnow(),
-            "noscraper" : True,
-            "end_time" : dt.datetime.utcnow()
+            "type": scraper_type,
+            "start_time": dt.datetime.utcnow(),
+            "noscraper": True,
+            "end_time": dt.datetime.utcnow()
         }]
 
-    # times: the list to iterate over for second scrape param
-    if scraper_type in ('bills', 'votes', 'events'):
-        if not options.sessions:
-            if options.terms:
-                times = []
-                for term in options.terms:
-                    scraper.validate_term(term)
-                    for metaterm in metadata['terms']:
-                        if term == metaterm['name']:
-                            times.extend(metaterm['sessions'])
-            else:
-                latest_session = metadata['terms'][-1]['sessions'][-1]
-                print('No session specified, using latest "%s"' %
-                      latest_session)
-                times = [latest_session]
-        else:
-            times = options.sessions
-
-        # validate sessions
-        for time in times:
-            scraper.validate_session(time)
-    elif scraper_type in ('legislators', 'committees'):
-        if not options.terms:
-            latest_term = metadata['terms'][-1]['name']
-            print 'No term specified, using latest "%s"' % latest_term
-            times = [latest_term]
-        else:
-            times = options.terms
-
-        # validate terms
-        for time in times:
-            scraper.validate_term(time, scraper.latest_only)
 
     runs = []
 
     # Removed from the inner loop due to non-bicameral scrapers
     scrape = {
-        "type"       : scraper_type
+        "type": scraper_type
     }
     scrape['start_time'] = dt.datetime.utcnow()
+
+    if scraper_type in ('bills', 'votes', 'events'):
+        times = options.sessions
+        for time in times:
+            scraper.validate_session(time)
+    elif scraper_type in ('committees', 'legislators'):
+        times = options.terms
+        for time in times:
+            scraper.validate_term(time, scraper.latest_only)
 
     # run scraper against year/session/term
     for time in times:
@@ -118,7 +96,7 @@ def _run_scraper(scraper_type, options, metadata):
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
 
-    scrape['end_time']  = dt.datetime.utcnow()
+    scrape['end_time'] = dt.datetime.utcnow()
     runs.append(scrape)
 
     return runs
@@ -142,7 +120,7 @@ def _scrape_solo_bills(options, metadata):
 
 
 def _do_imports(abbrev, args):
-    # do imports here so that scrapers don't depend on mongo
+    # do imports here so that scrape doesn't depend on mongo
     from billy.importers.metadata import import_metadata
     from billy.importers.bills import import_bills
     from billy.importers.legislators import import_legislators
@@ -166,23 +144,24 @@ def _do_imports(abbrev, args):
 
     report = {}
 
-    if args.legislators:
+    if 'legislators' in args.types:
         report['legislators'] = \
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
-    if args.bills:
+    if 'bills' in args.types:
         report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR,
                                        args.oyster)
 
-    if args.committees:
+    if 'committees' in args.types:
         report['committees'] = \
                 import_committees(abbrev, settings.BILLY_DATA_DIR)
 
-    if args.events:
+    if 'events' in args.types:
         report['events'] = \
                 import_events(abbrev, settings.BILLY_DATA_DIR)
 
     return report
+
 
 def _do_reports(abbrev, args):
     from billy import db
@@ -194,11 +173,11 @@ def _do_reports(abbrev, args):
     if not report:
         report = {'_id': abbrev}
 
-    if args.legislators:
+    if 'legislators' in args.types:
         report['legislators'] = legislator_report(abbrev)
-    if args.bills:
+    if 'bills' in args.types:
         report['bills'] = bill_report(abbrev)
-    if args.committees:
+    if 'committees' in args.types:
         report['committees'] = committee_report(abbrev)
 
     db.reports.save(report, safe=True)
@@ -207,7 +186,7 @@ def _do_reports(abbrev, args):
 def main(old_scrape_compat=False):
     try:
         parser = argparse.ArgumentParser(
-          description='Scrape legislative data, saving data to disk as JSON.',
+          description='update billy data',
           parents=[base_arg_parser],
         )
 
@@ -218,30 +197,18 @@ def main(old_scrape_compat=False):
 
         parser.add_argument('module', type=str, help='scraper module (eg. nc)')
         what.add_argument('-s', '--session', action='append',
-                            dest='sessions', help='session(s) to scrape')
+                            dest='sessions', default=[],
+                          help='session(s) to scrape')
         what.add_argument('-t', '--term', action='append', dest='terms',
-                            help='term(s) to scrape')
-        what.add_argument('--upper', action='store_true', dest='upper',
-                            default=False, help='scrape upper chamber')
-        what.add_argument('--lower', action='store_true', dest='lower',
-                            default=False, help='scrape lower chamber')
-        what.add_argument('--bills', action='store_true', dest='bills',
-                            default=False, help="scrape bill data")
-        what.add_argument('--legislators', action='store_true',
-                            dest='legislators', default=False,
-                            help="scrape legislator data")
-        what.add_argument('--committees', action='store_true',
-                            dest='committees', default=False,
-                            help="scrape committee data")
-        what.add_argument('--votes', action='store_true', dest='votes',
-                            default=False, help="scrape vote data")
-        what.add_argument('--events', action='store_true', dest='events',
-                            default=False, help='scrape event data')
-        what.add_argument('--alldata', action='store_true', dest='alldata',
-                            default=False,
-                            help="scrape all available types of data")
-        scrape.add_argument('--strict', action='store_true', dest='strict',
-                            default=False, help="fail immediately when"
+                            help='term(s) to scrape', default=[])
+        for arg in ('upper', 'lower'):
+            what.add_argument('--' + arg, action='append_const',
+                              dest='chambers', const=arg)
+        for arg in ('bills', 'legislators', 'committees', 'votes', 'events'):
+            what.add_argument('--' + arg, action='append_const', dest='types',
+                              const=arg)
+        scrape.add_argument('--nonstrict', action='store_false', dest='strict',
+                            default=True, help="don't fail immediately when"
                             " encountering validation warning")
         scrape.add_argument('--oyster', action='store_true', dest='oyster',
                             default=False, help="push documents to oyster"
@@ -258,16 +225,11 @@ def main(old_scrape_compat=False):
                             dest='SCRAPELIB_RETRY_ATTEMPTS')
         scrape.add_argument('--retry_wait', type=int,
                             dest='SCRAPELIB_RETRY_WAIT_SECONDS')
-        parser.add_argument('--bill', action='append', dest='solo_bills',
-                            help='individual bill id(s) to scrape')
-        # old_scrape_compat defaults scrape to true, if being called as scrape
-        parser.add_argument('--scrape', help="run specified scrapers",
-                            action="store_true", default=old_scrape_compat)
-        parser.add_argument('--import', dest="do_import",
-                            help="run specified import process",
-                            action="store_true", default=False)
-        parser.add_argument('--report', help="run specified reports",
-                            action="store_true", default=False)
+        # actions
+        for arg in ('scrape', 'import', 'report'):
+            parser.add_argument('--' + arg, dest='actions',
+                                action="append_const", const=arg,
+                                help='only run %s step' % arg)
 
         args = parser.parse_args()
 
@@ -282,7 +244,7 @@ def main(old_scrape_compat=False):
         metadata = module.metadata
         abbrev = metadata['abbreviation']
 
-        configure_logging(args.verbose, args.module)
+        configure_logging(args.module)
 
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
@@ -292,47 +254,54 @@ def main(old_scrape_compat=False):
             if e.errno != 17:
                 raise e
 
-        # determine time period to run for
-        if args.terms:
+        # if terms aren't set, use latest
+        if not args.terms:
+            if args.sessions:
+                for session in args.sessions:
+                    args.terms.append(
+                        term_for_session(metadata['abbreviation'], session,
+                                         metadata))
+                args.terms = list(set(args.terms or []))
+            else:
+                latest_term = metadata['terms'][-1]['name']
+                args.terms = [latest_term]
+        # only set sessions from terms if sessions weren't set
+        elif not args.sessions:
             for term in metadata['terms']:
-                if term in args.terms:
+                if term['name'] in args.terms:
                     args.sessions.extend(term['sessions'])
-        args.sessions = set(args.sessions or [])
+            # dedup sessions
+            args.sessions = list(set(args.sessions or []))
+
+        if not args.sessions:
+            args.sessions = [metadata['terms'][-1]['sessions'][-1]]
 
         # determine chambers
-        args.chambers = []
-        if args.upper:
-            args.chambers.append('upper')
-        if args.lower:
-            args.chambers.append('lower')
         if not args.chambers:
             args.chambers = ['upper', 'lower']
 
-        if not (args.scrape or args.do_import or args.report
-                or args.solo_bills):
-            raise ScrapeError("Must specify at least one of --scrape, "
-                              "--import, --report")
+        if not args.actions:
+            if old_scrape_compat:
+                args.actions = ['scrape']
+            else:
+                args.actions = ['scrape', 'import', 'report']
 
-        # determine which types to process
-        if not (args.bills or args.legislators or args.votes or
-                args.committees or args.events or args.alldata or
-                args.solo_bills):
-            raise ScrapeError("Must specify at least one of --bills, "
-                              "--legislators, --committees, --votes, --events,"
-                              " --alldata")
-        if args.alldata:
-            args.bills = True
-            args.legislators = True
-            args.votes = True
-            args.committees = True
+        if not args.types:
+            args.types = ['bills', 'legislators', 'votes', 'committees',
+                          'events', 'alldata']
 
+        plan = """billy-update abbr=%s
+    actions=%s
+    types=%s
+    sessions=%s
+    terms=%s""" % (args.module, ','.join(args.actions), ','.join(args.types),
+                   ','.join(args.sessions), ','.join(args.terms))
+        logging.getLogger('billy').info(plan)
 
         scrape_data = {}
 
-        # do full scrape if not solo bills, import only, or report only
-        if args.scrape:
+        if 'scrape' in args.actions:
             # validate then write metadata
-
             if hasattr(module, 'session_list'):
                 session_list = module.session_list()
             else:
@@ -347,97 +316,81 @@ def main(old_scrape_compat=False):
                 validator = DatetimeValidator()
                 validator.validate(metadata, schema)
             except ValueError as e:
-                logging.getLogger('billy').warning('metadata validation error: '
-                                                         + str(e))
+                logging.getLogger('billy').warning(
+                    'metadata validation error: ' + str(e))
 
-            with open(os.path.join(args.output_dir, 'metadata.json'), 'w') as f:
+            with open(os.path.join(args.output_dir, 'metadata.json'),
+                      'w') as f:
                 json.dump(metadata, f, cls=JSONDateEncoder)
 
             run_record = []
             exec_record = {
-                "run_record" : run_record,
-                "args"       : sys.argv,
-                "state"      : abbrev
+                "run_record": run_record,
+                "args": sys.argv,
+                "state": abbrev
             }
 
             lex = None
-            last_scraper = None
 
             # run scrapers
             exec_start = dt.datetime.utcnow()
+            order = ('legislators', 'committees', 'votes', 'bills', 'events')
             try:
-                if args.legislators:
-                    last_scraper = 'legislators'
-                    run_record += _run_scraper('legislators', args, metadata)
-                if args.committees:
-                    last_scraper = 'committees'
-                    run_record += _run_scraper('committees', args, metadata)
-                if args.votes:
-                    last_scraper = 'votes'
-                    run_record += _run_scraper('votes', args, metadata)
-                if args.bills:
-                    last_scraper = 'bills'
-                    run_record += _run_scraper('bills', args, metadata)
-                if args.events:
-                    last_scraper = 'events'
-                    run_record += _run_scraper('events', args, metadata)
-            except Exception as e :
-                # Format the full traceback for the run_detail.
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                trace = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                trace = ''.join(trace)
-                
-                run_record += [{"exception" : e, "type" : last_scraper,
-                                "traceback": trace}]
+                for stype in order:
+                    if stype in args.types:
+                        run_record += _run_scraper(stype, args, metadata)
+            except Exception as e:
+                run_record += [{"exception": e, "type": stype}]
                 lex = e
 
-            exec_end  = dt.datetime.utcnow()
-            exec_record['started']  = exec_start
-            exec_record['ended']    = exec_end
-            scrape_data['scraped']  = exec_record
-            scrape_data['state']    = abbrev
+            exec_end = dt.datetime.utcnow()
+            exec_record['started'] = exec_start
+            exec_record['ended'] = exec_end
+            scrape_data['scraped'] = exec_record
+            scrape_data['state'] = abbrev
 
             for record in run_record:
                 if "exception" in record:
                     ex = record['exception']
                     record['exception'] = {
-                        "type"    : ex.__class__.__name__,
-                        "message" : ex.message
+                        "type": ex.__class__.__name__,
+                        "message": ex.message
                     }
                     scrape_data['failure'] = True
             if lex:
-                if args.do_import:
+                if 'import' in args.actions:
                     try:
-                        db.billy_runs.save( scrape_data, safe=True )
+                        db.billy_runs.save(scrape_data, safe=True)
                     except Exception:
-                        print trace
-                        sys.exit(1)
+                        raise lex
                         # XXX: This should *NEVER* happen, but it has
-                        # in the past, so we're going to catch any errors writing
-                        # to pymongo, and raise the original exception rather
-                        # then let it look like Mongo's fault. Thanks for catching
-                        # this, Thom.
+                        # in the past, so we're going to catch any errors
+                        # writing # to pymongo, and raise the original
+                        # exception rather then let it look like Mongo's fault.
+                        # Thanks for catching this, Thom.
+                        #
+                        # We lose the stack trace, but the Exception is the
+                        # same in every other way.
                         #  -- paultag
                 raise
 
-        elif args.solo_bills:
-            _scrape_solo_bills(args, metadata)
-
         # imports
-        if args.do_import:
+        if 'import' in args.actions:
+            print 'doing import'
             import_report = _do_imports(abbrev, args)
             scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import
             # already writes to the DB, we might as well throw this in too.
-            db.billy_runs.save( scrape_data, safe=True )
+            db.billy_runs.save(scrape_data, safe=True)
 
         # reports
-        if args.report:
+        if 'report' in args.actions:
             _do_reports(abbrev, args)
 
     except ScrapeError as e:
         print 'Error:', e
         sys.exit(1)
+
 
 def scrape_compat_main():
     main(True)

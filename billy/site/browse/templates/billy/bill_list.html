@@ -1,0 +1,28 @@
+{% extends "billy/base.html" %}
+
+{% block title %} {{meta.name}} bill list {% endblock title %}
+
+{% block content %}
+
+<h2>{{meta.name}} bills where {{query_text}}</h2>
+
+<table class="table table-condensed">
+    <thead> <tr>
+            <th> Session </th>
+            <th> Chamber </th>
+            <th> bill_id </th>
+            <th> Title </th>
+    </tr> </thead>
+    <tbody>
+        {% for bill in bills %}
+        <tr>
+            <td> {{bill.session}} </td>
+            <td> {{bill.chamber}} </td>
+            <td> <a href="{% url bill bill.state bill.session bill.bill_id %}">{{bill.bill_id}}</a> </td>
+            <td> {{bill.title}} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
