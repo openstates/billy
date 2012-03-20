@@ -5,6 +5,7 @@ import json
 import glob
 import logging
 import argparse
+import traceback
 import unicodecsv
 
 import datetime as dt
@@ -331,6 +332,7 @@ def main(old_scrape_compat=False):
             }
 
             lex = None
+            exc_traceback = None
 
             # run scrapers
             exec_start = dt.datetime.utcnow()
@@ -340,7 +342,8 @@ def main(old_scrape_compat=False):
                     if stype in args.types:
                         run_record += _run_scraper(stype, args, metadata)
             except Exception as e:
-                run_record += [{"exception": e, "type": stype}]
+                _traceback = _, _, exc_traceback = sys.exc_info()
+                run_record += [{"exception": e, "type": stype }]
                 lex = e
 
             exec_end = dt.datetime.utcnow()
@@ -352,9 +355,14 @@ def main(old_scrape_compat=False):
             for record in run_record:
                 if "exception" in record:
                     ex = record['exception']
+                    fb = traceback.format_exception(*_traceback)
+                    trace = ""
+                    for t in fb:
+                        trace += t
                     record['exception'] = {
                         "type": ex.__class__.__name__,
-                        "message": ex.message
+                        "message": ex.message,
+                        'traceback': trace
                     }
                     scrape_data['failure'] = True
             if lex:
@@ -362,7 +370,7 @@ def main(old_scrape_compat=False):
                     try:
                         db.billy_runs.save(scrape_data, safe=True)
                     except Exception:
-                        raise lex
+                        raise lex, None, exc_traceback
                         # XXX: This should *NEVER* happen, but it has
                         # in the past, so we're going to catch any errors
                         # writing # to pymongo, and raise the original
