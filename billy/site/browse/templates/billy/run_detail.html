@@ -60,16 +60,12 @@ we've got the import flag.
         {% else %}
         <td>This stage threw an exception and ended the run.</td>
         <td>
-<pre>{{ scrape.exception.traceback }}: {{ scrape.exception.message }}</pre>
+<pre>{{ scrape.exception.type }}: {{ scrape.exception.message }}</pre>
+<pre>{{ scrape.exception.traceback }}</pre>
         </td>
         {% endif %}
     </tr>
     {% endfor %}
 </table>
 </p>
-{% if scrape.exception.traceback %}
-    {{ scrape.exception.traceback }}
-{% else %}
-    asf
-{% endif %}
 {% endblock %}
