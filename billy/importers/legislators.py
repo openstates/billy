@@ -150,8 +150,7 @@ def import_legislator(data):
     # Rename 'role' -> 'type'
     for role in data['roles']:
         if 'role' in role:
-            role['type'] = role['role']
-            del role['role']
+            role['type'] = role.pop('role')
 
         # copy over country and/or state into role
         # TODO: base this on all possible level fields

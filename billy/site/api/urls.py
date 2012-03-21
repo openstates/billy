@@ -66,8 +66,6 @@ committee_handler = Resource(handlers.CommitteeHandler,
                              authentication=authorizer)
 committee_search_handler = Resource(handlers.CommitteeSearchHandler,
                                     authentication=authorizer)
-stats_handler = Resource(handlers.StatsHandler,
-                         authentication=authorizer)
 events_handler = Resource(handlers.EventsHandler,
                           authentication=authorizer)
 subject_list_handler = Resource(handlers.SubjectListHandler,
@@ -119,7 +117,4 @@ urlpatterns = patterns('',
     url(r'v1/districts/(?P<abbr>[a-zA-Z]{2})/(?P<chamber>upper|lower)/$',
         district_handler),
     url(r'v1/districts/boundary/(?P<boundary_id>.+)/$', boundary_handler),
-
-
-    url(r'^v1/stats/$', stats_handler),
 )
