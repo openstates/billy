@@ -182,9 +182,6 @@ def import_legislator(data):
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 
-    if not leg and '_code' in data:
-        leg = db.legislators.find_one({'_code': data['_code']})
-
     if leg:
         if 'old_roles' not in leg:
             leg['old_roles'] = {}
