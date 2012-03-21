@@ -177,6 +177,16 @@ def test_import_legislator():
 
     leg4 = {'_type': 'person', 'level': 'state', 'state': 'ex',
             'full_name': 'Bob Dold',
+            '_code': 'bob-dold-44',
+            'roles': [{'role': 'member', 'chamber': 'upper', 'state': 'ex',
+                       'term': '2011-2012', 'district': '2',
+                       'party': 'Democrat',
+                       'start_date': None, 'end_date': None}]}
+
+    # same as leg4 but with a M. initial
+    leg5 = {'_type': 'person', 'level': 'state', 'state': 'ex',
+            'full_name': 'Bob M. Dold',
+            '_code': 'bob-dold-44',
             'roles': [{'role': 'member', 'chamber': 'upper', 'state': 'ex',
                        'term': '2011-2012', 'district': '2',
                        'party': 'Democrat',
@@ -196,4 +206,8 @@ def test_import_legislator():
     assert db.legislators.count() == 2
 
     legislators.import_legislator(leg4)
+    assert db.legislators.count() == 3
+
+    # test that b/c of _code we know this is not a new legisltor, Bob Dold
+    legislators.import_legislator(leg5)
     assert db.legislators.count() == 3
