@@ -10,7 +10,7 @@ import functools
 import unicodecsv
 from operator import itemgetter
 from itertools import chain, imap
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from pymongo.objectid import ObjectId
 
@@ -294,39 +294,154 @@ for the exception and error message.
 
 @never_cache
 def bills(request, abbr):
-    meta, report = _meta_and_report(abbr)
+    meta, report = _meta_and_report(abbr)    
 
+    terms = list(chain.from_iterable(map(itemgetter('sessions'), 
+                                         meta['terms'])))
+    def sorter(item, index=terms.index, len_=len(terms)):
+        '''Sort session strings in order described in state's metadata.'''
+        session, data = item
+        return index(session)
+
+    # Convert sessions into an ordered dict.
     sessions = report['bills']['sessions']
+    sessions = sorted(sessions.items(), key=sorter)
+    sessions = OrderedDict(sessions)
 
+    def decimal_format(value, TWOPLACES=decimal.Decimal(100) ** -1):
+        '''Format a float like 2.2345123 as a decimal like 2.23'''
+        n = decimal.Decimal(str(value))
+        n = n.quantize(TWOPLACES)#, context=Context(traps=[Inexact]))
+        return unicode(n)
 
     # ------------------------------------------------------------------------
-    # Get data for the tables for counts, types, etc. 
+    # Define data for the tables for counts, types, etc. 
     tablespecs = [
-        ('Bill Counts',      {'rownames': ['upper_count','lower_count',
-                                      'version_count', 'versionless_count']}),
-        ('Bill Types',       {'keypath': ['bill_types']}),
-        ('Actions by Type',  {'keypath': ['actions_per_type']}),
-        ('Actions by Actor', {'keypath': ['actions_per_actor']}),
-    ]
+        ('Bill Counts', {'rownames': [
+                                 'upper_count','lower_count',
+                                 'version_count']}),
 
+        ('Bill Types', {
+            'keypath': ['bill_types'],       
+            'summary': {
+                'object_type': 'bills',
+                'key': 'type',
+                },
+            }),
+
+        ('Actions by Type', {
+            'keypath': ['actions_per_type'],
+            'summary': {
+                'object_type': 'actions',
+                'key': 'type',
+                },
+            }),
+
+        ('Actions by Actor', {
+            'keypath': ['actions_per_actor'],
+            'summary': {
+                'object_type': 'actions',
+                'key': 'actor',
+                },
+            }),
+        ('Quality Issues',   {'rownames': [
+                                 'sourceless_count', 'sponsorless_count',
+                                 'actionless_count', 'actions_unsorted',
+                                 'bad_vote_counts', 'version_count',
+                                 'versionless_count', 
+
+                                 'sponsors_with_leg_id', 
+                                 'rollcalls_with_leg_id',
+                                 'have_subjects',
+                                 'updated_this_year',
+                                 'updated_this_month',
+                                 'updated_today',
+                                 'vote_passed']}),
+        ]
+
+    format_as_percent = [
+        'sponsors_with_leg_id', 
+        'rollcalls_with_leg_id',
+        'have_subjects',
+        'updated_this_year',
+        'updated_this_month',
+        'updated_today',
+        'actions_per_actor',
+        'actions_per_type']
+
+    # Create the data for each table.
     tables = []
-
     for name, spec in tablespecs:
-
         column_names = []
         rows = defaultdict(list)
-        tabledata = {'title': name,
+        href_params = {}
+        tabledata = {'abbr': abbr,
+                     'title': name,
                      'column_names': column_names,
                      'rows': rows}
+        contexts = []
+
         for session, context in sessions.items():
+            column_names.append(session)
             if 'keypath' in spec:
                 for k in spec['keypath']:
                     context = context[k]
-            column_names.append(session)
-            rownames = spec.get('rownames', context)
+            contexts.append(context)
+
+        try:
+            rownames = spec['rownames']
+        except KeyError:
+            rownames = reduce(lambda x, y: set(x) | set(y), contexts)
+
+        for context in contexts:        
             for r in rownames:
-                rows[r].append(context[r])
-        tabledata['rows'] = dict(rows)
+
+                val = context.get(r, 0)
+                if not isinstance(val, (int, float, decimal.Decimal)):
+                    val = len(val)    
+
+                use_percent = any([
+                    r in format_as_percent, 
+                    name in ['Actions by Actor', 'Actions by Type'],
+                    ])
+
+                if use_percent and (val != 0):
+                    val = decimal_format(val)
+                    val += ' %'
+                rows[r].append(val)
+
+                # Link to summary/distint views. 
+                if 'summary' in spec:
+                    try:
+                        spec_key = '.'.join(spec['keypath'])
+                    except KeyError:
+                        spec_key = r
+
+                    try:
+                        spec_val = spec['spec'](r)
+                    except KeyError:
+                        spec_val = r
+                    else:
+                        spec_val = json.dumps(spec_val)
+
+                    params = dict(spec['summary'], session=session, 
+                                  val=spec_val)
+
+                    params = urllib.urlencode(params)
+                    href_params[r] = params
+
+        # Add the final "total" column.
+        tabledata['column_names'].append('Total')
+        for k, v in rows.items():
+            try:
+                sum_ = sum(v)
+            except TypeError:
+                sum_ = 'n/a'
+            v.append(sum_)
+
+        rowdata = [((r, href_params.get(r)), cells) for (r, cells) in rows.items()]
+        tabledata['rowdata'] = rowdata
+
         tables.append(tabledata)
 
     # ------------------------------------------------------------------------
@@ -414,7 +529,14 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
-    val = json.loads(request.GET['val'])
+
+    val = request.GET['val']
+    try:
+        val = json.loads(val)
+    except ValueError:
+        pass
+
+    
     spec = {'state': abbr, 'session': session}
     fields = {'_id': 1}
 

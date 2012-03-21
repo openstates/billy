@@ -2,6 +2,17 @@
 {% load humanize %}
 {% load billy_utiltags %}
 
+{% block style %}
+.table th {
+	text-align: center;
+} 
+
+.table td {
+    text-align: right;
+}
+
+{% endblock style %}
+
 {% block content %}
 
 <h2>{{ metadata.name }} bill summary</h2>
