@@ -75,7 +75,7 @@ def insert_with_id(obj):
 
     while True:
         if obj['_type'] == 'bill':
-            obj['_id'] = '%s%08d' % (id_prefix, new_id)
+            obj['_id'] = '%s%06d' % (id_prefix, new_id)
         else:
             obj['_id'] = '%s%06d' % (id_prefix, new_id)
         obj['_all_ids'] = [obj['_id']]
