@@ -2,7 +2,10 @@
 {% load humanize %}
 {% load billy_utiltags %}
 
+{% block title %}Bills{% endblock %}
+
 {% block style %}
+<style>
 .table th {
 	text-align: center;
 } 
@@ -10,11 +13,21 @@
 .table td {
     text-align: right;
 }
-
-{% endblock style %}
+</style>
+{% endblock %}
 
 {% block content %}
 
+<div class="container-fluid">
+ <div class="sidebar" style="left: 10px; position: fixed; top: 50px; width: 100px;">
+  <ul style="list-style-type: none; margin-left: 0px;">
+  {% for name, d in tablespecs %}
+   <li><a href="#{{name|slugify}}">{{name}}</a></li>
+  {% endfor %}
+   <li><a href="#actions-month">Actions/month</a></li>
+  </ul>
+ </div>
+<div class="content" style="margin-left: 100px">
 <h2>{{ metadata.name }} bill summary</h2>
 {{meta}}
 <div id="tables">
@@ -23,12 +36,12 @@
 {% endfor %}
 </div>
 
-
+<a name="actions-month"></a>
 <h3>Actions by Month</h3>
 <div>
 {% for session, data in sessions.items %}
 <div class="pull-left">
-<table class="table table-bordered table-striped table-condensed">
+<table class="table-bordered table-striped table-condensed">
   <tr><th style="text-align: center;" colspan="2">{{session}}</th></tr>
   {% for name, num in data.actions_per_month|sorted_items %}
     <tr><td>{{name}}</td><td>{{num|decimal_format}}</td></tr>
@@ -38,4 +51,6 @@
 {% endfor %}
 </div>
 
+<!-- container-fluid -->
+</div>
 {% endblock %}

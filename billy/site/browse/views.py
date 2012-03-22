@@ -450,7 +450,8 @@ def bills(request, abbr):
     tables = map(_render, tables)
 
     return render(request, "billy/bills.html",
-                  dict(tables=tables, metadata=meta, sessions=sessions))
+                  dict(tables=tables, metadata=meta, sessions=sessions,
+                       tablespecs=tablespecs))
 
 
 def summary_index(request, abbr):
