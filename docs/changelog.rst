@@ -13,6 +13,7 @@ scrapelib changelog
         * --strict dropped, --nostrict now exists
         * simplification of how --session/--term work
     * drop billy-util districtcsv in favor of an admin view
+    * previously internal bill ids are now 8 digits
     * addition of billy-update --oyster argument, adds tracking of versions
     * duplicate_versions is now just that, not versions+documents
     * bugfix: stop silently swallowing errors in subject csvs

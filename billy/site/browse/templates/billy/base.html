@@ -34,6 +34,7 @@
                     <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
                     <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
                     <li> <a href="{% url random_bill metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
+                    <li> <a href="{% url duplicate_versions metadata.abbreviation %}">Dup. Versions</a> </li>
                     </ul>
                 </li>
                 <li> <a href='{% url admin_legislators metadata.abbreviation %}'>Legislators</a> </li>
