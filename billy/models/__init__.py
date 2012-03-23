@@ -64,7 +64,7 @@ class Document(dict):
         '''
         For collections like reports and bills that have a 'state' key.
         '''
-        return get_metadata(self['state'])
+        return get_metadata(self['_id'])
 
 
 class RelatedDocument(ReadOnlyAttribute):
