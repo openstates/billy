@@ -15,7 +15,7 @@
  <tr>
   <td><strong>
   	{% if params %}
-      <a href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">{{ name }}</a>
+      <a href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">{{ name|safe }}</a>
     {% else %}
       {{name}}
     {% endif %}
@@ -23,9 +23,9 @@
  {% for cell in cells  %}
    <td style="text-align: right;">
    {% if cell == "0.00 %" or cell == 0 or cell == 'n/a' %}
-     <span style="color: grey; font-style: italic;">{{ cell }}</span>
+     <span style="color: grey; font-style: italic;">{{ cell|safe }}</span>
    {% else %}
-     {{ cell }}
+     {{ cell|safe }}
    {% endif %}
    </td>{% endfor %}</tr>
   {% endwith %}
