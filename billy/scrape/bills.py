@@ -108,7 +108,8 @@ class Bill(SourcedObject):
             d['mimetype'] = mimetype
         self['documents'].append(d)
 
-    def add_version(self, name, url, mimetype=None, **kwargs):
+    def add_version(self, name, url, mimetype=None, _duplicate='error',
+                    **kwargs):
         """
         Add a version of the text of this bill.
 
@@ -116,10 +117,26 @@ class Bill(SourcedObject):
                      'As Introduced', 'Version 2', 'As amended', 'Enrolled'
         :param url: the location of this version on the legislative website.
         :param mimetype: MIME type of the document
+        :param _duplicate: What to do if a duplicate is seen:
+            error - default option, raises a ValueError
+            ignore - add the document twice (rarely the right choice)
+            use_new - use the new name, removing the old document
+            use_old - use the old name, not adding the new document
 
         If multiple formats are provided, a good rule of thumb is to
         prefer text, followed by html, followed by pdf/word/etc.
         """
+        if _duplicate != 'ignore':
+            if url in self._seen_versions:
+                if _duplicate == 'error':
+                    raise ValueError('duplicate version url %s' % url)
+                elif _duplicate == 'use_new':
+                    # delete the old version
+                    self['versions'] = [v for v in self['versions']
+                                        if v['url'] != url]
+                elif _duplicate == 'use_old':
+                    return       # do nothing
+
         d = dict(name=name, url=url, **kwargs)
         if mimetype:
             d['mimetype'] = mimetype
