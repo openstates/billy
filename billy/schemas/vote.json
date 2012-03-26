@@ -21,6 +21,6 @@
     "other_votes": {"type": "array", "items": {"type": "string"}},
     "sources": {"type": "array", "items": {"type": "object", "properties": {
         "url": {"type": "string"}
-    }}}
+    }}, "minItems": 1}
  }
 }

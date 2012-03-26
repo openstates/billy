@@ -68,7 +68,7 @@
     }}},
     "sources": {"type": "array", "items": {"type": "object", "properties": {
         "url": {"type": "string"}
-    }}},
+    }}, "minItems": 1, },
     "subjects": {"type": "array", "items": {"type": "string"}, "required": false}
  }
 }
