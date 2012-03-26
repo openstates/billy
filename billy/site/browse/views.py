@@ -58,7 +58,12 @@ def _csv_response(request, csv_name, columns, data, abbr):
 def browse_index(request, template='billy/index.html'):
     rows = []
 
-    for report in db.reports.find():
+    spec = {}
+    only = request.GET.get('only', [])
+    if only:
+        spec = {'_id': {'$in': only.split(',')}}
+
+    for report in db.reports.find(spec):
         report['id'] = report['_id']
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
