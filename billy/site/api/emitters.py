@@ -2,14 +2,11 @@ import json
 import datetime
 
 from billy.utils import chamber_name
-from billy.site.api import xml
 
 from django.template import defaultfilters
 from piston.emitters import Emitter, JSONEmitter
 
 import icalendar
-import lxml.etree
-from lxml.builder import E
 
 
 class DateTimeAwareJSONEncoder(json.JSONEncoder):
@@ -69,19 +66,6 @@ class BillyJSONEmitter(JSONEmitter):
                 else:
                     obj.__dict__[key] = self._clean(value)
         return obj
-
-
-class BillyXMLEmitter(Emitter):
-    def render(self, request):
-        obj = self.construct()
-        if isinstance(obj, list):
-            results = E.results(*[xml.render(o) for o in obj])
-        else:
-            results = E.results(xml.render(obj))
-
-        return lxml.etree.tostring(results, pretty_print=True,
-                                   xml_declaration=True,
-                                   encoding='UTF-8')
 
 
 class _vDatetime(icalendar.vDatetime):

@@ -8,7 +8,7 @@ from piston.emitters import Emitter
 
 from billy.site.api import handlers
 from billy.site.api.views import legislator_preview
-from billy.site.api.emitters import BillyJSONEmitter, BillyXMLEmitter
+from billy.site.api.emitters import BillyJSONEmitter
 from billy.site.api.emitters import ICalendarEmitter
 
 if getattr(settings, 'USE_LOCKSMITH', False):
@@ -42,11 +42,11 @@ else:
     Resource = piston.resource.Resource
 
 Emitter.register('json', BillyJSONEmitter, 'application/json; charset=utf-8')
-Emitter.register('xml', BillyXMLEmitter, 'application/xml; charset=utf-8')
 
 Emitter.register('ics', ICalendarEmitter, 'text/calendar')
 
 Emitter.unregister('yaml')
+Emitter.unregister('xml')
 Emitter.unregister('django')
 Emitter.unregister('pickle')
 
