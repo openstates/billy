@@ -6,7 +6,9 @@ scrapelib changelog
     * lots of improvements to billy admin
         * general style overhaul
         * duplicate_versions view
-    * API: removal of never-used RSS emitter and broken stats endpoint
+    * API:
+        * removal of XML
+        * removal of RSS emitter and broken stats endpoint
     * billy-update command line radically changed
         * defaults to actually doing work
         * -vvv dropped
