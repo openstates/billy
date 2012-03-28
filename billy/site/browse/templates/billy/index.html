@@ -149,8 +149,12 @@
         <!-- bills -->
         <td class="{{row.bills.upper_count|yesno:"good,bad"}}">
             {{row.bills.upper_count}}</td>
-        <td class="{{row.bills.lower_count|yesno:"good,bad"}}">
-            {{row.bills.lower_count}}</td>
+        {% if row.unicameral %}
+            <td class="good">---</td>
+        {% else %}
+            <td class="{{row.bills.lower_count|yesno:"good,bad"}}">
+                {{row.bills.lower_count}}</td>
+        {% endif %}
         <td class="{{row.bills.actionless_count|yesno:"bad,good"}}">
             {{row.bills.actionless_count}}</td>
         <td class="{{row.bills.sponsorless_count|yesno:"bad,good"}}">
