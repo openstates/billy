@@ -683,7 +683,8 @@ def random_bill(request, abbr):
     }
 
     if modi_flag == 'bad_vote_counts':
-        bad_vote_counts = db.reports.find_one({'_id': abbr})['bills']['bad_vote_counts']
+        bad_vote_counts = db.reports.find_one({'_id': abbr}
+                                             )['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
         default = False
 
@@ -691,6 +692,13 @@ def random_bill(request, abbr):
         default = False
         spec.update( basic_specs[modi_flag] )
         spec.pop('session') # all sessions
+
+    if modi_flag == 'current_term':
+        default = True
+        curTerms = meta['terms'][0]['sessions']
+        spec['session'] = {
+            "$in" : curTerms
+        }
 
     count = db.bills.find(spec).count()
     if count:
