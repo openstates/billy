@@ -38,7 +38,7 @@ $(document).ready(function() {
             feel?
                - MOM (World of Goo)
         -->
-        <div class="alert-message block-message error">
+        <div class="alert alert-block alert-error">
             <p><strong>Warning! Read me! This voids the warranty!!</strong></p>
             <br />
             <p>If you doubt what you're doing, or don't feel like you know exactly
@@ -46,7 +46,7 @@ $(document).ready(function() {
             to break the API for folks, so please do think twice.</p>
         </div>
         <h1>Merge Plan</h1>
-        <div class = 'alert-message block-message info' >
+        <div class = 'alert alert-block alert-info' >
             <strong>This is an incomplete listing!</strong>
             <br />
             <p>
@@ -122,7 +122,7 @@ $(document).ready(function() {
             {% csrf_token %}
             &nbsp;
             <input name = 'sub'  type = 'submit' value = 'Make it so!'
-                class = 'btn danger' />
+                class = 'btn-danger' />
         </form>
     </div>
 {% endblock %}
