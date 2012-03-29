@@ -694,7 +694,7 @@ def random_bill(request, abbr):
         spec.pop('session') # all sessions
 
     if modi_flag == 'current_term':
-        default = True
+        default = False
         curTerms = meta['terms'][0]['sessions']
         spec['session'] = {
             "$in" : curTerms
