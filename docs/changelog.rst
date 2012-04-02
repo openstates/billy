@@ -1,8 +1,9 @@
 scrapelib changelog
 ===================
 
-0.9.7
+1.0.0
 -----
+**2 April 2012**
     * lots of improvements to billy admin
         * general style overhaul
         * duplicate_versions view
