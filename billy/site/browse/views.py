@@ -696,7 +696,6 @@ def random_bill(request, abbr):
     if modi_flag == 'current_term':
         default = False
         curTerms = meta['terms'][-1]['sessions']
-        print curTerms
         spec['session'] = {
             "$in" : curTerms
         }
