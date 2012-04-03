@@ -1,6 +1,10 @@
 scrapelib changelog
 ===================
 
+1.1.0-dev
+-----
+    * improved vote validation during scrape
+
 1.0.0
 -----
 **2 April 2012**
