@@ -13,28 +13,34 @@ tr:hover {cursor: pointer;}
     $(document).ready(function(){
       var trs = $("tr");
       trs.click(function(){
-        window.location = $(this).attr('href');
+        var href = $(this).attr('href');
+        window.location = (href || window.location);
         });
       });    
   </script>
 
 <div class="container">
-    <h2>{{ meta.name }} [{{ session }}]</h2>
-<h3>All values for "{{object_type}}.{{key}}"</h3>
+  
+<h2>{{ meta.name }} [{{ session }}]</h2>
+<h3>{{object_type}}</h3> 
+<p><strong>Mongo spec:</strong></p>
+<p><pre>{{spec}}</pre></p>
+
+
 <table class="table table-striped table-bordered table-condensed">
   <thead>
-  <tr><th>%</th><th>#</th><th>value</th></tr>
+  <tr><th>id</th></tr>
   </thead>
   <tbody>
-  {% for obj, count, percentage, params in objs  %}
-  <tr class="link" href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">
-    <td>{{ percentage|decimal_format }}</td>
-    <td>{{count}}</td>
-    <td>{{ obj|truncatewords:20 }}</td>
-  </tr>
+  {% for obj_type, obj_id in objects  %}
+  <tr class="link" href="/admin/object_json/{{ obj_type }}/{{obj_id}}/"><td>{{ obj_id }}</td></tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
+
+
+
 
 </div>
 

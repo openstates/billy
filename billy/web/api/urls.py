@@ -6,10 +6,10 @@ from django.http import HttpResponse
 import piston.resource
 from piston.emitters import Emitter
 
-from billy.site.api import handlers
-from billy.site.api.views import legislator_preview
-from billy.site.api.emitters import BillyJSONEmitter
-from billy.site.api.emitters import ICalendarEmitter
+from billy.web.api import handlers
+from billy.web.api.views import legislator_preview
+from billy.web.api.emitters import BillyJSONEmitter
+from billy.web.api.emitters import ICalendarEmitter
 
 if getattr(settings, 'USE_LOCKSMITH', False):
     from locksmith.mongoauth.authentication import PistonKeyAuthentication

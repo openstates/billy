@@ -15,7 +15,7 @@
  <tr>
   <td><strong>
   	{% if params %}
-      <a href="/browse/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">{{ name|safe }}</a>
+      <a href="/admin/{{ abbr }}/summary_object_key_vals?{{ params|safe }}">{{ name|safe }}</a>
     {% else %}
       {{name}}
     {% endif %}

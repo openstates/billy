@@ -1,9 +1,9 @@
 
 from django.conf.urls.defaults import patterns, include, url
 
-from billy.site.www.views import legislators, legislators_chamber, \
-    legislator, committees_chamber, committees, committee, bill, \
-    bills, vote, state, state_selection
+from billy.web.public.views import (legislators, legislators_chamber,
+    legislator, committees_chamber, committees, committee, bill,
+    bills, vote, state, state_selection)
 
 
 urlpatterns = patterns('',

@@ -3,7 +3,7 @@ from operator import itemgetter
 from django import template
 
 from billy import db
-from billy.site.www.forms import StateSelectForm
+from billy.web.public.forms import StateSelectForm
 
 from billy.models import Metadata
 

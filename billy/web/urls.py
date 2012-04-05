@@ -2,9 +2,9 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
-    (r'^api/', include('billy.site.api.urls')),
-    (r'^browse/', include('billy.site.browse.urls')),
-    (r'^www/', include('billy.site.www.urls')),
+    (r'^api/', include('billy.web.api.urls')),
+    (r'^admin/', include('billy.web.admin.urls')),
+    (r'^www/', include('billy.web.public.urls')),
 )
 
 if settings.DEBUG:

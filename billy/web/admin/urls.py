@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('billy.site.browse.views',
+urlpatterns = patterns('billy.web.admin.views',
     url(r'^$', 'browse_index', name='admin_index'),
 
     # admin overview pages

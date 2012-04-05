@@ -169,7 +169,7 @@ function lineize( key, val, title ) {
     });
 }
 $(document).ready(function(){
-    $.getJSON( "/browse/run-detail-data/{{ state }}", function(data) {
+    $.getJSON( "/admin/run-detail-data/{{ state }}", function(data) {
         d = data['stacked'];
         $.each(d, function(key, val) {
             stackize( key, val, data['title'][key] );
@@ -226,7 +226,7 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     </tr>
 {% for run in allruns %}
     <tr class='{% if run.failure %}error{% else %}success{% endif %}'>
-        <td><a href = '/browse/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
+        <td><a href = '/admin/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
         <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
         <td>{{ run.scraped.started|date_display }}</td>
     </tr>

@@ -10,7 +10,7 @@ setup(name='billy',
       package_data={'billy': ['schemas/*.json',
                               'schemas/api/*.json',
                               'schemas/relax/api.rnc'],
-                    'billy.site.browse': ['templates/billy/*.html'],
+                    'billy.web.admin': ['templates/billy/*.html'],
                    },
       author="James Turk",
       author_email="jturk@sunlightfoundation.com",
@@ -26,7 +26,7 @@ billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
     install_requires=[
-        "Django>=1.3",
+        "Django==1.3.1",
         "argparse==1.1",
         "boto",
         "django-piston",
