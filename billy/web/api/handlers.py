@@ -139,12 +139,16 @@ class MetadataHandler(BillyHandler):
 
 
 class BillHandler(BillyHandler):
-    def read(self, request, abbr, session, bill_id, chamber=None):
-        abbr = abbr.lower()
-        level = metadata(abbr)['level']
-        query = {level: abbr, 'session': session, 'bill_id': bill_id}
-        if chamber:
-            query['chamber'] = chamber.lower()
+    def read(self, request, abbr=None, session=None, bill_id=None,
+             chamber=None, billy_bill_id=None):
+        if billy_bill_id:
+            query = {'_id': billy_bill_id}
+        else:
+            abbr = abbr.lower()
+            level = metadata(abbr)['level']
+            query = {level: abbr, 'session': session, 'bill_id': bill_id}
+            if chamber:
+                query['chamber'] = chamber.lower()
         return find_bill(query, fields=_build_field_list(request))
 
 
