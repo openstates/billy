@@ -212,9 +212,9 @@ def import_bills(abbr, data_dir, oyster_documents=False):
         logger.debug('Failed to match vote %s %s %s' % tuple([
             r.encode('ascii', 'replace') for r in remaining]))
 
-    #meta = db.metadata.find_one({'_id': abbr})
-    #level = meta['level']
-    #populate_current_fields(level, abbr)
+    meta = db.metadata.find_one({'_id': abbr})
+    level = meta['level']
+    populate_current_fields(level, abbr)
 
     ensure_indexes()
 
