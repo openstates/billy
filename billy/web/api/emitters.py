@@ -46,10 +46,8 @@ class BillyJSONEmitter(JSONEmitter):
 
     def _clean(self, obj):
         if isinstance(obj, dict):
-            # Expose the '_id' field as 'id' for certain object types
-            if (obj.get('_type') in ('person',
-                                     'committee',
-                                     'event') and '_id' in obj):
+            # convert _id to id
+            if '_id' in obj:
                 obj['id'] = obj['_id']
 
             for key, value in obj.items():

@@ -94,7 +94,7 @@ class BillyHandlerMetaClass(HandlerMetaClass):
             def new_read(*args, **kwargs):
                 request = args[1]
                 fmt = request.GET.get('format')
-                if fmt in ['xml', 'ics'] and 'fields' in request.GET:
+                if fmt == 'ics' and 'fields' in request.GET:
                     resp = rc.BAD_REQUEST
                     resp.write(": cannot specify fields param if format=%s" %
                                fmt)
@@ -154,7 +154,7 @@ class BillSearchHandler(BillyHandler):
         bill_fields = {'title': 1, 'created_at': 1, 'updated_at': 1,
                        'bill_id': 1, 'type': 1, 'state': 1, 'level': 1,
                        'country': 1, 'session': 1, 'chamber': 1, 'subjects': 1,
-                       '_type': 1}
+                       '_type': 1, 'id': 1}
         # replace with request's fields if they exist
         bill_fields = _build_field_list(request, bill_fields)
 
