@@ -93,6 +93,7 @@ def test_update():
 
     # update with a few fields changed
     changes = {'field1': 'more stuff', 'field2': 'a change'}
+    time.sleep(0.005)   # sleep long enough to avoid created_at == updated_at
     utils.update(obj1, changes, db.bills)
     obj2 = db.bills.find_one({'_id': id1})
 
