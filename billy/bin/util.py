@@ -10,6 +10,7 @@ configure_logging()
 
 COMMAND_MODULES = (
     'billy.commands.dump',
+    'billy.commands.textextract',
     'billy.commands.load_legislators',
     'billy.commands.oysterize',
     'billy.commands.prune_committees',
