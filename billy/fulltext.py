@@ -1,13 +1,23 @@
 import re
 import string
+import tempfile
 from functools import wraps
+from billy.scrape.utils import convert_pdf
 
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 def clean_text(text):
-    text = re.sub('\s+', ' ', text)
-    text = PUNCTUATION.sub('', text)
+    text = text.replace(u'\xa0', ' ')  # nbsp -> sp
+    text = re.sub('\s+', ' ', text)    # collapse spaces
+    text = PUNCTUATION.sub('', text)   # strip punctuation
     return text
+
+
+def pdfdata_to_text(data):
+    with tempfile.NamedTemporaryFile(delete=False) as tmpf:
+        tmpf.write(data)
+        tmpf.close()
+        return convert_pdf(tmpf.name, 'text')
 
 
 def extracts_text(function):
