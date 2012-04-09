@@ -7,9 +7,10 @@ from billy.scrape.utils import convert_pdf
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 def clean_text(text):
-    text = text.replace(u'\xa0', ' ')  # nbsp -> sp
+    text = text.decode('utf8', 'ignore')
+    text = text.replace(u'\xa0', u' ') # nbsp -> sp
+    text = PUNCTUATION.sub(' ', text)  # strip punctuation
     text = re.sub('\s+', ' ', text)    # collapse spaces
-    text = PUNCTUATION.sub('', text)   # strip punctuation
     return text
 
 
