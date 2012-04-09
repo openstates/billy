@@ -48,7 +48,7 @@ class Event(SourcedObject):
         d = dict(name=name, url=url, **kwargs)
         if mimetype:
             d['mimetype'] = mimetype
-        if type:
+        if not type:
             type = "other"
         d['type'] = type
         self['documents'].append(d)
