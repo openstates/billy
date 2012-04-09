@@ -53,10 +53,6 @@
                 "null"
             ]
         }, 
-        "committee": {
-            "type": "string",
-            "required": false
-        }, 
         "location": {
             "type": "string"
         }, 
@@ -85,9 +81,6 @@
             }, 
             "type": "array"
         }, 
-        "session": {
-            "type": "string"
-        }, 
         "related_bills": {
             "items": {
                 "properties": {
@@ -99,6 +92,9 @@
             }, 
             "minItems": 0, 
             "type": "array"
+        }, 
+        "session": {
+            "type": "string"
         }, 
         "sources": {
             "items": {
