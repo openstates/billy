@@ -1,4 +1,5 @@
 import sys
+import urllib2
 from billy.conf import settings
 from billy.commands import BaseCommand
 
@@ -19,4 +20,11 @@ class Oysterize(BaseCommand):
 
         extract_text = module.extract_text
 
-        print extract_text({}, open(args.filename).read())
+        if (args.filename.startswith('http://') or
+            args.filename.startswith('https://') or
+            args.filename.startswith('ftp://')):
+            filedata = urllib2.urlopen(args.filename).read()
+        else:
+            filedata = open(args.filename).read()
+
+        print extract_text({}, filedata)
