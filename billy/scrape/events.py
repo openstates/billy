@@ -39,7 +39,6 @@ class Event(SourcedObject):
         self['end'] = end
         self['participants'] = []
         self['location'] = location
-        self['agendas'] = []
         self['documents'] = []
         self['related_bills'] = []
         self.update(kwargs)
