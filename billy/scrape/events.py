@@ -39,7 +39,23 @@ class Event(SourcedObject):
         self['end'] = end
         self['participants'] = []
         self['location'] = location
+        self['agendas'] = []
+        self['documents'] = []
+        self['related_bills'] = []
         self.update(kwargs)
+
+    def add_document(self, name, url, type=None, mimetype=None, **kwargs):
+        d = dict(name=name, url=url, **kwargs)
+        if mimetype:
+            d['mimetype'] = mimetype
+        if type:
+            type = "other"
+        d['type'] = type
+        self['documents'].append(d)
+
+    def add_related_bill(self, bill_id, **kwargs):
+        kwargs.update({ "bill_id" : bill_id })
+        self['related_bills'].append(kwargs)
 
     def add_participant(self, type, participant, **kwargs):
         kwargs.update({'type': type, 'participant': participant})

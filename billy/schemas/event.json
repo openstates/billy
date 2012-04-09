@@ -1,27 +1,132 @@
-{"description": "event data",
- "type": "object",
- "properties": {
-   "_type": {"type": "string", "enum": ["event"]},
-    "level": {"type": "string", "enum":["country", "state"]},
-    "state": {"type": "string", "minLength": 2, "maxLength": 2},
-    "country": {"type": "string", "minLength": 2, "maxLength": 2},
-   "session": {"type": "string"},
-   "type": {"type": "string"},
-   "location": {"type": "string"},
-   "description": {"type": "string"},
-   "when": {"type": "datetime"},
-   "end": {"type": ["datetime", "null"]},
-   "all_day": {"type": "boolean", "required": false},
-   "notes": {"type": ["string", "null"], "required": false},
-   "status": {"type": "string", "required": false},
-   "link": {"type": ["string", "null"], "required": false},
-   "participants": {"type": "array", "items":
-     {"type": "object", "properties": {
-       "type": {"type": "string"},
-       "participant": {"type": "string"},
-       "chamber": {"type": "string", "required": false}}}},
-   "sources": {"type": "array", "items": {"type": "object", "properties": {
-        "url": {"type": "string"}
-    }}, "minItems": 1}
- }
+{
+    "description": "event data", 
+    "properties": {
+        "_type": {
+            "enum": [
+                "event"
+            ], 
+            "type": "string"
+        }, 
+        "all_day": {
+            "required": false, 
+            "type": "boolean"
+        }, 
+        "country": {
+            "maxLength": 2, 
+            "minLength": 2, 
+            "type": "string"
+        }, 
+        "description": {
+            "type": "string"
+        }, 
+        "documents": {
+            "items": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }, 
+                    "url": {
+                        "type": "string"
+                    }
+                }, 
+                "type": "object"
+            }, 
+            "type": "array"
+        }, 
+        "end": {
+            "type": [
+                "datetime", 
+                "null"
+            ]
+        }, 
+        "level": {
+            "enum": [
+                "country", 
+                "state"
+            ], 
+            "type": "string"
+        }, 
+        "link": {
+            "required": false, 
+            "type": [
+                "string", 
+                "null"
+            ]
+        }, 
+        "committee": {
+            "type": "string",
+            "required": false
+        }, 
+        "location": {
+            "type": "string"
+        }, 
+        "notes": {
+            "required": false, 
+            "type": [
+                "string", 
+                "null"
+            ]
+        }, 
+        "participants": {
+            "items": {
+                "properties": {
+                    "chamber": {
+                        "required": false, 
+                        "type": "string"
+                    }, 
+                    "participant": {
+                        "type": "string"
+                    }, 
+                    "type": {
+                        "type": "string"
+                    }
+                }, 
+                "type": "object"
+            }, 
+            "type": "array"
+        }, 
+        "session": {
+            "type": "string"
+        }, 
+        "related_bills": {
+            "items": {
+                "properties": {
+                    "bill_id": {
+                        "type": "string"
+                    }
+                }, 
+                "type": "object"
+            }, 
+            "minItems": 0, 
+            "type": "array"
+        }, 
+        "sources": {
+            "items": {
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                }, 
+                "type": "object"
+            }, 
+            "minItems": 1, 
+            "type": "array"
+        }, 
+        "state": {
+            "maxLength": 2, 
+            "minLength": 2, 
+            "type": "string"
+        }, 
+        "status": {
+            "required": false, 
+            "type": "string"
+        }, 
+        "type": {
+            "type": "string"
+        }, 
+        "when": {
+            "type": "datetime"
+        }
+    }, 
+    "type": "object"
 }
