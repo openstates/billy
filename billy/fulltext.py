@@ -7,7 +7,6 @@ from billy.scrape.utils import convert_pdf
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 def clean_text(text):
-    text = text.decode('utf8', 'ignore')
     text = text.replace(u'\xa0', u' ') # nbsp -> sp
     text = PUNCTUATION.sub(' ', text)  # strip punctuation
     text = re.sub('\s+', ' ', text)    # collapse spaces
@@ -24,7 +23,7 @@ def pdfdata_to_text(data):
 def extracts_text(function):
     @wraps(function)
     def wrapper(oyster_doc, data):
-        oyster_doc['text_content'] = _clean_text(function(oyster_doc, data))
+        oyster_doc['text_content'] = clean_text(function(oyster_doc, data))
     return wrapper
 
 
