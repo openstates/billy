@@ -88,13 +88,32 @@ def insert_with_id(obj):
         except pymongo.errors.DuplicateKeyError:
             new_id += 1
 
-
 def _timestamp_to_dt(timestamp):
     tstruct = time.localtime(timestamp)
     dt = datetime.datetime(*tstruct[0:6])
     if tstruct.tm_isdst:
         dt = dt - datetime.timedelta(hours=1)
     return dt
+
+
+def compare_committee(ctty1, ctty2):
+    def _cleanup(obj):
+        ctty_junk_words = [
+            "(\s+|^)committee(\s+|$)",
+            "(\s+|^)on(\s+|$)",
+            "(\s+|^)joint(\s+|$)",
+            "(\s+|^)house(\s+|$)",
+            "(\s+|^)senate(\s+|$)",
+            "[,\.\!\+\/]"
+        ]
+        obj = obj.strip().lower()
+        for junk in ctty_junk_words:
+            obj = re.sub(junk, " ", obj).strip()
+        obj = re.sub("\s+", " ", obj)
+        return obj
+    ctty1 = _cleanup(ctty1)
+    ctty2 = _cleanup(ctty2)
+    return ctty1 == ctty2
 
 
 def update(old, new, collection, sneaky_update_filter=None):
