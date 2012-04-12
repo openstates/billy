@@ -247,6 +247,11 @@ def main(old_scrape_compat=False):
 
         configure_logging(args.module)
 
+        # configure oyster
+        if args.oyster:
+            from oyster.conf import settings as oyster_settings
+            oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = module.document_class
+
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
         try:
