@@ -9,13 +9,13 @@ logger = logging.getLogger('billy')
 configure_logging()
 
 COMMAND_MODULES = (
+    # lots of these commands can go away as billy matures
+    'billy.commands.serve',             # useful for development
+    'billy.commands.textextract',       # useful for development
+    'billy.commands.load_legislators',  # allow editing legislators in admin
+    'billy.commands.prune_committees',  # allow deleting committees in admin
+    'billy.commands.retire',            # allow retiring legislators in admin
     'billy.commands.dump',
-    'billy.commands.textextract',
-    'billy.commands.load_legislators',
-    'billy.commands.oysterize',
-    'billy.commands.prune_committees',
-    'billy.commands.retire',
-    'billy.commands.serve',
     'billy.commands.update_external_ids',
     'billy.commands.update_leg_ids',
     'billy.commands.validate_api',
