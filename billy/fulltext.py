@@ -39,5 +39,5 @@ def _clean_text(text):
 def oyster_text(function):
     @wraps(function)
     def wrapper(oyster_doc, data):
-        oyster_doc['text_content'] = _clean_text(function(oyster_doc, data))
+        return _clean_text(function(oyster_doc, data))
     return wrapper
