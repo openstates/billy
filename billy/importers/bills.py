@@ -154,7 +154,7 @@ def import_bill(data, votes, categorizer, oyster_documents=False):
                       # metadata
                       name=version['name'], state=data['state'],
                       session=data['session'], chamber=data['chamber'],
-                      bill_id=data['bill_id'], openstates_bill_id=data['_id'])
+                      bill_id=data['bill_id'])
 
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
