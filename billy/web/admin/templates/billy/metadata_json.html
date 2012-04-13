@@ -1,0 +1,23 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block title %}
+    {{ metadata.name}}
+{% endblock %}
+
+{% block content-nocontainer %}
+<div class="container-fluid">
+<div class="sidebar" style="left: 10px; position: fixed; top: 50px; width: 100px;">
+<h3><a href="{% url admin_overview metadata.abbreviation %}">back</a></h3>
+<ul style="list-style-type: none; margin-left: 0px;">
+{% for k in keys %}
+  <li><a href="#{{k}}">{{k}}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+<div class="content" style="margin-left: 130px;">
+    <pre>{{  metadata_json|safe }}</pre>
+</div>
+{% endblock %}
