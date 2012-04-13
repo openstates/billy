@@ -5,6 +5,7 @@ urlpatterns = patterns('billy.web.admin.views',
 
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
+    url(r'^(?P<abbr>[a-z]{2})/metadata$', 'metadata_json', name='metadata_json'),
     url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),
     url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
         name='admin_legislators'),
@@ -16,6 +17,7 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/random_bill/$', 'random_bill',
         name='random_bill'),
     url(r'^(?P<abbr>[a-z]{2})/bill_list/$', 'bill_list', name='bill_list'),
+
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
