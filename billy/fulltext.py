@@ -29,6 +29,7 @@ PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 
 def _clean_text(text):
+    text = text.encode('ascii', 'ignore')
     text = text.replace(u'\xa0', u' ') # nbsp -> sp
     text = PUNCTUATION.sub(' ', text)  # strip punctuation
     text = re.sub('\s+', ' ', text)    # collapse spaces
@@ -38,5 +39,5 @@ def _clean_text(text):
 def oyster_text(function):
     @wraps(function)
     def wrapper(oyster_doc, data):
-        oyster_doc['text_content'] = _clean_text(function(oyster_doc, data))
+        return _clean_text(function(oyster_doc, data))
     return wrapper

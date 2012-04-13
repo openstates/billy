@@ -28,5 +28,4 @@ class Oysterize(BaseCommand):
             filedata = open(args.filename).read()
 
         doc = {}
-        extract_text(doc, filedata)
-        print doc['text_content']
+        print extract_text(doc, filedata)
