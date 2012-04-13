@@ -54,11 +54,8 @@ def import_events(abbr, data_dir, import_actions=False):
             cttyid = get_committee_id(data['level'], data['state'],
                                       committee['participant'],
                                       committee['chamber'] )
-            print cttyid
             if cttyid:
-                print "FOOBAR"
                 committee['committee_id'] = cttyid
-                print data
         import_event(data)
 
     ensure_indexes()
