@@ -40,7 +40,7 @@ def get_committee_id(level, abbr, name, chamber):
     for committee in comms:
         c = committee['committee']
         if compare_committee(name, c):
-            return c['_id']
+            return committee['_id']
     return None
 
 def import_events(abbr, data_dir, import_actions=False):
@@ -54,8 +54,11 @@ def import_events(abbr, data_dir, import_actions=False):
             cttyid = get_committee_id(data['level'], data['state'],
                                       committee['participant'],
                                       committee['chamber'] )
+            print cttyid
             if cttyid:
+                print "FOOBAR"
                 committee['committee_id'] = cttyid
+                print data
         import_event(data)
 
     ensure_indexes()
