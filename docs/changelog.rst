@@ -4,10 +4,11 @@ scrapelib changelog
 1.1.0-dev
 -----
     * large refactor of billy.site.{browse,www} into billy.web.{admin,public}
-    * expose internal id on bills (and all objects)
-    * add API method for direct lookup of bills by id
+    * scrape: improved vote validation
+    * API: expose internal id on all objects, including bills
+    * API: new method for direct lookup of bills by id
+    * API: added created_at sort to bills
     * add support for text extraction from bills
-    * improved vote validation during scrape
 
 1.0.0
 -----
