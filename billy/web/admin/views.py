@@ -103,6 +103,25 @@ or check out the scrape run report page for this state.
 
     return render(request, 'billy/state_index.html', context)
 
+def metadata_json(request, abbr):
+    re_attr = re.compile(r'^    "(.{1,100})":', re.M)
+    obj = metadata(abbr)
+    obj_json = json.dumps(obj, indent=4, cls=JSONDateEncoder)
+    def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
+        val = m.group(1)
+        return tmpl % (val, val)
+
+    for k in obj:
+        obj_json = re_attr.sub(subfunc, obj_json)
+
+    tmpl = '<a href="{0}">{0}</a>'
+    obj_json = re.sub('"(http://.+?)"',
+                      lambda m: tmpl.format(*m.groups()), obj_json)
+    context = {'metadata': obj, 
+               'keys': sorted(obj),
+               'metadata_json': obj_json}
+    return render(request, 'billy/metadata_json.html', context)
+
 
 def run_detail_graph_data(request, abbr):
 
