@@ -149,12 +149,14 @@ def import_bill(data, votes, categorizer, oyster_documents=False):
     for version in data['versions']:
         # push versions to oyster
         if oyster_documents:
+            titles = [data['title']] + list(alt_titles)
             oysterize(version['url'], data['state'] + ':billtext',
                       id=version['doc_id'],
                       # metadata
-                      name=version['name'], state=data['state'],
-                      session=data['session'], chamber=data['chamber'],
-                      bill_id=data['bill_id'])
+                      state=data['state'], session=data['session'],
+                      chamber=data['chamber'], bill_id=data['bill_id'],
+                      title=' , '.join(titles),
+                     )
 
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
