@@ -14,7 +14,7 @@ class Oysterize(BaseCommand):
         state = args.state
         bills = db.bills.find({'state': state,
                                'versions.url': {'$exists': True}
-                              })
+                              }, timeout=False)
         print '%s bills with versions to oysterize' % bills.count()
         for bill in bills:
             for version in bill['versions']:
