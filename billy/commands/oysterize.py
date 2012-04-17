@@ -12,9 +12,9 @@ class Oysterize(BaseCommand):
         self.add_argument('state', help='state to oysterize')
 
     def handle(self, args):
-        known_ids = kernel.db.tracked.find({'metadata.state': 'nc'}
-                                          ).distinct('_id')
         state = args.state
+        known_ids = kernel.db.tracked.find({'metadata.state': state}
+                                          ).distinct('_id')
         bills = db.bills.find({'state': state,
                                'versions.url': {'$exists': True}
                               }, timeout=False)
