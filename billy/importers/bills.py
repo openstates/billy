@@ -65,6 +65,16 @@ def import_votes(data_dir):
     logger.info('imported %s vote files' % len(paths))
     return votes
 
+def oysterize_version(bill, version):
+    titles = [bill['title']] + bill.get('alternate_titles', [])
+    oysterize(version['url'], bill['state'] + ':billtext',
+              id=version['doc_id'],
+              # metadata
+              state=bill['state'], session=bill['session'],
+              chamber=bill['chamber'], bill_id=bill['bill_id'],
+              title=' , '.join(titles),
+             )
+
 
 def import_bill(data, votes, categorizer, oyster_documents=False):
     level = data['level']
@@ -148,15 +158,8 @@ def import_bill(data, votes, categorizer, oyster_documents=False):
 
     for version in data['versions']:
         # push versions to oyster
-        if oyster_documents:
-            titles = [data['title']] + list(alt_titles)
-            oysterize(version['url'], data['state'] + ':billtext',
-                      id=version['doc_id'],
-                      # metadata
-                      state=data['state'], session=data['session'],
-                      chamber=data['chamber'], bill_id=data['bill_id'],
-                      title=' , '.join(titles),
-                     )
+        if oyster_documents and 'url' in version:
+            oysterize_version(data, version)
 
         # Merge any version titles into the alternate_titles list
         if 'title' in version:

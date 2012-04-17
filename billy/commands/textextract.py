@@ -4,7 +4,7 @@ from billy.conf import settings
 from billy.commands import BaseCommand
 
 
-class Oysterize(BaseCommand):
+class TextExtract(BaseCommand):
     name = 'textextract'
     help = 'test text extraction on a document'
 
