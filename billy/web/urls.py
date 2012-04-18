@@ -4,7 +4,7 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('',
     (r'^api/', include('billy.web.api.urls')),
     (r'^admin/', include('billy.web.admin.urls')),
-    (r'^www/', include('billy.web.public.urls')),
+    (r'^public/', include('billy.web.public.urls')),
 )
 
 if settings.DEBUG:
