@@ -36,7 +36,6 @@ billy-util = billy.bin.util:main
         "name_tools>=0.1.2",
         "nose",
         "pymongo>=2.0.0",
-        "python-votesmart",
         "scrapelib>=0.5.4",
         "unicodecsv",
         "validictory>=0.7.1",
