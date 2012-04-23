@@ -1,5 +1,5 @@
-scrapelib changelog
-===================
+billy changelog
+===============
 
 1.1.0-dev
 -----
@@ -9,6 +9,7 @@ scrapelib changelog
     * API: new method for direct lookup of bills by id
     * API: added created_at sort to bills
     * add support for text extraction from bills
+    * require new scrapelib >= 0.7
 
 1.0.0
 -----

@@ -36,7 +36,7 @@ billy-util = billy.bin.util:main
         "name_tools>=0.1.2",
         "nose",
         "pymongo>=2.0.0",
-        "scrapelib>=0.5.4",
+        "scrapelib>=0.7.0",
         "unicodecsv",
         "validictory>=0.7.1",
     ]
