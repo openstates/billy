@@ -43,16 +43,12 @@ def _get_configured_scraper(scraper_type, options, metadata):
             raise e
 
     opts = {'output_dir': options.output_dir,
-            'no_cache': options.no_cache,
-            'requests_per_minute': options.rpm,
-            'timeout': options.timeout,
             'strict_validation': options.strict,
-            'retry_attempts': settings.SCRAPELIB_RETRY_ATTEMPTS,
-            'retry_wait_seconds': settings.SCRAPELIB_RETRY_WAIT_SECONDS,
-        }
+            'requests_per_minute': options.rpm,
+           }
     if options.fastmode:
         opts['requests_per_minute'] = 0
-        opts['use_cache_first'] = True
+        opts['cache_write_only'] = False
     scraper = ScraperClass(metadata, **opts)
     return scraper
 
@@ -214,14 +210,12 @@ def main(old_scrape_compat=False):
         scrape.add_argument('--oyster', action='store_true', dest='oyster',
                             default=False, help="push documents to oyster"
                             " document tracking daemon")
-        scrape.add_argument('-n', '--no_cache', action='store_true',
-                            dest='no_cache', help="don't use web page cache")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
         scrape.add_argument('-r', '--rpm', action='store', type=int,
                             dest='rpm', default=60)
         scrape.add_argument('--timeout', action='store', type=int,
-                            dest='timeout', default=10)
+                            dest='SCRAPELIB_TIMEOUT', default=10)
         scrape.add_argument('--retries', type=int,
                             dest='SCRAPELIB_RETRY_ATTEMPTS')
         scrape.add_argument('--retry_wait', type=int,

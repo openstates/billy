@@ -85,38 +85,22 @@ class Scraper(scrapelib.Scraper):
 
     latest_only = False
 
-    def __init__(self, metadata, no_cache=False, output_dir=None,
-                 strict_validation=None, **kwargs):
+    def __init__(self, metadata, output_dir=None, strict_validation=None,
+                 **kwargs):
         """
         Create a new Scraper instance.
 
         :param metadata: metadata for this scraper
-        :param no_cache: if True, will ignore any cached downloads
         :param output_dir: the data directory to use
         :param strict_validation: exit immediately if validation fails
         """
 
         # configure underlying scrapelib object
-        if no_cache:
-            kwargs['cache_dir'] = None
-        elif 'cache_dir' not in kwargs:
-            kwargs['cache_dir'] = settings.BILLY_CACHE_DIR
-
-        if 'error_dir' not in kwargs:
-            kwargs['error_dir'] = settings.BILLY_ERROR_DIR
-
-        if 'timeout' not in kwargs:
-            kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
-
-        if 'requests_per_minute' not in kwargs:
-            kwargs['requests_per_minute'] = None
-
-        if 'retry_attempts' not in kwargs:
-            kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
-
-        if 'retry_wait_seconds' not in kwargs:
-            kwargs['retry_wait_seconds'] = \
-                    settings.SCRAPELIB_RETRY_WAIT_SECONDS
+        kwargs['error_dir'] = settings.BILLY_ERROR_DIR
+        kwargs['cache_dir'] = settings.BILLY_CACHE_DIR
+        kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
+        kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
+        kwargs['retry_wait_seconds'] = settings.SCRAPELIB_RETRY_WAIT_SECONDS
 
         super(Scraper, self).__init__(**kwargs)
 
@@ -129,7 +113,7 @@ class Scraper(scrapelib.Scraper):
         self.output_dir = output_dir
 
         # make output dir, error dir, and cache dir
-        for d in (self.output_dir, kwargs['cache_dir'], kwargs['error_dir']):
+        for d in (self.output_dir, kwargs['error_dir']):
             try:
                 if d:
                     os.makedirs(d)
