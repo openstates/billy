@@ -9,6 +9,7 @@ from billy import db
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.scrape.events import Event
 from billy.importers.utils import compare_committee
+from billy.importers.utils import fix_bill_id
 
 import pymongo
 

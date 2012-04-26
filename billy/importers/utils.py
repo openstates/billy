@@ -27,6 +27,16 @@ def _get_property_dict(schema):
             pdict[k] = _get_property_dict(v['items'])
     return pdict
 
+
+# fixing bill ids
+_bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
+
+
+def fix_bill_id(bill_id):
+    bill_id = bill_id.replace('.', '')
+    return _bill_id_re.sub(r'\1 \2', bill_id).strip()
+
+
 # load standard fields from schema files
 standard_fields = {}
 for _type in ('bill', 'person', 'committee', 'metadata', 'vote', 'event'):

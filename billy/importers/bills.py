@@ -11,7 +11,7 @@ from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
-                                   next_big_id, oysterize)
+                                   next_big_id, oysterize, fix_bill_id)
 
 import pymongo
 
@@ -224,15 +224,6 @@ def import_bills(abbr, data_dir, oyster_documents=False):
     ensure_indexes()
 
     return counts
-
-# fixing bill ids
-_bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
-
-
-def fix_bill_id(bill_id):
-    bill_id = bill_id.replace('.', '')
-    return _bill_id_re.sub(r'\1 \2', bill_id).strip()
-
 
 def bill_keywords(bill):
     """
