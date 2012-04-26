@@ -2,6 +2,7 @@ from decimal import Decimal, Context, Inexact
 import urllib
 import pdb
 import datetime as dt
+from pprint import pformat
 
 from django import template
 
@@ -45,3 +46,4 @@ def date_display(d):
     )
 
 quote_plus=register.filter(urllib.quote_plus)
+pformat=register.filter(pformat)

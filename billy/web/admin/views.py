@@ -8,6 +8,7 @@ import pymongo
 import decimal
 import functools
 import unicodecsv
+import urlparse
 from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict, OrderedDict
@@ -15,6 +16,7 @@ from collections import defaultdict, OrderedDict
 from pymongo.objectid import ObjectId
 
 from django.http import Http404, HttpResponse
+from django.core import urlresolvers
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render
@@ -956,3 +958,111 @@ def mom_merge(request):
        'remove'          : toRemove,
        'merge_view_info' : mv_info })
 
+
+def newsblogs(request):
+    '''
+    Demo view for news/blog aggregation.
+    ''' 
+    
+    # Pagination insanity.
+    total_count = db.feed_entries.count()
+    limit = int(request.GET.get('limit', 3))
+    page = int(request.GET.get('page', 1))
+    if page < 1:
+        page = 1
+    skip = limit * (page - 1)
+
+    # Whether display is limited to entries tagged with legislator
+    # committee or bill object.
+    entities = request.GET.get('entities', True)
+
+    tab_range = range(1, int(float(total_count) / limit) + 1)
+    tab = skip / limit + 1
+    try:
+        tab_index = tab_range.index(tab)
+    except ValueError:
+        tab_index = 1
+
+    tab_range_len = len(tab_range)
+    pagination_truncated = False
+    if tab_range_len > 8:
+        i = tab_index - 4
+        if i < 0:
+            i = 1
+        j = tab_index
+        k = j + 5
+        previous = tab_range[i: j]
+        current = j
+        next_ = tab_range[j + 1: k]
+        pagination_truncated = True
+    elif tab_range_len == 8:
+        previous = tab_range[:4]
+        next_ = tab_range[4:]
+    else:
+        div, mod = divmod(tab_range_len, 2)
+        if mod == 2:
+            i = tab_range_len / 2
+        else:
+            i = (tab_range_len - 1)/ 2
+        previous = tab_range[:i]
+        next_ = tab_range[i:]
+
+    # Get the data.
+    state = request.GET.get('state')
+
+    if entities is True:
+        spec = {'entity_ids': {'$ne': None}}
+    else:
+        spec = {}
+    if state:
+        spec.update(state=state)
+
+    entries = db.feed_entries.find(spec, skip=skip, limit=limit,
+        sort=[('published_parsed', pymongo.DESCENDING)])
+    _entries = []
+    entity_types = {'L': 'legislators',
+                    'C': 'committees',
+                    'B': 'bills'}
+
+    print tab_range_len, tab, previous, next_, tab_index - 4
+
+    for entry in entries:
+        summary = entry['summary']
+        entity_strings = entry['entity_strings']
+        entity_ids = entry['entity_ids']
+        _entity_strings = []
+        _entity_ids = []
+        _entity_urls = []
+        
+        _done = []
+        if entity_strings:
+            for entity_string, _id in zip(entity_strings, entity_ids):
+                if entity_string in _done:
+                    continue
+                else:
+                    _done.append(entity_string)
+                    _entity_strings.append(entity_string)
+                    _entity_ids.append(_id)
+                entity_type = entity_types[_id[2]]
+                url = urlresolvers.reverse('object_json', args=[entity_type, _id])
+                _entity_urls.append(url)
+                summary = summary.replace(entity_string, 
+                                '<b><a href="%s">%s</a></b>' % (url, entity_string))
+            entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
+            entry['summary'] = summary
+            entry['entity_data'] = entity_data
+        entry['id'] = entry['_id']
+        entry['host'] = urlparse.urlparse(entry['link']).netloc
+        _entries.append(entry)
+
+    return render(request, 'billy/newsblogs.html', {
+        'entries': _entries,
+        'entry_count': entries.count(),
+        'states': db.feed_entries.distinct('state'),
+        'state': state,
+        'tab_range': tab_range,
+        'previous': previous,
+        'next_': next_,
+        'pagination_truncated': pagination_truncated,
+        'page': page,
+        })
