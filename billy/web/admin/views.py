@@ -810,6 +810,23 @@ def legislators(request, abbr):
     })
 
 
+def events(request, abbr):
+    meta = metadata(abbr)
+    level = metadata(abbr)['level']
+
+    events = db.events.find({
+        'level': level,
+        level: abbr.lower()
+    })
+
+    # sort and get rid of old events.
+
+    return render(request, 'billy/events.html', {
+        'events': events,
+        'metadata': meta
+    })
+
+
 def legislator(request, id):
     leg = db.legislators.find_one({'_all_ids': id})
     if not leg:
