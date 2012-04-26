@@ -1,0 +1,21 @@
+<div class="entry">
+<span class="pull-right">
+	<a href="{% url object_json 'feed_entries' entry.id %}">json</a></span>
+<h3>[{{entry.state}}]&nbsp;<a href="{{entry.link}}">{{entry.title}}</a></h3>
+<h5>
+	<small>
+		{% if entry.author %}by {{ entry.author }}
+		|
+		{% endif %}
+		{{entry.host}}
+		|
+		{{entry.published_parsed|date:"jS F Y H:i"}}
+	</small>
+</h5>
+<p>{{entry.summary|safe|truncatewords:100}}</p>
+<div>
+{% for entity, id, url in entry.entity_data %}
+  <span><a class="label" href="{{url}}">{{entity}}</a></span>
+{% endfor %}
+</div>
+</div>
