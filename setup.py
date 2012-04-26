@@ -26,7 +26,7 @@ billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
     install_requires=[
-        "Django==1.3.1",
+        "Django==1.4",
         "argparse==1.1",
         "boto",
         "django-piston",
@@ -36,7 +36,6 @@ billy-util = billy.bin.util:main
         "name_tools>=0.1.2",
         "nose",
         "pymongo>=2.0.0",
-        "python-votesmart",
         "scrapelib>=0.7.0",
         "unicodecsv",
         "validictory>=0.7.1",

@@ -9,6 +9,7 @@ from billy import db
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.scrape.events import Event
 from billy.importers.utils import compare_committee
+from billy.importers.utils import fix_bill_id
 
 import pymongo
 
@@ -56,8 +57,20 @@ def import_events(abbr, data_dir, import_actions=False):
                                       committee['chamber'] )
             if cttyid:
                 committee['committee_id'] = cttyid
-        import_event(data)
 
+        for bill in data['related_bills']:
+            bill['_scraped_bill_id'] = bill['bill_id']
+            bill_id = bill['bill_id']
+            bill_id = fix_bill_id(bill_id)
+            bill['bill_id'] = ""
+            db_bill = db.bills.find_one({"state": abbr,
+                                         'session': data['session'],
+                                         'bill_id': bill_id})
+            # Events are really hard to pin to a chamber. Some of these are
+            # also a committee considering a bill from the other chamber, or
+            # something like that.
+            bill['bill_id'] = db_bill['_id']
+        import_event(data)
     ensure_indexes()
 
 

@@ -1,0 +1,57 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block title %}
+    Feeds
+{% endblock %}
+
+{% block style %}
+<style type='text/css'>
+.entry {border-bottom: 1px solid #EEE;
+        padding-top: 17px;}
+</style>
+{% endblock %}
+
+{% block content-nocontainer %}
+<div class="container-fluid">
+<div class="sidebar" style="left: 10px; position: fixed; top: 50px; width: 100px;">
+<ul style="list-style-type: none; margin-left: 0px;">
+{% for abbr in states %}
+    <li><a href="{% url newsblogs %}?state={{abbr}}">{{abbr}}</a></li>
+{% endfor %}
+</ul>
+</div>
+<div class="content" style="margin-left: 130px;">
+
+	{% if state %}
+		<h3>{{entry_count}} news and blog items for {{state}}</h3>
+	{% endif %}
+	<div class="pagination">
+
+        {# commence pagination insanity #}
+        <ul>
+          {% for tabnumber in previous %}
+            {% if forloop.first %}
+              <li><a href="?page={{ tabnumber|add:-1 }}">«</a></li>
+            {% else %}
+              <li><a href="?page={{ tabnumber }}">{{ tabnumber }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+      <li class="active"><a href="?page={{ page }}">{{ page }}</a></li>
+
+          {% for tabnumber in next_ %}
+            {% if not forloop.last %}
+              <li><a {% if forloop.counter == tab %}class="active"{% endif %} href="?page={{ tabnumber }}">{{ tabnumber }}</a></li>
+            {% else %}
+              <li><a href="?page={{ tabnumber|add:1 }}">»</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+	{% for entry in entries %}
+		{% include "billy/entry.html" %}
+	{% endfor %}
+</div>
+{% endblock %}
