@@ -13,7 +13,7 @@ from billy import db
 oyster_import_exception = None
 try:
     from oyster.core import kernel
-except Exception as e:
+except ImportError as e:
     kernel = None
     oyster_import_exception = e
 
