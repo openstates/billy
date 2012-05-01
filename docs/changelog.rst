@@ -1,6 +1,11 @@
 billy changelog
 ===============
 
+1.2-dev
+--------
+**in development**
+    * full text utility for pulling data from .doc files
+
 1.1.0
 -----
 **23 April 2012**
