@@ -97,7 +97,7 @@ class Scraper(scrapelib.Scraper):
 
         # configure underlying scrapelib object
         kwargs['error_dir'] = settings.BILLY_ERROR_DIR
-        kwargs['cache_dir'] = settings.BILLY_CACHE_DIR
+        kwargs['cache_obj'] = scrapelib.FileCache(settings.BILLY_CACHE_DIR)
         kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
         kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
         kwargs['retry_wait_seconds'] = settings.SCRAPELIB_RETRY_WAIT_SECONDS
