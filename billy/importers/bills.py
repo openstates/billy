@@ -71,9 +71,11 @@ def oysterize_version(bill, version):
               id=version['doc_id'],
               # metadata
               mimetype=version.get('mimetype', None),
+              titles=titles,
               state=bill['state'], session=bill['session'],
               chamber=bill['chamber'], bill_id=bill['bill_id'],
-              titles=titles,
+              subjects=bill.get('subjects', []),
+              sponsors=[s['leg_id'] for s in bill['sponsors']],
              )
 
 
