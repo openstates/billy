@@ -70,9 +70,10 @@ def oysterize_version(bill, version):
     oysterize(version['url'], bill['state'] + ':billtext',
               id=version['doc_id'],
               # metadata
+              mimetype=version.get('mimetype', None),
               state=bill['state'], session=bill['session'],
               chamber=bill['chamber'], bill_id=bill['bill_id'],
-              title=' , '.join(titles),
+              titles=titles,
              )
 
 
