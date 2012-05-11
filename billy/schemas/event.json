@@ -84,9 +84,6 @@
         "related_bills": {
             "items": {
                 "properties": {
-                    "_scraped_bill_id": {
-                        "type": "string"
-                    }, 
                     "bill_id": {
                         "type": "string"
                     }, 

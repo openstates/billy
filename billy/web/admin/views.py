@@ -13,7 +13,7 @@ from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict, OrderedDict
 
-from pymongo.objectid import ObjectId
+from bson.objectid import ObjectId
 
 from django.http import Http404, HttpResponse
 from django.core import urlresolvers

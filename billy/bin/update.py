@@ -42,15 +42,10 @@ def _get_configured_scraper(scraper_type, options, metadata):
         else:
             raise e
 
-    opts = {'output_dir': options.output_dir,
-            'strict_validation': options.strict,
-            'requests_per_minute': options.rpm,
-           }
-    if options.fastmode:
-        opts['requests_per_minute'] = 0
-        opts['cache_write_only'] = False
-    scraper = ScraperClass(metadata, **opts)
-    return scraper
+    return ScraperClass(metadata,
+                        output_dir=options.output_dir,
+                        strict_validation=options.strict,
+                        fastmode=options.fastmode)
 
 
 def _run_scraper(scraper_type, options, metadata):
@@ -137,7 +132,8 @@ def _do_imports(abbrev, args):
             dist['num_seats'] = int(dist['num_seats'])
             db.districts.save(dist, safe=True)
     else:
-        print "%s not found, continuing without districts" % dist_filename
+        logging.getLogger('billy').warning("%s not found, continuing without "
+                                           "districts" % dist_filename)
 
     report = {}
 
@@ -146,8 +142,7 @@ def _do_imports(abbrev, args):
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if 'bills' in args.types:
-        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR,
-                                       args.oyster)
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
 
     if 'committees' in args.types:
         report['committees'] = \
@@ -207,15 +202,12 @@ def main(old_scrape_compat=False):
         scrape.add_argument('--nonstrict', action='store_false', dest='strict',
                             default=True, help="don't fail immediately when"
                             " encountering validation warning")
-        scrape.add_argument('--oyster', action='store_true', dest='oyster',
-                            default=False, help="push documents to oyster"
-                            " document tracking daemon")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
         scrape.add_argument('-r', '--rpm', action='store', type=int,
-                            dest='rpm', default=60)
+                            dest='SCRAPELIB_RPM')
         scrape.add_argument('--timeout', action='store', type=int,
-                            dest='SCRAPELIB_TIMEOUT', default=10)
+                            dest='SCRAPELIB_TIMEOUT')
         scrape.add_argument('--retries', type=int,
                             dest='SCRAPELIB_RETRY_ATTEMPTS')
         scrape.add_argument('--retry_wait', type=int,
@@ -228,8 +220,6 @@ def main(old_scrape_compat=False):
 
         args = parser.parse_args()
 
-        settings.update(args)
-
         # inject scraper paths so scraper module can be found
         for newpath in settings.SCRAPER_PATHS:
             sys.path.insert(0, newpath)
@@ -237,12 +227,17 @@ def main(old_scrape_compat=False):
         # get metadata
         module = __import__(args.module)
         metadata = module.metadata
+        module_settings = getattr(module, 'settings', {})
         abbrev = metadata['abbreviation']
+
+        # load state settings, then command line settings
+        settings.update(module_settings)
+        settings.update(args)
 
         configure_logging(args.module)
 
         # configure oyster
-        if args.oyster:
+        if settings.ENABLE_OYSTER:
             from oyster.conf import settings as oyster_settings
             oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = module.document_class
 
@@ -383,7 +378,6 @@ def main(old_scrape_compat=False):
 
         # imports
         if 'import' in args.actions:
-            print 'doing import'
             import_report = _do_imports(abbrev, args)
             scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import

@@ -63,9 +63,26 @@ def import_events(abbr, data_dir, import_actions=False):
             bill_id = bill['bill_id']
             bill_id = fix_bill_id(bill_id)
             bill['bill_id'] = ""
-            db_bill = db.bills.find_one({"state": abbr,
-                                         'session': data['session'],
-                                         'bill_id': bill_id})
+            db_bill = db.bills.find_one({
+                "$or": [
+                    {
+                        "state": abbr,
+                        'session': data['session'],
+                        'bill_id': bill_id
+                    },
+                    {
+                        "state": abbr,
+                        'session': data['session'],
+                        'alternate_bill_ids': bill_id
+                    }
+                ]
+            })
+
+            if not db_bill:
+                logger.warning("Error: Can't find %s" % bill_id)
+                db_bill = {}
+                db_bill['_id'] = None
+
             # Events are really hard to pin to a chamber. Some of these are
             # also a committee considering a bill from the other chamber, or
             # something like that.

@@ -10,7 +10,6 @@ SCRAPER_PATHS = []
 
 BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
 BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
-BILLY_ERROR_DIR = os.path.join(os.getcwd(), 'errors')
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
 BILLY_SUBJECTS = [
@@ -60,11 +59,14 @@ BILLY_SUBJECTS = [
     'Transportation',
     'Welfare and Poverty']
 
+ENABLE_OYSTER = False
+
 BILLY_LEVEL_FIELDS = {
     'country': ('country',),
     'state': ('state', 'country'),
 }
 
-SCRAPELIB_TIMEOUT = 600
+SCRAPELIB_RPM = 60
+SCRAPELIB_TIMEOUT = 60
 SCRAPELIB_RETRY_ATTEMPTS = 3
 SCRAPELIB_RETRY_WAIT_SECONDS = 20

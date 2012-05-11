@@ -1,6 +1,13 @@
 billy changelog
 ===============
 
+1.2-dev
+--------
+**in development**
+    * continued improvements to event support
+    * full text utility for pulling data from .doc files
+    * support for module-specific settings overrides
+
 1.1.0
 -----
 **23 April 2012**

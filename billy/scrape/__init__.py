@@ -86,7 +86,7 @@ class Scraper(scrapelib.Scraper):
     latest_only = False
 
     def __init__(self, metadata, output_dir=None, strict_validation=None,
-                 **kwargs):
+                 fastmode=False, **kwargs):
         """
         Create a new Scraper instance.
 
@@ -96,11 +96,15 @@ class Scraper(scrapelib.Scraper):
         """
 
         # configure underlying scrapelib object
-        kwargs['error_dir'] = settings.BILLY_ERROR_DIR
-        kwargs['cache_dir'] = settings.BILLY_CACHE_DIR
+        kwargs['cache_obj'] = scrapelib.FileCache(settings.BILLY_CACHE_DIR)
+        kwargs['requests_per_minute'] = settings.SCRAPELIB_RPM
         kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
         kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
         kwargs['retry_wait_seconds'] = settings.SCRAPELIB_RETRY_WAIT_SECONDS
+
+        if fastmode:
+            kwargs['requests_per_minute'] = 0
+            kwargs['cache_write_only'] = False
 
         super(Scraper, self).__init__(**kwargs)
 
@@ -112,14 +116,8 @@ class Scraper(scrapelib.Scraper):
         self.metadata = metadata
         self.output_dir = output_dir
 
-        # make output dir, error dir, and cache dir
-        for d in (self.output_dir, kwargs['error_dir']):
-            try:
-                if d:
-                    os.makedirs(d)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
+        # make output_dir
+        os.path.isdir(self.output_dir) or os.path.makedirs(self.output_dir)
 
         # validation
         self.strict_validation = strict_validation
