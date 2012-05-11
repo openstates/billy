@@ -283,7 +283,9 @@ def main(old_scrape_compat=False):
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
-                          'events', 'alldata']
+                          'alldata']
+            if 'events' in metadata['feature_flags']:
+                args.types.append('events')
 
         plan = """billy-update abbr=%s
     actions=%s
@@ -332,12 +334,9 @@ def main(old_scrape_compat=False):
             exec_start = dt.datetime.utcnow()
 
             # scraper order matters
-            scraper_types = ['legislators', 'committees', 'votes', 'bills']
-            # only scrape events if they're enabled in feature flags
-            if 'events' in metadata['feature_flags']:
-                scraper_types.append('events')
+            order = ('legislators', 'committees', 'votes', 'bills', 'events')
             try:
-                for stype in scraper_types:
+                for stype in order:
                     if stype in args.types:
                         run_record += _run_scraper(stype, args, metadata)
             except Exception as e:
