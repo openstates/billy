@@ -1,8 +1,16 @@
 import pdb
 import sys
+import itertools
+import operator
+import math
+import itertools
+import urlparse
 
+import pymongo
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
+
+from django.core import urlresolvers
 
 from billy.conf import settings
 from billy.utils import metadata as get_metadata
@@ -10,6 +18,11 @@ from billy.utils import metadata as get_metadata
 
 db = Connection(host=settings.MONGO_HOST, port=settings.MONGO_PORT)
 db = getattr(db, settings.MONGO_DATABASE)
+
+
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(itertools.islice(iterable, n))
 
 
 def get_model(classname, this_module=sys.modules[__name__]):
@@ -64,7 +77,15 @@ class Document(dict):
         '''
         For collections like reports and bills that have a 'state' key.
         '''
-        return get_metadata(self['_id'])
+        try:
+            return Metadata.get_object(self['state'])
+        except KeyError:
+            return Metadata.get_object(self['_id'])
+
+    @property
+    def state(self):
+        'Sometimes calling metadata "state" is clearer.'
+        return self.metadata
 
 
 class RelatedDocument(ReadOnlyAttribute):
@@ -118,10 +139,28 @@ class RelatedDocuments(ReadOnlyAttribute):
     the key `model_key`. For example, this could be used to get all
     "legislator" documents for a given state's metadata.
     '''
-    def __init__(self, model, model_key, instance_key='_id'):
+    def __init__(self, model, model_keys, instance_key='_id',
+                 sort=None, model_keys_operator='$or',
+                 default_spec_instance_keys=None):
+        '''
+        :param mode: model class of the related document
+        :param model_keys: keys to use in generating mongo query spec from 
+            model data
+        :param instance_key: instance key that model[model_key] is mapped to
+            in the default mongo query spec
+        :param sort: default mongo query sort spec, like [("field", direction)]
+        :param model_keys_operator: if multiple model_keys are given, the
+            boolean mongo query to relate them, like $and, $or, etc.
+        :param default_spec_instance_keys: extra instance keys used to populate
+            the default mongo query spec with, like 'state' and 'session'. 
+            Useful in constraining potentially brutal queries.
+        '''
         self.model = model
         self.instance_key = instance_key
-        self.model_key = model_key
+        self.model_keys = model_keys
+        self.sort = sort
+        self.model_keys_operator = model_keys_operator
+
 
     def __get__(self, instance, type_=None, *args, **kwargs):
 
@@ -133,14 +172,138 @@ class RelatedDocuments(ReadOnlyAttribute):
 
         return self
 
+
     def __call__(self, extra_spec={}, *args, **kwargs):
-        spec = {self.model_key: self.instance_val}
+
+        # Create the default spec.
+        spec = dict(zip(self.model_keys, 
+                        itertools.repeat(self.instance_val)))
+
+        # If multiple model keys were defined, apply boolean mongo query syntax.
+        if 1 < len(spec):
+            spec = [{k: v} for (k, v) in spec.items()]
+            spec = {self.model_keys_operator: spec}
+
+        # Add any extra spec.
         spec.update(extra_spec)
+
+        # Add any default sorting behaviour.
+        if 'sort' not in kwargs:
+            _sort = self.sort
+            if _sort is not None:
+                kwargs.update(sort=_sort)
+
+        print 'running %r, %r, %r' % (spec, args, kwargs)
         return self.model.collection.find(spec, *args, **kwargs)
+
+
+class Subdocument(dict):
+
+    @classmethod
+    def fromdict(cls, dict_, parent_doc, parent_name):
+        '''
+        :param dict: the dictionary subdocument, like the `votes` dict
+            on a bill object.
+        :param parent_doc: the document/dict in which the subdoc is a value, like
+            the bill document in the case of a votes list.
+        "param parent_name:
+        '''
+        subdoc = cls(dict_)
+        subdoc.parent = parent_doc
+        setattr(subdoc, parent_name, parent_doc)
+        return subdoc
+
+
+class AttrManager(object):
+    '''A class providing ways to associate methods with a particular attribute
+    of an object.
+
+    class SomeDoc(Document):
+        sponsors = SponsorsManager()
+
+    class SponsorsManager(AttrManager):
+        def prime(self):
+            for sponsor in self.data:
+                if sponsor['type'] == 'primary:
+                    return sponsor
+    '''
+
+    @property
+    def _keyname(self):
+        keyname = self.__class__.__name__
+        return keyname.lower().replace('manager', '')
+
+
+    def __iter__(self):
+        try:
+            wrapper = self.wrapper
+        except AttributeError:
+            msg = 'AttrManager %r must define a wrapper class.'
+            raise ModelDefinitionError(msg)
+
+        for obj in self.inst[self._keyname]:
+            yield wrapper(obj)
+
+
+    def __get__(self, instance, type_=None, *args, **kwargs):
+        self.inst = instance
+        return self
 
 
 # ---------------------------------------------------------------------------
 # Model definitions.
+
+
+class FeedEntry(Document):
+    collection = db.feed_entries
+
+    def __init__(self, *args, **kw):
+        super(FeedEntry, self).__init__(*args, **kw)
+        self._process()
+        
+
+    def _process(self):
+        '''Mutate the feed entry with hyperlinked entities. Add tagging
+        data and other template context values, including source.
+        '''
+        entity_types = {'L': 'legislator',
+                        'C': 'committee',
+                        'B': 'bill'}
+        entry = self
+
+        summary = entry['summary']
+        entity_strings = entry['entity_strings']
+        entity_ids = entry['entity_ids']
+        state = entry['state']
+
+        _entity_strings = []
+        _entity_ids = []
+        _entity_urls = []
+        _done = []
+        if entity_strings:
+            for entity_string, _id in zip(entity_strings, entity_ids):
+                if entity_string in _done:
+                    continue
+                else:
+                    _done.append(entity_string)
+                    _entity_strings.append(entity_string)
+                    _entity_ids.append(_id)
+                entity_type = entity_types[_id[2]]
+                url = urlresolvers.reverse(entity_type, args=[state, _id])
+                _entity_urls.append(url)
+                summary = summary.replace(entity_string, 
+                                '<b><a href="%s">%s</a></b>' % (url, entity_string))
+            entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
+            entry['summary'] = summary
+            entry['entity_data'] = entity_data
+
+        entry['id'] = entry['_id']
+        urldata = urlparse.urlparse(entry['link'])
+        entry['source'] = urldata.scheme + urldata.netloc
+        entry['host'] = urldata.netloc
+
+
+
 
 
 class CommitteeMember(dict):
@@ -150,6 +313,8 @@ class CommitteeMember(dict):
 class Committee(Document):
 
     collection = db.committees
+    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
+
 
     def members_objects(self):
         '''
@@ -167,13 +332,215 @@ class Committee(Document):
                 raise
 
 
+class Role(dict):
+
+    def is_committee(self):
+        return ('committee' in self)
+
+    def committee_name(self):
+        name = self['committee']
+        if 'subcommittee' in self:
+            sub = self['subcommittee']
+            if sub:
+                name = '%s - %s' % (name, sub)
+        return name
+
+
+class RolesManager(AttrManager):
+    wrapper = Role
+
+
 class Legislator(Document):
 
     collection = db.legislators
     foreign_key_string = 'leg_id'
 
-    committees = RelatedDocuments('Committee', model_key='members.leg_id')
-    sponsored_bills = RelatedDocuments('Bill', model_key='sponsors.leg_id')
+    committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
+    sponsored_bills = RelatedDocuments('Bill', model_keys=['sponsors.leg_id'])
+    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
+
+    roles_manager = RolesManager()
+
+
+    def votes(self):
+        _id = self['_id']
+        for bill in self.state.bills():
+            for vote in bill.votes_manager:
+                for k in ['yes_votes', 'no_votes', 'other_votes']:
+                    for voter in vote[k]:
+                        if voter['leg_id'] == _id:
+                            yield vote
+
+
+    def votes_3_sorted(self):
+        res = []
+        _id = self['_id']
+        votes = self.votes()
+        votes = take(3, sorted(votes, key=operator.itemgetter('date')))
+        for i, vote in enumerate(votes):
+            for vote_value in ['yes', 'no', 'other']:
+                id_getter = operator.itemgetter('leg_id')
+                ids = map(id_getter, vote['%s_votes' % vote_value])
+                if _id in ids:
+                    break
+            yield i, vote_value, vote
+
+    
+class Sponsor(dict):
+    legislator = RelatedDocument('Legislator')
+
+
+class SponsorsManager(AttrManager):
+
+    def __iter__(self):
+        '''Another unoptimized method that ultimately hits
+        mongo once for each sponsor.'''
+        for spons in self.inst['sponsors']:
+            yield Sponsor(spons)
+
+    def primary_list(self):
+        'Return the first primary sponsor on the bill.'
+        for sponsor in self.inst['sponsors']:
+            if sponsor['type'] == 'primary':
+                yield Sponsor(sponsor)
+
+    def first_primary(self):
+        try:
+            return next(self.primary_list())
+        except StopIteration:
+            return
+
+    def first_five(self):
+        'views.bill'
+        return take(5, self)
+        
+    def first_five_remainder(self):
+        'views.bill'
+        if 5 < len(first_five):
+            return len(self.inst['sponsors'])
+        else:
+            return 0        
+
+class Action(Subdocument):
+
+    def chamber_name(self):
+        chamber = self.bill['chamber']
+        meta = self.bill.state
+        return meta['%s_chamber_name' % chamber]
+
+
+class ActionsManager(AttrManager):
+
+    def __iter__(self):
+        bill = self.inst
+        for action in reversed(bill['actions']):
+            yield Action.fromdict(action, bill, 'bill')
+
+
+    def _bytype(self, action_type, action_spec=None):
+        '''Return the most recent date on which action_type occurred.
+        Action spec is a dictionary of key-value attrs to match.'''
+        for action in reversed(self.inst['actions']):
+            if action_type in action['type']:
+                acion_spec = action_spec or {}
+                for k, v in action_spec.items():
+                    if action[k] == v:
+                        yield action
+
+    def _bytype_latest(self, action_type, action_spec=None):
+        actions = self._bytype(action_type, action_spec)
+        try:
+            return next(actions)
+        except StopIteration:
+            return
+
+    def latest_passed_upper(self):
+        return self._bytype_latest('bill:passed', {'actor': 'upper'})
+
+    def latest_passed_lower(self):
+        return self._bytype_latest('bill:passed', {'actor': 'lower'})
+
+    def latest_introduced_upper(self):
+        return self._bytype_latest('bill:introduced', {'actor': 'upper'})
+
+    def latest_introduced_lower(self):
+        return self._bytype_latest('bill:introduced', {'actor': 'lower'})
+
+
+class Vote(Subdocument):
+    
+
+    def _total_votes(self):
+        return self['yes_count'] + self['no_count'] + self['other_count']
+
+    def _ratio(self, key):
+        '''Return the yes/total ratio as a percetage string
+        suitable for use as as css attribute.'''
+        total = float(self._total_votes())
+        return math.floor(self[key]/total * 100)
+
+    def yes_ratio(self):
+        return self._ratio('yes_count')
+
+    def no_ratio(self):
+        return self._ratio('no_count')
+
+    def other_ratio(self):
+        return self._ratio('other_count')
+
+    def _vote_legislators(self, yes_no_other):
+        '''This function will hit the database indivually
+        to get each legislator object. Good if the number of
+        voters is small (i.e., committee vote), but possibly
+        bad if it's high (full roll call vote).'''
+        id_getter = operator.itemgetter('leg_id')
+        for _id in map(id_getter, self['%s_votes' % yes_no_other]):
+            yield db.legislators.find_one({'_id': _id})
+
+    def yes_vote_legislators(self):
+        return self._vote_legislators('yes')
+
+    def no_vote_legislators(self):
+        return self._vote_legislators('no')
+
+    def other_vote_legislators(self):
+        return self._vote_legislators('other')
+
+
+class VotesManager(AttrManager):
+
+    def __iter__(self):
+        inst = self.inst
+        for vote in inst['votes']:
+            yield Vote.fromdict(
+                vote, parent_doc=inst, parent_name='bill')
+
+
+class Bill(Document):
+
+    collection = db.bills
+
+    sponsors_manager = SponsorsManager()
+    actions_manager = ActionsManager()
+    votes_manager = VotesManager()
+
+    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
+
+
+    def session_details(self):
+        metadata = self.metadata
+        return metadata['session_details'][self['session']]
+
+    def most_recent_action(self):
+        return self['actions'][-1]
+
+    def chamber_name(self):
+        '''"lower" --> "House of Representatives"'''
+        return self.metadata['%s_chamber_name' % self['chamber']]
+
+    @property
+    def state(self):
+        return self.metadata
 
 
 class Metadata(Document):
@@ -187,11 +554,18 @@ class Metadata(Document):
     '''
     collection = db.metadata
 
-    legislators = RelatedDocuments(Legislator, model_key='state',
+    legislators = RelatedDocuments(Legislator, model_keys=['state'],
                                    instance_key='abbreviation')
 
-    committees = RelatedDocuments(Committee, model_key='state',
+    committees = RelatedDocuments(Committee, model_keys=['state'],
                                   instance_key='abbreviation')
+
+    bills = RelatedDocuments(Bill, model_keys=['state'],
+                             instance_key='abbreviation')
+
+    feed_entries = RelatedDocuments(FeedEntry, model_keys=['state'],
+                                    instance_key='abbreviation')
+
 
     @classmethod
     def get_object(cls, abbr):
@@ -207,21 +581,13 @@ class Metadata(Document):
         '''Return the state's two letter abbreviation.'''
         return self['_id']
 
+    @property
+    def most_recent_session(self):
+        'Get the most recent session for this state.'
+        session = self['terms'][-1]['sessions'][-1]
+        return session
 
-class Bill(Document):
 
-    collection = db.bills
-
-    def session_details(self):
-        metadata = self.metadata
-        return metadata['session_details'][self['session']]
-
-    def most_recent_action(self):
-        return self['actions'][-1]
-
-    def chamber_name(self):
-        '''"lower" --> "House of Representatives"'''
-        return self.metadata['%s_chamber_name' % self['chamber']]
 
 
 class Report(Document):
@@ -243,6 +609,7 @@ class Report(Document):
 _collection_model_dict = {}
 
 models_list = [
+    FeedEntry,
     Metadata,
     Report,
     Bill,
