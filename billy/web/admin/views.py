@@ -84,6 +84,7 @@ def overview(request, abbr):
     context = {}
     context['metadata'] = meta
     context['report'] = report
+    context['sessions'] = db.bills.find({'state': abbr}).distinct('session')
 
     try:
         runlog = db.billy_runs.find({
@@ -105,6 +106,7 @@ or check out the scrape run report page for this state.
 
     return render(request, 'billy/state_index.html', context)
 
+
 def metadata_json(request, abbr):
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
     obj = metadata(abbr)
@@ -119,7 +121,7 @@ def metadata_json(request, abbr):
     tmpl = '<a href="{0}">{0}</a>'
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
-    context = {'metadata': obj, 
+    context = {'metadata': obj,
                'keys': sorted(obj),
                'metadata_json': obj_json}
     return render(request, 'billy/metadata_json.html', context)
@@ -337,19 +339,17 @@ def bills(request, abbr):
     def decimal_format(value, TWOPLACES=decimal.Decimal(100) ** -1):
         '''Format a float like 2.2345123 as a decimal like 2.23'''
         n = decimal.Decimal(str(value))
-        n = n.quantize(TWOPLACES)#, context=Context(traps=[Inexact]))
+        n = n.quantize(TWOPLACES)
         return unicode(n)
 
-    # ------------------------------------------------------------------------
-    # Define data for the tables for counts, types, etc. 
+    # Define data for the tables for counts, types, etc.
     tablespecs = [
-        ('Bill Counts', {'rownames': [
-                                 'upper_count','lower_count',
-                                 'version_count']}),
+        ('Bill Counts', {'rownames': ['upper_count', 'lower_count',
+                                      'version_count']}),
 
         ('Bill Types', {
-            'keypath': ['bill_types'],       
-            'summary': {
+            'keypath': ['bill_types'],
+                'summary': {
                 'object_type': 'bills',
                 'key': 'type',
                 },
@@ -374,9 +374,9 @@ def bills(request, abbr):
                                  'sourceless_count', 'sponsorless_count',
                                  'actionless_count', 'actions_unsorted',
                                  'bad_vote_counts', 'version_count',
-                                 'versionless_count', 
+                                 'versionless_count',
 
-                                 'sponsors_with_leg_id', 
+                                 'sponsors_with_leg_id',
                                  'rollcalls_with_leg_id',
                                  'have_subjects',
                                  'updated_this_year',
@@ -386,7 +386,7 @@ def bills(request, abbr):
         ]
 
     format_as_percent = [
-        'sponsors_with_leg_id', 
+        'sponsors_with_leg_id',
         'rollcalls_with_leg_id',
         'have_subjects',
         'updated_this_year',
@@ -419,15 +419,15 @@ def bills(request, abbr):
         except KeyError:
             rownames = reduce(lambda x, y: set(x) | set(y), contexts)
 
-        for context in contexts:        
+        for context in contexts:
             for r in rownames:
 
                 val = context.get(r, 0)
                 if not isinstance(val, (int, float, decimal.Decimal)):
-                    val = len(val)    
+                    val = len(val)
 
                 use_percent = any([
-                    r in format_as_percent, 
+                    r in format_as_percent,
                     name in ['Actions by Actor', 'Actions by Type'],
                     ])
 
@@ -436,7 +436,7 @@ def bills(request, abbr):
                     val += ' %'
                 rows[r].append(val)
 
-                # Link to summary/distint views. 
+                # Link to summary/distint views.
                 if 'summary' in spec:
                     try:
                         spec_key = '.'.join(spec['keypath'])
@@ -450,7 +450,7 @@ def bills(request, abbr):
                     else:
                         spec_val = json.dumps(spec_val)
 
-                    params = dict(spec['summary'], session=session, 
+                    params = dict(spec['summary'], session=session,
                                   val=spec_val)
 
                     params = urllib.urlencode(params)
@@ -480,10 +480,9 @@ def bills(request, abbr):
                        tablespecs=tablespecs))
 
 
-def summary_index(request, abbr):
+def summary_index(request, abbr, session):
 
     meta = metadata(abbr)
-    session = request.GET['session']
 
     object_types = 'votes actions versions sponsors documents sources'.split()
 
@@ -505,6 +504,7 @@ def summary_index(request, abbr):
 
         return res
     summary = build_state(abbr)
+
     return render(request, 'billy/summary_index.html', locals())
 
 
@@ -983,7 +983,7 @@ def newsblogs(request):
     
     # Pagination insanity.
     total_count = db.feed_entries.count()
-    limit = int(request.GET.get('limit', 3))
+    limit = int(request.GET.get('limit', 6))
     page = int(request.GET.get('page', 1))
     if page < 1:
         page = 1
@@ -1070,7 +1070,27 @@ def newsblogs(request):
             entry['entity_data'] = entity_data
         entry['id'] = entry['_id']
         entry['host'] = urlparse.urlparse(entry['link']).netloc
+
+        # Now hyperlink the inbox data.
+        # if '_inbox_data' in entry:
+        #     inbox_data = entry['_inbox_data']
+        #     for entity in inbox_data['entities']:
+        #         entity_data = entity['entity_data']
+        #         if entity_data['type'] == 'organization':
+        #             ie_url = 'http://influenceexplorer.com/organization/%s/%s'
+        #             ie_url = ie_url % (entity_data['slug'], entity_data['id'])
+        #             print 'found one!'
+        #         else:
+        #             continue
+        #         summary = entry['summary']
+        #         tmpl = '<a href="%s">%s</a>'
+        #         for string in entity['matched_text']:
+        #             summary = summary.replace(string, tmpl % (ie_url, string))
+        #     entry['summary'] = summary
+        
         _entries.append(entry)
+
+
 
     return render(request, 'billy/newsblogs.html', {
         'entries': _entries,
