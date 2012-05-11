@@ -4,6 +4,7 @@ import sys
 import json
 import glob
 import logging
+import inspect
 import argparse
 import traceback
 import unicodecsv
@@ -18,7 +19,7 @@ from billy.utils import configure_logging, term_for_session
 from billy.scrape.validator import DatetimeValidator
 
 
-def _clear_scraped_data(output_dir, scraper_type):
+def _clear_scraped_data(output_dir, scraper_type=''):
     # make or clear directory for this type
     path = os.path.join(output_dir, scraper_type)
     try:
@@ -47,6 +48,9 @@ def _get_configured_scraper(scraper_type, options, metadata):
                         strict_validation=options.strict,
                         fastmode=options.fastmode)
 
+def _is_old_scrape(f):
+    argspec = inspect.getargspec(f)
+    return 'chamber' in argspec.args
 
 def _run_scraper(scraper_type, options, metadata):
     """
@@ -82,8 +86,12 @@ def _run_scraper(scraper_type, options, metadata):
 
     # run scraper against year/session/term
     for time in times:
-        for chamber in options.chambers:
-            scraper.scrape(chamber, time)
+        # old style
+        if _is_old_scrape(scraper.scrape):
+            for chamber in options.chambers:
+                scraper.scrape(chamber, time)
+        else:
+            scraper.scrape(time, chambers=options.chambers)
 
         if scraper_type == 'events' and len(options.chambers) == 2:
             scraper.scrape('other', time)
@@ -193,17 +201,26 @@ def main(old_scrape_compat=False):
                           help='session(s) to scrape')
         what.add_argument('-t', '--term', action='append', dest='terms',
                             help='term(s) to scrape', default=[])
+
         for arg in ('upper', 'lower'):
             what.add_argument('--' + arg, action='append_const',
                               dest='chambers', const=arg)
         for arg in ('bills', 'legislators', 'committees', 'votes', 'events'):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
+        for arg in ('scrape', 'import', 'report'):
+            parser.add_argument('--' + arg, dest='actions',
+                                action="append_const", const=arg,
+                                help='only run %s step' % arg)
+
+        # special modes for debugging
         scrape.add_argument('--nonstrict', action='store_false', dest='strict',
                             default=True, help="don't fail immediately when"
                             " encountering validation warning")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
+
+        # scrapelib overrides
         scrape.add_argument('-r', '--rpm', action='store', type=int,
                             dest='SCRAPELIB_RPM')
         scrape.add_argument('--timeout', action='store', type=int,
@@ -212,11 +229,6 @@ def main(old_scrape_compat=False):
                             dest='SCRAPELIB_RETRY_ATTEMPTS')
         scrape.add_argument('--retry_wait', type=int,
                             dest='SCRAPELIB_RETRY_WAIT_SECONDS')
-        # actions
-        for arg in ('scrape', 'import', 'report'):
-            parser.add_argument('--' + arg, dest='actions',
-                                action="append_const", const=arg,
-                                help='only run %s step' % arg)
 
         args = parser.parse_args()
 
@@ -243,11 +255,7 @@ def main(old_scrape_compat=False):
 
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
-        try:
-            os.makedirs(args.output_dir)
-        except OSError as e:
-            if e.errno != 17:
-                raise e
+        _clear_scraped_data(args.output_dir)
 
         # if terms aren't set, use latest
         if not args.terms:
