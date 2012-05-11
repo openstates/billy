@@ -132,7 +132,8 @@ def _do_imports(abbrev, args):
             dist['num_seats'] = int(dist['num_seats'])
             db.districts.save(dist, safe=True)
     else:
-        print "%s not found, continuing without districts" % dist_filename
+        logging.getLogger('billy').warning("%s not found, continuing without "
+                                           "districts" % dist_filename)
 
     report = {}
 
@@ -382,7 +383,6 @@ def main(old_scrape_compat=False):
 
         # imports
         if 'import' in args.actions:
-            print 'doing import'
             import_report = _do_imports(abbrev, args)
             scrape_data['imported'] = import_report
             # We're tying the run-logging into the import stage - since import
