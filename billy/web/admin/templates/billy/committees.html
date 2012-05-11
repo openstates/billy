@@ -1,5 +1,5 @@
 {% extends "billy/base.html" %}
-
+{% load billy_utiltags %}
 {% block title %}{{metadata.name}} committees{% endblock %}
 
 {% block content %}
@@ -16,6 +16,9 @@
     <tr>
         <td> {{com.committee}}
              {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
+             {% with com|key:"_id" as comm_id %}<br/>
+             <a href="{% url object_json "committees" comm_id %}"><b>json</b></a>
+             {% endwith %}
         </td>
         <td> <ul>
             {%for m in com.members %}
