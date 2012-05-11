@@ -5,6 +5,7 @@ billy changelog
 --------
 **in development**
     * full text utility for pulling data from .doc files
+    * support for module-specific settings overrides
 
 1.1.0
 -----

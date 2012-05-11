@@ -23,11 +23,16 @@ class Settings(object):
         pass
 
     def update(self, module):
-        for setting in dir(module):
-            if setting.isupper():
-                val = getattr(module, setting)
-                if val is not None:
+        if isinstance(module, dict):
+            for setting, val in module.iteritems():
+                if setting.isupper() and val is not None:
                     setattr(self, setting, val)
+        else:
+            for setting in dir(module):
+                if setting.isupper():
+                    val = getattr(module, setting)
+                    if val is not None:
+                        setattr(self, setting, val)
 
 settings = Settings()
 settings.update(default_settings)

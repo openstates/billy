@@ -42,15 +42,10 @@ def _get_configured_scraper(scraper_type, options, metadata):
         else:
             raise e
 
-    opts = {'output_dir': options.output_dir,
-            'strict_validation': options.strict,
-            'requests_per_minute': options.rpm,
-           }
-    if options.fastmode:
-        opts['requests_per_minute'] = 0
-        opts['cache_write_only'] = False
-    scraper = ScraperClass(metadata, **opts)
-    return scraper
+    return ScraperClass(metadata,
+                        output_dir=options.output_dir,
+                        strict_validation=options.strict,
+                        fastmode=options.fastmode)
 
 
 def _run_scraper(scraper_type, options, metadata):
@@ -213,9 +208,9 @@ def main(old_scrape_compat=False):
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
         scrape.add_argument('-r', '--rpm', action='store', type=int,
-                            dest='rpm', default=60)
+                            dest='SCRAPELIB_RPM')
         scrape.add_argument('--timeout', action='store', type=int,
-                            dest='SCRAPELIB_TIMEOUT', default=10)
+                            dest='SCRAPELIB_TIMEOUT')
         scrape.add_argument('--retries', type=int,
                             dest='SCRAPELIB_RETRY_ATTEMPTS')
         scrape.add_argument('--retry_wait', type=int,
@@ -228,8 +223,6 @@ def main(old_scrape_compat=False):
 
         args = parser.parse_args()
 
-        settings.update(args)
-
         # inject scraper paths so scraper module can be found
         for newpath in settings.SCRAPER_PATHS:
             sys.path.insert(0, newpath)
@@ -237,7 +230,12 @@ def main(old_scrape_compat=False):
         # get metadata
         module = __import__(args.module)
         metadata = module.metadata
+        module_settings = getattr(module, 'settings', {})
         abbrev = metadata['abbreviation']
+
+        # load state settings, then command line settings
+        settings.update(module_settings)
+        settings.update(args)
 
         configure_logging(args.module)
 
