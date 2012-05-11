@@ -141,8 +141,7 @@ def _do_imports(abbrev, args):
                 import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if 'bills' in args.types:
-        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR,
-                                       args.oyster)
+        report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
 
     if 'committees' in args.types:
         report['committees'] = \
@@ -202,9 +201,10 @@ def main(old_scrape_compat=False):
         scrape.add_argument('--nonstrict', action='store_false', dest='strict',
                             default=True, help="don't fail immediately when"
                             " encountering validation warning")
-        scrape.add_argument('--oyster', action='store_true', dest='oyster',
-                            default=False, help="push documents to oyster"
-                            " document tracking daemon")
+        scrape.add_argument('--oyster', action='store_true',
+                            dest='ENABLE_OYSTER',
+                            help="push documents to oyster document tracking "
+                            "daemon")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
         scrape.add_argument('-r', '--rpm', action='store', type=int,
@@ -240,7 +240,7 @@ def main(old_scrape_compat=False):
         configure_logging(args.module)
 
         # configure oyster
-        if args.oyster:
+        if settings.ENABLE_OYSTER:
             from oyster.conf import settings as oyster_settings
             oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = module.document_class
 

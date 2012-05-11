@@ -6,6 +6,7 @@ import json
 import logging
 from collections import defaultdict
 
+from billy.conf import settings
 from billy.utils import metadata, keywordize, term_for_session
 from billy import db
 from billy.importers.names import get_legislator_id
@@ -79,7 +80,7 @@ def oysterize_version(bill, version):
              )
 
 
-def import_bill(data, votes, categorizer, oyster_documents=False):
+def import_bill(data, votes, categorizer):
     level = data['level']
     abbr = data[level]
 
@@ -161,7 +162,7 @@ def import_bill(data, votes, categorizer, oyster_documents=False):
 
     for version in data['versions']:
         # push versions to oyster
-        if oyster_documents and 'url' in version:
+        if settings.ENABLE_OYSTER and 'url' in version:
             oysterize_version(data, version)
 
         # Merge any version titles into the alternate_titles list
@@ -188,7 +189,7 @@ def import_bill(data, votes, categorizer, oyster_documents=False):
         return "update"
 
 
-def import_bills(abbr, data_dir, oyster_documents=False):
+def import_bills(abbr, data_dir):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'bills', '*.json')
 
@@ -211,7 +212,7 @@ def import_bills(abbr, data_dir, oyster_documents=False):
             data = prepare_obj(json.load(f))
 
         counts["total"] += 1
-        ret = import_bill(data, votes, categorizer, oyster_documents)
+        ret = import_bill(data, votes, categorizer)
         counts[ret] += 1
 
     logger.info('imported %s bill files' % len(paths))
