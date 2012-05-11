@@ -563,7 +563,6 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
     except ValueError:
         pass
 
-    
     spec = {'state': abbr, 'session': session}
     fields = {'_id': 1}
 
@@ -596,7 +595,6 @@ def object_json(request, collection, _id,
     obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
     keys = sorted(obj)
 
-
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
         return tmpl % (val, val)
@@ -609,6 +607,7 @@ def object_json(request, collection, _id,
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
     return render(request, 'billy/object_json.html', locals())
+
 
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
@@ -630,14 +629,16 @@ def unmatched_leg_ids(request, abbr):
     return _csv_response(request, 'leg_ids', ('term', 'chamber', 'name'),
                          sorted(combined_sets), abbr)
 
+
 def uncategorized_subjects(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
         raise Http404
     subjects = sorted(report['bills']['uncategorized_subjects'],
-                      key=lambda t: (t[1],t[0]), reverse=True)
+                      key=lambda t: (t[1], t[0]), reverse=True)
     return _csv_response(request, 'uncategorized_subjects', ('subject', '#'),
                          subjects, abbr)
+
 
 def district_stub(request, abbr):
     def keyfunc(x):
