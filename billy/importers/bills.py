@@ -68,6 +68,7 @@ def import_votes(data_dir):
 
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
+    logger.info('{0} tracked in oyster'.format(version['doc_id']))
     oysterize(version['url'], bill['state'] + ':billtext',
               id=version['doc_id'],
               # metadata
