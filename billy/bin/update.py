@@ -202,11 +202,6 @@ def main(old_scrape_compat=False):
         scrape.add_argument('--nonstrict', action='store_false', dest='strict',
                             default=True, help="don't fail immediately when"
                             " encountering validation warning")
-        scrape.add_argument('--oyster', action='store_true',
-                            default=None,
-                            dest='ENABLE_OYSTER',
-                            help="push documents to oyster document tracking "
-                            "daemon")
         scrape.add_argument('--fastmode', help="scrape in fast mode",
                             action="store_true", default=False)
         scrape.add_argument('-r', '--rpm', action='store', type=int,
