@@ -5,6 +5,7 @@ billy changelog
 --------
 **in development**
     * continued improvements to event support
+    * fresh look at available settings
     * full text utility for pulling data from .doc files
     * support for module-specific settings overrides
 

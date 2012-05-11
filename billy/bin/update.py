@@ -328,11 +328,16 @@ def main(old_scrape_compat=False):
             lex = None
             exc_traceback = None
 
-            # run scrapers
+            # start to run scrapers
             exec_start = dt.datetime.utcnow()
-            order = ('legislators', 'committees', 'votes', 'bills', 'events')
+
+            # scraper order matters
+            scraper_types = ['legislators', 'committees', 'votes', 'bills']
+            # only scrape events if they're enabled in feature flags
+            if 'events' in metadata['feature_flags']:
+                scraper_types.append('events')
             try:
-                for stype in order:
+                for stype in scraper_types:
                     if stype in args.types:
                         run_record += _run_scraper(stype, args, metadata)
             except Exception as e:
