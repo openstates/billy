@@ -202,6 +202,7 @@ def main(old_scrape_compat=False):
                             default=True, help="don't fail immediately when"
                             " encountering validation warning")
         scrape.add_argument('--oyster', action='store_true',
+                            default=None,
                             dest='ENABLE_OYSTER',
                             help="push documents to oyster document tracking "
                             "daemon")
