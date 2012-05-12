@@ -283,7 +283,9 @@ def main(old_scrape_compat=False):
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
-                          'events', 'alldata']
+                          'alldata']
+            if 'events' in metadata['feature_flags']:
+                args.types.append('events')
 
         plan = """billy-update abbr=%s
     actions=%s
@@ -328,8 +330,10 @@ def main(old_scrape_compat=False):
             lex = None
             exc_traceback = None
 
-            # run scrapers
+            # start to run scrapers
             exec_start = dt.datetime.utcnow()
+
+            # scraper order matters
             order = ('legislators', 'committees', 'votes', 'bills', 'events')
             try:
                 for stype in order:
