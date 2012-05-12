@@ -62,7 +62,7 @@
     <h3>Distinct Object Values</h3>
     <p>These pages display distinct values for each key found in objects in the collections in mongo.</p>
     {% for session in sessions %}
-        <a href="{% url summary_index metadata.abbreviation session %}">{{session}}</a>
+        <a href="{% url summary_index metadata.abbreviation session %}">{{session}}</a></br>
     {% endfor %}
 </div>
 </div>
