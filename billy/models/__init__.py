@@ -84,7 +84,9 @@ class Document(dict):
 
     @property
     def state(self):
-        'Sometimes calling metadata "state" is clearer.'
+        '''Sometimes calling metadata "state" is clearer, BUT if the
+        document also has a key named 'state', django's templating
+        engine will use that instead, so using 'metadata' is safer.'''
         return self.metadata
 
 
@@ -222,7 +224,7 @@ class AttrManager(object):
 
     class SponsorsManager(AttrManager):
         def prime(self):
-            for sponsor in self.data:
+            for sponsor in self:
                 if sponsor['type'] == 'primary:
                     return sponsor
     '''
@@ -409,13 +411,6 @@ class SponsorsManager(AttrManager):
         'views.bill'
         return take(5, self)
 
-    def first_five_remainder(self):
-        'views.bill'
-        if 5 < len(first_five):
-            return len(self.inst['sponsors'])
-        else:
-            return 0
-
 
 class Action(Subdocument):
 
@@ -482,7 +477,7 @@ class Vote(Subdocument):
         return self._ratio('other_count')
 
     def _vote_legislators(self, yes_no_other):
-        '''This function will hit the database indivually
+        '''This function will hit the database individually
         to get each legislator object. Good if the number of
         voters is small (i.e., committee vote), but possibly
         bad if it's high (full roll call vote).'''
