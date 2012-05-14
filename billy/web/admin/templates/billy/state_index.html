@@ -9,7 +9,7 @@
 {% block content %}
 <div class="container">
     <h1>{{ metadata.name }}</h1>
-    <a href="metadata">Metadata</a>
+    <a href="{% url object_json "metadata" metadata.abbreviation %}">Metadata</a>
 </div>
 
 <div class="container">
@@ -55,6 +55,15 @@
         <dt>Updated This Month:</dt><dd>{{report.bills.updated_this_month}}%</dd>
         <dt>Updated This Year:</dt><dd>{{report.bills.updated_this_year}}%</dd>
     </dl>
+</div>
+
+
+<div class="well">
+    <h3>Distinct Object Values</h3>
+    <p>These pages display distinct values for each key found in objects in the collections in mongo.</p>
+    {% for session in sessions %}
+        <a href="{% url summary_index metadata.abbreviation session %}">{{session}}</a></br>
+    {% endfor %}
 </div>
 </div>
 

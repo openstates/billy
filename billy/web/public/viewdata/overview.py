@@ -1,8 +1,18 @@
 import pdb
 
 from collections import defaultdict
+from itertools import repeat
+from operator import itemgetter
 
-from billy import db
+import pymongo
+
+from billy.models import db, Bill, Metadata, Legislator, Committee
+
+
+repeat1 = repeat(1)
+def include_fields(*field_names):
+    return zip(field_names, repeat1)
+
 
 def chamber(abbr, chamber):
     '''
@@ -17,9 +27,10 @@ def chamber(abbr, chamber):
     '''
     res = {}
 
+    state = Metadata.get_object(abbr)   
+
     # Legislators
-    legislators = db.legislators.find({'state': abbr, 'chamber': chamber}, 
-                                      {'party': True})
+    legislators = state.legislators({'chamber': chamber}, {'party': True})
     legislators = list(legislators)
 
     # Maybe later, mapreduce instead
@@ -34,16 +45,39 @@ def chamber(abbr, chamber):
 
     # Committees
     res['committees'] = {
-        'count': db.committees.find({'state': abbr, 'chamber': chamber}).count(),
-        'joint_count': db.committees.find({'state': abbr, 'chamber': 'joint'}).count(),
+        'count': state.committees({'chamber': chamber}).count(),
+        'joint_count': state.committees({'chamber': 'joint'}).count(),
         }
 
-    res['bills_count'] = db.bills.find({'state': abbr, 'chamber': chamber}).count()
+    res['bills_count'] = state.bills({'chamber': chamber}).count()
 
     return res
 
+def recent_actions(abbr):
+    state = Metadata.get_object(abbr)   
+    bills = state.bills({'session': state.most_recent_session,
+                         'actions.type': 'bill:passed',
+                         'actions.type': 'bill:introduced', 
+                         'type': 'bill'})
+    bills_by_action = defaultdict(list)
+    for bill in bills:
+        for action in bill['actions']:
+            actor = action['actor']
+            for type_ in action['type']:
+                if type_ in ['bill:passed', 'bill:introduced']:
+                    bills_by_action[(type_, actor)].append(
+                                            (action['date'], bill))
 
-def bills(state, chamber):
-    '''
-    '''
-    #db.bills.find({'state': 'de' }, {'bill_id': 1, 'actions': {'$slice': 1}}).sort('actions.1.date', -1).limit(10)
+    def f(type_, chamber): 
+        bills = list(sorted(bills_by_action[(type_, chamber)], 
+                     reverse=True, key=itemgetter(0)))[:2]
+        return map(itemgetter(1), bills)
+
+    res = dict(
+        passed_upper=f('bill:passed', 'upper'),
+        passed_lower=f('bill:passed', 'lower'),
+        introduced_upper=f('bill:introduced', 'upper'),
+        introduced_lower=f('bill:introduced', 'lower'))
+
+    return res
+

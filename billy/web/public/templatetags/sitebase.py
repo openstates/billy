@@ -10,12 +10,12 @@ from billy.models import Metadata
 register = template.Library()
 
 
-@register.inclusion_tag('billy/www/sitebase/states_selection.html')
+@register.inclusion_tag('billy/web/public/sitebase/states_selection.html')
 def states_selection():
     form = StateSelectForm
     return locals()
 
-@register.inclusion_tag('billy/www/sitebase/states_sidebar.html')
+@register.inclusion_tag('billy/web/public/sitebase/states_sidebar.html')
 def states_sidebar(abbr):
     return locals()
 

@@ -33,7 +33,8 @@ urlpatterns = patterns('billy.web.admin.views',
         name='duplicate_versions'),
 
     # Summary urls.
-    url(r'^(?P<abbr>[a-z]{2})/summary/$', 'summary_index'),
+    url(r'^(?P<abbr>[a-z]{2})/summary/(?P<session>[^/]+)$', 'summary_index',
+        name='summary_index'),
     url(r'^(?P<abbr>[a-z]{2})/summary_object_key/$', 'summary_object_key'),
     url(r'^(?P<abbr>[a-z]{2})/summary_object_key_vals/$',
         'summary_object_key_vals'),
