@@ -36,20 +36,6 @@ def templatename(name):
     return 'billy/web/public/%s.html' % name
 
 
-def simplified(f):
-    '''Render the decorated view to response with the template
-    bearing the same name as the view function.
-    '''
-    @wraps(f)
-    def wrapper(request, *args, **kwargs):
-        dictionary = f(request, *args, **kwargs)
-        dictionary['base_template'] = 'billy/web/public/base.html'
-        template = 'billy/web/public/%s.html' % f.__name__
-        return render(request, template, dictionary)
-
-    return wrapper
-
-
 class ListViewBase(TemplateView):
     'Base class for VoteList, FeedList, etc.'
     template_name = templatename('object_list')
@@ -250,7 +236,6 @@ def committees(request, abbr):
     return redirect('committees_chamber', abbr, 'upper')
 
 
-@simplified
 def committees_chamber(request, abbr, chamber):
 
     state = Metadata.get_object(abbr)
@@ -272,21 +257,40 @@ def committees_chamber(request, abbr, chamber):
                                   sort=[(sort_key, sort_order)])
 
     sort_order = {1: -1, -1: 1}[sort_order]
+    return render_to_response(
+        template_name=templatename('committees_chamber'),
+        dictionary=dict(
+            committees=committees,
+            abbr=abbr,
+            metadata=Metadata.get_object(abbr),
+            committees_table_template=templatename('committees_table'),
+            sort_order=sort_order,
+            statenav_active='committees'),
+        context_instance=RequestContext(request, default_context))
 
-    return locals()
 
-
-@simplified
 def committee(request, abbr, committee_id):
     committee = db.committees.find_one({'_id': committee_id})
-    sources = committee['sources']
-    return locals()
+    return render_to_response(
+        template_name=templatename('committee'),
+        dictionary=dict(
+            committee=committee,
+            abbr=abbr,
+            metadata=Metadata.get_object(abbr),
+            sources=committee['sources'],
+            statenav_active='committees'),
+        context_instance=RequestContext(request, default_context))
 
 
-@simplified
 def bills(request, abbr):
-    state = Metadata.get_object(abbr)
-    return locals()
+    return render_to_response(
+        template_name=templatename('bills'),
+        dictionary=dict(
+            committee=committee,
+            abbr=abbr,
+            metadata=Metadata.get_object(abbr),
+            statenav_active='bills'),
+        context_instance=RequestContext(request, default_context))
 
 
 def bill(request, abbr, bill_id):
@@ -304,17 +308,10 @@ def bill(request, abbr, bill_id):
         context_instance=RequestContext(request, default_context))
 
 
-#----------------------------------------------------------------------------
-@simplified
-def votes(request, abbr):
-    state = Metadata.get_object(abbr)
-    return locals()
-
-
 def vote(request, abbr, bill_id, vote_index):
     bill = db.bills.find_one({'_id': bill_id})
     return render_to_response(
-        template_name=templatename('vote'),
+        template_name=templatename('vote_test'),
         dictionary=dict(
             abbr=abbr,
             state=Metadata.get_object(abbr),
