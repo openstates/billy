@@ -117,16 +117,9 @@ def state(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     meta = Metadata.get_object(abbr)
 
-    # Image id.
-    img_id = meta['name']
-    if ' ' in img_id:
-        img_id = meta['name'].split()
-        img_id = img_id[0].lower() + ''.join(img_id[1:])
-
     return render_to_response(
         template_name=templatename('state'),
         dictionary=dict(abbr=abbr,
-            state_image_id=img_id,
             metadata=meta,
             sessions=report.session_link_data(),
             lower=overview.chamber(abbr, 'lower'),
