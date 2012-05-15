@@ -1,9 +1,9 @@
 
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views import (legislators, legislators_chamber,
     legislator, committees_chamber, committees, committee, bill,
-    bills, vote, state, state_selection)
+    bills, vote, state, state_selection, VotesList, FeedsList)
 
 
 urlpatterns = patterns('',
@@ -42,7 +42,12 @@ urlpatterns = patterns('',
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/vote/(?P<bill_id>\w+)/(?P<vote_index>\w+)/$',
         vote, name='vote'),
+
+    url(r'^(?P<abbr>[a-z]{2})/votes_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
+        VotesList.as_view(), name='votes_list'),
+
+
+    url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
+        FeedsList.as_view(), name='feeds_list'),
+
 )
-
-
-
