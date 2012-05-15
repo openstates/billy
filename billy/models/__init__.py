@@ -1,9 +1,17 @@
+'''
+Notes:
+This ORM approach has worked reasonably well, but because the query
+interface it exposes returns raw mongo cursors, they can't be easily used with
+certain parts of django's internals, like the 'queryset' class attribute on
+generic view subclasses. More tinkering neeeded.
+'''
 import pdb
 import sys
 import itertools
 import operator
 import math
 import urlparse
+import datetime
 
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
@@ -297,6 +305,10 @@ class FeedEntry(Document):
         urldata = urlparse.urlparse(entry['link'])
         entry['source'] = urldata.scheme + urldata.netloc
         entry['host'] = urldata.netloc
+        del entry['published']
+
+    def published(self):
+        return datetime.datetime.fromtimestamp(self['published_parsed'])
 
 
 class CommitteeMember(dict):
@@ -352,18 +364,33 @@ class Legislator(Document):
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
     roles_manager = RolesManager()
 
-    def votes(self):
-        _id = self['_id']
-        for bill in self.state.bills():
-            for vote in bill.votes_manager:
-                for k in ['yes_votes', 'no_votes', 'other_votes']:
-                    for voter in vote[k]:
-                        if voter['leg_id'] == _id:
-                            yield vote
+    class VotesManager(object):
+        def __iter__(self):
+            inst = self.inst
+            _id = inst['_id']
+            for bill in inst.state.bills():
+                for vote in bill.votes_manager:
+                    for k in ['yes_votes', 'no_votes', 'other_votes']:
+                        for voter in vote[k]:
+                            if voter['leg_id'] == _id:
+                                yield vote
+
+        def __get__(self, instance, type_=None, *args, **kwargs):
+            self.inst = instance
+            return self
+    votes_manager = VotesManager()
+    # def votes_manager(self):
+    #     _id = self['_id']
+    #     for bill in self.state.bills():
+    #         for vote in bill.votes_manager:
+    #             for k in ['yes_votes', 'no_votes', 'other_votes']:
+    #                 for voter in vote[k]:
+    #                     if voter['leg_id'] == _id:
+    #                         yield vote
 
     def votes_3_sorted(self):
         _id = self['_id']
-        votes = self.votes()
+        votes = self.votes_manager
         votes = take(3, sorted(votes, key=operator.itemgetter('date')))
         for i, vote in enumerate(votes):
             for vote_value in ['yes', 'no', 'other']:
@@ -494,14 +521,8 @@ class Vote(Subdocument):
     def other_vote_legislators(self):
         return self._vote_legislators('other')
 
-
-class VotesManager(AttrManager):
-
-    def __iter__(self):
-        inst = self.inst
-        for vote in inst['votes']:
-            yield Vote.fromdict(
-                vote, parent_doc=inst, parent_name='bill')
+    def index(self):
+        return self.bill['votes'].index(self)
 
 
 class Bill(Document):
@@ -510,6 +531,17 @@ class Bill(Document):
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
+
+    class VotesManager(AttrManager):
+        '''
+        maybe return self.Subdocument(mydict)
+        '''
+        def __iter__(self):
+            inst = self.inst
+            for vote in inst['votes']:
+                yield Vote.fromdict(
+                    vote, parent_doc=inst, parent_name='bill')
+
     votes_manager = VotesManager()
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
@@ -539,6 +571,12 @@ class Metadata(Document):
     >>> bill.state.abbr
     'de'
     '''
+    class VotesManager(AttrManager):
+        def __iter__(self):
+            for bill in self.inst.bills():
+                for vote in bill.votes_manager:
+                        yield vote
+
     collection = db.metadata
 
     legislators = RelatedDocuments(Legislator, model_keys=['state'],
@@ -552,6 +590,8 @@ class Metadata(Document):
 
     feed_entries = RelatedDocuments(FeedEntry, model_keys=['state'],
                                     instance_key='abbreviation')
+
+    votes_manager = VotesManager()
 
     @classmethod
     def get_object(cls, abbr):
