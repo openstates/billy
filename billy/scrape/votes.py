@@ -119,9 +119,15 @@ class Vote(SourcedObject):
                 votes = len(self[type+'_votes'])
                 count = self[type+'_count']
                 if votes != count:
-                    raise ValueError('bad %s vote count for %s %s votes=%s count=%s' %
-                                     (type, self['bill_id'], self['motion'],
-                                      votes, count))
+                    try:
+                        raise ValueError('bad %s vote count for %s %s votes=%s count=%s' %
+                                         (type, self['bill_id'], self['motion'],
+                                          votes, count))
+                    except KeyError:
+                        # self-bill_id-might be missing under some
+                        # cases. Warn an pass the error.
+                        # self.warning("XXX: Warning! Missing bill_id!")
+                        pass
 
 
 
