@@ -12,20 +12,32 @@ import operator
 import math
 import urlparse
 import datetime
+import logging
 
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
 
 from django.core import urlresolvers
-
-from billy.conf import settings
+from django.conf import settings as django_settings
+from billy.conf import settings as billy_settings
 from billy.utils import metadata as get_metadata
 
 from billy.web.public.viewdata import blurbs
 
 
-db = Connection(host=settings.MONGO_HOST, port=settings.MONGO_PORT)
-db = getattr(db, settings.MONGO_DATABASE)
+db = Connection(host=billy_settings.MONGO_HOST, port=billy_settings.MONGO_PORT)
+db = getattr(db, billy_settings.MONGO_DATABASE)
+
+DEBUG = 1  # django_settings.DEBUG
+logger = logging.getLogger('billy.models')
+logger.setLevel(logging.DEBUG)
+
+ch = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(message)s',
+                              datefmt='%H:%M:%S')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+query_log_template = 'db.{0}.{1}({2}, {3}, {4})'
 
 
 def take(n, iterable):
@@ -138,6 +150,10 @@ class RelatedDocument(ReadOnlyAttribute):
     def __call__(self, extra_spec={}, *args, **kwargs):
         spec = {'_id': self.model_id}
         spec.update(extra_spec)
+        if DEBUG:
+            msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
+                                            'find_one', spec, args, kwargs)
+            logger.debug(msg)
         return self.model.collection.find_one(spec, *args, **kwargs)
 
 
@@ -202,7 +218,10 @@ class RelatedDocuments(ReadOnlyAttribute):
             if _sort is not None:
                 kwargs.update(sort=_sort)
 
-        print 'running %r, %r, %r' % (spec, args, kwargs)
+        if DEBUG:
+            msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
+                                                 'find', spec, args, kwargs)
+            logger.debug(msg)
         return self.model.collection.find(spec, *args, **kwargs)
 
 
@@ -409,6 +428,9 @@ class Legislator(Document):
     def primary_sponsored_bills(self):
         return self.sponsored_bills({'sponsors.type': 'primary'})
 
+    def display_name(self):
+        return '%s %s' % (self['first_name'], self['last_name'])
+
 
 class Sponsor(dict):
     legislator = RelatedDocument('Legislator')
@@ -510,6 +532,10 @@ class Vote(Subdocument):
         bad if it's high (full roll call vote).'''
         id_getter = operator.itemgetter('leg_id')
         for _id in map(id_getter, self['%s_votes' % yes_no_other]):
+            if DEBUG:
+                msg = '{0}.{1}({2}, {3}, {4})'.format(
+                    'legislators', 'find_one', {'_id': _id}, (), {})
+                logger.debug(msg)
             yield db.legislators.find_one({'_id': _id})
 
     def yes_vote_legislators(self):
@@ -541,6 +567,9 @@ class Bill(Document):
             for vote in inst['votes']:
                 yield Vote.fromdict(
                     vote, parent_doc=inst, parent_name='bill')
+
+        def has_votes(self):
+            return bool(self.inst['votes'])
 
     votes_manager = VotesManager()
 
