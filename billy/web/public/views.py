@@ -1,19 +1,19 @@
 import re
 import operator
-from functools import wraps
 from itertools import repeat, islice
 
 import pymongo
 
-from django.shortcuts import render, redirect, render_to_response
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic import TemplateView
+from django.http import Http404
 
 import billy.models
-from billy.models import db, Metadata
+from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 
-from .forms import StateSelectForm
+from .forms import StateSelectForm, ChamberSelectForm
 from .viewdata import overview
 
 
@@ -34,6 +34,14 @@ def include_fields(*field_names):
 
 def templatename(name):
     return 'billy/web/public/%s.html' % name
+
+
+def homepage(request):
+    return render_to_response(
+        template_name=templatename('homepage'),
+        dictionary=dict(
+            statenav_active=None),
+        context_instance=RequestContext(request, default_context))
 
 
 class ListViewBase(TemplateView):
@@ -61,20 +69,36 @@ class ListViewBase(TemplateView):
         _id = self.kwargs.get('id')
 
         get = self.request.GET.get
+
+        # Setup the paginator arguments.
         show_per_page = int(get('show_per_page', 20))
         page = int(get('page', 1))
         if 100 < show_per_page:
             show_per_page = 100
+
+        # Get the related object.
         collection = getattr(billy.models.db, collection_name)
-        obj = collection.find_one(_id)
+
+        try:
+            obj = collection.find_one(_id)
+        except DoesNotExist:
+            raise Http404
+
         objects = getattr(obj, self.query_attr)
+
+        # The related collection of objects might be a
+        # function or a manager class.
+        # This is to work around a pain-point in models.py.
         if callable(objects):
             objects = objects()
+
+        # Apply any specified sorting.
         sort_func = getattr(self, 'sort_func', None)
         sort_reversed = bool(getattr(self, 'sort_reversed', None))
         if sort_func:
             objects = sorted(objects, key=sort_func,
                              reverse=sort_reversed)
+
         paginator = self.paginator(objects, page=page,
                                    show_per_page=show_per_page)
         return paginator
@@ -88,7 +112,6 @@ class VotesList(ListViewBase):
     paginator = IteratorPaginator
     query_attr = 'votes_manager'
     use_table = True
-
     rowtemplate_name = templatename('votes_list_row')
     column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
                       'No', 'Other', 'Motion')
@@ -100,10 +123,8 @@ class FeedsList(ListViewBase):
     list_item_context_name = 'entry'
     paginator = CursorPaginator
     query_attr = 'feed_entries'
-
     rowtemplate_name = templatename('feed_entry')
-    column_headers = ('feeds',)  # ('date', 'title', 'author', 'host',
-                      #'summary', 'tags')
+    column_headers = ('feeds',)
     statenav_active = 'bills'
 
 
@@ -115,7 +136,10 @@ def state_nav(active_collection):
 
 def state(request, abbr):
     report = db.reports.find_one({'_id': abbr})
-    meta = Metadata.get_object(abbr)
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
 
     # Image id.
     img_id = meta['name']
@@ -137,23 +161,59 @@ def state(request, abbr):
 
 
 def state_selection(request):
-    '''
-    Handle the "state" dropdown form at the top of the page.
+    '''Handle submission of the state selection form
+    in the base template.
     '''
     form = StateSelectForm(request.GET)
     abbr = form.data['abbr']
+    if len(abbr) != 2:
+        return redirect('pick_a_state')
     return redirect('state', abbr=abbr)
 
 
-#----------------------------------------------------------------------------
+def pick_a_state(request):
+    metadata = db.metadata.find({}, ['_id', 'name'],
+                                sort=[('name', 1)])
+
+    def columns(cursor, num_columns):
+        percolumn, _ = divmod(cursor.count(), num_columns)
+        iterator = iter(cursor)
+        for i in range(num_columns):
+            yield list(islice(iterator, percolumn))
+
+    return render_to_response(
+        template_name=templatename('pick_a_state'),
+        dictionary=dict(
+            columns=columns(metadata, 3),
+            metadata=metadata,
+            statenav_active=None),
+        context_instance=RequestContext(request, default_context))
+
+
+def chamber_select(request, collection_name):
+    '''Handle the chamber selection radio button, i.e.,
+    in legislators_chamber and committees_chamber views.
+    '''
+    if collection_name not in ('legislators', 'committees'):
+        raise Http404
+    form = ChamberSelectForm(request.GET)
+    chamber = form.data['chamber']
+    abbr = form.data['abbr']
+    return redirect('%s_chamber' % collection_name, abbr, chamber)
+
+
 def legislators(request, abbr):
     return redirect('legislators_chamber', abbr, 'upper')
 
 
 def legislators_chamber(request, abbr, chamber):
 
-    state = Metadata.get_object(abbr)
-    chamber_name = state['%s_chamber_name' % chamber]
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
+    chamber_name = meta['%s_chamber_name' % chamber]
 
     # Query params
     spec = {'chamber': chamber}
@@ -168,7 +228,7 @@ def legislators_chamber(request, abbr, chamber):
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
 
-    legislators = state.legislators(extra_spec=spec, fields=fields,
+    legislators = meta.legislators(extra_spec=spec, fields=fields,
                                     sort=[(sort_key, sort_order)])
 
     # Sort in python if the key was "district"
@@ -186,12 +246,17 @@ def legislators_chamber(request, abbr, chamber):
     sort_order = {1: -1, -1: 1}[sort_order]
 
     legislators = list(legislators)
-    # import pdb;pdb.set_trace()
+
+    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
+
     return render_to_response(
         template_name=templatename('legislators_chamber'),
         dictionary=dict(
-            state=state,
+            metadata=meta,
             chamber_name=chamber_name,
+            chamber_select_form=chamber_select_form,
+            chamber_select_template=templatename('chamber_select_form'),
+            chamber_select_collection='legislators',
             abbr=abbr,
             legislators=legislators,
             sort_order=sort_order,
@@ -205,7 +270,15 @@ def legislator(request, abbr, leg_id):
     '''
     Note - changes needed before we can display "sessions served" info.
     '''
-    legislator = db.legislators.find_one({'_id': leg_id})
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
+    try:
+        legislator = db.legislators.find_one({'_id': leg_id})
+    except DoesNotExist:
+        raise Http404
 
     # Note to self: Slow query
     sponsored_bills = legislator.sponsored_bills(
@@ -221,7 +294,7 @@ def legislator(request, abbr, leg_id):
             vote_preview_row_template=templatename('vote_preview_row'),
             roles=legislator.roles_manager,
             abbr=abbr,
-            metadata=Metadata.get_object(abbr),
+            metadata=meta,
             legislator=legislator,
             sources=legislator['sources'],
             sponsored_bills=sponsored_bills,
@@ -238,7 +311,12 @@ def committees(request, abbr):
 
 def committees_chamber(request, abbr, chamber):
 
-    state = Metadata.get_object(abbr)
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
+    chamber_name = meta['%s_chamber_name' % chamber]
 
     # Query params
     spec = {'chamber': chamber}
@@ -253,24 +331,35 @@ def committees_chamber(request, abbr, chamber):
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
 
-    committees = state.committees(spec, fields=fields,
+    committees = meta.committees(spec, fields=fields,
                                   sort=[(sort_key, sort_order)])
 
     sort_order = {1: -1, -1: 1}[sort_order]
+
+    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
+
     return render_to_response(
         template_name=templatename('committees_chamber'),
         dictionary=dict(
             committees=committees,
             abbr=abbr,
-            metadata=Metadata.get_object(abbr),
+            metadata=meta,
+            chamber_name=chamber_name,
+            chamber_select_form=chamber_select_form,
+            chamber_select_template=templatename('chamber_select_form'),
             committees_table_template=templatename('committees_table'),
+            chamber_select_collection='committees',
             sort_order=sort_order,
             statenav_active='committees'),
         context_instance=RequestContext(request, default_context))
 
 
 def committee(request, abbr, committee_id):
-    committee = db.committees.find_one({'_id': committee_id})
+    try:
+        committee = db.committees.find_one({'_id': committee_id})
+    except DoesNotExist:
+        raise Http404
+
     return render_to_response(
         template_name=templatename('committee'),
         dictionary=dict(
@@ -283,18 +372,27 @@ def committee(request, abbr, committee_id):
 
 
 def bills(request, abbr):
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
     return render_to_response(
         template_name=templatename('bills'),
         dictionary=dict(
             committee=committee,
             abbr=abbr,
-            metadata=Metadata.get_object(abbr),
+            metadata=meta,
             statenav_active='bills'),
         context_instance=RequestContext(request, default_context))
 
 
 def bill(request, abbr, bill_id):
-    bill = db.bills.find_one({'_id': bill_id})
+    try:
+        bill = db.bills.find_one({'_id': bill_id})
+    except DoesNotExist:
+        raise Http404
+
     return render_to_response(
         template_name=templatename('bill'),
         dictionary=dict(
@@ -309,9 +407,13 @@ def bill(request, abbr, bill_id):
 
 
 def vote(request, abbr, bill_id, vote_index):
-    bill = db.bills.find_one({'_id': bill_id})
+    try:
+        bill = db.bills.find_one({'_id': bill_id})
+    except DoesNotExist:
+        raise Http404
+
     return render_to_response(
-        template_name=templatename('vote_test'),
+        template_name=templatename('vote'),
         dictionary=dict(
             abbr=abbr,
             state=Metadata.get_object(abbr),
