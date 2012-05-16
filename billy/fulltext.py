@@ -42,7 +42,10 @@ PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 
 def _clean_text(text):
-    text = text.encode('ascii', 'ignore')
+    if isinstance(text, unicode):
+        text = text.encode('ascii', 'ignore')
+    else:
+        text = text.decode('utf8', 'ignore').encode('ascii', 'ignore')
     text = text.replace(u'\xa0', u' ') # nbsp -> sp
     text = PUNCTUATION.sub(' ', text)  # strip punctuation
     text = re.sub('\s+', ' ', text)    # collapse spaces
