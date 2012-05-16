@@ -18,7 +18,6 @@ from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
 
 from django.core import urlresolvers
-from django.conf import settings as django_settings
 from billy.conf import settings as billy_settings
 from billy.utils import metadata as get_metadata
 
@@ -33,11 +32,11 @@ logger = logging.getLogger('billy.models')
 logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(message)s',
+formatter = logging.Formatter('[%(name)s] %(asctime)s - %(message)s',
                               datefmt='%H:%M:%S')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
-query_log_template = 'db.{0}.{1}({2}, {3}, {4})'
+query_log_template = 'Query: db.{0}.{1}({2}, {3}, {4})'
 
 
 def take(n, iterable):
@@ -64,6 +63,10 @@ class ReadOnlyAttribute(object):
 
 class ModelDefinitionError(Exception):
     '''Raised if there's a problem with a model definition.'''
+    pass
+
+
+class DoesNotExist(Exception):
     pass
 
 
@@ -154,7 +157,14 @@ class RelatedDocument(ReadOnlyAttribute):
             msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
                                             'find_one', spec, args, kwargs)
             logger.debug(msg)
-        return self.model.collection.find_one(spec, *args, **kwargs)
+
+        obj = self.model.collection.find_one(spec, *args, **kwargs)
+        if obj is None:
+            msg = 'No %s found for %r' % (self.model.collection.name,
+                                          (spec, args, kwargs))
+
+            raise DoesNotExist(msg)
+        return obj
 
 
 class RelatedDocuments(ReadOnlyAttribute):
@@ -431,6 +441,12 @@ class Legislator(Document):
     def display_name(self):
         return '%s %s' % (self['first_name'], self['last_name'])
 
+    def sessions_served(self):
+        session_details = self.metadata['session_details']
+        for role in self['roles']:
+            if role['type'] == 'member':
+                yield session_details[role['term']]['display_name']
+
 
 class Sponsor(dict):
     legislator = RelatedDocument('Legislator')
@@ -536,7 +552,12 @@ class Vote(Subdocument):
                 msg = '{0}.{1}({2}, {3}, {4})'.format(
                     'legislators', 'find_one', {'_id': _id}, (), {})
                 logger.debug(msg)
-            yield db.legislators.find_one({'_id': _id})
+            obj = db.legislators.find_one({'_id': _id})
+            if obj is None:
+                msg = 'No legislator found with id %r' % _id
+                continue
+                #raise DoesNotExist(msg)
+            yield obj
 
     def yes_vote_legislators(self):
         return self._vote_legislators('yes')
@@ -629,7 +650,11 @@ class Metadata(Document):
         advantage of the metadata cache in billy.util, which would otherwise
         return unwrapped objects.
         '''
-        return cls(get_metadata(abbr))
+        obj = get_metadata(abbr)
+        if obj is None:
+            msg = 'No metatdata found for abbreviation %r' % abbr
+            raise DoesNotExist(msg)
+        return cls(obj)
 
     @property
     def abbr(self):
