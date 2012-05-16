@@ -20,8 +20,7 @@ def worddata_to_text(data):
         with tempfile.NamedTemporaryFile(delete=True) as tmpf:
             tmpf.write(data)
             tmpf.flush()
-            subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name),
-                                  shell=True)
+            subprocess.check_call(['abiword' '--to=%s' %txtfile, tmpf.name])
             f = open(txtfile)
             text = f.read()
             tmpf.close()
