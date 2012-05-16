@@ -18,9 +18,9 @@ def worddata_to_text(data):
     _, txtfile = tempfile.mkstemp(prefix='tmp-worddata-', suffix='.txt')
     with tempfile.NamedTemporaryFile(delete=True) as tmpf:
         tmpf.write(data)
-        subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name), 
-                              shell=True)
         tmpf.flush()
+        subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name),
+                              shell=True)
         text = open(txtfile).read()
     os.remove(txtfile)
     return text.decode('utf8')
