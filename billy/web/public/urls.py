@@ -57,4 +57,7 @@ urlpatterns = patterns('',
     url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
         FeedsList.as_view(), name='feeds_list'),
 
+    # other views
+    url(r'^downloads/$', 'billy.web.public.views_other.downloads', name='downloads'),
+
 )
