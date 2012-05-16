@@ -24,6 +24,7 @@ def worddata_to_text(data):
                                   shell=True)
             f = open(txtfile)
             text = f.read()
+            tmpf.close()
             f.close()
     finally:
         os.remove(txtfile)
