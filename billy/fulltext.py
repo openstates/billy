@@ -22,7 +22,9 @@ def worddata_to_text(data):
             tmpf.flush()
             subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name),
                                   shell=True)
-            text = open(txtfile).read()
+            f = open(txtfile)
+            text = f.read()
+            f.close()
     finally:
         os.remove(txtfile)
     return text.decode('utf8')
