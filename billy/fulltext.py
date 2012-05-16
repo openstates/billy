@@ -16,13 +16,15 @@ def pdfdata_to_text(data):
 
 def worddata_to_text(data):
     _, txtfile = tempfile.mkstemp(prefix='tmp-worddata-', suffix='.txt')
-    with tempfile.NamedTemporaryFile(delete=True) as tmpf:
-        tmpf.write(data)
-        tmpf.flush()
-        subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name),
-                              shell=True)
-        text = open(txtfile).read()
-    os.remove(txtfile)
+    try:
+        with tempfile.NamedTemporaryFile(delete=True) as tmpf:
+            tmpf.write(data)
+            tmpf.flush()
+            subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name),
+                                  shell=True)
+            text = open(txtfile).read()
+    finally:
+        os.remove(txtfile)
     return text.decode('utf8')
 
 def text_after_line_numbers(lines):
