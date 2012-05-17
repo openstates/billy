@@ -38,7 +38,8 @@
         {% endif %}
 
         {% if role.type == 'committee member' %}
-          member of the {{ role.committee }} Committee
+        member of the {{ role.committee }} Committee
+        {% if role.subcommittee %}, {{role.subcommittee}} Subcommittee {% endif %}
         {% endif %}
       </li>
     {% endfor %}
