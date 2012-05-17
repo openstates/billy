@@ -4,6 +4,9 @@ MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DATABASE = 'billy'
 
+BOUNDARY_SERVICE_URL = 'http://localhost:8001/1.0/'
+ELASTICSEARCH_HOST = '127.0.0.1:9200'
+
 API_BASE_URL = 'http://openstates.org/api/v1/'
 
 SCRAPER_PATHS = []
