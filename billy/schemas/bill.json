@@ -15,11 +15,13 @@
     "versions": {"type": "array", "items": {"type": "object", "properties": {
         "name": {"type": "string"},
         "url": {"type": "string", "blank": true},
+        "mimetype": {"type": "string", "required": false},
         "title": {"type": "string", "required": false}
     }}},
     "documents": {"type": "array", "items": {"type": "object", "properties": {
         "name": {"type": "string"},
-        "url": {"type": "string"}
+        "url": {"type": "string"},
+        "mimetype": {"type": "string", "required": false}
     }}},
     "sponsors": {"type": "array", "items": {"type": "object", "properties": {
         "type": {"type": "string"},

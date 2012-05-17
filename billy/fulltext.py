@@ -15,14 +15,19 @@ def pdfdata_to_text(data):
 
 
 def worddata_to_text(data):
-    _, txtfile = tempfile.mkstemp(prefix='tmp-worddata-', suffix='.txt')
-    with tempfile.NamedTemporaryFile(delete=True) as tmpf:
-        tmpf.write(data)
-        subprocess.check_call('abiword --to=%s %s' % (txtfile, tmpf.name), 
-                              shell=True)
-        tmpf.flush()
-        text = open(txtfile).read()
-    os.remove(txtfile)
+    desc, txtfile = tempfile.mkstemp(prefix='tmp-worddata-', suffix='.txt')
+    try:
+        with tempfile.NamedTemporaryFile(delete=True) as tmpf:
+            tmpf.write(data)
+            tmpf.flush()
+            subprocess.check_call(['abiword', '--to=%s' %txtfile, tmpf.name])
+            f = open(txtfile)
+            text = f.read()
+            tmpf.close()
+            f.close()
+    finally:
+        os.remove(txtfile)
+        os.close(desc)
     return text.decode('utf8')
 
 def text_after_line_numbers(lines):
@@ -55,5 +60,7 @@ def _clean_text(text):
 def oyster_text(function):
     @wraps(function)
     def wrapper(oyster_doc, data):
-        return _clean_text(function(oyster_doc, data))
+        data = function(oyster_doc, data)
+        if data:
+            return _clean_text(data)
     return wrapper
