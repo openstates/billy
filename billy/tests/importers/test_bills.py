@@ -76,7 +76,6 @@ def test_import_bill():
     assert bill['scraped_subjects'] == data['subjects']
     assert 'subjects' not in bill
     assert bill['_term'] == 'T1'
-    assert '_keywords' in bill
     assert bill['created_at'] == bill['updated_at']
 
     # assure sponsors are there and that John Adams gets matched
@@ -168,18 +167,6 @@ def test_fix_bill_id():
     assert bills.fix_bill_id('PR19-0041') == 'PR 19-0041'
     assert bills.fix_bill_id(' 999') == '999'
     assert bills.fix_bill_id('999') == '999'
-
-
-def test_bill_keywords():
-    bill = {'title': 'transportation of hazardous materials',
-            'bill_id': 'HB 201',
-            'alternate_titles': [
-                'cephalopod waste disposal',
-                'elimination of marine garbage'
-            ]}
-    expected = set(['201', 'elimin', 'garbag', 'materi', 'wast', 'hazard',
-                    'marin', 'hb', 'dispos', 'cephalopod', 'transport'])
-    assert bills.bill_keywords(bill) == expected
 
 
 @with_setup(setup_func)
