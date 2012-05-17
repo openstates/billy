@@ -103,6 +103,8 @@ class Document(dict):
         try:
             return Metadata.get_object(self['state'])
         except KeyError:
+            # This is the special case of Reports, where the _id
+            # is the state abbreviation.
             return Metadata.get_object(self['_id'])
 
     @property
@@ -111,6 +113,38 @@ class Document(dict):
         document also has a key named 'state', django's templating
         engine will use that instead, so using 'metadata' is safer.'''
         return self.metadata
+
+    def chamber_name(self):
+        chamber = self['chamber']
+        if chamber == 'joint':
+            return 'Joint'
+        return self.metadata['%s_chamber_name' % self['chamber']]
+
+    @property
+    def subdocument(self):
+        '''This property enables enables this:
+
+        class Bill(Document):
+
+            def version_objects(self):
+                for data in self['versions']:
+                    yield self.subdocument(data)
+
+        bill = db.bills.find_one()
+        version = next(bill.version_objects())
+        assert version.bill is bill
+        '''
+        selfname = self.__class__.__name__.lower()
+
+        class Subdocument(dict):
+
+            def __repr__(subdoc):
+                args = (selfname, dict.__repr__(subdoc))
+                return '%s.Subdocument(%r)' % args
+
+        setattr(Subdocument, selfname, self)
+
+        return Subdocument
 
 
 class RelatedDocument(ReadOnlyAttribute):
@@ -122,8 +156,9 @@ class RelatedDocument(ReadOnlyAttribute):
     You can pass additional find_one arguments and limit the returned
     field, for example.
     '''
-    def __init__(self, model):
+    def __init__(self, model, instance_key=None):
         self.model = model
+        self.instance_key = instance_key
 
     def __get__(self, instance, type_=None):
 
@@ -133,20 +168,22 @@ class RelatedDocument(ReadOnlyAttribute):
         if isinstance(model, basestring):
             model = self.model = get_model(model)
 
-        try:
-            model_fk_string = model.foreign_key_string
-            self.model_fk_string = model_fk_string
+        instance_key = getattr(self, 'instance_key', None)
+        if instance_key is None:
+            try:
+                instance_key = model.instance_key
+            except KeyError:
+                msg = ("Can't dereference: model %r has no instance_key "
+                       "defined.")
+                raise ModelDefinitionError(msg % model)
+            else:
+                self.instance_key = instance_key
 
-        except KeyError:
-            msg = ("Can't dereference: model %r has no foreign_key_string "
-                   "defined.")
-            raise ModelDefinitionError(msg % model)
-
         try:
-            self.model_id = instance[model_fk_string]
+            self.model_id = instance[self.instance_key]
         except KeyError:
-            msg = "Can't dereference: model %r has no key %r."
-            raise ModelDefinitionError(msg % (model, model_fk_string))
+            msg = "Can't dereference: instance %r has no key %r."
+            raise ModelDefinitionError(msg % (instance, instance_key))
 
         return self
 
@@ -341,7 +378,21 @@ class FeedEntry(Document):
 
 
 class CommitteeMember(dict):
-    legislator_object = RelatedDocument('Legislator')
+    legislator_object = RelatedDocument('Legislator', instance_key='leg_id')
+
+
+class CommitteeMemberManager(AttrManager):
+
+    def __iter__(self):
+        for obj in self.inst['members']:
+            if 'leg_id' in obj:
+                if DEBUG:
+                    msg = '{0}.{1}({2}, {3}, {4})'.format(
+                                'legislators',
+                                'find_one', {'_id': obj['leg_id']}, (), {})
+                    logger.debug(msg)
+                legislator = db.legislators.find_one({'_id': obj['leg_id']})
+                yield obj, legislator
 
 
 class Committee(Document):
@@ -349,11 +400,7 @@ class Committee(Document):
     collection = db.committees
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
-    def members_objects(self):
-        '''
-        Return a list of CommitteeMember objects.
-        '''
-        return map(CommitteeMember, self['members'])
+    members_objects = CommitteeMemberManager()
 
     def display_name(self):
         try:
@@ -386,7 +433,7 @@ class RolesManager(AttrManager):
 class Legislator(Document):
 
     collection = db.legislators
-    foreign_key_string = 'leg_id'
+    istance_key = 'leg_id'
 
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
     sponsored_bills = RelatedDocuments('Bill', model_keys=['sponsors.leg_id'])
@@ -432,9 +479,6 @@ class Legislator(Document):
     def bio_blurb(self):
         return blurbs.bio_blurb(self)
 
-    def chamber_name(self):
-        return self.state['%s_chamber_name' % self['chamber']]
-
     def primary_sponsored_bills(self):
         return self.sponsored_bills({'sponsors.type': 'primary'})
 
@@ -443,13 +487,25 @@ class Legislator(Document):
 
     def sessions_served(self):
         session_details = self.metadata['session_details']
+        terms = self.metadata['terms']
         for role in self['roles']:
             if role['type'] == 'member':
-                yield session_details[role['term']]['display_name']
+                term_name = role['term']
+
+                try:
+                    details = session_details[term_name]
+                except KeyError:
+                    for term in terms:
+                        if term['name'] == term_name:
+                            for session in term['sessions']:
+                                details = session_details[session]
+                                yield details['display_name']
+                else:
+                    details['display_name']
 
 
 class Sponsor(dict):
-    legislator = RelatedDocument('Legislator')
+    legislator = RelatedDocument('Legislator', instance_key='leg_id')
 
 
 class SponsorsManager(AttrManager):
@@ -596,6 +652,11 @@ class Bill(Document):
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
+    def version_objects(self):
+        cls = self.subdocument
+        for obj in self['versions']:
+            yield cls(obj)
+
     def session_details(self):
         metadata = self.metadata
         return metadata['session_details'][self['session']]
@@ -611,6 +672,9 @@ class Bill(Document):
     def state(self):
         return self.metadata
 
+    def type_string(self):
+        return self['_type']
+
 
 class Metadata(Document):
     '''
@@ -621,6 +685,8 @@ class Metadata(Document):
     >>> bill.state.abbr
     'de'
     '''
+    instance_key = 'state'
+
     class VotesManager(AttrManager):
         def __iter__(self):
             for bill in self.inst.bills():
@@ -671,6 +737,7 @@ class Metadata(Document):
 class Report(Document):
 
     collection = db.reports
+    metadata = RelatedDocument('Metadata', instance_key='_id')
 
     def session_link_data(self):
         '''

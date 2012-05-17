@@ -1,5 +1,7 @@
 import re
 import operator
+
+from operator import itemgetter
 from itertools import repeat, islice
 
 import pymongo
@@ -34,6 +36,14 @@ def include_fields(*field_names):
 
 def templatename(name):
     return 'billy/web/public/%s.html' % name
+
+
+def sort_by_district(obj):
+        matchobj = re.search(r'\d+', obj['district'])
+        if matchobj:
+            return int(matchobj.group())
+        else:
+            return obj['district']
 
 
 def homepage(request):
@@ -189,29 +199,26 @@ def chamber_select(request, collection_name):
     '''
     if collection_name not in ('legislators', 'committees'):
         raise Http404
+
     form = ChamberSelectForm(request.GET)
     chamber = form.data['chamber']
     abbr = form.data['abbr']
-    return redirect('%s_chamber' % collection_name, abbr, chamber)
+
+    if chamber != 'both':
+        return redirect('%s_chamber' % collection_name, abbr, chamber)
+    else:
+        return redirect(collection_name, abbr)
 
 
 def legislators(request, abbr):
-    return redirect('legislators_chamber', abbr, 'upper')
-
-
-def legislators_chamber(request, abbr, chamber):
 
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
 
-    chamber_name = meta['%s_chamber_name' % chamber]
-
-    # Query params
-    spec = {'chamber': chamber}
-
-    fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party']
+    fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
+              'chamber', 'state', 'last_name']
     fields = dict(zip(fields, repeat1))
 
     sort_key = 'district'
@@ -221,19 +228,81 @@ def legislators_chamber(request, abbr, chamber):
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
 
-    legislators = meta.legislators(extra_spec=spec, fields=fields,
-                                    sort=[(sort_key, sort_order)])
+    spec = {'active': True}
 
-    # Sort in python if the key was "district"
-    if sort_key == 'district':
-        def sorter(obj):
+    legislators = meta.legislators(extra_spec=spec, fields=fields)
+
+    def sort_by_district(obj):
+        matchobj = re.search(r'\d+', obj['district'])
+        if matchobj:
+            return int(matchobj.group())
+        else:
+            return obj['district']
+
+    legislators = sorted(legislators, key=sort_by_district)
+
+    if sort_key != 'district':
+        legislators = sorted(legislators, key=itemgetter(sort_key),
+                             reverse=(sort_order == -1))
+
+    sort_order = {1: -1, -1: 1}[sort_order]
+
+    legislators = list(legislators)
+
+    chamber_select_form = ChamberSelectForm.unbound(meta)
+
+    return render_to_response(
+        template_name=templatename('legislators_chamber'),
+        dictionary=dict(
+            metadata=meta,
+            chamber_select_form=chamber_select_form,
+            chamber_select_template=templatename('chamber_select_form'),
+            chamber_select_collection='legislators',
+            show_chamber_column=True,
+            abbr=abbr,
+            legislators=legislators,
+            sort_order=sort_order,
+            sort_key=sort_key,
+            legislator_table=templatename('legislator_table'),
+            statenav_active='legislators'),
+        context_instance=RequestContext(request, default_context))
+
+
+def legislators_chamber(request, abbr, chamber):
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
+    chamber_name = meta['%s_chamber_name' % chamber]
+
+    # Query params
+    spec = {'chamber': chamber, 'active': True}
+
+    fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
+              'chamber', 'state', 'last_name']
+    fields = dict(zip(fields, repeat1))
+
+    sort_key = 'district'
+    sort_order = 1
+
+    if request.GET:
+        sort_key = request.GET['key']
+        sort_order = int(request.GET['order'])
+
+    legislators = meta.legislators(extra_spec=spec, fields=fields)
+
+    def sort_by_district(obj):
             matchobj = re.search(r'\d+', obj['district'])
             if matchobj:
                 return int(matchobj.group())
             else:
                 return obj['district']
 
-        legislators = sorted(legislators, key=sorter,
+    legislators = sorted(legislators, key=sort_by_district)
+
+    if sort_key != 'district':
+        legislators = sorted(legislators, key=itemgetter(sort_key),
                              reverse=(sort_order == -1))
 
     sort_order = {1: -1, -1: 1}[sort_order]
@@ -250,6 +319,7 @@ def legislators_chamber(request, abbr, chamber):
             chamber_select_form=chamber_select_form,
             chamber_select_template=templatename('chamber_select_form'),
             chamber_select_collection='legislators',
+            show_chamber_column=False,
             abbr=abbr,
             legislators=legislators,
             sort_order=sort_order,
@@ -299,7 +369,56 @@ def legislator(request, abbr, leg_id):
 
 #----------------------------------------------------------------------------
 def committees(request, abbr):
-    return redirect('committees_chamber', abbr, 'upper')
+
+    try:
+        meta = Metadata.get_object(abbr)
+    except DoesNotExist:
+        raise Http404
+
+    chamber = request.GET.get('chamber', 'both')
+    if chamber in ('upper', 'lower'):
+        chamber_name = meta['%s_chamber_name' % chamber]
+        spec = {'chamber': chamber}
+        show_chamber_column = False
+    else:
+        chamber = 'both'
+        spec = {}
+        show_chamber_column = True
+        chamber_name = ''
+
+    fields = ['committee', 'subcommittee', 'members', 'state',
+              'chamber']
+    fields = dict(zip(fields, repeat1))
+
+    sort_key = 'committee'
+    sort_order = 1
+
+    sort_key = request.GET.get('key', 'committee')
+    sort_order = int(request.GET.get('order', 1))
+
+    committees = meta.committees(spec, fields=fields,
+                                  sort=[(sort_key, sort_order)])
+
+    sort_order = {1: -1, -1: 1}[sort_order]
+
+    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
+
+    return render_to_response(
+        template_name=templatename('committees_chamber'),
+        dictionary=dict(
+            chamber=chamber,
+            committees=committees,
+            abbr=abbr,
+            metadata=meta,
+            chamber_name=chamber_name,
+            chamber_select_form=chamber_select_form,
+            chamber_select_template=templatename('chamber_select_form'),
+            committees_table_template=templatename('committees_table'),
+            chamber_select_collection='committees',
+            show_chamber_column=show_chamber_column,
+            sort_order=sort_order,
+            statenav_active='committees'),
+        context_instance=RequestContext(request, default_context))
 
 
 def committees_chamber(request, abbr, chamber):
@@ -378,6 +497,10 @@ def bills(request, abbr):
             metadata=meta,
             statenav_active='bills'),
         context_instance=RequestContext(request, default_context))
+
+
+def bills_by_subject(request, abbr, subject):
+    pass
 
 
 def bill(request, abbr, bill_id):

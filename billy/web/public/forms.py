@@ -18,14 +18,15 @@ class ChamberSelectForm(forms.Form):
     abbr = forms.CharField(widget=forms.HiddenInput())
 
     @classmethod
-    def unbound(cls, metadata, chamber):
+    def unbound(cls, metadata, chamber='both'):
 
         inst = cls()
 
         # Make the radio option names reflect this state's actual
         # chamber names.
         chamber_choices = [('upper', metadata['upper_chamber_name']),
-                           ('lower', metadata['lower_chamber_name'])]
+                           ('lower', metadata['lower_chamber_name']),
+                           ('both', 'All')]
 
         _chamber = inst.fields['chamber']
         _chamber.choices = chamber_choices
