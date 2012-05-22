@@ -436,7 +436,6 @@ class Legislator(Document):
     istance_key = 'leg_id'
 
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
-    sponsored_bills = RelatedDocuments('Bill', model_keys=['sponsors.leg_id'])
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
     roles_manager = RolesManager()
 
@@ -479,8 +478,19 @@ class Legislator(Document):
     def bio_blurb(self):
         return blurbs.bio_blurb(self)
 
+    def sponsored_bills(self, extra_spec=None, *args, **kwargs):
+        if extra_spec is None:
+            extra_spec = {} 
+        extra_spec.update({'sponsors.leg_id': self.id})
+        return self.metadata.bills(extra_spec, *args, **kwargs)
+
     def primary_sponsored_bills(self):
-        return self.sponsored_bills({'sponsors.type': 'primary'})
+        return self.metadata.bills({'sponsors.type': 'primary',
+                                    'sponsors.leg_id': self.id})
+
+    def secondary_sponsored_bills(self):
+        return self.metadata.bills({'sponsors.type': {'$ne': 'primary'},
+                                    'sponsors.leg_id': self.id})
 
     def display_name(self):
         return '%s %s' % (self['first_name'], self['last_name'])
@@ -737,7 +747,7 @@ class Metadata(Document):
 class Report(Document):
 
     collection = db.reports
-    metadata = RelatedDocument('Metadata', instance_key='_id')
+    #metadata = RelatedDocument('Metadata', instance_key='_id')
 
     def session_link_data(self):
         '''
