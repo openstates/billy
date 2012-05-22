@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 
 from billy.conf import settings
-from billy.utils import metadata, keywordize, term_for_session
+from billy.utils import metadata, term_for_session
 from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
@@ -179,9 +179,6 @@ def import_bill(data, votes, categorizer):
         pass
     data['alternate_titles'] = list(alt_titles)
 
-    # update keywords
-    data['_keywords'] = list(bill_keywords(data))
-
     if not bill:
         insert_with_id(data)
         return "insert"
@@ -229,17 +226,6 @@ def import_bills(abbr, data_dir):
     ensure_indexes()
 
     return counts
-
-def bill_keywords(bill):
-    """
-    Get the keyword set for all of a bill's titles.
-    """
-    keywords = keywordize(bill['title'])
-    keywords = keywords.union(keywordize(bill['bill_id']))
-    for title in bill['alternate_titles']:
-        keywords = keywords.union(keywordize(title))
-    return keywords
-
 
 def populate_current_fields(level, abbr):
     """

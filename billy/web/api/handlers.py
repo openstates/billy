@@ -9,14 +9,17 @@ from django.http import HttpResponse
 
 from billy import db
 from billy.conf import settings
-from billy.utils import keywordize, metadata, find_bill
+from billy.utils import metadata, find_bill
 
 import pymongo
+import pyes
 
 from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 from jellyfish import levenshtein_distance
+
+elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST)
 
 _chamber_aliases = {
     'assembly': 'lower',
@@ -167,12 +170,6 @@ class BillSearchHandler(BillyHandler):
                                                 'subjects', 'bill_id',
                                                 'bill_id__in'))
 
-        # process full-text query
-        query = request.GET.get('q')
-        if query:
-            keywords = list(keywordize(query))
-            _filter['_keywords'] = {'$all': keywords}
-
         # process search_window
         search_window = request.GET.get('search_window', '')
         if search_window:
@@ -207,6 +204,42 @@ class BillSearchHandler(BillyHandler):
         sponsor_id = request.GET.get('sponsor_id')
         if sponsor_id:
             _filter['sponsors.leg_id'] = sponsor_id
+
+        # process full-text query
+        query = request.GET.get('q')
+        if query:
+            query = {"query": {"query_string": {"fields": ["text", "title"],
+                                                "query": query}}}
+
+            # take terms from mongo query
+            es_terms = {}
+            if 'state' in _filter:
+                es_terms['state'] = request.GET.get('state')
+            if 'session' in _filter:
+                es_terms['session'] = _filter.pop('session')
+            if 'chamber' in _filter:
+                es_terms['chamber'] = _filter.pop('chamber')
+            if 'subjects' in _filter:
+                es_terms['subjects'] = _filter.pop('subjects')
+            if 'sponsors.leg_id' in _filter:
+                es_terms['sponsors'] = _filter.pop('sponsors.leg_id')
+
+            # add terms
+            if es_terms:
+                query = dict(query = dict(
+                    filtered = dict(
+                        query,
+                        filter = dict(term=es_terms)
+                    )
+                ))
+
+            # only get the vital fields
+            query['fields'] = []
+            query['size'] = 5000  # suitably large to not exclude anything?
+            print query
+            es_result = elasticsearch.search(query)
+            doc_ids = [r['_id'] for r in es_result['hits']['hits']]
+            _filter['versions.doc_id'] = {'$in': doc_ids}
 
         # limit response size
         count = db.bills.find(_filter, bill_fields).count()
@@ -452,8 +485,7 @@ class ReconciliationHandler(BaseHandler):
 
 
 class LegislatorGeoHandler(BillyHandler):
-    base_url = getattr(settings, 'BOUNDARY_SERVICE_URL',
-                       'http://localhost:8001/1.0/')
+    base_url = settings.BOUNDARY_SERVICE_URL
 
     def read(self, request):
         latitude, longitude = request.GET.get('lat'), request.GET.get('long')
@@ -529,8 +561,7 @@ class DistrictHandler(BillyHandler):
 
 
 class BoundaryHandler(BillyHandler):
-    base_url = getattr(settings, 'BOUNDARY_SERVICE_URL',
-                       'http://localhost:8001/1.0/')
+    base_url = settings.BOUNDARY_SERVICE_URL
 
     def read(self, request, boundary_id):
         url = "%sboundary/%s/?shape_type=simple" % (self.base_url, boundary_id)
