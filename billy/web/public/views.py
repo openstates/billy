@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic import TemplateView
 from django.http import Http404
+from django.conf import settings
 
 import billy.models
 from billy.models import db, Metadata, DoesNotExist
@@ -46,10 +47,21 @@ def sort_by_district(obj):
             return obj['district']
 
 
+def state_not_active_yet(request, args, kwargs):
+    return render_to_response(
+        template_name=templatename('state_not_active_yet'),
+        dictionary=dict(
+            metadata=Metadata.get_object(kwargs['abbr']),
+            statenav_active=None),
+        context_instance=RequestContext(request, default_context))
+
+
 def homepage(request):
     return render_to_response(
         template_name=templatename('homepage'),
         dictionary=dict(
+            active_states=map(Metadata.get_object, settings.ACTIVE_STATES),
+            second_last=len(settings.ACTIVE_STATES) - 1,
             statenav_active=None),
         context_instance=RequestContext(request, default_context))
 
