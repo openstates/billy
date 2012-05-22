@@ -1,9 +1,9 @@
 from django import forms
+from django.conf import settings
 
-from billy import db
+from billy.models import Metadata
 
-
-states = db.metadata.find({}, {'_id': 1, 'name': 1}, sort=[('name', 1)])
+states = map(Metadata.get_object, sorted(settings.ACTIVE_STATES))
 state_abbrs = [('', 'Select a state')]
 state_abbrs += [(obj['_id'], obj['name']) for obj in states]
 
