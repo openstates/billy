@@ -84,6 +84,4 @@ def recent_actions(abbr):
         introduced_upper=f('bill:introduced', 'upper'),
         introduced_lower=f('bill:introduced', 'lower'))
 
-    import pdb;pdb.set_trace()
-
     return res
