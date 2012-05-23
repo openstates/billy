@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import template
 
 from billy.web.public.views import templatename
@@ -20,3 +22,11 @@ def sources(obj):
 @register.filter
 def plusfield(object, key):
     return object['+' + key]
+
+
+@register.filter
+def decimal_format(value, TWOPLACES=Decimal(100) ** -2):
+    'Format a decimal.Decimal like to 2 decimal places.'
+    if not isinstance(value, Decimal):
+        value = Decimal(str(value))
+    return value.quantize(TWOPLACES)
