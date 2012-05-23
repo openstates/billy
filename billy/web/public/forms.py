@@ -36,3 +36,7 @@ class ChamberSelectForm(forms.Form):
         inst.fields['abbr'].initial = metadata['_id']
 
         return inst
+
+
+class FindYourLegislatorForm(forms.Form):
+    address = forms.CharField()
