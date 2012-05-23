@@ -4,7 +4,8 @@ from django.conf.urls.defaults import patterns, url
 from billy.web.public.views import (legislators, legislators_chamber,
     legislator, committees_chamber, committees, committee, bill,
     bills, vote, state, state_selection, VotesList, FeedsList,
-    homepage, pick_a_state, chamber_select, bills_by_subject)
+    homepage, pick_a_state, chamber_select, bills_by_subject,
+    find_your_legislator)
 
 
 urlpatterns = patterns('',
@@ -61,5 +62,6 @@ urlpatterns = patterns('',
 
     # other views
     url(r'^downloads/$', 'billy.web.public.views_other.downloads', name='downloads'),
-
+    url(r'^find_your_legislator/$', find_your_legislator,
+        name='find_your_legislator'),
 )

@@ -12,11 +12,13 @@ from django.views.generic import TemplateView
 from django.http import Http404
 from django.conf import settings
 
+import requests
+
 import billy.models
 from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 
-from .forms import StateSelectForm, ChamberSelectForm
+from .forms import StateSelectForm, ChamberSelectForm, FindYourLegislatorForm
 from .viewdata import overview
 
 
@@ -221,6 +223,16 @@ def chamber_select(request, collection_name):
     else:
         return redirect(collection_name, abbr)
 
+
+def find_your_legislator(request):
+
+    form = FindYourLegislatorForm(request.GET)
+
+    url = 'http://rpc.geocoder.us/service/csv?address=%s'
+    url = url % form.data['address'].replace(' ', '+')
+    resp = requests.get(url)
+    lat, lng, _ = resp.text.split(',', 2)
+    import pdb;pdb.set_trace()
 
 def legislators(request, abbr):
 
