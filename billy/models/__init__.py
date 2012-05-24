@@ -13,6 +13,7 @@ import math
 import urlparse
 import datetime
 import logging
+import collections
 
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
@@ -674,9 +675,19 @@ class Bill(Document):
     def most_recent_action(self):
         return self['actions'][-1]
 
+    @property
     def chamber_name(self):
         '''"lower" --> "House of Representatives"'''
         return self.metadata['%s_chamber_name' % self['chamber']]
+
+    @property
+    def other_chamber(self):
+        return {'upper': 'lower',
+                'lower': 'upper'}[self['chamber']]
+
+    @property
+    def other_chamber_name(self):
+        return self.metadata['%s_chamber_name' % self.other_chamber]
 
     @property
     def state(self):
@@ -684,6 +695,66 @@ class Bill(Document):
 
     def type_string(self):
         return self['_type']
+
+    # Bill progress properties
+    @property
+    def actions_type_dict(self):
+        typedict = getattr(self, '_actions_type_dict', None)
+        if typedict is None:
+            typedict = collections.defaultdict(list)
+            for action in self['actions']:
+                for type_ in action['type']:
+                    typedict[type_].append(action)
+            setattr(self, '_actions_type_dict', typedict)
+        return dict(typedict)
+
+    def date_introduced(self):
+        chamber = self['chamber']
+        actions = self.actions_type_dict.get('bill:introduced')
+        if actions:
+            for action in actions:
+                if chamber in action['actor']:
+                    return action['date']
+
+    def date_passed_lower(self):
+        chamber = 'lower'
+        actions = self.actions_type_dict.get('bill:passed')
+        if actions:
+            for action in actions:
+                if chamber in action['actor']:
+                    return action['date']
+
+    def date_passed_upper(self):
+        chamber = 'upper'
+        actions = self.actions_type_dict.get('bill:passed')
+        if actions:
+            for action in actions:
+                if chamber in action['actor']:
+                    return action['date']
+
+    def date_signed(self):
+        actions = self.actions_type_dict.get('upper', 'governor:signed')
+        if actions:
+            return actions[-1]['date']
+
+    def progress_data(self):
+
+        data = [
+            ('stage1', 'Introduced', 'date_introduced'),
+
+            ('stage2',
+             'Passed ' + self.chamber_name,
+             'date_passed_' + self['chamber']),
+
+            ('stage3',
+             'Passed ' + self.other_chamber_name,
+             'date_passed_' + self.other_chamber),
+
+            ('stage4', 'Governor Signs', 'date_passed_upper'),
+            ]
+        for stage, text, method in data:
+            print stage, text, getattr(self, method)()
+            yield stage, text, getattr(self, method)()
 
 
 class Metadata(Document):

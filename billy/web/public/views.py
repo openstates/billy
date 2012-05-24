@@ -234,6 +234,7 @@ def find_your_legislator(request):
     lat, lng, _ = resp.text.split(',', 2)
     import pdb;pdb.set_trace()
 
+
 def legislators(request, abbr):
 
     try:
@@ -288,7 +289,9 @@ def legislators(request, abbr):
             sort_order=sort_order,
             sort_key=sort_key,
             legislator_table=templatename('legislator_table'),
-            statenav_active='legislators'),
+            statenav_active='legislators',
+            tweet_text='Test cow!',
+            ),
         context_instance=RequestContext(request, default_context))
 
 
@@ -537,6 +540,7 @@ def bill(request, abbr, bill_id):
         template_name=templatename('bill'),
         dictionary=dict(
             vote_preview_row_template=templatename('vote_preview_row'),
+            bill_progress_template=templatename('bill_progress_template'),
             abbr=abbr,
             state=Metadata.get_object(abbr),
             bill=bill,
