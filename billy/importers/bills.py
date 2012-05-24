@@ -20,24 +20,16 @@ logger = logging.getLogger('billy')
 
 
 def ensure_indexes():
+    # accomodates basic search / unique constraint
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
                            ('bill_id', pymongo.ASCENDING)],
                           unique=True)
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
-                           ('_current_term', pymongo.ASCENDING),
-                           ('_current_session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('_keywords', pymongo.ASCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('_keywords', pymongo.ASCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('type', pymongo.ASCENDING)])
+    # used for search in conjunction with ElasticSearch
+    db.bills.ensure_index([('versions.doc_id', pymongo.ASCENDING)])
+    # TODO: add a _current_term, _current_session index
+    # TODO: re-evaluate if the below indices are needed
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
