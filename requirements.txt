@@ -2,7 +2,7 @@
 Django>=1.4
 argparse==1.1
 boto
-django-piston==0.2.2
+-e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 icalendar==2.1
 jellyfish>=0.1.2
 lxml>=2.2
