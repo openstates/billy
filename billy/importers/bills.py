@@ -33,10 +33,6 @@ def ensure_indexes():
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
-                           ('_keywords', pymongo.ASCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
                            ('type', pymongo.ASCENDING)])
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),

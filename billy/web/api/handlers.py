@@ -38,12 +38,10 @@ def parse_param_dt(dt):
         except ValueError:
             pass
 
+_lower_fields = ('state',)
+
 
 def _build_mongo_filter(request, keys, icase=True):
-    # We use regex queries to get case insensitive search - this
-    # means they won't use any indexes for now. Real case insensitive
-    # queries are coming eventually:
-    # http://jira.mongodb.org/browse/SERVER-90
     _filter = {}
     keys = set(keys) - set(['fields'])
 
@@ -60,10 +58,16 @@ def _build_mongo_filter(request, keys, icase=True):
             if key == 'chamber':
                 value = value.lower()
                 _filter[key] = _chamber_aliases.get(value, value)
+            elif key in _lower_fields:
+                _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
                 _filter[key[:-4]] = {'$in': values}
             else:
+                # We use regex queries to get case insensitive search - this
+                # means they won't use any indexes for now. Real case
+                # insensitive queries are coming eventually:
+                # http://jira.mongodb.org/browse/SERVER-90
                 _filter[key] = re.compile('^%s$' % value, re.IGNORECASE)
 
     return _filter
@@ -212,31 +216,30 @@ class BillSearchHandler(BillyHandler):
                                                 "query": query}}}
 
             # take terms from mongo query
-            es_terms = {}
+            es_terms = []
             if 'state' in _filter:
-                es_terms['state'] = request.GET.get('state')
+                es_terms.append({'term': {'state': _filter.pop('state')}})
             if 'session' in _filter:
-                es_terms['session'] = _filter.pop('session')
+                es_terms.append({'term': {'session': _filter.pop('session')}})
             if 'chamber' in _filter:
-                es_terms['chamber'] = _filter.pop('chamber')
+                es_terms.append({'term': {'chamber': _filter.pop('chamber')}})
             if 'subjects' in _filter:
-                es_terms['subjects'] = _filter.pop('subjects')
+                es_terms.append({'term': {'subjects': _filter.pop('subjects')['$all']}})
             if 'sponsors.leg_id' in _filter:
-                es_terms['sponsors'] = _filter.pop('sponsors.leg_id')
+                es_terms.append({'term': {'sponsors': _filter.pop('sponsors.leg_id')}})
 
             # add terms
             if es_terms:
                 query = dict(query = dict(
                     filtered = dict(
                         query,
-                        filter = dict(term=es_terms)
+                        filter = {'and': es_terms}
                     )
                 ))
 
             # only get the vital fields
             query['fields'] = []
             query['size'] = 5000  # suitably large to not exclude anything?
-            print query
             es_result = elasticsearch.search(query)
             doc_ids = [r['_id'] for r in es_result['hits']['hits']]
             _filter['versions.doc_id'] = {'$in': doc_ids}
