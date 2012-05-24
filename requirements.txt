@@ -1,8 +1,8 @@
 -e git://github.com/sunlightlabs/django-locksmith.git#egg=django-locksmith
+-e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 Django>=1.4
 argparse==1.1
 boto
--e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 icalendar==2.1
 jellyfish>=0.1.2
 lxml>=2.2
@@ -12,3 +12,4 @@ pymongo>=2.2
 scrapelib>=0.7.0
 unicodecsv
 validictory
+pyes
