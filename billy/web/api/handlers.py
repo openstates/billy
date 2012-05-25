@@ -19,7 +19,8 @@ from piston.handler import BaseHandler, HandlerMetaClass
 
 from jellyfish import levenshtein_distance
 
-elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST)
+elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
+                        settings.ELASTICSEARCH_TIMEOUT)
 
 _chamber_aliases = {
     'assembly': 'lower',
