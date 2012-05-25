@@ -1,6 +1,5 @@
--e git://github.com/sunlightlabs/django-locksmith.git#egg=django-locksmith
--e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 Django>=1.4
+-e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 argparse==1.1
 boto
 icalendar==2.1
