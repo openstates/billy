@@ -213,36 +213,36 @@ class BillSearchHandler(BillyHandler):
         # process full-text query
         query = request.GET.get('q')
         if query:
-            query = {"query": {"query_string": {"fields": ["text", "title"],
-                                                "query": query}}}
+            query = {"query_string": {"fields": ["text", "title"],
+                                                "query": query}}
+            search = pyes.Search(query, size=100, fields=[])
 
             # take terms from mongo query
             es_terms = []
             if 'state' in _filter:
-                es_terms.append({'term': {'state': _filter.pop('state')}})
+                es_terms.append(pyes.TermFilter('state',
+                                                _filter.pop('state')))
             if 'session' in _filter:
-                es_terms.append({'term': {'session': _filter.pop('session')}})
+                es_terms.append(pyes.TermFilter('session',
+                                                _filter.pop('session')))
             if 'chamber' in _filter:
-                es_terms.append({'term': {'chamber': _filter.pop('chamber')}})
+                es_terms.append(pyes.TermFilter('chamber',
+                                                _filter.pop('chamber')))
             if 'subjects' in _filter:
-                es_terms.append({'term': {'subjects': _filter.pop('subjects')['$all']}})
+                es_terms.append(pyes.TermFilter('subjects',
+                                           _filter.pop('subjects')['$all']))
             if 'sponsors.leg_id' in _filter:
-                es_terms.append({'term': {'sponsors': _filter.pop('sponsors.leg_id')}})
+                es_terms.append(pyes.TermFilter('sponsors',
+                                                _filter.pop('sponsors.leg_id')))
 
             # add terms
             if es_terms:
-                query = dict(query = dict(
-                    filtered = dict(
-                        query,
-                        filter = {'and': es_terms}
-                    )
-                ))
+                search.filter = pyes.ANDFilter(es_terms)
 
-            # only get the vital fields
-            query['fields'] = []
-            query['size'] = 5000  # suitably large to not exclude anything?
-            es_result = elasticsearch.search_raw(query)
-            doc_ids = [r['_id'] for r in es_result['hits']['hits']]
+            # limit page size & fields
+            es_result = elasticsearch.search(search, search_type='scan',
+                                             scroll='3m')
+            doc_ids = [r.get_id() for r in es_result]
             _filter['versions.doc_id'] = {'$in': doc_ids}
 
         # limit response size
