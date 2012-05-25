@@ -241,7 +241,7 @@ class BillSearchHandler(BillyHandler):
             # only get the vital fields
             query['fields'] = []
             query['size'] = 5000  # suitably large to not exclude anything?
-            es_result = elasticsearch.search(query)
+            es_result = elasticsearch.search_raw(query)
             doc_ids = [r['_id'] for r in es_result['hits']['hits']]
             _filter['versions.doc_id'] = {'$in': doc_ids}
 
