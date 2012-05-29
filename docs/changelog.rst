@@ -1,6 +1,10 @@
 billy changelog
 ===============
 
+1.3-dev
+-------
+**in development**
+
 1.2.0
 -----
 **29 May 2012**
