@@ -215,7 +215,7 @@ class BillSearchHandler(BillyHandler):
         if query:
             query = {"query_string": {"fields": ["text", "title"],
                                                 "query": query}}
-            search = pyes.Search(query, size=1000, fields=[])
+            search = pyes.Search(query, fields=[])
 
             # take terms from mongo query
             es_terms = []
@@ -239,9 +239,9 @@ class BillSearchHandler(BillyHandler):
             if es_terms:
                 search.filter = pyes.ANDFilter(es_terms)
 
-            # limit page size & fields
+            # page size is a guess, could use tweaks
             es_result = elasticsearch.search(search, search_type='scan',
-                                             scroll='3m')
+                                             scroll='3m', size=250)
             doc_ids = [r.get_id() for r in es_result]
             _filter['versions.doc_id'] = {'$in': doc_ids}
 
