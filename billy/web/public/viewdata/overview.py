@@ -57,8 +57,8 @@ def chamber(abbr, chamber):
 def recent_actions(abbr):
     state = Metadata.get_object(abbr)
     bills = state.bills({'session': state.most_recent_session,
-                         '$or': [{'actions.type': 'bill:passed',
-                                  'actions.type': 'bill:introduced'}],
+                         '$or': [{'actions.type': 'bill:passed'},
+                                 {'actions.type': 'bill:introduced'}],
                          'type': 'bill'})
     bills_by_action = defaultdict(list)
     for bill in bills:
