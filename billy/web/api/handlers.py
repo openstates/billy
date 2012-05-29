@@ -19,7 +19,8 @@ from piston.handler import BaseHandler, HandlerMetaClass
 
 from jellyfish import levenshtein_distance
 
-elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST)
+elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
+                        settings.ELASTICSEARCH_TIMEOUT)
 
 _chamber_aliases = {
     'assembly': 'lower',
@@ -38,12 +39,10 @@ def parse_param_dt(dt):
         except ValueError:
             pass
 
+_lower_fields = ('state',)
+
 
 def _build_mongo_filter(request, keys, icase=True):
-    # We use regex queries to get case insensitive search - this
-    # means they won't use any indexes for now. Real case insensitive
-    # queries are coming eventually:
-    # http://jira.mongodb.org/browse/SERVER-90
     _filter = {}
     keys = set(keys) - set(['fields'])
 
@@ -60,10 +59,16 @@ def _build_mongo_filter(request, keys, icase=True):
             if key == 'chamber':
                 value = value.lower()
                 _filter[key] = _chamber_aliases.get(value, value)
+            elif key in _lower_fields:
+                _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
                 _filter[key[:-4]] = {'$in': values}
             else:
+                # We use regex queries to get case insensitive search - this
+                # means they won't use any indexes for now. Real case
+                # insensitive queries are coming eventually:
+                # http://jira.mongodb.org/browse/SERVER-90
                 _filter[key] = re.compile('^%s$' % value, re.IGNORECASE)
 
     return _filter
@@ -208,48 +213,61 @@ class BillSearchHandler(BillyHandler):
         # process full-text query
         query = request.GET.get('q')
         if query:
-            query = {"query": {"query_string": {"fields": ["text", "title"],
-                                                "query": query}}}
+            query = {"query_string": {"fields": ["text", "title"],
+                                                "query": query}}
+            search = pyes.Search(query, fields=[])
 
             # take terms from mongo query
-            es_terms = {}
+            es_terms = []
             if 'state' in _filter:
-                es_terms['state'] = request.GET.get('state')
+                es_terms.append(pyes.TermFilter('state',
+                                                _filter.pop('state')))
             if 'session' in _filter:
-                es_terms['session'] = _filter.pop('session')
+                es_terms.append(pyes.TermFilter('session',
+                                                _filter.pop('session')))
             if 'chamber' in _filter:
-                es_terms['chamber'] = _filter.pop('chamber')
+                es_terms.append(pyes.TermFilter('chamber',
+                                                _filter.pop('chamber')))
             if 'subjects' in _filter:
-                es_terms['subjects'] = _filter.pop('subjects')
+                es_terms.append(pyes.TermFilter('subjects',
+                                           _filter.pop('subjects')['$all']))
             if 'sponsors.leg_id' in _filter:
-                es_terms['sponsors'] = _filter.pop('sponsors.leg_id')
+                es_terms.append(pyes.TermFilter('sponsors',
+                                                _filter.pop('sponsors.leg_id')))
 
             # add terms
             if es_terms:
-                query = dict(query = dict(
-                    filtered = dict(
-                        query,
-                        filter = dict(term=es_terms)
-                    )
-                ))
+                search.filter = pyes.ANDFilter(es_terms)
 
-            # only get the vital fields
-            query['fields'] = []
-            query['size'] = 5000  # suitably large to not exclude anything?
-            print query
-            es_result = elasticsearch.search(query)
-            doc_ids = [r['_id'] for r in es_result['hits']['hits']]
+            # page size is a guess, could use tweaks
+            es_result = elasticsearch.search(search, search_type='scan',
+                                             scroll='3m', size=250)
+            doc_ids = [r.get_id() for r in es_result]
             _filter['versions.doc_id'] = {'$in': doc_ids}
 
-        # limit response size
-        count = db.bills.find(_filter, bill_fields).count()
-        if count > 5000:
-            resp = rc.BAD_REQUEST
-            resp.write(': request too large, try narrowing your search by '
-                       'adding more filters.')
-            return resp
-
+        # start with base query
         query = db.bills.find(_filter, bill_fields)
+
+        # pagination
+        page = request.GET.get('page')
+        per_page = request.GET.get('per_page')
+        if page and not per_page:
+            per_page = 50
+        if per_page and not page:
+            page = 1
+
+        if page:
+            page = int(page)
+            per_page = int(per_page)
+            query = query.limit(per_page).skip(per_page*(page-1))
+        else:
+            # limit response size
+            count = db.bills.find(_filter, bill_fields).count()
+            if count > 5000:
+                resp = rc.BAD_REQUEST
+                resp.write(': request too large, try narrowing your search by '
+                           'adding more filters.')
+                return resp
 
         # sorting
         sort = request.GET.get('sort')
