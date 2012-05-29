@@ -1,13 +1,18 @@
 billy changelog
 ===============
 
-1.2-dev
---------
-**in development**
-    * continued improvements to event support
-    * fresh look at available settings
-    * full text utility for pulling data from .doc files
-    * support for module-specific settings overrides
+1.2.0
+-----
+**29 May 2012**
+    * further development of the public site
+    * use elasticsearch for bill search
+    * improvements to event support
+    * refresh of settings
+        * ENABLE_OYSTER setting replaces --oyster
+        * support for module-specific settings overrides
+    * support for a new scrape signature (chambers vs. chamber)
+    * utility function for pulling data from .doc files
+    * bugfix for pymongo 2.2
 
 1.1.0
 -----
