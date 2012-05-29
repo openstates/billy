@@ -215,7 +215,7 @@ class BillSearchHandler(BillyHandler):
         if query:
             query = {"query_string": {"fields": ["text", "title"],
                                                 "query": query}}
-            search = pyes.Search(query, size=100, fields=[])
+            search = pyes.Search(query, size=5000, fields=[])
 
             # take terms from mongo query
             es_terms = []
