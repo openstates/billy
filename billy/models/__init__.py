@@ -489,7 +489,7 @@ class Legislator(Document):
     #                     if voter['leg_id'] == _id:
     #                         yield vote
 
-    def url(self):
+    def get_absolute_url(self):
         args = (self.metadata.state['abbreviation'], self.id)
         return urlresolvers.reverse('legislator', args=args)
 
@@ -697,7 +697,7 @@ class Bill(Document):
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
-    def url(self):
+    def get_absolute_url(self):
         return urlresolvers.reverse('bill', args=[self['abbreviation', self.id]])
 
     def version_objects(self):
@@ -857,7 +857,7 @@ class Metadata(Document):
     def display_name(self):
         return self['name']
 
-    def url(self):
+    def get_absolute_url(self):
         return urlresolvers.reverse('state', args=[self['abbreviation']])
 
     def _bills_by_chamber_action(self, chamber, action):
