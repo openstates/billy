@@ -10,7 +10,6 @@ class LimitStatesMiddleware(object):
     available yet.
     '''
     def process_view(self, request, func, args, kw):
-
         # Skip API or admin views.
         for path in ['/admin', '/api']:
             if request.path.startswith(path):

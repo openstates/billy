@@ -3,7 +3,7 @@ from decimal import Decimal
 from django import template
 
 from billy.web.public.views import templatename
-from billy.web.public.forms import StateSelectForm
+from billy.web.public.forms import get_state_select_form
 
 
 register = template.Library()
@@ -11,7 +11,7 @@ register = template.Library()
 
 @register.inclusion_tag(templatename('state_select_form'))
 def state_select_form():
-    return {'form':  StateSelectForm}
+    return {'form':  get_state_select_form()}
 
 
 @register.inclusion_tag(templatename('sources'))
