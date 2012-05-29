@@ -245,15 +245,29 @@ class BillSearchHandler(BillyHandler):
             doc_ids = [r.get_id() for r in es_result]
             _filter['versions.doc_id'] = {'$in': doc_ids}
 
-        # limit response size
-        count = db.bills.find(_filter, bill_fields).count()
-        if count > 5000:
-            resp = rc.BAD_REQUEST
-            resp.write(': request too large, try narrowing your search by '
-                       'adding more filters.')
-            return resp
-
+        # start with base query
         query = db.bills.find(_filter, bill_fields)
+
+        # pagination
+        page = request.GET.get('page')
+        per_page = request.GET.get('per_page')
+        if page and not per_page:
+            per_page = 50
+        if per_page and not page:
+            page = 1
+
+        if page:
+            page = int(page)
+            per_page = int(per_page)
+            query = query.limit(per_page).skip(per_page*(page-1))
+        else:
+            # limit response size
+            count = db.bills.find(_filter, bill_fields).count()
+            if count > 5000:
+                resp = rc.BAD_REQUEST
+                resp.write(': request too large, try narrowing your search by '
+                           'adding more filters.')
+                return resp
 
         # sorting
         sort = request.GET.get('sort')
