@@ -4,8 +4,9 @@ from django.conf.urls.defaults import patterns, url
 from billy.web.public.views import (legislators, legislators_chamber,
     legislator, committees_chamber, committees, committee, bill,
     bills, vote, state, state_selection, VotesList, FeedsList,
-    homepage, pick_a_state, chamber_select, bills_by_subject,
-    find_your_legislator)
+    homepage, pick_a_state, chamber_select, BillsBySubject,
+    find_your_legislator, SponsoredBillsList, BillsIntroducedUpper,
+    BillsIntroducedLower, BillsPassedUpper, BillsPassedLower)
 
 
 urlpatterns = patterns('',
@@ -41,14 +42,28 @@ urlpatterns = patterns('',
         committee, name='committee'),
 
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/bills', bills, name='bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/$',
+        BillsBySubject.as_view(), name='bills_by_subject'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_upper/$',
+        BillsIntroducedUpper.as_view(), name='bills_introduced_upper'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_lower/$',
+        BillsIntroducedLower.as_view(), name='bills_introduced_lower'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bills_passed_upper/$',
+        BillsPassedUpper.as_view(), name='bills_passed_upper'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bills_passed_lower/$',
+        BillsPassedLower.as_view(), name='bills_passed_lower'),
+
+    url(r'^(?P<abbr>[a-z]{2})/sponsored_bills/(?P<collection_name>[^/]+)/(?P<id>[^/]+)/$',
+        SponsoredBillsList.as_view(), name='sponsored_bills'),
 
     url(r'^(?P<abbr>[a-z]{2})/bill/(?P<bill_id>\w+)/$',
         bill, name='bill'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/$',
-        bills_by_subject, name='bills_by_subject'),
-
+    url(r'^(?P<abbr>[a-z]{2})/bills', bills, name='bills'),
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/vote/(?P<bill_id>\w+)/(?P<vote_index>\w+)/$',
         vote, name='vote'),

@@ -306,6 +306,10 @@ class AttrManager(object):
 
     @property
     def _keyname(self):
+        try:
+            return self.keyname
+        except AttributeError:
+            pass
         keyname = self.__class__.__name__
         return keyname.lower().replace('manager', '')
 
@@ -431,6 +435,26 @@ class RolesManager(AttrManager):
     wrapper = Role
 
 
+# class OldRole(dict):
+
+#     def session_name(self):
+#         metadata = self.inst.metadata
+#         return metadata.session_details[self.session]
+
+
+# class OldRolesManager(dict):
+
+#     def __get__(self, instance, type_=None):
+#         self.inst = instance
+#         return self(instance['old_roles'])
+
+#     def __iter__(self):
+#         for old_role in itertools.chain.from_iterable(self.values()):
+#             import pdb;pdb.set_trace()
+#             cls = type('OldRol', (OldRole,), {'inst': self.inst})
+#             yield cls(old_role)
+
+
 class Legislator(Document):
 
     collection = db.legislators
@@ -439,6 +463,7 @@ class Legislator(Document):
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
     roles_manager = RolesManager()
+    # old_roles_manager = OldRolesManager()
 
     class VotesManager(object):
         def __iter__(self):
@@ -464,6 +489,10 @@ class Legislator(Document):
     #                     if voter['leg_id'] == _id:
     #                         yield vote
 
+    def get_absolute_url(self):
+        args = (self.metadata.state['abbreviation'], self.id)
+        return urlresolvers.reverse('legislator', args=args)
+
     def votes_3_sorted(self):
         _id = self['_id']
         votes = self.votes_manager
@@ -481,7 +510,7 @@ class Legislator(Document):
 
     def sponsored_bills(self, extra_spec=None, *args, **kwargs):
         if extra_spec is None:
-            extra_spec = {} 
+            extra_spec = {}
         extra_spec.update({'sponsors.leg_id': self.id})
         return self.metadata.bills(extra_spec, *args, **kwargs)
 
@@ -542,6 +571,11 @@ class SponsorsManager(AttrManager):
     def first_five(self):
         'views.bill'
         return take(5, self)
+
+    def first_five_remainder(self):
+        len_ = len(self.inst['sponsors'])
+        if 5 < len_:
+            return len_ - 5
 
 
 class Action(Subdocument):
@@ -663,6 +697,9 @@ class Bill(Document):
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
+    def get_absolute_url(self):
+        return urlresolvers.reverse('bill', args=[self['abbreviation', self.id]])
+
     def version_objects(self):
         cls = self.subdocument
         for obj in self['versions']:
@@ -709,12 +746,14 @@ class Bill(Document):
         return dict(typedict)
 
     def date_introduced(self):
-        chamber = self['chamber']
+        '''Currently returns the earliest date the bill was introduced
+        in either chamber.
+        '''
         actions = self.actions_type_dict.get('bill:introduced')
+        actions = sorted(actions, key=operator.itemgetter('date'))
         if actions:
             for action in actions:
-                if chamber in action['actor']:
-                    return action['date']
+                return action['date']
 
     def date_passed_lower(self):
         chamber = 'lower'
@@ -733,7 +772,7 @@ class Bill(Document):
                     return action['date']
 
     def date_signed(self):
-        actions = self.actions_type_dict.get('upper', 'governor:signed')
+        actions = self.actions_type_dict.get('governor:signed')
         if actions:
             return actions[-1]['date']
 
@@ -750,10 +789,9 @@ class Bill(Document):
              'Passed ' + self.other_chamber_name,
              'date_passed_' + self.other_chamber),
 
-            ('stage4', 'Governor Signs', 'date_passed_upper'),
+            ('stage4', 'Governor Signs', 'date_signed'),
             ]
         for stage, text, method in data:
-            print stage, text, getattr(self, method)()
             yield stage, text, getattr(self, method)()
 
 
@@ -790,6 +828,8 @@ class Metadata(Document):
 
     votes_manager = VotesManager()
 
+    report = RelatedDocument('Report', instance_key='_id')
+
     @classmethod
     def get_object(cls, abbr):
         '''
@@ -814,11 +854,36 @@ class Metadata(Document):
         session = self['terms'][-1]['sessions'][-1]
         return session
 
+    def display_name(self):
+        return self['name']
+
+    def get_absolute_url(self):
+        return urlresolvers.reverse('state', args=[self['abbreviation']])
+
+    def _bills_by_chamber_action(self, chamber, action):
+        bills = self.bills({'session': self.most_recent_session,
+                            'chamber': chamber,
+                            'actions.type': action,
+                            'type': 'bill'})
+        # Not worrying about date sorting until later.
+        return bills
+
+    def bills_introduced_upper(self):
+        return self._bills_by_chamber_action('upper', 'bill:introduced')
+
+    def bills_introduced_lower(self):
+        return self._bills_by_chamber_action('lower', 'bill:introduced')
+
+    def bills_passed_upper(self):
+        return self._bills_by_chamber_action('upper', 'bill:passed')
+
+    def bills_passed_lower(self):
+        return self._bills_by_chamber_action('lower', 'bill:passed')
+
 
 class Report(Document):
 
     collection = db.reports
-    #metadata = RelatedDocument('Metadata', instance_key='_id')
 
     def session_link_data(self):
         '''

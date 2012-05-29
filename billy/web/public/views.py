@@ -69,7 +69,15 @@ def homepage(request):
 
 
 class ListViewBase(TemplateView):
-    'Base class for VoteList, FeedList, etc.'
+    '''Base class for VoteList, FeedList, etc.
+
+    I tried using generic views for bill lists to cut down the
+    boilerplate, but I'm not sure that has succeeded. One downside
+    has been the reuse of what attempts to be a generic sort of
+    template but in reality has become an awful monster template,
+    named "object_list.html." Possibly more tuning needed.
+    '''
+
     template_name = templatename('object_list')
 
     def get_context_data(self, *args, **kwargs):
@@ -78,27 +86,52 @@ class ListViewBase(TemplateView):
         context.update(**default_context)
         context.update(column_headers=self.column_headers,
                        rowtemplate_name=self.rowtemplate_name,
+                       description_template=self.description_template,
                        object_list=self.get_queryset(),
                        statenav_active=self.statenav_active,
                        abbr=self.kwargs['abbr'],
+                       metadata=Metadata.get_object(self.kwargs['abbr']),
                        url=self.request.path,
                        use_table=getattr(self, 'use_table', False))
+
+        # Include the kwargs to enable references to url paramaters.
+        context.update(**kwargs)
         return context
 
-    def get_queryset(self, *args, **kwargs):
-        collection_name = self.kwargs.get('collection_name')
+
+class RelatedObjectsList(ListViewBase):
+    '''A generic list view where there's a main object, like a
+    legislator or state, and we want to display all of the main
+    object's "sponsored_bills" or "introduced_bills." This class
+    basically hacks the ListViewBase to add the main object into
+    the template context so it can be used to generate a phrase like
+    'showing all sponsored bills for Wesley Chesebro.'
+    '''
+    def get_context_data(self, *args, **kwargs):
+        context = super(RelatedObjectsList, self).get_context_data(
+                                                        *args, **kwargs)
+        context.update(obj=self.get_object())
+        return context
+
+    def get_object(self):
+        try:
+            return self.obj
+        except AttributeError:
+            pass
+
+        try:
+            collection_name = self.kwargs['collection_name']
+        except KeyError:
+            collection_name = self.collection_name
+
         collection_name = {
             'state': 'metadata',
             }.get(collection_name, collection_name)
-        _id = self.kwargs.get('id')
 
-        get = self.request.GET.get
-
-        # Setup the paginator arguments.
-        show_per_page = int(get('show_per_page', 20))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
+        try:
+            _id = self.kwargs['id']
+        except KeyError:
+            _id = self.kwargs['abbr']
 
         # Get the related object.
         collection = getattr(billy.models.db, collection_name)
@@ -108,7 +141,20 @@ class ListViewBase(TemplateView):
         except DoesNotExist:
             raise Http404
 
-        objects = getattr(obj, self.query_attr)
+        self.obj = obj
+        return obj
+
+    def get_queryset(self):
+
+        get = self.request.GET.get
+
+        # Setup the paginator arguments.
+        show_per_page = int(get('show_per_page', 20))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
+
+        objects = getattr(self.get_object(), self.query_attr)
 
         # The related collection of objects might be a
         # function or a manager class.
@@ -128,7 +174,7 @@ class ListViewBase(TemplateView):
         return paginator
 
 
-class VotesList(ListViewBase):
+class VotesList(RelatedObjectsList):
 
     list_item_context_name = 'vote'
     sort_func = operator.itemgetter('date')
@@ -140,9 +186,10 @@ class VotesList(ListViewBase):
     column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
                       'No', 'Other', 'Motion')
     statenav_active = 'bills'
+    description_template = templatename('list_descriptions/votes')
 
 
-class FeedsList(ListViewBase):
+class FeedsList(RelatedObjectsList):
 
     list_item_context_name = 'entry'
     paginator = CursorPaginator
@@ -150,6 +197,99 @@ class FeedsList(ListViewBase):
     rowtemplate_name = templatename('feed_entry')
     column_headers = ('feeds',)
     statenav_active = 'bills'
+    description_template = templatename('list_descriptions/feeds')
+
+
+class BillsList(ListViewBase):
+
+    use_table = True
+    list_item_context_name = 'bill'
+    paginator = CursorPaginator
+    rowtemplate_name = templatename('bills_list_row')
+    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
+    statenav_active = 'bills'
+
+
+class RelatedBillsList(RelatedObjectsList):
+
+    use_table = True
+    list_item_context_name = 'bill'
+    paginator = CursorPaginator
+    rowtemplate_name = templatename('bills_list_row')
+    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
+    statenav_active = 'bills'
+
+
+class SponsoredBillsList(RelatedBillsList):
+    query_attr = 'sponsored_bills'
+    description_template = templatename(
+        'list_descriptions/sponsored_bills')
+
+
+class BillsBySubject(BillsList):
+
+    description_template = templatename(
+        'list_descriptions/bills_by_subject')
+
+    def get_queryset(self, *args, **kwargs):
+
+        get = self.request.GET.get
+
+        subject = self.kwargs['subject']
+        abbr = self.kwargs['abbr']
+        objects = db.bills.find({'state': abbr, 'subjects': subject})
+
+        # Setup the paginator arguments.
+        show_per_page = int(get('show_per_page', 20))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
+
+        # Apply any specified sorting.
+        sort_func = getattr(self, 'sort_func', None)
+        sort_reversed = bool(getattr(self, 'sort_reversed', None))
+        if sort_func:
+            objects = sorted(objects, key=sort_func,
+                             reverse=sort_reversed)
+
+        paginator = self.paginator(objects, page=page,
+                                   show_per_page=show_per_page)
+        return paginator
+
+
+class BillsIntroducedUpper(RelatedBillsList):
+    collection_name = 'metadata'
+    query_attr = 'bills_introduced_upper'
+    description_template = templatename(
+        'list_descriptions/bills_introduced_upper')
+
+
+class BillsIntroducedLower(RelatedBillsList):
+    collection_name = 'metadata'
+    query_attr = 'bills_introduced_lower'
+    description_template = templatename(
+        'list_descriptions/bills_introduced_lower')
+
+
+class BillsIntroducedUpper(RelatedBillsList):
+    collection_name = 'metadata'
+    query_attr = 'bills_introduced_upper'
+    description_template = templatename(
+        'list_descriptions/bills_introduced_upper')
+
+
+class BillsPassedUpper(RelatedBillsList):
+    collection_name = 'metadata'
+    query_attr = 'bills_passed_upper'
+    description_template = templatename(
+        'list_descriptions/bills_passed_upper')
+
+
+class BillsPassedLower(RelatedBillsList):
+    collection_name = 'metadata'
+    query_attr = 'bills_passed_lower'
+    description_template = templatename(
+        'list_descriptions/bills_passed_lower')
 
 
 def state_nav(active_collection):
@@ -290,7 +430,6 @@ def legislators(request, abbr):
             sort_key=sort_key,
             legislator_table=templatename('legislator_table'),
             statenav_active='legislators',
-            tweet_text='Test cow!',
             ),
         context_instance=RequestContext(request, default_context))
 
@@ -526,16 +665,13 @@ def bills(request, abbr):
         context_instance=RequestContext(request, default_context))
 
 
-def bills_by_subject(request, abbr, subject):
-    pass
-
-
 def bill(request, abbr, bill_id):
     try:
         bill = db.bills.find_one({'_id': bill_id})
     except DoesNotExist:
         raise Http404
 
+    show_all_sponsors = request.GET.get('show_all_sponsors')
     return render_to_response(
         template_name=templatename('bill'),
         dictionary=dict(
@@ -544,7 +680,7 @@ def bill(request, abbr, bill_id):
             abbr=abbr,
             state=Metadata.get_object(abbr),
             bill=bill,
-            first_five=bill.sponsors_manager.first_five(),
+            show_all_sponsors=show_all_sponsors,
             sources=bill['sources'],
             statenav_active='bills'),
         context_instance=RequestContext(request, default_context))
