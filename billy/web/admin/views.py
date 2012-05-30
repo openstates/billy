@@ -253,7 +253,7 @@ def run_detail_graph_data(request, abbr):
         data['title'][line] = speck[line]['title']
 
     return HttpResponse(
-        json.dumps( data ),
+        json.dumps( data, cls=JSONDateEncoder ),
         #content_type="text/json"
         content_type="text/plain"
     )
@@ -448,7 +448,7 @@ def bills(request, abbr):
                     except KeyError:
                         spec_val = r
                     else:
-                        spec_val = json.dumps(spec_val)
+                        spec_val = json.dumps(spec_val, cls=JSONDateEncoder)
 
                     params = dict(spec['summary'], session=session,
                                   val=spec_val)
@@ -931,10 +931,10 @@ def _mom_attr_diff( merge, leg1, leg2 ):
     return ( mv, mv_info )
 
 def _mom_mangle( attr ):
-    jsonify = json.dumps
     args    = {
         "sort_keys" : True,
-        "indent"    : 4
+        "indent"    : 4,
+        "cls"       : JSONDateEncoder
     }
     if isinstance( attr, types.ListType ):
         return json.dumps( attr, **args )
