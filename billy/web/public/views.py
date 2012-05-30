@@ -398,8 +398,8 @@ def legislators(request, abbr):
     sort_order = 1
 
     if request.GET:
-        sort_key = request.GET['key']
-        sort_order = int(request.GET['order'])
+        sort_key = request.GET.get('key', sort_key)
+        sort_order = int(request.GET.get('order', sort_order))
 
     legislators = meta.legislators(extra_spec=spec, fields=fields)
 
