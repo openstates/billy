@@ -820,13 +820,22 @@ def events(request, abbr):
     events = db.events.find({
         'level': level,
         level: abbr.lower()
-    })
+    }).limit(20)
 
     # sort and get rid of old events.
 
     return render(request, 'billy/events.html', {
-        'events': events,
-        'metadata': meta
+        'events': ((e, e['_id']) for e in events),
+        'metadata': meta,
+    })
+
+
+def event(request, abbr, event_id):
+    meta = metadata(abbr)
+    event = db.events.find_one(event_id)
+    return render(request, 'billy/events.html', {
+        'event': event,
+        'metadata': meta,
     })
 
 

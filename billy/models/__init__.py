@@ -330,6 +330,8 @@ class AttrManager(object):
 
 # ---------------------------------------------------------------------------
 # Model definitions.
+
+
 class FeedEntry(Document):
     collection = db.feed_entries
 
@@ -826,6 +828,9 @@ class Metadata(Document):
     feed_entries = RelatedDocuments(FeedEntry, model_keys=['state'],
                                     instance_key='abbreviation')
 
+    events = RelatedDocuments('Event', model_keys=['state'],
+                              instance_key='abbreviation')
+
     votes_manager = VotesManager()
 
     report = RelatedDocument('Report', instance_key='_id')
@@ -893,6 +898,12 @@ class Report(Document):
         session_details = self.metadata['session_details']
         for s in self['bills']['sessions']:
             yield (s, session_details[s]['display_name'])
+
+
+class Event(Document):
+
+    collection = db.events
+    bills = RelatedDocuments('Bill', model_keys=['related_bills.bill_id'])
 
 
 # ---------------------------------------------------------------------------

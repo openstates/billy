@@ -1,0 +1,6 @@
+<tr>
+    <td>{{event_id}}</td>
+    <td><a href="{% url object_json 'events' event_id %}">{{event.description}}</a></td>
+    <td>{{event.location}}</td>
+    <td>{{event.participants.length}}</td>
+</tr>

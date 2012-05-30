@@ -17,7 +17,8 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/random_bill/$', 'random_bill',
         name='random_bill'),
     url(r'^(?P<abbr>[a-z]{2})/bill_list/$', 'bill_list', name='bill_list'),
-
+    url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='events'),
+    url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$$', 'event', name='event'),
 
 
     # missing data
