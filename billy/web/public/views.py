@@ -305,13 +305,17 @@ def state(request, abbr):
     except DoesNotExist:
         raise Http404
 
+    chambers = [
+        overview.chamber(abbr, 'upper'),
+        overview.chamber(abbr, 'lower'),
+    ]
+
     return render_to_response(
         template_name=templatename('state'),
         dictionary=dict(abbr=abbr,
             metadata=meta,
             sessions=report.session_link_data(),
-            lower=overview.chamber(abbr, 'lower'),
-            upper=overview.chamber(abbr, 'upper'),
+            chambers=chambers,
             recent_actions=overview.recent_actions(abbr),
             statenav_active=None),
         context_instance=RequestContext(request, default_context))

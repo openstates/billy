@@ -38,6 +38,11 @@ def chamber(abbr, chamber):
     for leg in legislators:
         party_counts[leg['party']] += 1
 
+    # chamber metadata
+    res['type'] = chamber
+    res['title'] = state[chamber + '_chamber_title']
+    res['name'] = state[chamber + '_chamber_name']
+
     res['legislators'] = {
         'count': len(legislators),
         'party_counts': dict(party_counts),
