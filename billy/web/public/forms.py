@@ -19,11 +19,13 @@ class ChamberSelectForm(forms.Form):
 
     chamber = forms.ChoiceField(widget=forms.RadioSelect())
     abbr = forms.CharField(widget=forms.HiddenInput())
+    order = forms.IntegerField(widget=forms.HiddenInput(), initial=1)
+    key = forms.CharField(widget=forms.HiddenInput(), initial='committee')
 
     @classmethod
-    def unbound(cls, metadata, chamber='both'):
+    def unbound(cls, metadata, chamber='both', *args, **kwargs):
 
-        inst = cls()
+        inst = cls(*args, **kwargs)
 
         # Make the radio option names reflect this state's actual
         # chamber names.
