@@ -382,6 +382,14 @@ def legislators(request, abbr):
     except DoesNotExist:
         raise Http404
 
+    spec = {'active': True}
+
+    chamber = request.GET.get('chamber', 'both')
+    if chamber in ('upper', 'lower'):
+        spec['chamber'] = chamber
+    else:
+        chamber = 'both'
+
     fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
               'chamber', 'state', 'last_name']
     fields = dict(zip(fields, repeat1))
@@ -392,8 +400,6 @@ def legislators(request, abbr):
     if request.GET:
         sort_key = request.GET['key']
         sort_order = int(request.GET['order'])
-
-    spec = {'active': True}
 
     legislators = meta.legislators(extra_spec=spec, fields=fields)
 
@@ -409,17 +415,23 @@ def legislators(request, abbr):
     if sort_key != 'district':
         legislators = sorted(legislators, key=itemgetter(sort_key),
                              reverse=(sort_order == -1))
+    else:
+        legislators = sorted(legislators, key=sort_by_district,
+                             reverse=bool(0 > sort_order))
 
     sort_order = {1: -1, -1: 1}[sort_order]
 
     legislators = list(legislators)
 
-    chamber_select_form = ChamberSelectForm.unbound(meta)
+    initial = {'key': 'district', 'chamber': chamber}
+
+    chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
 
     return render_to_response(
         template_name=templatename('legislators_chamber'),
         dictionary=dict(
             metadata=meta,
+            chamber=chamber,
             chamber_select_form=chamber_select_form,
             chamber_select_template=templatename('chamber_select_form'),
             chamber_select_collection='legislators',
