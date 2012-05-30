@@ -446,67 +446,6 @@ def legislators(request, abbr):
         context_instance=RequestContext(request, default_context))
 
 
-def legislators_chamber(request, abbr, chamber):
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    chamber_name = meta['%s_chamber_name' % chamber]
-
-    # Query params
-    spec = {'chamber': chamber, 'active': True}
-
-    fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
-              'chamber', 'state', 'last_name']
-    fields = dict(zip(fields, repeat1))
-
-    sort_key = 'district'
-    sort_order = 1
-
-    if request.GET:
-        sort_key = request.GET['key']
-        sort_order = int(request.GET['order'])
-
-    legislators = meta.legislators(extra_spec=spec, fields=fields)
-
-    def sort_by_district(obj):
-            matchobj = re.search(r'\d+', obj['district'])
-            if matchobj:
-                return int(matchobj.group())
-            else:
-                return obj['district']
-
-    legislators = sorted(legislators, key=sort_by_district)
-
-    if sort_key != 'district':
-        legislators = sorted(legislators, key=itemgetter(sort_key),
-                             reverse=(sort_order == -1))
-
-    sort_order = {1: -1, -1: 1}[sort_order]
-
-    legislators = list(legislators)
-
-    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
-
-    return render_to_response(
-        template_name=templatename('legislators_chamber'),
-        dictionary=dict(
-            metadata=meta,
-            chamber_name=chamber_name,
-            chamber_select_form=chamber_select_form,
-            chamber_select_template=templatename('chamber_select_form'),
-            chamber_select_collection='legislators',
-            show_chamber_column=False,
-            abbr=abbr,
-            legislators=legislators,
-            sort_order=sort_order,
-            sort_key=sort_key,
-            legislator_table=templatename('legislator_table'),
-            statenav_active='legislators'),
-        context_instance=RequestContext(request, default_context))
-
-
 def legislator(request, abbr, leg_id):
     '''
     Note - changes needed before we can display "sessions served" info.

@@ -25,9 +25,6 @@ urlpatterns = patterns('',
     url(r'^(?P<abbr>[a-z]{2})/legislators/$',
         legislators, name='legislators'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<chamber>\w+)/$',
-        legislators_chamber, name='legislators_chamber'),
-
     url(r'^(?P<abbr>[a-z]{2})/legislator/(?P<leg_id>\w+)/$',
         legislator, name='legislator'),
 
