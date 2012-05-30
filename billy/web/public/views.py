@@ -321,7 +321,7 @@ def state_selection(request):
     '''Handle submission of the state selection form
     in the base template.
     '''
-    form = get_state_select_form()(request.GET)
+    form = get_state_select_form(request.GET)
     abbr = form.data['abbr']
     if len(abbr) != 2:
         return redirect('pick_a_state')

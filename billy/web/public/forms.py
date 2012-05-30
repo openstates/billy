@@ -4,7 +4,7 @@ from django.conf import settings
 from billy.models import Metadata
 
 
-def get_state_select_form():
+def get_state_select_form(data):
     states = map(Metadata.get_object, sorted(settings.ACTIVE_STATES))
     state_abbrs = [('', 'Select a state')]
     state_abbrs += [(obj['_id'], obj['name']) for obj in states]
@@ -12,7 +12,7 @@ def get_state_select_form():
     class StateSelectForm(forms.Form):
         abbr = forms.ChoiceField(choices=state_abbrs, label="state")
 
-    return StateSelectForm
+    return StateSelectForm(data)
 
 
 class ChamberSelectForm(forms.Form):

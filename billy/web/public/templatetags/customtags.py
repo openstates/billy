@@ -10,8 +10,8 @@ register = template.Library()
 
 
 @register.inclusion_tag(templatename('state_select_form'))
-def state_select_form():
-    return {'form':  get_state_select_form()}
+def state_select_form(abbr=None):
+    return {'form':  get_state_select_form({'abbr': abbr})}
 
 
 @register.inclusion_tag(templatename('sources'))
