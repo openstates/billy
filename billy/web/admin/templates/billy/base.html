@@ -1,11 +1,12 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} : billy admin</title>
-    <link rel="stylesheet" href="{{STATIC_URL}}css/bootstrap.min.css">
-    <script src="{{STATIC_URL}}scripts/jquery-1.7.1.min.js"></script>
-    <script src="{{STATIC_URL}}scripts/bootstrap-dropdown.js"></script>
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <script src="{% static "scripts/jquery-1.7.1.min.js" %}></script>
+    <script src="{% static "scripts/bootstrap-dropdown.js" %}></script>
     <script>
       $('.dropdown-toggle').dropdown();
     </script>
