@@ -8,7 +8,7 @@ from billy.web.public.views import (VotesList, FeedsList,
 
 urlpatterns = patterns('billy.web.public.views',
 
-    url(r'^home$', 'homepage', name='homepage'),
+    url(r'^$', 'homepage', name='homepage'),
 
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection',
