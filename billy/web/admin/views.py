@@ -8,6 +8,7 @@ import pymongo
 import decimal
 import functools
 import unicodecsv
+import datetime
 import urlparse
 from operator import itemgetter
 from itertools import chain, imap
@@ -25,6 +26,7 @@ from billy import db
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
+from billy.importers.legislators import deactivate_legislators
 
 
 def _meta_and_report(abbr):
@@ -849,6 +851,37 @@ def legislator(request, id):
     return render(request, 'billy/legislator.html', {'leg': leg,
                                                         'metadata': meta})
 
+def retire_legislator(request, id):
+    legislator = db.legislators.find_one({'_all_ids': id})
+    if not legislator:
+        raise Http404
+
+    # retire a legislator
+    level = legislator['level']
+    abbr = legislator[level]
+    meta = metadata(abbr)
+
+    term = meta['terms'][-1]['name']
+    cur_role = legislator['roles'][0]
+    if cur_role['type'] != 'member' or cur_role['term'] != term:
+        raise ValueError('member missing role for %s' % term)
+
+    end_date = request.POST.get('end_date')
+    if not end_date:
+        alert = dict(type='warning', title='Warning!',
+                     message='missing end_date for retirement')
+    else:
+        cur_role['end_date'] = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+        db.legislators.save(legislator, safe=True)
+        deactivate_legislators(term, abbr, level)
+        alert = dict(type='success', title='Retired Legislator',
+                     message='{0} was successfully retired.'.format(
+                         legislator['full_name']))
+
+    return render(request, 'billy/legislator.html', {'leg': legislator,
+                                                     'metadata': meta,
+                                                     'alert': alert,
+                                                    })
 
 def committees(request, abbr):
     meta = metadata(abbr)

@@ -17,7 +17,8 @@
         <dt>TransparencyData ID</dt>
         <dd><a href="http://influenceexplorer.com/politician/id/{{leg.transparencydata_id}}?cycle=-1">{{leg.transparencydata_id}}</a></dd>
     {% endif %}
-
+    <dt>Created</dt><dd>{{leg.created_at}}</dd>
+    <dt>Updated</dt><dd>{{leg.updated_at}}</dd>
     {% for k,v in leg.items %}
     {% if "+" in k %}
         <dt>{{k}}</dt><dd>{{v}}</dd>
@@ -85,5 +86,12 @@
   <h4>No photo_url</h4>
 {% endif %}
 </div>
+
+<form class="well form-inline" action="{% url retire_legislator leg.leg_id %}" method="POST">
+  <h4>Retire Legislator</h4>
+  <label>Retirement Date</label>
+  <input type="text" placeholder="YYYY-MM-DD" name="end_date">
+  <button type="submit" class="btn btn-danger">Retire Legislator</button>
+</form>
 {% endblock %}
 
