@@ -98,11 +98,12 @@ def overview(request, abbr):
                                            runlog['scraped']['started'])
         context['runlog'] = runlog
         if "failure" in runlog:
-            context['warning_title'] = "This build is currently broken!"
-            context['warning'] = """
+            context['alert'] = dict(type='error',
+                                    title="This build is currently broken!",
+                                    message="""
 The last scrape was a failure. Check in the run log section for more details,
 or check out the scrape run report page for this state.
-"""
+""")
     except IndexError:
         runlog = False
 
@@ -312,12 +313,12 @@ def state_run_detail(request, abbr):
     }
 
     if "failure" in runlog:
-        context['warning_title'] = "Exception during Execution"
-        context['warning'] = \
-"""
+        context["alert"] = dict(type='error',
+                                title="Exception during Execution",
+                                message="""
 This build had an exception during it's execution. Please check below
 for the exception and error message.
-"""
+""")
 
     return render(request, 'billy/state_run_detail.html', context)
 
