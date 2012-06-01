@@ -20,7 +20,7 @@ from django.http import Http404, HttpResponse
 from django.core import urlresolvers
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -904,6 +904,17 @@ def committees(request, abbr):
         'joint_coms': joint_coms,
         'metadata': meta,
     })
+
+def delete_committees(request):
+    ids = request.POST.getlist('committees')
+    committees = db.committees.find({'_id': {'$in': ids}})
+    abbr = committees[0][committees[0]['level']]
+    if not request.POST.get('confirm'):
+        return render(request, 'billy/delete_committees.html',
+                      { 'abbr': abbr, 'committees': committees })
+    else:
+        db.committees.remove({'_id': {'$in': ids}}, safe=True)
+        return redirect('admin_committees', abbr)
 
 def mom_index(request):
     return render(request, 'billy/mom_index.html' )

@@ -1,0 +1,34 @@
+{% extends "billy/base.html" %}
+{% load billy_utiltags %}
+{% block title %}{{metadata.name}} committees - deleting{% endblock %}
+
+{% block content %}
+
+<form action="{% url delete_committees %}" method="POST">
+
+<div>
+    <h3>Permanently Delete these Committees?</h3>
+    <dl>
+    {% for com in committees %}
+        <dt>{{com|key:"_id"}} - {{com.committee}}
+        {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
+        </dt>
+        <dd>
+            <ul>
+            {% for m in com.members %}
+                <li>{{ m.name }}</li>
+            {% empty %}
+                <li><em>no members</em></li>
+            {% endfor %}
+            </ul>
+        </dd>
+        <input type="hidden" name="committees" value="{{com|key:"_id"}}">
+    {% endfor %}
+
+    <a href="{% url admin_committees abbr %}"
+        class="btn btn-default">Go Back</a>
+    <button type="submit" name="confirm" value="true"
+        class="btn btn-danger">Delete Checked Committees</button>
+</form>
+
+{% endblock %}
