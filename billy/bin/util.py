@@ -13,12 +13,14 @@ COMMAND_MODULES = (
     'billy.commands.serve',             # useful for development
     'billy.commands.textextract',       # useful for development
     'billy.commands.load_legislators',  # allow editing legislators in admin
-    'billy.commands.oysterize',         # manual oysterization of bills
     'billy.commands.dump',
     'billy.commands.update_external_ids',
     'billy.commands.update_leg_ids',
     'billy.commands.validate_api',
 )
+
+if settings.ENABLE_OYSTER:
+    COMMAND_MODULES += ('billy.commands.oysterize',)
 
 
 def import_command_module(mod):
