@@ -72,6 +72,7 @@ class Person(SourcedObject):
         self['middle_name'] = middle_name
         self['suffixes'] = kwargs.get('suffixes', '')
         self['roles'] = []
+        self['offices'] = []
 
     def add_role(self, role, term, start_date=None, end_date=None,
                  **kwargs):
@@ -87,6 +88,17 @@ class Person(SourcedObject):
         self['roles'].append(dict(role=role, term=term,
                                   start_date=start_date,
                                   end_date=end_date, **kwargs))
+
+    def add_office(self, type, name, address=None, phone=None, fax=None,
+                   email=None):
+        """
+        Allowed office types:
+            capitol
+            district
+        """
+        office_dict = dict(type=type, address=address, name=name, phone=phone,
+                           fax=fax, email=email)
+        self['offices'].append(office_dict)
 
     def get_filename(self):
         role = self['roles'][0]
