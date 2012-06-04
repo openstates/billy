@@ -369,14 +369,11 @@ def chamber_select(request, collection_name):
 
 
 def find_your_legislator(request):
-
-    form = FindYourLegislatorForm(request.GET)
-
-    url = 'http://rpc.geocoder.us/service/csv?address=%s'
-    url = url % form.data['address'].replace(' ', '+')
-    resp = requests.get(url)
-    lat, lng, _ = resp.text.split(',', 2)
-    import pdb;pdb.set_trace()
+    # check if lat/lon are set, or if leg_search is set.
+    return render_to_response(
+        template_name=templatename('find_your_legislator'),
+        dictionary=dict(),
+        context_instance=RequestContext(request, default_context))
 
 
 def legislators(request, abbr):

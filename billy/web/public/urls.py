@@ -74,6 +74,6 @@ urlpatterns = patterns('billy.web.public.views',
 urlpatterns += patterns('',
     # other views
     url(r'^downloads/$', 'billy.web.public.views_other.downloads', name='downloads'),
-    url(r'^find_your_legislator/$', 'find_your_legislator',
+    url(r'^find_your_legislator/$', 'billy.web.public.views.find_your_legislator',
         name='find_your_legislator'),
 )
