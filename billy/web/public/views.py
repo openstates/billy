@@ -1,4 +1,6 @@
 import re
+import json
+import urllib2
 import operator
 
 from operator import itemgetter
@@ -17,12 +19,14 @@ import requests
 import billy.models
 from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
+from billy.conf import settings as billy_settings
 
 from .forms import get_state_select_form, ChamberSelectForm, FindYourLegislatorForm
 from .viewdata import overview
 
 
 default_context = dict(base_template='billy/web/public/base.html')
+openstates_api_host = "http://openstates.org"
 
 
 def nth(iterable, n, default=None):
@@ -369,10 +373,34 @@ def chamber_select(request, collection_name):
 
 
 def find_your_legislator(request):
-    # check if lat/lon are set, or if leg_search is set.
+    # check if lat/lon are set
+    # if leg_search is set, they most likely don't have ECMAScript enabled.
+    # XXX: fallback behavior here for alpha.
+
+    kwargs = {}
+
+    get = request.GET
+    if "lat" in get and "lon" in get:
+        # We've got a passed lat/lon. Let's build off it.
+        lat = get['lat']
+        lon = get['lon']
+
+        kwargs['lat'] = lat
+        kwargs['lon'] = lon
+        kwargs['located'] = True
+
+        qurl = "%s/api/v1/legislators/geo/?long=%s&lat=%s&apikey=%s" % (
+            openstates_api_host,
+            lon,
+            lat,
+            billy_settings.SUNLIGHT_API_KEY
+        )
+        f = urllib2.urlopen(qurl)
+        kwargs['legislators'] = json.load(f)
+
     return render_to_response(
         template_name=templatename('find_your_legislator'),
-        dictionary=dict(),
+        dictionary=kwargs,
         context_instance=RequestContext(request, default_context))
 
 
