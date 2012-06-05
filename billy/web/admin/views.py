@@ -586,7 +586,23 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
 
+    from pymongo.objectid import ObjectId
+    from json import JSONEncoder
+
+    class MongoEncoder(JSONEncoder):
+
+        def default(self, obj, **kwargs):
+            if isinstance(obj, ObjectId):
+                return str(obj)
+            elif isinstance(obj, datetime.datetime):
+                return time.mktime(obj.utctimetuple())
+            elif isinstance(obj, datetime.date):
+                return time.mktime(obj.timetuple())
+            else:
+                return JSONEncoder.default(obj, **kwargs)
+
     obj = getattr(db, collection).find_one(_id)
+    obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
     obj_isbill = (obj['_type'] == 'bill')
     if obj_isbill:
         try:
@@ -595,8 +611,9 @@ def object_json(request, collection, _id,
             pass
 
     obj_id = obj['_id']
-    obj_json = json.dumps(obj, cls=JSONDateEncoder, indent=4)
+    obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
     keys = sorted(obj)
+
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
