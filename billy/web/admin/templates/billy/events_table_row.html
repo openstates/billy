@@ -1,6 +1,5 @@
 <tr>
-    <td>{{event_id}}</td>
-    <td><a href="{% url object_json 'events' event_id %}">{{event.description}}</a></td>
+    <td><a href="{% url event event.state event_id %}">{{event_id}}</a></td>
+    <td><a href="{% url object_json 'events' event_id %}">[json]</a>&nbsp;{{event.description}}</td>
     <td>{{event.location}}</td>
-    <td>{{event.participants.length}}</td>
 </tr>

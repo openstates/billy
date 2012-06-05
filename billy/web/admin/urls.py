@@ -22,8 +22,7 @@ urlpatterns = patterns('billy.web.admin.views',
         name='random_bill'),
     url(r'^(?P<abbr>[a-z]{2})/bill_list/$', 'bill_list', name='bill_list'),
     url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='events'),
-    url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$$', 'event', name='event'),
-
+    url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$', 'event', name='event'),
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
@@ -49,15 +48,15 @@ urlpatterns = patterns('billy.web.admin.views',
     # runlog URLs.
     url(r'^state-run-detail/(?P<abbr>[a-z]{2})/$', 'state_run_detail', name="state_run_detail"),
     url(r'^run-detail/(?P<obj>.*)/$', 'run_detail', name="run_detail"),
-    url(r'^run-detail-data/(?P<abbr>[a-z]{2})/$','run_detail_graph_data',
+    url(r'^run-detail-data/(?P<abbr>[a-z]{2})/$', 'run_detail_graph_data',
         name="run_detail-data"),
 
     # Merge-o-matic URLs.
-    url(r'^mom/$', 'mom_index', name="mom_index" ),
-    url(r'^mom/merge/$', 'mom_merge', name="mom_merge" ),
-    url(r'^mom/commit/$', 'mom_commit', name="mom_commit" ),
+    url(r'^mom/$', 'mom_index', name="mom_index"),
+    url(r'^mom/merge/$', 'mom_merge', name="mom_merge"),
+    url(r'^mom/commit/$', 'mom_commit', name="mom_commit"),
 
     # New feed URLs.
     url(r'^newsblogs/$', 'newsblogs', name='newsblogs'),
-    
+
 )

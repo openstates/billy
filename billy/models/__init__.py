@@ -14,6 +14,7 @@ import urlparse
 import datetime
 import logging
 import collections
+import copy
 
 from pymongo import Connection
 from pymongo.son_manipulator import SONManipulator
@@ -88,6 +89,25 @@ class Document(dict):
     # Each subclass represents a document from a specific collection.
     collection = None
 
+    # The attribute name that should point to this object in related
+    # documents.
+    related_name = None
+
+    def __init__(self, *args, **kwargs):
+        super(Document, self).__init__(*args, **kwargs)
+
+        # This dictionary enables managed key/values and any objects
+        # they contain to easily reference the top-level document.
+        self.context = {}
+
+    @property
+    def related_name(self):
+        try:
+            return self._related_name
+        except:
+            related_name = self.__class__.__name__.lower()
+            return related_name
+
     @property
     def id(self):
         '''
@@ -121,31 +141,91 @@ class Document(dict):
             return 'Joint'
         return self.metadata['%s_chamber_name' % self['chamber']]
 
+
+class Wrapper(object):
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+class AttrManager(Wrapper):
+
     @property
-    def subdocument(self):
-        '''This property enables enables this:
-
-        class Bill(Document):
-
-            def version_objects(self):
-                for data in self['versions']:
-                    yield self.subdocument(data)
-
-        bill = db.bills.find_one()
-        version = next(bill.version_objects())
-        assert version.bill is bill
+    def _wrapper(self, rubber_stamp=lambda x: x):
+        '''Subclasses define a wrapper (or not).
         '''
-        selfname = self.__class__.__name__.lower()
+        return getattr(self, 'wrapper', rubber_stamp)
 
-        class Subdocument(dict):
+    def __get__(self, inst, type_=None):
 
-            def __repr__(subdoc):
-                args = (selfname, dict.__repr__(subdoc))
-                return '%s.Subdocument(%r)' % args
+        # Create a child context for the new classes.
+        context = copy.copy(inst.context)
+        context['context'] = context
+        context[inst.related_name] = inst
+        if 'document' not in context and isinstance(inst, Document):
+            context.update(document=inst)
 
-        setattr(Subdocument, selfname, self)
+        # Create a new wrapper class if a wrapper was defined on the
+        # manager.
+        wrapper = getattr(self, 'wrapper', None)
+        if wrapper is not None:
+            wrapper_name = wrapper.__name__
+            context['manager'] = self
+            new_wrapper = type(wrapper_name, (wrapper,), context)
+            del context['manager']
+            context.update(wrapper=new_wrapper)
 
-        return Subdocument
+        # Otherwise, create the new manager subclass.
+        cls = self.__class__
+        newclass = type(cls.__name__, (cls,), context)
+
+        if getattr(self, 'methods_only', None):
+            # If this manager just adds methods without wrapping any data
+            # from the instance, no need to go further; just return self.
+            return newclass(self)
+        else:
+            # Else wrap the instance data in the new class.
+            inst = newclass(inst[self.keyname])
+            return inst
+
+    @property
+    def keyname(self):
+        try:
+            return self._keyname
+        except AttributeError:
+            pass
+        keyname = self.__class__.__name__
+        return keyname.lower().replace('manager', '')
+
+
+class ListManager(list, AttrManager):
+    def __iter__(self):
+        wrapper = self._wrapper
+        for obj in self.document[self.keyname]:
+            yield wrapper(obj)
+
+    def __getitem__(self, int_or_slice):
+        '''Note to self for future--django's templating system does some
+        perhaps rather silly voodoo to try __getattr__, __getitem__ when you
+        reference object attributes in templates, and if your custom ORM
+        throws custom errors, django might not handle those correctly, leading
+        to difficult-to-debug issues. Better to let python throw its own
+        errors from operations, which django handles well.
+        '''
+        ret = self._wrapper(list.__getitem__(self, int_or_slice))
+        if isinstance(int_or_slice, int):
+            return self._wrapper(ret)
+        elif isinstance(int_or_slice, slice):
+            return map(self._wrapper, ret)
+
+
+class DictManager(dict, AttrManager):
+    def items(self):
+        import pdb;pdb.set_trace()
+        return [(k, self._wrapper(v)) for (k, v) in dict.items(self)]
+
+    def __getitem__(self, key):
+        return self._wrapper(dict.__getitem__(self, key))
 
 
 class RelatedDocument(ReadOnlyAttribute):
@@ -273,61 +353,6 @@ class RelatedDocuments(ReadOnlyAttribute):
         return self.model.collection.find(spec, *args, **kwargs)
 
 
-class Subdocument(dict):
-
-    @classmethod
-    def fromdict(cls, dict_, parent_doc, parent_name):
-        '''
-        :param dict: the dictionary subdocument, like the `votes` dict
-            on a bill object.
-        :param parent_doc: the document/dict in which the subdoc is a value, like
-            the bill document in the case of a votes list.
-        "param parent_name:
-        '''
-        subdoc = cls(dict_)
-        subdoc.parent = parent_doc
-        setattr(subdoc, parent_name, parent_doc)
-        return subdoc
-
-
-class AttrManager(object):
-    '''A class providing ways to associate methods with a particular attribute
-    of an object.
-
-    class SomeDoc(Document):
-        sponsors = SponsorsManager()
-
-    class SponsorsManager(AttrManager):
-        def prime(self):
-            for sponsor in self:
-                if sponsor['type'] == 'primary:
-                    return sponsor
-    '''
-
-    @property
-    def _keyname(self):
-        try:
-            return self.keyname
-        except AttributeError:
-            pass
-        keyname = self.__class__.__name__
-        return keyname.lower().replace('manager', '')
-
-    def __iter__(self):
-        try:
-            wrapper = self.wrapper
-        except AttributeError:
-            msg = 'AttrManager %r must define a wrapper class.'
-            raise ModelDefinitionError(msg)
-
-        for obj in self.inst[self._keyname]:
-            yield wrapper(obj)
-
-    def __get__(self, instance, type_=None, *args, **kwargs):
-        self.inst = instance
-        return self
-
-
 # ---------------------------------------------------------------------------
 # Model definitions.
 
@@ -388,10 +413,13 @@ class CommitteeMember(dict):
     legislator_object = RelatedDocument('Legislator', instance_key='leg_id')
 
 
-class CommitteeMemberManager(AttrManager):
+class CommitteeMemberManager(ListManager):
+
+    keyname = 'members'
 
     def __iter__(self):
-        for obj in self.inst['members']:
+        for obj in self.document['members']:
+            # This would be better as an '_id': {$or: [id1, id2,...]}
             if 'leg_id' in obj:
                 if DEBUG:
                     msg = '{0}.{1}({2}, {3}, {4})'.format(
@@ -421,6 +449,12 @@ class Committee(Document):
 
 class Role(dict):
 
+    def data(self):
+        '''This roles term metadata from the metadata['terms'] list.
+        '''
+        metadata = self.manager.document
+        return metadata.term_dict[self['term']]
+
     def is_committee(self):
         return ('committee' in self)
 
@@ -433,28 +467,46 @@ class Role(dict):
         return name
 
 
-class RolesManager(AttrManager):
+class RolesManager(ListManager):
     wrapper = Role
 
 
-# class OldRole(dict):
+class OldRole(DictManager):
+    methods_only = True
 
-#     def session_name(self):
-#         metadata = self.inst.metadata
-#         return metadata.session_details[self.session]
+    @property
+    def termdata(self):
+        return self.document.metadata.terms_manager.dict_[self['term']]
 
 
-# class OldRolesManager(dict):
+class OldRolesManager(DictManager):
+    keyname = 'old_roles'
+    wrapper = OldRole
 
-#     def __get__(self, instance, type_=None):
-#         self.inst = instance
-#         return self(instance['old_roles'])
+    def __iter__(self):
+        wrapper = self._wrapper
+        for role in itertools.chain.from_iterable(self.values()):
+            inst = wrapper(role)
+            yield inst
 
-#     def __iter__(self):
-#         for old_role in itertools.chain.from_iterable(self.values()):
-#             import pdb;pdb.set_trace()
-#             cls = type('OldRol', (OldRole,), {'inst': self.inst})
-#             yield cls(old_role)
+    def sessions_served(self):
+        sessions = collections.defaultdict(set)
+        for role in self:
+            sessions[role['term']] |= set(list(role.termdata.session_names()))
+        return dict(sessions)
+
+
+class LegislatorVotesManager(AttrManager):
+    methods_only = True
+
+    def __iter__(self):
+        _id = self.document['_id']
+        for bill in self.document.metadata.bills():
+            for vote in bill.votes_manager:
+                for k in ['yes_votes', 'no_votes', 'other_votes']:
+                    for voter in vote[k]:
+                        if voter['leg_id'] == _id:
+                            yield vote
 
 
 class Legislator(Document):
@@ -465,23 +517,8 @@ class Legislator(Document):
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
     roles_manager = RolesManager()
-    # old_roles_manager = OldRolesManager()
-
-    class VotesManager(object):
-        def __iter__(self):
-            inst = self.inst
-            _id = inst['_id']
-            for bill in inst.state.bills():
-                for vote in bill.votes_manager:
-                    for k in ['yes_votes', 'no_votes', 'other_votes']:
-                        for voter in vote[k]:
-                            if voter['leg_id'] == _id:
-                                yield vote
-
-        def __get__(self, instance, type_=None, *args, **kwargs):
-            self.inst = instance
-            return self
-    votes_manager = VotesManager()
+    old_roles_manager = OldRolesManager()
+    votes_manager = LegislatorVotesManager()
     # def votes_manager(self):
     #     _id = self['_id']
     #     for bill in self.state.bills():
@@ -555,12 +592,12 @@ class SponsorsManager(AttrManager):
     def __iter__(self):
         '''Another unoptimized method that ultimately hits
         mongo once for each sponsor.'''
-        for spons in self.inst['sponsors']:
+        for spons in self.document['sponsors']:
             yield Sponsor(spons)
 
     def primary_list(self):
         'Return the first primary sponsor on the bill.'
-        for sponsor in self.inst['sponsors']:
+        for sponsor in self.document['sponsors']:
             if sponsor['type'] == 'primary':
                 yield Sponsor(sponsor)
 
@@ -575,30 +612,38 @@ class SponsorsManager(AttrManager):
         return take(5, self)
 
     def first_five_remainder(self):
-        len_ = len(self.inst['sponsors'])
+        len_ = len(self.document['sponsors'])
         if 5 < len_:
             return len_ - 5
 
 
-class Action(Subdocument):
+class Action(dict):
 
-    def chamber_name(self):
-        chamber = self.bill['chamber']
+    def actor_name(self):
+        actor = self['actor']
         meta = self.bill.state
-        return meta['%s_chamber_name' % chamber]
+        for s in ('upper', 'lower'):
+            if s in actor:
+                chamber_name = meta['%s_chamber_name' % s]
+                return actor.replace(s, chamber_name)
+        return actor.title()
+
+    @property
+    def bill(self):
+        return self.manager.document
 
 
-class ActionsManager(AttrManager):
+class ActionsManager(ListManager):
+    wrapper = Action
 
     def __iter__(self):
-        bill = self.inst
-        for action in reversed(bill['actions']):
-            yield Action.fromdict(action, bill, 'bill')
+        for action in reversed(self.bill['actions']):
+            yield self._wrapper(action)
 
     def _bytype(self, action_type, action_spec=None):
         '''Return the most recent date on which action_type occurred.
         Action spec is a dictionary of key-value attrs to match.'''
-        for action in reversed(self.inst['actions']):
+        for action in reversed(self.bill['actions']):
             if action_type in action['type']:
                 for k, v in action_spec.items():
                     if action[k] == v:
@@ -624,7 +669,7 @@ class ActionsManager(AttrManager):
         return self._bytype_latest('bill:introduced', {'actor': 'lower'})
 
 
-class Vote(Subdocument):
+class BillVote(DictManager):
 
     def _total_votes(self):
         return self['yes_count'] + self['no_count'] + self['other_count']
@@ -675,37 +720,31 @@ class Vote(Subdocument):
         return self.bill['votes'].index(self)
 
 
+class BillVotesManager(ListManager):
+        wrapper = BillVote
+        keyname = 'votes'
+
+        def has_votes(self):
+            return bool(self.bill['votes'])
+
+
 class Bill(Document):
 
     collection = db.bills
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
-
-    class VotesManager(AttrManager):
-        '''
-        maybe return self.Subdocument(mydict)
-        '''
-        def __iter__(self):
-            inst = self.inst
-            for vote in inst['votes']:
-                yield Vote.fromdict(
-                    vote, parent_doc=inst, parent_name='bill')
-
-        def has_votes(self):
-            return bool(self.inst['votes'])
-
-    votes_manager = VotesManager()
+    votes_manager = BillVotesManager()
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
     def get_absolute_url(self):
         return urlresolvers.reverse('bill', args=[self['abbreviation', self.id]])
 
-    def version_objects(self):
-        cls = self.subdocument
-        for obj in self['versions']:
-            yield cls(obj)
+    # def version_objects(self):
+    #     cls = self.subdocument
+    #     for obj in self['versions']:
+    #         yield cls(obj)
 
     def session_details(self):
         metadata = self.metadata
@@ -751,7 +790,7 @@ class Bill(Document):
         '''Currently returns the earliest date the bill was introduced
         in either chamber.
         '''
-        actions = self.actions_type_dict.get('bill:introduced')
+        actions = self.actions_type_dict.get('bill:introduced', [])
         actions = sorted(actions, key=operator.itemgetter('date'))
         if actions:
             for action in actions:
@@ -797,6 +836,46 @@ class Bill(Document):
             yield stage, text, getattr(self, method)()
 
 
+class Term(DictManager):
+    methods_only = True
+
+    def session_info(self):
+        details = self.metadata['session_details']
+        for session_name in self['sessions']:
+            yield dict(details[session_name], name=session_name)
+
+    def session_names(self):
+        '''The display names of sessions occuring in this term.
+        '''
+        details = self.metadata['session_details']
+        for sess in self['sessions']:
+            yield details[sess]['display_name']
+
+
+class TermsManager(ListManager):
+    wrapper = Term
+
+    @property
+    def dict_(self):
+        wrapper = self._wrapper
+        grouped = itertools.groupby(self.metadata['terms'],
+                                    operator.itemgetter('name'))
+        data = []
+        for term, termdata in grouped:
+            termdata = list(termdata)
+            assert len(termdata) is 1
+            data.append((term, wrapper(termdata[0])))
+
+        return dict(data)
+
+
+class MetadataVotesManager(AttrManager):
+    def __iter__(self):
+        for bill in self.document.bills():
+            for vote in bill.votes_manager:
+                    yield vote
+
+
 class Metadata(Document):
     '''
     The metadata can also be thought as the "state" (i.e., Montana, Texas)
@@ -807,12 +886,6 @@ class Metadata(Document):
     'de'
     '''
     instance_key = 'state'
-
-    class VotesManager(AttrManager):
-        def __iter__(self):
-            for bill in self.inst.bills():
-                for vote in bill.votes_manager:
-                        yield vote
 
     collection = db.metadata
 
@@ -831,9 +904,10 @@ class Metadata(Document):
     events = RelatedDocuments('Event', model_keys=['state'],
                               instance_key='abbreviation')
 
-    votes_manager = VotesManager()
-
     report = RelatedDocument('Report', instance_key='_id')
+
+    votes_manager = MetadataVotesManager()
+    terms_manager = TermsManager()
 
     @classmethod
     def get_object(cls, abbr):
@@ -884,6 +958,17 @@ class Metadata(Document):
 
     def bills_passed_lower(self):
         return self._bills_by_chamber_action('lower', 'bill:passed')
+
+    @property
+    def term_dict(self):
+        try:
+            return self._term_dict
+        except AttributeError:
+            term_dict = itertools.groupby(self['terms'],
+                                         operator.itemgetter('name'))
+            term_dict = dict((name, list(data)) for (name, data) in term_dict)
+            self._term_dict = term_dict
+            return term_dict
 
 
 class Report(Document):

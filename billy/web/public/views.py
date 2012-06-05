@@ -3,6 +3,8 @@ import json
 import urllib2
 import operator
 
+from random import choice
+
 from operator import itemgetter
 from itertools import repeat, islice
 
@@ -13,8 +15,6 @@ from django.template import RequestContext
 from django.views.generic import TemplateView
 from django.http import Http404
 from django.conf import settings
-
-import requests
 
 import billy.models
 from billy.models import db, Metadata, DoesNotExist
@@ -361,7 +361,6 @@ def chamber_select(request, collection_name):
     '''
     if collection_name not in ('legislators', 'committees'):
         raise Http404
-
     form = ChamberSelectForm(request.GET)
     chamber = form.data['chamber']
     abbr = form.data['abbr']
@@ -378,6 +377,12 @@ def find_your_legislator(request):
     # XXX: fallback behavior here for alpha.
 
     kwargs = {}
+    addrs = [
+        "50 Rice Street, Wellesley, MA",
+        "20700 North Park Blvd. University Heights, Ohio",
+        "1818 N Street NW, Washington, DC"
+    ]
+    kwargs['address'] = choice(addrs)
 
     get = request.GET
     if "lat" in get and "lon" in get:
@@ -484,10 +489,12 @@ def legislator(request, abbr, leg_id):
     except DoesNotExist:
         raise Http404
 
-    try:
-        legislator = db.legislators.find_one({'_id': leg_id})
-    except DoesNotExist:
-        raise Http404
+    legislator = db.legislators.find_one({'_id': leg_id})
+    if legislator is None:
+        raise Http404('No legislator was found with led_id = %r' % leg_id)
+
+    if not legislator['active']:
+        return legislator_inactive(request, abbr, legislator)
 
     # Note to self: Slow query
     sponsored_bills = legislator.sponsored_bills(
@@ -513,9 +520,35 @@ def legislator(request, abbr, leg_id):
         context_instance=RequestContext(request, default_context))
 
 
+def legislator_inactive(request, abbr, legislator):
+    '''
+    '''
+    # Note to self: Slow query
+    sponsored_bills = legislator.sponsored_bills(
+        limit=5, sort=[('actions.1.date', pymongo.DESCENDING)])
+
+    # Note to self: Another slow query
+    legislator_votes = legislator.votes_3_sorted()
+    has_votes = bool(legislator_votes)
+    return render_to_response(
+        template_name=templatename('legislator_inactive'),
+        dictionary=dict(
+            feed_entry_template=templatename('feed_entry'),
+            vote_preview_row_template=templatename('vote_preview_row'),
+            old_roles=legislator.old_roles_manager,
+            abbr=abbr,
+            metadata=legislator.metadata,
+            legislator=legislator,
+            sources=legislator['sources'],
+            sponsored_bills=sponsored_bills,
+            legislator_votes=legislator_votes,
+            has_votes=has_votes,
+            statenav_active='legislators'),
+        context_instance=RequestContext(request, default_context))
+
+
 #----------------------------------------------------------------------------
 def committees(request, abbr):
-
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -613,9 +646,9 @@ def committees_chamber(request, abbr, chamber):
 
 
 def committee(request, abbr, committee_id):
-    try:
-        committee = db.committees.find_one({'_id': committee_id})
-    except DoesNotExist:
+
+    committee = db.committees.find_one({'_id': committee_id})
+    if committee is None:
         raise Http404
 
     return render_to_response(
@@ -646,9 +679,9 @@ def bills(request, abbr):
 
 
 def bill(request, abbr, bill_id):
-    try:
-        bill = db.bills.find_one({'_id': bill_id})
-    except DoesNotExist:
+
+    bill = db.bills.find_one({'_id': bill_id})
+    if bill is None:
         raise Http404
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
@@ -667,9 +700,8 @@ def bill(request, abbr, bill_id):
 
 
 def vote(request, abbr, bill_id, vote_index):
-    try:
-        bill = db.bills.find_one({'_id': bill_id})
-    except DoesNotExist:
+    bill = db.bills.find_one({'_id': bill_id})
+    if bill is None:
         raise Http404
 
     return render_to_response(
