@@ -68,25 +68,26 @@ def get_filter_bills_form(metadata):
                              ('lowerl', metadata['lower_chamber_name'])),
                     widget=forms.CheckboxSelectMultiple())
 
-        bill_types = forms.MultipleChoiceField(
+        bill_types = forms.ChoiceField(
                         choices=BILL_TYPES,
-                        widget=forms.CheckboxSelectMultiple())
+                        #widget=forms.CheckboxSelectMultiple())
+                        )
 
-        subjects = forms.MultipleChoiceField(
+        subjects = forms.ChoiceField(
                     choices=BILL_SUBJECTS,
-                    widget=forms.CheckboxSelectMultiple()
+                    #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
                     )
 
-        actions = forms.MultipleChoiceField(
+        actions = forms.ChoiceField(
                     choices=ACTION_TYPES,
-                    widget=forms.CheckboxSelectMultiple()
+                    #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Actions", is_stacked=False)
                     )
 
-        sponsors = forms.MultipleChoiceField(
+        sponsors = forms.ChoiceField(
                     choices=BILL_SPONSORS,
-                    widget=forms.CheckboxSelectMultiple()
+                    #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Sponsors", is_stacked=False)
                     )
 
