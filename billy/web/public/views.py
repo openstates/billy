@@ -19,7 +19,8 @@ from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 from billy.conf import settings as billy_settings
 
-from .forms import get_state_select_form, ChamberSelectForm, FindYourLegislatorForm
+from .forms import (get_state_select_form, ChamberSelectForm,
+                    FindYourLegislatorForm, get_filter_bills_form)
 from .viewdata import overview
 
 
@@ -220,6 +221,36 @@ class RelatedBillsList(RelatedObjectsList):
     rowtemplate_name = templatename('bills_list_row')
     column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
     statenav_active = 'bills'
+
+
+class StateBills(RelatedBillsList):
+    template_name = templatename('state_bills_list')
+    collection_name = 'metadata'
+    query_attr = 'bills'
+    description_template = templatename(
+        'list_descriptions/bills')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(RelatedObjectsList, self).get_context_data(
+                                                        *args, **kwargs)
+        metadata = context['metadata']
+        FilterBillsForm = get_filter_bills_form(metadata)
+        context.update(form=FilterBillsForm())
+        return context
+
+
+def filter_bills(request, abbr):
+    metadata = Metadata.get_object(abbr)
+    FilterBillsForm = get_filter_bills_form(metadata)
+    form = FilterBillsForm(request.GET)
+
+    chambers = form.data.getlist('chambers')
+    subjects = form.data.getlist('subjects')
+    sponsored = form.data.getlist('sponsored')
+    actions = form.data.getlist('actions')
+    bill_types = form.data.getlist('bill_types')
+
+    raise NotImplementedError('Search is in the works')
 
 
 class SponsoredBillsList(RelatedBillsList):

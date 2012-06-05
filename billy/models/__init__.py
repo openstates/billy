@@ -970,6 +970,15 @@ class Metadata(Document):
             self._term_dict = term_dict
             return term_dict
 
+    def distinct_bill_subjects(self):
+        return self.bills().distinct('subjects')
+
+    def distinct_action_types(self):
+        return self.bills().distinct('actions.type')
+
+    def distinct_bill_types(self):
+        return self.bills().distinct('type')
+
 
 class Report(Document):
 
