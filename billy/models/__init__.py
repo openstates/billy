@@ -221,7 +221,6 @@ class ListManager(list, AttrManager):
 
 class DictManager(dict, AttrManager):
     def items(self):
-        import pdb;pdb.set_trace()
         return [(k, self._wrapper(v)) for (k, v) in dict.items(self)]
 
     def __getitem__(self, key):
@@ -476,7 +475,8 @@ class OldRole(DictManager):
 
     @property
     def termdata(self):
-        return self.document.metadata.terms_manager.dict_[self['term']]
+        dict_ = self.document.metadata.terms_manager.dict_
+        return dict_[self['term']]
 
 
 class OldRolesManager(DictManager):
@@ -971,13 +971,13 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        return self.bills().distinct('subjects')
+        return sorted(self.bills().distinct('subjects'))
 
     def distinct_action_types(self):
-        return self.bills().distinct('actions.type')
+        return sorted(self.bills().distinct('actions.type'))
 
     def distinct_bill_types(self):
-        return self.bills().distinct('type')
+        return sorted(self.bills().distinct('type'))
 
 
 class Report(Document):
