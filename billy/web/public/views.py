@@ -3,6 +3,8 @@ import json
 import urllib2
 import operator
 
+from random import choice
+
 from operator import itemgetter
 from itertools import repeat, islice
 
@@ -405,9 +407,20 @@ def find_your_legislator(request):
     # if leg_search is set, they most likely don't have ECMAScript enabled.
     # XXX: fallback behavior here for alpha.
 
+    get = request.GET
     kwargs = {}
 
-    get = request.GET
+    addrs = [
+        "50 Rice Street, Wellesley, MA",
+        "20700 North Park Blvd. University Heights, Ohio",
+        "1818 N Street NW, Washington, DC"
+    ]
+
+    kwargs['address'] = choice(addrs)
+
+    if "q" in get:
+        kwargs['request'] = get['q']
+
     if "lat" in get and "lon" in get:
         # We've got a passed lat/lon. Let's build off it.
         lat = get['lat']
