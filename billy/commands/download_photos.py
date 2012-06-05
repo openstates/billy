@@ -37,8 +37,8 @@ class DownloadPhotos(BaseCommand):
             else:
                 print "Updating ids for {0}".format(abbr)
 
-            orig_dir = 'photos2/original'
-            small_dir = 'photos2/small'
+            orig_dir = 'photos/original'
+            small_dir = 'photos/small'
             large_dir = 'photos/large'
             for d in (orig_dir, small_dir, large_dir):
                 if not os.path.exists(d):
