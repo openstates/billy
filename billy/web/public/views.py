@@ -14,8 +14,6 @@ from django.views.generic import TemplateView
 from django.http import Http404
 from django.conf import settings
 
-import requests
-
 import billy.models
 from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -529,7 +527,7 @@ def legislator_inactive(request, abbr, legislator):
         dictionary=dict(
             feed_entry_template=templatename('feed_entry'),
             vote_preview_row_template=templatename('vote_preview_row'),
-            roles=legislator.roles_manager,
+            old_roles=legislator.old_roles_manager,
             abbr=abbr,
             metadata=legislator.metadata,
             legislator=legislator,
