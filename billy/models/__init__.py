@@ -142,9 +142,19 @@ class Document(dict):
         return self.metadata['%s_chamber_name' % self['chamber']]
 
 
-class AttrManager(object):
+class Wrapper(object):
 
-    wrapper = object
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+class AttrManager(Wrapper):
+
+    @property
+    def _wrapper(self, rubber_stamp=lambda x: x):
+        '''Subclasses define a wrapper (or not).
+        '''
+        return getattr(self, 'wrapper', rubber_stamp)
 
     def __get__(self, inst, type_=None):
 
@@ -152,27 +162,31 @@ class AttrManager(object):
         context = copy.copy(inst.context)
         context['context'] = context
         context[inst.related_name] = inst
-        if isinstance(inst, Document):
+        if 'document' not in context and isinstance(inst, Document):
             context.update(document=inst)
 
-        # Create a new wrapper class.
-        wrapper = self.wrapper
-        try:
+        # Create a new wrapper class if a wrapper was defined on the
+        # manager.
+        wrapper = getattr(self, 'wrapper', None)
+        if wrapper is not None:
             wrapper_name = wrapper.__name__
-        except:
-            wrapper_name = 'Wrapper'
-        context['manager'] = self
-        new_wrapper = type(wrapper_name, (wrapper,), context)
-        del context['manager']
+            context['manager'] = self
+            new_wrapper = type(wrapper_name, (wrapper,), context)
+            del context['manager']
+            context.update(wrapper=new_wrapper)
 
-        # Create the new manager class.
+        # Otherwise, create the new manager subclass.
         cls = self.__class__
-        context.update(wrapper=new_wrapper)
         newclass = type(cls.__name__, (cls,), context)
 
-        # Create the new instance.
-        inst = newclass(inst[self.keyname])
-        return inst
+        if getattr(self, 'methods_only', None):
+            # If this manager just adds methods without wrapping any data
+            # from the instance, no need to go further; just return self.
+            return newclass(self)
+        else:
+            # Else wrap the instance data in the new class.
+            inst = newclass(inst[self.keyname])
+            return inst
 
     @property
     def keyname(self):
@@ -186,32 +200,32 @@ class AttrManager(object):
 
 class ListManager(list, AttrManager):
     def __iter__(self):
-        try:
-            wrapper = self.wrapper
-        except AttributeError:
-            msg = 'AttrManager %r must define a wrapper class.'
-            raise ModelDefinitionError(msg)
-
+        wrapper = self._wrapper
         for obj in self.document[self.keyname]:
             yield wrapper(obj)
 
     def __getitem__(self, int_or_slice):
+        '''Note to self for future--django's templating system does some
+        perhaps rather silly voodoo to try __getattr__, __getitem__ when you
+        reference object attributes in templates, and if your custom ORM
+        throws custom errors, django might not handle those correctly, leading
+        to difficult-to-debug issues. Better to let python throw its own
+        errors from operations, which django handles well.
+        '''
+        ret = self._wrapper(list.__getitem__(self, int_or_slice))
         if isinstance(int_or_slice, int):
-            return self.wrapper(list.__getitem__(self, int_or_slice))
+            return self._wrapper(ret)
         elif isinstance(int_or_slice, slice):
-            return map(self.wrapper, list.__getitem__(self, int_or_slice))
-        else:
-            msg = 'Argument must be int or slice, not %r' % type(int_or_slice)
-            raise ValueError(msg)
+            return map(self._wrapper, ret)
 
 
 class DictManager(dict, AttrManager):
     def items(self):
-        wrapper = self.wrapper
-        return [(k, wrapper(v)) for (k, v) in dict.items(self)]
+        import pdb;pdb.set_trace()
+        return [(k, self._wrapper(v)) for (k, v) in dict.items(self)]
 
     def __getitem__(self, key):
-        return self.wrapper(dict.__getitem__(self, key))
+        return self._wrapper(dict.__getitem__(self, key))
 
 
 class RelatedDocument(ReadOnlyAttribute):
@@ -399,10 +413,13 @@ class CommitteeMember(dict):
     legislator_object = RelatedDocument('Legislator', instance_key='leg_id')
 
 
-class CommitteeMemberManager(AttrManager):
+class CommitteeMemberManager(ListManager):
+
+    keyname = 'members'
 
     def __iter__(self):
         for obj in self.document['members']:
+            # This would be better as an '_id': {$or: [id1, id2,...]}
             if 'leg_id' in obj:
                 if DEBUG:
                     msg = '{0}.{1}({2}, {3}, {4})'.format(
@@ -450,33 +467,38 @@ class Role(dict):
         return name
 
 
-class RolesManager(AttrManager):
+class RolesManager(ListManager):
     wrapper = Role
 
 
-class OldRole(dict):
-    pass
+class OldRole(DictManager):
+    methods_only = True
+
+    @property
+    def termdata(self):
+        return self.document.metadata.terms_manager.dict_[self['term']]
 
 
-class OldRolesManager(AttrManager):
-    wrapper = OldRole()
+class OldRolesManager(DictManager):
     keyname = 'old_roles'
+    wrapper = OldRole
 
     def __iter__(self):
+        wrapper = self._wrapper
         for role in itertools.chain.from_iterable(self.values()):
-            yield self.cls(role)
+            inst = wrapper(role)
+            yield inst
 
     def sessions_served(self):
-        metadata = self.inst.metadata
-        for term in self:
-            termdata = itertools.groupby(operator('term'), metadata['terms'])
-            termdata = sorted(termdata)
-
-        for term, data in self.items():
-            return term, data['sessions']
+        sessions = collections.defaultdict(set)
+        for role in self:
+            sessions[role['term']] |= set(list(role.termdata.session_names()))
+        return dict(sessions)
 
 
 class LegislatorVotesManager(AttrManager):
+    methods_only = True
+
     def __iter__(self):
         _id = self.document['_id']
         for bill in self.document.metadata.bills():
@@ -611,18 +633,17 @@ class Action(dict):
         return self.manager.document
 
 
-class ActionsManager(AttrManager):
-    wrapper = Action()
+class ActionsManager(ListManager):
+    wrapper = Action
 
     def __iter__(self):
-        bill = self.document
-        for action in reversed(bill['actions']):
-            yield self.wrapper(action)
+        for action in reversed(self.bill['actions']):
+            yield self._wrapper(action)
 
     def _bytype(self, action_type, action_spec=None):
         '''Return the most recent date on which action_type occurred.
         Action spec is a dictionary of key-value attrs to match.'''
-        for action in reversed(self.document['actions']):
+        for action in reversed(self.bill['actions']):
             if action_type in action['type']:
                 for k, v in action_spec.items():
                     if action[k] == v:
@@ -649,10 +670,6 @@ class ActionsManager(AttrManager):
 
 
 class BillVote(DictManager):
-
-    @property
-    def bill(self):
-        return self.manager.document
 
     def _total_votes(self):
         return self['yes_count'] + self['no_count'] + self['other_count']
@@ -700,7 +717,6 @@ class BillVote(DictManager):
         return self._vote_legislators('other')
 
     def index(self):
-        import pdb;pdb.set_trace()
         return self.bill['votes'].index(self)
 
 
@@ -709,7 +725,7 @@ class BillVotesManager(ListManager):
         keyname = 'votes'
 
         def has_votes(self):
-            return bool(self.document['votes'])
+            return bool(self.bill['votes'])
 
 
 class Bill(Document):
@@ -774,7 +790,7 @@ class Bill(Document):
         '''Currently returns the earliest date the bill was introduced
         in either chamber.
         '''
-        actions = self.actions_type_dict.get('bill:introduced')
+        actions = self.actions_type_dict.get('bill:introduced', [])
         actions = sorted(actions, key=operator.itemgetter('date'))
         if actions:
             for action in actions:
@@ -820,7 +836,8 @@ class Bill(Document):
             yield stage, text, getattr(self, method)()
 
 
-class Term(dict):
+class Term(DictManager):
+    methods_only = True
 
     def session_info(self):
         details = self.metadata['session_details']
@@ -837,6 +854,19 @@ class Term(dict):
 
 class TermsManager(ListManager):
     wrapper = Term
+
+    @property
+    def dict_(self):
+        wrapper = self._wrapper
+        grouped = itertools.groupby(self.metadata['terms'],
+                                    operator.itemgetter('name'))
+        data = []
+        for term, termdata in grouped:
+            termdata = list(termdata)
+            assert len(termdata) is 1
+            data.append((term, wrapper(termdata[0])))
+
+        return dict(data)
 
 
 class MetadataVotesManager(AttrManager):
