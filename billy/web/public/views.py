@@ -13,7 +13,7 @@ import pymongo
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic import TemplateView
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.conf import settings
 
 import billy.models
@@ -409,6 +409,7 @@ def find_your_legislator(request):
 
     get = request.GET
     kwargs = {}
+    template = 'find_your_legislator'
 
     addrs = [
         "50 Rice Street, Wellesley, MA",
@@ -438,9 +439,10 @@ def find_your_legislator(request):
         )
         f = urllib2.urlopen(qurl)
         kwargs['legislators'] = json.load(f)
+        template = 'find_your_legislator_table'
 
     return render_to_response(
-        template_name=templatename('find_your_legislator'),
+        template_name=templatename(template),
         dictionary=kwargs,
         context_instance=RequestContext(request, default_context))
 
