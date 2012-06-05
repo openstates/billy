@@ -56,7 +56,9 @@ class DownloadPhotos(BaseCommand):
                 # error retrieving photo, skip it
                 try:
                     tmpname, resp = scraper.urlretrieve(leg['photo_url'])
-                except scrapelib.HTTPError:
+                except scrapelib.HTTPError as he:
+                    continue
+                except Exception as e:
                     continue
 
                 # original size, standardized filenames
