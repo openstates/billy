@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} : billy admin</title>
     <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
-    <script src="{% static "scripts/jquery-1.7.1.min.js" %}></script>
-    <script src="{% static "scripts/bootstrap-dropdown.js" %}></script>
+    <script src="{% static "scripts/jquery-1.7.1.min.js" %}"></script>
+    <script src="{% static "scripts/bootstrap-dropdown.js" %}"></script>
     <script>
       $('.dropdown-toggle').dropdown();
     </script>
@@ -61,12 +61,10 @@
     </div>
     {% block content-nocontainer %}
     <div class="container">
-        {% if warning %}
-            <div class="alert alert-block alert-error">
-                {% if warning_title %}
-                    <strong>{{ warning_title }}</strong><br />
-                {% endif %}
-                {{ warning }}
+        {% if alert %}
+            <div class="alert alert-block alert-{{alert.type}}">
+                <h4 class="alert-heading">{{alert.title}}</h4>
+                {{ alert.message }}
             </div>
         {% endif %}
         {% block content %}{% endblock %}

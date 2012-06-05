@@ -8,7 +8,7 @@ from billy.web.public.views import (VotesList, FeedsList,
 
 urlpatterns = patterns('billy.web.public.views',
 
-    url(r'^home$', 'homepage', name='homepage'),
+    url(r'^$', 'homepage', name='homepage'),
 
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection',
@@ -77,6 +77,6 @@ urlpatterns = patterns('billy.web.public.views',
 urlpatterns += patterns('',
     # other views
     url(r'^downloads/$', 'billy.web.public.views_other.downloads', name='downloads'),
-    url(r'^find_your_legislator/$', 'find_your_legislator',
+    url(r'^find_your_legislator/$', 'billy.web.public.views.find_your_legislator',
         name='find_your_legislator'),
 )

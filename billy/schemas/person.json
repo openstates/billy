@@ -25,6 +25,14 @@
         "end_date": {"type": ["string", "datetime", "null"]},
         "position": {"type": "string", "required": false}
     }}},
+    "offices": {"type": "array", "items": {"type": "object", "properties": {
+        "type": {"type": "string", "enum": ["capitol", "district"]},
+        "name": {"type": "string"},
+        "address": {"type": ["string", "null"]},
+        "phone": {"type": ["string", "null"]},
+        "fax": {"type": ["string", "null"]},
+        "email": {"type": ["string", "null"]}
+    }}},
     "photo_url": {"type": "string", "blank": true, "required": false},
     "office_phone": {"type": "string", "blank": true, "required": false},
     "office_address": {"type": "string", "blank": true, "required": false},

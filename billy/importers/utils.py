@@ -9,13 +9,15 @@ import pymongo.errors
 import name_tools
 
 from billy import db
+from billy.conf import settings
 
-oyster_import_exception = None
-try:
-    from oyster.core import kernel
-except ImportError as e:
-    kernel = None
-    oyster_import_exception = e
+if settings.ENABLE_OYSTER:
+    oyster_import_exception = None
+    try:
+        from oyster.core import kernel
+    except ImportError as e:
+        kernel = None
+        oyster_import_exception = e
 
 
 def _get_property_dict(schema):

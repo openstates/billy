@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<form action="{% url delete_committees %}" method="POST">
+
 <div>
     <h3>{{metadata.upper_chamber_name}} Committees </h3>
     <table class="table table-bordered table-striped">
@@ -11,6 +13,7 @@
         <td>Committee</td>
         <td>Members</td>
         <td>Sources</td>
+        <td>Delete?</td>
     </tr>
     {% for com in upper_coms %}
     <tr>
@@ -34,6 +37,7 @@
                 <li><a href="{{s.url}}">{{s.url}}</a></li>
             {% endfor %}
         </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
     </tr>
     {% endfor %}
     </table>
@@ -46,6 +50,7 @@
         <td>Committee</td>
         <td>Members</td>
         <td>Sources</td>
+        <td>Delete?</td>
     </tr>
     {% for com in lower_coms %}
     <tr>
@@ -69,6 +74,7 @@
                 <li><a href="{{s.url}}">{{s.url}}</a></li>
             {% endfor %}
         </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
     </tr>
     {% endfor %}
     </table>
@@ -82,6 +88,7 @@
         <td>Committee</td>
         <td>Members</td>
         <td>Sources</td>
+        <td>Delete?</td>
     </tr>
     {% for com in joint_coms %}
     <tr>
@@ -105,10 +112,13 @@
                 <li><a href="{{s.url}}">{{s.url}}</a></li>
             {% endfor %}
         </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
     </tr>
     {% endfor %}
     </table>
 </div>
 
+<button type="submit" class="btn btn-danger">Delete Checked Committees</button>
+</form>
 
 {% endblock %}

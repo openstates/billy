@@ -8,6 +8,7 @@ import pymongo
 import decimal
 import functools
 import unicodecsv
+import datetime
 import urlparse
 from operator import itemgetter
 from itertools import chain, imap
@@ -19,12 +20,13 @@ from django.http import Http404, HttpResponse
 from django.core import urlresolvers
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from billy import db
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
+from billy.importers.legislators import deactivate_legislators
 
 
 def _meta_and_report(abbr):
@@ -96,11 +98,12 @@ def overview(request, abbr):
                                            runlog['scraped']['started'])
         context['runlog'] = runlog
         if "failure" in runlog:
-            context['warning_title'] = "This build is currently broken!"
-            context['warning'] = """
+            context['alert'] = dict(type='error',
+                                    title="This build is currently broken!",
+                                    message="""
 The last scrape was a failure. Check in the run log section for more details,
 or check out the scrape run report page for this state.
-"""
+""")
     except IndexError:
         runlog = False
 
@@ -253,7 +256,7 @@ def run_detail_graph_data(request, abbr):
         data['title'][line] = speck[line]['title']
 
     return HttpResponse(
-        json.dumps( data ),
+        json.dumps( data, cls=JSONDateEncoder ),
         #content_type="text/json"
         content_type="text/plain"
     )
@@ -310,12 +313,12 @@ def state_run_detail(request, abbr):
     }
 
     if "failure" in runlog:
-        context['warning_title'] = "Exception during Execution"
-        context['warning'] = \
-"""
+        context["alert"] = dict(type='error',
+                                title="Exception during Execution",
+                                message="""
 This build had an exception during it's execution. Please check below
 for the exception and error message.
-"""
+""")
 
     return render(request, 'billy/state_run_detail.html', context)
 
@@ -448,7 +451,7 @@ def bills(request, abbr):
                     except KeyError:
                         spec_val = r
                     else:
-                        spec_val = json.dumps(spec_val)
+                        spec_val = json.dumps(spec_val, cls=JSONDateEncoder)
 
                     params = dict(spec['summary'], session=session,
                                   val=spec_val)
@@ -849,6 +852,37 @@ def legislator(request, id):
     return render(request, 'billy/legislator.html', {'leg': leg,
                                                         'metadata': meta})
 
+def retire_legislator(request, id):
+    legislator = db.legislators.find_one({'_all_ids': id})
+    if not legislator:
+        raise Http404
+
+    # retire a legislator
+    level = legislator['level']
+    abbr = legislator[level]
+    meta = metadata(abbr)
+
+    term = meta['terms'][-1]['name']
+    cur_role = legislator['roles'][0]
+    if cur_role['type'] != 'member' or cur_role['term'] != term:
+        raise ValueError('member missing role for %s' % term)
+
+    end_date = request.POST.get('end_date')
+    if not end_date:
+        alert = dict(type='warning', title='Warning!',
+                     message='missing end_date for retirement')
+    else:
+        cur_role['end_date'] = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+        db.legislators.save(legislator, safe=True)
+        deactivate_legislators(term, abbr, level)
+        alert = dict(type='success', title='Retired Legislator',
+                     message='{0} was successfully retired.'.format(
+                         legislator['full_name']))
+
+    return render(request, 'billy/legislator.html', {'leg': legislator,
+                                                     'metadata': meta,
+                                                     'alert': alert,
+                                                    })
 
 def committees(request, abbr):
     meta = metadata(abbr)
@@ -870,6 +904,17 @@ def committees(request, abbr):
         'joint_coms': joint_coms,
         'metadata': meta,
     })
+
+def delete_committees(request):
+    ids = request.POST.getlist('committees')
+    committees = db.committees.find({'_id': {'$in': ids}})
+    abbr = committees[0][committees[0]['level']]
+    if not request.POST.get('confirm'):
+        return render(request, 'billy/delete_committees.html',
+                      { 'abbr': abbr, 'committees': committees })
+    else:
+        db.committees.remove({'_id': {'$in': ids}}, safe=True)
+        return redirect('admin_committees', abbr)
 
 def mom_index(request):
     return render(request, 'billy/mom_index.html' )
@@ -931,10 +976,10 @@ def _mom_attr_diff( merge, leg1, leg2 ):
     return ( mv, mv_info )
 
 def _mom_mangle( attr ):
-    jsonify = json.dumps
     args    = {
         "sort_keys" : True,
-        "indent"    : 4
+        "indent"    : 4,
+        "cls"       : JSONDateEncoder
     }
     if isinstance( attr, types.ListType ):
         return json.dumps( attr, **args )
