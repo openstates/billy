@@ -32,10 +32,10 @@ class DownloadPhotos(BaseCommand):
 
             meta = db.metadata.find_one({'_id': abbr.lower()})
             if not meta:
-                print "'{0}' does not exist in the database.".format(abbr)
+                print("'{0}' does not exist in the database.".format(abbr))
                 sys.exit(1)
             else:
-                print "Updating ids for {0}".format(abbr)
+                print("Updating ids for {0}".format(abbr))
 
             orig_dir = 'photos/original'
             small_dir = 'photos/small'
@@ -44,15 +44,24 @@ class DownloadPhotos(BaseCommand):
                 if not os.path.exists(d):
                     os.makedirs(d)
 
-            print "Downloading photos..."
             for leg in db.legislators.find({meta['level']: abbr,
                                             'photo_url': {'$exists': True}}):
-                tmpname, resp = scraper.urlretrieve(leg['photo_url'])
 
-                # original size, standard filenames
+                fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))
+
+                # if fname already exists, skip this processing step
+                if os.path.exists(fname):
+                    continue
+
+                # error retrieving photo, skip it
+                try:
+                    tmpname, resp = scraper.urlretrieve(leg['photo_url'])
+                except scrapelib.HTTPError:
+                    continue
+
+                # original size, standardized filenames
                 fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))
                 subprocess.check_call(['convert', tmpname, fname])
-                print fname
                 k = Key(bucket)
                 k.key = fname
                 k.set_contents_from_filename(fname)
@@ -62,7 +71,6 @@ class DownloadPhotos(BaseCommand):
                 fname = os.path.join(small_dir, '{0}.jpg'.format(leg['_id']))
                 subprocess.check_call(['convert', tmpname, '-resize',
                                        '150x200', fname])
-                print fname
                 k = Key(bucket)
                 k.key = fname
                 k.set_contents_from_filename(fname)
