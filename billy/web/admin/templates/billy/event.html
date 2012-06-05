@@ -1,10 +1,13 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
 
-{% block title %}
-{{ bill.state|upper }} {{ bill.bill_id }}
-{% endblock %}
-
 {% block content %}
-
+<h2>{{event.description}}<h2>
+{{event.country}}{{event.level}}{{event.state}}
+{% for data in event.related_bills %}
+<ul>
+    <li><a href="{% url 'bill' event.state bill.bill_id %}">{{bill.bill_id}}</a></li>
+    <li>{{bill.description}}</li>
+</ul>
+{% endfor %}
 {% endblock %}
