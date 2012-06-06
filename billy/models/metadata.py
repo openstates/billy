@@ -1,0 +1,152 @@
+import operator
+import itertools
+
+from django.core import urlresolvers
+
+from .base import (db, Document, RelatedDocument, RelatedDocuments,
+                   ListManager, DictManager, AttrManager, DoesNotExist)
+from ..utils import metadata as get_metadata
+
+
+class Term(DictManager):
+    methods_only = True
+
+    def session_info(self):
+        details = self.metadata['session_details']
+        for session_name in self['sessions']:
+            yield dict(details[session_name], name=session_name)
+
+    def session_names(self):
+        '''The display names of sessions occuring in this term.
+        '''
+        details = self.metadata['session_details']
+        for sess in self['sessions']:
+            yield details[sess]['display_name']
+
+
+class TermsManager(ListManager):
+    wrapper = Term
+
+    @property
+    def dict_(self):
+        wrapper = self._wrapper
+        grouped = itertools.groupby(self.metadata['terms'],
+                                    operator.itemgetter('name'))
+        data = []
+        for term, termdata in grouped:
+            termdata = list(termdata)
+            assert len(termdata) is 1
+            data.append((term, wrapper(termdata[0])))
+
+        return dict(data)
+
+
+class MetadataVotesManager(AttrManager):
+    def __iter__(self):
+        for bill in self.document.bills():
+            for vote in bill.votes_manager:
+                    yield vote
+
+
+class Metadata(Document):
+    '''
+    The metadata can also be thought as the "state" (i.e., Montana, Texas)
+    when it's an attribute of another object. For example, if you have a
+    bill, you can do this:
+
+    >>> bill.metadata.abbr
+    'de'
+    '''
+    instance_key = 'state'
+
+    collection = db.metadata
+
+    legislators = RelatedDocuments('Legislator', model_keys=['state'],
+                                   instance_key='abbreviation')
+
+    committees = RelatedDocuments('Committee', model_keys=['state'],
+                                  instance_key='abbreviation')
+
+    bills = RelatedDocuments('Bill', model_keys=['state'],
+                             instance_key='abbreviation')
+
+    feed_entries = RelatedDocuments('FeedEntry', model_keys=['state'],
+                                    instance_key='abbreviation')
+
+    events = RelatedDocuments('Event', model_keys=['state'],
+                              instance_key='abbreviation')
+
+    report = RelatedDocument('Report', instance_key='_id')
+
+    votes_manager = MetadataVotesManager()
+    terms_manager = TermsManager()
+
+    @classmethod
+    def get_object(cls, abbr):
+        '''
+        This particular model need its own constructor in order to take
+        advantage of the metadata cache in billy.util, which would otherwise
+        return unwrapped objects.
+        '''
+        obj = get_metadata(abbr)
+        if obj is None:
+            msg = 'No metadata found for abbreviation %r' % abbr
+            raise DoesNotExist(msg)
+        return cls(obj)
+
+    @property
+    def abbr(self):
+        '''Return the state's two letter abbreviation.'''
+        return self['_id']
+
+    @property
+    def most_recent_session(self):
+        'Get the most recent session for this state.'
+        session = self['terms'][-1]['sessions'][-1]
+        return session
+
+    def display_name(self):
+        return self['name']
+
+    def get_absolute_url(self):
+        return urlresolvers.reverse('state', args=[self['abbreviation']])
+
+    def _bills_by_chamber_action(self, chamber, action):
+        bills = self.bills({'session': self.most_recent_session,
+                            'chamber': chamber,
+                            'actions.type': action,
+                            'type': 'bill'})
+        # Not worrying about date sorting until later.
+        return bills
+
+    def bills_introduced_upper(self):
+        return self._bills_by_chamber_action('upper', 'bill:introduced')
+
+    def bills_introduced_lower(self):
+        return self._bills_by_chamber_action('lower', 'bill:introduced')
+
+    def bills_passed_upper(self):
+        return self._bills_by_chamber_action('upper', 'bill:passed')
+
+    def bills_passed_lower(self):
+        return self._bills_by_chamber_action('lower', 'bill:passed')
+
+    @property
+    def term_dict(self):
+        try:
+            return self._term_dict
+        except AttributeError:
+            term_dict = itertools.groupby(self['terms'],
+                                         operator.itemgetter('name'))
+            term_dict = dict((name, list(data)) for (name, data) in term_dict)
+            self._term_dict = term_dict
+            return term_dict
+
+    def distinct_bill_subjects(self):
+        return sorted(self.bills().distinct('subjects'))
+
+    def distinct_action_types(self):
+        return sorted(self.bills().distinct('actions.type'))
+
+    def distinct_bill_types(self):
+        return sorted(self.bills().distinct('type'))
