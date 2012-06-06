@@ -2,13 +2,14 @@ import copy
 from billy import db
 from billy.importers import bills, names
 
-from nose.tools import with_setup
+from nose.tools import with_setup, assert_equal
 
 
 def setup_func():
     db.metadata.drop()
     db.bills.drop()
     db.legislators.drop()
+    db.document_ids.drop()
     db.vote_ids.drop()
     db.committees.drop()
     names.__matchers = {}
@@ -95,7 +96,7 @@ def test_import_bill():
     assert 'old title' in bill['alternate_titles']
 
     # test version/document import
-    assert bill['versions'][0]['doc_id'] == 'EXD00000001'
+    assert_equal(bill['versions'][0]['doc_id'], 'EXD00000001')
     assert bill['versions'][1]['doc_id'] == 'EXD00000002'
     assert bill['documents'][0]['doc_id'] == 'EXD00000003'
 

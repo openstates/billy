@@ -193,10 +193,6 @@ class Bill(Document):
     def other_chamber_name(self):
         return self.metadata['%s_chamber_name' % self.other_chamber]
 
-    @property
-    def state(self):
-        return self.metadata
-
     def type_string(self):
         return self['_type']
 
