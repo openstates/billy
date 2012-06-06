@@ -13,7 +13,7 @@ import pymongo
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic import TemplateView
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.conf import settings
 
 import billy.models
@@ -21,7 +21,8 @@ from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 from billy.conf import settings as billy_settings
 
-from .forms import get_state_select_form, ChamberSelectForm, FindYourLegislatorForm
+from .forms import (get_state_select_form, ChamberSelectForm,
+                    FindYourLegislatorForm, get_filter_bills_form)
 from .viewdata import overview
 
 
@@ -224,6 +225,36 @@ class RelatedBillsList(RelatedObjectsList):
     statenav_active = 'bills'
 
 
+class StateBills(RelatedBillsList):
+    template_name = templatename('state_bills_list')
+    collection_name = 'metadata'
+    query_attr = 'bills'
+    description_template = templatename(
+        'list_descriptions/bills')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(RelatedObjectsList, self).get_context_data(
+                                                        *args, **kwargs)
+        metadata = context['metadata']
+        FilterBillsForm = get_filter_bills_form(metadata)
+        context.update(form=FilterBillsForm())
+        return context
+
+
+def filter_bills(request, abbr):
+    metadata = Metadata.get_object(abbr)
+    FilterBillsForm = get_filter_bills_form(metadata)
+    form = FilterBillsForm(request.GET)
+
+    chambers = form.data.getlist('chambers')
+    subjects = form.data.getlist('subjects')
+    sponsored = form.data.getlist('sponsored')
+    actions = form.data.getlist('actions')
+    bill_types = form.data.getlist('bill_types')
+
+    raise NotImplementedError('Search is in the works')
+
+
 class SponsoredBillsList(RelatedBillsList):
     query_attr = 'sponsored_bills'
     description_template = templatename(
@@ -378,6 +409,7 @@ def find_your_legislator(request):
 
     get = request.GET
     kwargs = {}
+    template = 'find_your_legislator'
 
     addrs = [
         "50 Rice Street, Wellesley, MA",
@@ -407,9 +439,10 @@ def find_your_legislator(request):
         )
         f = urllib2.urlopen(qurl)
         kwargs['legislators'] = json.load(f)
+        template = 'find_your_legislator_table'
 
     return render_to_response(
-        template_name=templatename('find_your_legislator'),
+        template_name=templatename(template),
         dictionary=kwargs,
         context_instance=RequestContext(request, default_context))
 

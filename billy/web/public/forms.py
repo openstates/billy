@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+#from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from billy.models import Metadata
 
@@ -45,3 +46,49 @@ class ChamberSelectForm(forms.Form):
 
 class FindYourLegislatorForm(forms.Form):
     address = forms.CharField()
+
+
+def get_filter_bills_form(metadata):
+
+    class FilterBillsForm(forms.Form):
+
+        _bill_types = metadata.distinct_bill_types()
+        _bill_subjects = metadata.distinct_bill_subjects()
+        _action_types = metadata.distinct_action_types()
+        _bill_sponsors = [leg.display_name() for leg in
+                          metadata.legislators()]
+
+        BILL_TYPES = zip(_bill_types, _bill_types)
+        BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
+        ACTION_TYPES = zip(_action_types, _action_types)
+        BILL_SPONSORS = zip(_bill_sponsors, _bill_sponsors)
+
+        chambers = forms.MultipleChoiceField(
+                    choices=(('upper', metadata['upper_chamber_name']),
+                             ('lowerl', metadata['lower_chamber_name'])),
+                    widget=forms.CheckboxSelectMultiple())
+
+        bill_types = forms.ChoiceField(
+                        choices=BILL_TYPES,
+                        #widget=forms.CheckboxSelectMultiple())
+                        )
+
+        subjects = forms.ChoiceField(
+                    choices=BILL_SUBJECTS,
+                    #widget=forms.CheckboxSelectMultiple()
+                    #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
+                    )
+
+        actions = forms.ChoiceField(
+                    choices=ACTION_TYPES,
+                    #widget=forms.CheckboxSelectMultiple()
+                    #widget=FilteredSelectMultiple("Actions", is_stacked=False)
+                    )
+
+        sponsors = forms.ChoiceField(
+                    choices=BILL_SPONSORS,
+                    #widget=forms.CheckboxSelectMultiple()
+                    #widget=FilteredSelectMultiple("Sponsors", is_stacked=False)
+                    )
+
+    return FilterBillsForm
