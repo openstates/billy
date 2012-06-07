@@ -75,7 +75,7 @@ def test_insert_with_idlevels():
     assert utils.insert_with_id(country_obj).startswith('US')
 
 
-@with_setup(db.bills.drop)
+@with_setup(drop_everything)
 def test_update():
     obj0 = {'_type': 'bill', 'level': 'state', 'state': 'ex',
             'field1': 'stuff', 'field2': 'original',
@@ -106,7 +106,7 @@ def test_update():
     assert obj2['field2'] == 'original'
 
 
-@with_setup(db.bills.drop)
+@with_setup(drop_everything)
 def test_update_sneaky_filter():
     obj = {'_type': 'bill', 'level': 'state', 'state': 'ex',
             'normal_field': 1, 'set_field': [1, 2, 3]}

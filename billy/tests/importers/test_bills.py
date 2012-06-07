@@ -2,14 +2,16 @@ import copy
 from billy import db
 from billy.importers import bills, names
 
-from nose.tools import with_setup
+from nose.tools import with_setup, assert_equal
 
 
 def setup_func():
     db.metadata.drop()
     db.bills.drop()
     db.legislators.drop()
+    db.document_ids.drop()
     db.vote_ids.drop()
+    db.committees.drop()
     names.__matchers = {}
 
     db.metadata.insert({'level': 'state', '_id': 'ex',
@@ -94,7 +96,7 @@ def test_import_bill():
     assert 'old title' in bill['alternate_titles']
 
     # test version/document import
-    assert bill['versions'][0]['doc_id'] == 'EXD00000001'
+    assert_equal(bill['versions'][0]['doc_id'], 'EXD00000001')
     assert bill['versions'][1]['doc_id'] == 'EXD00000002'
     assert bill['documents'][0]['doc_id'] == 'EXD00000003'
 
@@ -193,7 +195,7 @@ def test_populate_current_fields():
     assert not b['_current_term']
 
 
-@with_setup(db.vote_ids.drop)
+@with_setup(setup_func)
 def test_votematcher():
     # three votes, two with the same fingerprint
     votes = [{'motion': 'a', 'chamber': 'b', 'date': 'c',
@@ -228,7 +230,7 @@ def test_votematcher():
     assert votes[3]['vote_id'] == 'EXV00000003'
 
 
-@with_setup(db.committees.drop)
+@with_setup(setup_func)
 def test_get_committee_id():
     # 3 committees with the same name, different levels & chamber
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'upper',

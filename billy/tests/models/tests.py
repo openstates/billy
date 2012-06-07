@@ -1,8 +1,9 @@
 import unittest
 from random import choice
 
-from billy.models import Bill, Metadata, Legislator, CommitteeMember
-from billy.models import models_list
+from billy.models import Bill, Metadata, Legislator
+from billy.models.base import _model_registry
+from billy.models.committees import CommitteeMember
 from billy import db
 
 
@@ -15,11 +16,14 @@ class TestNoConflict(unittest.TestCase):
 
     def test_all_models(self):
         conflict_exists = self.conflict_exists
-        for model in models_list:
+        for model in _model_registry.values():
             model_attrs = set(dir(model))
             for document in model.collection.find():
                 doc_keys = set(document)
-                self.assertFalse(conflict_exists(model_attrs, doc_keys))
+                conflict = conflict_exists(model_attrs, doc_keys)
+                self.assertFalse(conflict,
+                                 "conflicting keys ({0}) in {1}".format(
+                                     ','.join(conflict), model.__name__))
 
     def test_bogus_key(self, model=Bill):
         document = model.collection.find_one()
