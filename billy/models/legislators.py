@@ -93,7 +93,7 @@ class Legislator(Document):
         return Metadata.get_object(self['state'])
 
     def get_absolute_url(self):
-        args = (self.metadata['state'], self.id)
+        args = (self.metadata['abbreviation'], self.id)
         return urlresolvers.reverse('legislator', args=args)
 
     def votes_3_sorted(self):

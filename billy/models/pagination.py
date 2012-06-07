@@ -59,11 +59,7 @@ class PaginatorBase(object):
         '''"Showing 40-50 of 234 results
                     ^
         '''
-        start = (self.current_page - 1) * self.show_per_page
-        if start == 0:
-            return 1
-        else:
-            return start
+        return (self.current_page - 1) * self.show_per_page
 
     @property
     def range_end(self):

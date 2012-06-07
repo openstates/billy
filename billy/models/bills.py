@@ -169,15 +169,18 @@ class Bill(Document):
         return Metadata.get_object(self['state'])
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('bill', args=[self['abbreviation',
-                                                       self.id]])
+        return urlresolvers.reverse('bill', args=[self['state'],
+                                                       self.id])
 
     def session_details(self):
         metadata = self.metadata
         return metadata['session_details'][self['session']]
 
     def most_recent_action(self):
-        return self['actions'][-1]
+        if self['actions']:
+            return self['actions'][-1]
+        else:
+            return {}
 
     @property
     def chamber_name(self):
