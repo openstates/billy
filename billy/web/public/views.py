@@ -439,7 +439,7 @@ def find_your_legislator(request):
         )
         f = urllib2.urlopen(qurl)
 
-        if "boundry" in get:
+        if "boundary" in get:
             legs = json.load(f)
             to_search = []
             for leg in legs:
