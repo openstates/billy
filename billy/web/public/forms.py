@@ -7,7 +7,7 @@ from billy.models import Metadata
 
 def get_state_select_form(data):
     states = map(Metadata.get_object, sorted(settings.ACTIVE_STATES))
-    state_abbrs = [('', 'Select a state')]
+    state_abbrs = []  # [('', 'Select a state')]
     state_abbrs += [(obj['_id'], obj['name']) for obj in states]
 
     class StateSelectForm(forms.Form):
@@ -58,10 +58,12 @@ def get_filter_bills_form(metadata):
         _bill_sponsors = [leg.display_name() for leg in
                           metadata.legislators()]
 
-        BILL_TYPES = zip(_bill_types, _bill_types)
+        BILL_TYPES = zip(_bill_types, [s.title() for s in _bill_types])
         BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
         ACTION_TYPES = zip(_action_types, _action_types)
         BILL_SPONSORS = zip(_bill_sponsors, _bill_sponsors)
+
+        search = forms.CharField()
 
         chambers = forms.MultipleChoiceField(
                     choices=(('upper', metadata['upper_chamber_name']),

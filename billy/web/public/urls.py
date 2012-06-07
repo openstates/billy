@@ -10,7 +10,7 @@ from billy.web.public.views import (VotesList, FeedsList,
 urlpatterns = patterns('billy.web.public.views',
 
     url(r'^$', 'homepage', name='homepage'),
-
+    url(r'^(?P<scope>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection',
         name='state_selection'),
@@ -74,7 +74,6 @@ urlpatterns = patterns('billy.web.public.views',
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
         FeedsList.as_view(), name='feeds_list'),
-
 )
 
 urlpatterns += patterns('',

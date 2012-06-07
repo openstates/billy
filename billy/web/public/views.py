@@ -20,6 +20,7 @@ import billy.models
 from billy.models import db, Metadata, DoesNotExist
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 from billy.conf import settings as billy_settings
+from billy.importers.utils import fix_bill_id
 
 from .forms import (get_state_select_form, ChamberSelectForm,
                     FindYourLegislatorForm, get_filter_bills_form)
@@ -68,9 +69,87 @@ def homepage(request):
         template_name=templatename('homepage'),
         dictionary=dict(
             active_states=map(Metadata.get_object, settings.ACTIVE_STATES),
-            second_last=len(settings.ACTIVE_STATES) - 1,
             statenav_active=None),
         context_instance=RequestContext(request, default_context))
+
+
+def search(request, scope):
+
+    abbr = None
+    search_text = request.GET['q']
+    spec = {}
+
+    # If the input looks like a bill id, try to fetch the bill.
+    if re.search(r'\d', search_text):
+        bill_id = fix_bill_id(search_text).upper()
+        collection = db.bills
+        spec.update(bill_id=bill_id)
+
+        if scope != 'all':
+            abbr = scope
+            spec.update(state=abbr)
+
+        docs = collection.find(spec, limit=10)
+
+        # If there were actual results, return a bill_id result view.
+        if 0 < docs.count():
+
+            def sortkey(doc):
+                session = doc['session']
+                years = re.findall(r'\d{4}', session)
+                try:
+                    return int(years[-1])
+                except IndexError:
+                    return session
+
+            docs = sorted(docs, key=operator.itemgetter('session'),
+                          reverse=True)
+
+            return render_to_response(
+                template_name=templatename('search_results_bill_id'),
+                dictionary=dict(
+                    bill_id=bill_id,
+                    abbr=abbr,
+                    rowtemplate_name=templatename('bills_list_row_with_session'),
+                    object_list=IteratorPaginator(docs),
+                    use_table=True,
+                    column_headers=('Title', 'Session', 'Introduced',
+                                    'Recent Action', 'Votes'),
+                    statenav_active=None),
+                context_instance=RequestContext(request, default_context))
+
+    # The input didn't contain \d{4}, so assuming it's not a bill,
+    # search bill title and legislator names.
+    scope_name = None
+    spec = {'title': {'$regex': search_text, '$options': 'i'}}
+    if scope != 'all':
+        abbr = scope
+        scope_name = Metadata.get_object(abbr)['name']
+        spec.update(state=abbr)
+    bill_results = db.bills.find(spec)
+
+    spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
+    if scope != 'all':
+        abbr = scope
+        scope_name = Metadata.get_object(abbr)['name']
+        spec.update(state=abbr)
+    legislator_results = db.legislators.find(spec)
+
+    return render_to_response(
+        template_name=templatename('search_results_bills_legislators'),
+        dictionary=dict(
+            search_text=search_text,
+            abbr=abbr,
+            scope_name=scope_name,
+            bills_list=bill_results.limit(5),
+            more_bills_available=(5 < bill_results.count()),
+            legislators_list=legislator_results.limit(5),
+            more_legislators_available=(5 < legislator_results.count()),
+            bill_column_headers=('State', 'Title', 'Session', 'Introduced',
+                                 'Recent Action', 'Votes'),
+            show_chamber_column=True,
+            statenav_active=None),
+            context_instance=RequestContext(request, default_context))
 
 
 class ListViewBase(TemplateView):
@@ -197,6 +276,8 @@ class VotesList(RelatedObjectsList):
 class FeedsList(RelatedObjectsList):
 
     list_item_context_name = 'entry'
+    # sort_func = operator.itemgetter('published_parsed')
+    # sort_reversed = True
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
@@ -349,7 +430,7 @@ def state(request, abbr):
         template_name=templatename('state'),
         dictionary=dict(abbr=abbr,
             metadata=meta,
-            sessions=report.session_link_data(),
+            sessions=reversed(list(report.session_link_data())),
             chambers=chambers,
             recent_actions=overview.recent_actions(abbr),
             statenav_active=None),
@@ -492,11 +573,8 @@ def legislators(request, abbr):
                              reverse=bool(0 > sort_order))
 
     sort_order = {1: -1, -1: 1}[sort_order]
-
     legislators = list(legislators)
-
     initial = {'key': 'district', 'chamber': chamber}
-
     chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
 
     return render_to_response(
