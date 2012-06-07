@@ -739,7 +739,7 @@ class Bill(Document):
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('bill', args=[self['abbreviation', self.id]])
+        return urlresolvers.reverse('bill', args=[self['state'], self.id])
 
     # def version_objects(self):
     #     cls = self.subdocument
