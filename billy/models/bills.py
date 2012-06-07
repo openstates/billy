@@ -15,6 +15,7 @@ from .metadata import Metadata
 elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
                         settings.ELASTICSEARCH_TIMEOUT)
 
+
 class Sponsor(dict):
     legislator = RelatedDocument('Legislator', instance_key='leg_id')
 
