@@ -1,4 +1,3 @@
-import sys
 import copy
 import logging
 import itertools
@@ -32,6 +31,7 @@ query_log_template = 'Query: db.{0}.{1}({2}, {3}, {4})'
 _model_registry = {}
 _model_registry_by_collection = {}
 
+
 def get_model(classname):
     '''
     Helper to enable RelatedDocuments to reference models by name (string)
@@ -39,6 +39,7 @@ def get_model(classname):
     module.
     '''
     return _model_registry[classname]
+
 
 class ModelBase(type):
     def __new__(meta, classname, bases, classdict):
@@ -49,6 +50,7 @@ class ModelBase(type):
             _model_registry_by_collection[cls.collection.name] = cls
 
         return cls
+
 
 class ReadOnlyAttribute(object):
     ''' ensure that an attribute can't be set '''

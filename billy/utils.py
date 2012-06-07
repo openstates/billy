@@ -2,6 +2,7 @@ import re
 import urllib
 import urlparse
 import logging
+import datetime
 
 from billy import db
 import difflib
@@ -28,6 +29,18 @@ def chamber_name(abbr, chamber):
         return 'Joint'
 
     return metadata(abbr)['%s_chamber_name' % chamber].split()[0]
+
+
+def parse_param_dt(dt):
+    formats = ['%Y-%m-%d %H:%M',    # here for legacy reasons
+               '%Y-%m-%dT%H:%M:%S',
+               '%Y-%m-%d']
+    for format in formats:
+        try:
+            return datetime.datetime.strptime(dt, format)
+        except ValueError:
+            pass
+    raise ValueError('unable to parse %s' % dt)
 
 
 def term_for_session(abbr, session, meta=None):
