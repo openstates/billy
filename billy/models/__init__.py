@@ -1,4 +1,4 @@
-from .base import db, _model_registry_by_collection
+from .base import db, _model_registry_by_collection, DoesNotExist
 from .metadata import Metadata
 from .bills import Bill
 from .legislators import Legislator
