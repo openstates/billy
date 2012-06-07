@@ -438,6 +438,25 @@ def find_your_legislator(request):
             billy_settings.SUNLIGHT_API_KEY
         )
         f = urllib2.urlopen(qurl)
+
+        if "boundry" in get:
+            legs = json.load(f)
+            to_search = []
+            for leg in legs:
+                to_search.append(leg['boundary_id'])
+            borders = set(to_search)
+            ret = {}
+            for border in borders:
+                qurl = "%s/api/v1/districts/boundary/%s/?apikey=%s" % (
+                    openstates_api_host,
+                    border,
+                    billy_settings.SUNLIGHT_API_KEY
+                )
+                f = urllib2.urlopen(qurl)
+                resp = json.load(f)
+                ret[border] = resp
+            return HttpResponse(json.dumps(ret))
+
         kwargs['legislators'] = json.load(f)
         template = 'find_your_legislator_table'
 
