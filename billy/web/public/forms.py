@@ -55,40 +55,45 @@ def get_filter_bills_form(metadata):
         _bill_types = metadata.distinct_bill_types()
         _bill_subjects = metadata.distinct_bill_subjects()
         _action_types = metadata.distinct_action_types()
-        _bill_sponsors = [leg.display_name() for leg in
+        _bill_sponsors = [(leg['_id'], leg.display_name()) for leg in
                           metadata.legislators()]
 
-        BILL_TYPES = zip(_bill_types, [s.title() for s in _bill_types])
-        BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
-        ACTION_TYPES = zip(_action_types, _action_types)
-        BILL_SPONSORS = zip(_bill_sponsors, _bill_sponsors)
+        BILL_TYPES = [('', '')] + zip(_bill_types, [s.title() for s in _bill_types])
+        BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
+        ACTION_TYPES = [('', '')] + zip(_action_types, _action_types)
+        BILL_SPONSORS = [('', '')] + _bill_sponsors
 
-        search = forms.CharField()
+        search_text = forms.CharField(required=False)
 
-        chambers = forms.MultipleChoiceField(
+        chamber = forms.MultipleChoiceField(
                     choices=(('upper', metadata['upper_chamber_name']),
-                             ('lowerl', metadata['lower_chamber_name'])),
-                    widget=forms.CheckboxSelectMultiple())
+                             ('lower', metadata['lower_chamber_name'])),
+                    widget=forms.CheckboxSelectMultiple(),
+                    required=False)
 
-        bill_types = forms.ChoiceField(
+        type = forms.ChoiceField(
                         choices=BILL_TYPES,
+                        required=False,
                         #widget=forms.CheckboxSelectMultiple())
                         )
 
         subjects = forms.ChoiceField(
                     choices=BILL_SUBJECTS,
+                    required=False,
                     #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
                     )
 
-        actions = forms.ChoiceField(
+        actions__type = forms.ChoiceField(
                     choices=ACTION_TYPES,
+                    required=False,
                     #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Actions", is_stacked=False)
                     )
 
-        sponsors = forms.ChoiceField(
+        sponsor__leg_id = forms.ChoiceField(
                     choices=BILL_SPONSORS,
+                    required=False,
                     #widget=forms.CheckboxSelectMultiple()
                     #widget=FilteredSelectMultiple("Sponsors", is_stacked=False)
                     )

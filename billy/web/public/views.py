@@ -56,10 +56,15 @@ def sort_by_district(obj):
 
 
 def state_not_active_yet(request, args, kwargs):
+    try:
+        metadata = Metadata.get_object(kwargs['abbr'])
+    except DoesNotExist:
+        return redirect(pick_a_state)
+
     return render_to_response(
         template_name=templatename('state_not_active_yet'),
         dictionary=dict(
-            metadata=Metadata.get_object(kwargs['abbr']),
+            metadata=metadata,
             statenav_active=None),
         context_instance=RequestContext(request, default_context))
 
@@ -85,7 +90,7 @@ def search(request, scope):
         collection = db.bills
         spec.update(bill_id=bill_id)
 
-        if scope != 'all':
+        if scope != 'us':
             abbr = scope
             spec.update(state=abbr)
 
@@ -122,14 +127,14 @@ def search(request, scope):
     # search bill title and legislator names.
     scope_name = None
     spec = {'title': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'all':
+    if scope != 'us':
         abbr = scope
         scope_name = Metadata.get_object(abbr)['name']
         spec.update(state=abbr)
     bill_results = db.bills.find(spec)
 
     spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'all':
+    if scope != 'us':
         abbr = scope
         scope_name = Metadata.get_object(abbr)['name']
         spec.update(state=abbr)
@@ -233,7 +238,8 @@ class RelatedObjectsList(ListViewBase):
         get = self.request.GET.get
 
         # Setup the paginator arguments.
-        show_per_page = int(get('show_per_page', 20))
+        show_per_page = getattr(self, 'show_per_page', 10)
+        show_per_page = int(get('show_per_page', show_per_page))
         page = int(get('page', 1))
         if 100 < show_per_page:
             show_per_page = 100
@@ -297,7 +303,7 @@ class BillsList(ListViewBase):
 
 
 class RelatedBillsList(RelatedObjectsList):
-
+    show_per_page = 10
     use_table = True
     list_item_context_name = 'bill'
     paginator = CursorPaginator
@@ -322,18 +328,51 @@ class StateBills(RelatedBillsList):
         return context
 
 
-def filter_bills(request, abbr):
-    metadata = Metadata.get_object(abbr)
-    FilterBillsForm = get_filter_bills_form(metadata)
-    form = FilterBillsForm(request.GET)
+class FilterBills(RelatedBillsList):
+    template_name = templatename('state_bills_list')
+    collection_name = 'metadata'
+    query_attr = 'bills'
+    paginator = CursorPaginator
+    description_template = templatename(
+        'list_descriptions/bills')
 
-    chambers = form.data.getlist('chambers')
-    subjects = form.data.getlist('subjects')
-    sponsored = form.data.getlist('sponsored')
-    actions = form.data.getlist('actions')
-    bill_types = form.data.getlist('bill_types')
+    def get_context_data(self, *args, **kwargs):
+        context = super(RelatedObjectsList, self).get_context_data(
+                                                        *args, **kwargs)
+        metadata = context['metadata']
+        FilterBillsForm = get_filter_bills_form(metadata)
+        form = FilterBillsForm(self.request.GET)
+        search_text = form.data.get('search_text')
+        context.update(search_text=search_text)
+        context.update(form=FilterBillsForm(self.request.GET))
+        return context
 
-    raise NotImplementedError('Search is in the works')
+    def get_queryset(self):
+
+        metadata = Metadata.get_object(self.kwargs['abbr'])
+        FilterBillsForm = get_filter_bills_form(metadata)
+        form = FilterBillsForm(self.request.GET)
+
+        params = [
+            'chamber',
+            'subjects',
+            'sponsor__leg_id',
+            'actions__type',
+            'type']
+
+        spec = {'state': metadata['abbreviation']}
+        for key in params:
+            val = form.data.get(key)
+            if val:
+                key = key.replace('__', '.')
+                spec[key] = val
+
+        search_text = form.data.get('search_text')
+        if search_text:
+            spec['title'] = {'$regex': search_text, '$options': 'i'}
+
+        return self.paginator(db.bills.find(spec),
+                              show_per_page=self.show_per_page)
 
 
 class SponsoredBillsList(RelatedBillsList):
@@ -449,8 +488,8 @@ def state_selection(request):
 
 
 def pick_a_state(request):
-    metadata = db.metadata.find({}, ['_id', 'name'],
-                                sort=[('name', 1)])
+    metadata = db.metadata.find({'_id': {'$in': settings.ACTIVE_STATES}},
+                                ['_id', 'name'], sort=[('name', 1)])
 
     def columns(cursor, num_columns):
         percolumn, _ = divmod(cursor.count(), num_columns)
