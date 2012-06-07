@@ -8,19 +8,17 @@ from collections import defaultdict
 from django.http import HttpResponse
 
 from billy import db
+from billy.models import Bill
 from billy.conf import settings
-from billy.utils import metadata, find_bill
+from billy.utils import metadata, find_bill, parse_param_dt
 
 import pymongo
-import pyes
 
 from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 from jellyfish import levenshtein_distance
 
-elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
-                        settings.ELASTICSEARCH_TIMEOUT)
 
 _chamber_aliases = {
     'assembly': 'lower',
@@ -28,16 +26,6 @@ _chamber_aliases = {
     'senate': 'upper',
 }
 
-
-def parse_param_dt(dt):
-    formats = ['%Y-%m-%d %H:%M',    # here for legacy reasons
-               '%Y-%m-%dT%H:%M:%S',
-               '%Y-%m-%d']
-    for format in formats:
-        try:
-            return datetime.datetime.strptime(dt, format)
-        except ValueError:
-            pass
 
 _lower_fields = ('state',)
 
@@ -171,85 +159,28 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        _filter = _build_mongo_filter(request, ('state', 'chamber',
-                                                'subjects', 'bill_id',
-                                                'bill_id__in'))
+        base_fields = _build_mongo_filter(request, ('state', 'chamber',
+                                                    'subjects', 'bill_id',
+                                                    'bill_id__in'))
 
-        # process search_window
-        search_window = request.GET.get('search_window', '')
-        if search_window:
-            if search_window == 'session':
-                _filter['_current_session'] = True
-            elif search_window == 'term':
-                _filter['_current_term'] = True
-            elif search_window.startswith('session:'):
-                _filter['session'] = search_window.split('session:')[1]
-            elif search_window.startswith('term:'):
-                _filter['_term'] = search_window.split('term:')[1]
-            elif search_window == 'all':
-                pass
-            else:
-                resp = rc.BAD_REQUEST
-                resp.write(": invalid search_window. Valid choices are "
-                           "'term', 'session' or 'all'")
-                return resp
-
-        # process updated_since
-        since = request.GET.get('updated_since')
-        if since:
-            try:
-                _filter['updated_at'] = {'$gte': parse_param_dt(since)}
-            except ValueError:
-                resp = rc.BAD_REQUEST
-                resp.write(": invalid updated_since parameter."
-                           " Please supply a date in YYYY-MM-DD format.")
-                return resp
-
-        # process sponsor_id
-        sponsor_id = request.GET.get('sponsor_id')
-        if sponsor_id:
-            _filter['sponsors.leg_id'] = sponsor_id
-
-        # process full-text query
+        # process extra attributes
         query = request.GET.get('q')
-        if query:
-            query = {"query_string": {"fields": ["text", "title"],
-                                      "default_operator": "AND",
-                                      "query": query}}
-            search = pyes.Search(query, fields=[])
+        search_window = request.GET.get('search_window', 'all')
+        since = request.GET.get('updated_since', None)
+        sponsor_id = request.GET.get('sponsor_id')
 
-            # take terms from mongo query
-            es_terms = []
-            if 'state' in _filter:
-                es_terms.append(pyes.TermFilter('state',
-                                                _filter.pop('state')))
-            if 'session' in _filter:
-                es_terms.append(pyes.TermFilter('session',
-                                                _filter.pop('session')))
-            if 'chamber' in _filter:
-                es_terms.append(pyes.TermFilter('chamber',
-                                                _filter.pop('chamber')))
-            if 'subjects' in _filter:
-                es_terms.append(pyes.TermFilter('subjects',
-                                           _filter.pop('subjects')['$all']))
-            if 'sponsors.leg_id' in _filter:
-                es_terms.append(pyes.TermFilter('sponsors',
-                                                _filter.pop('sponsors.leg_id')))
+        try:
+            query = Bill.search(query,
+                                search_window=search_window,
+                                updated_since=since, sponsor_id=sponsor_id,
+                                bill_fields=bill_fields,
+                                **base_fields)
+        except ValueError as e:
+            resp = rc.BAD_REQUEST
+            resp.write(': %s' % e)
+            return resp
 
-            # add terms
-            if es_terms:
-                search.filter = pyes.ANDFilter(es_terms)
-
-            # page size is a guess, could use tweaks
-            es_result = elasticsearch.search(search, search_type='scan',
-                                             scroll='3m', size=250)
-            doc_ids = [r.get_id() for r in es_result]
-            _filter['versions.doc_id'] = {'$in': doc_ids}
-
-        # start with base query
-        query = db.bills.find(_filter, bill_fields)
-
-        # pagination
+        # add pagination
         page = request.GET.get('page')
         per_page = request.GET.get('per_page')
         if page and not per_page:
@@ -263,8 +194,7 @@ class BillSearchHandler(BillyHandler):
             query = query.limit(per_page).skip(per_page*(page-1))
         else:
             # limit response size
-            count = db.bills.find(_filter, bill_fields).count()
-            if count > 5000:
+            if query.count() > 5000:
                 resp = rc.BAD_REQUEST
                 resp.write(': request too large, try narrowing your search by '
                            'adding more filters.')

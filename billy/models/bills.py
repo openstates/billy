@@ -3,11 +3,17 @@ import operator
 import collections
 
 from django.core import urlresolvers
+import pyes
+
+from billy.conf import settings
+from billy.utils import parse_param_dt
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DictManager, AttrManager, take, DEBUG, logger)
 from .metadata import Metadata
 
+elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
+                        settings.ELASTICSEARCH_TIMEOUT)
 
 class Sponsor(dict):
     legislator = RelatedDocument('Legislator', instance_key='leg_id')
@@ -259,3 +265,69 @@ class Bill(Document):
             ]
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
+
+    @staticmethod
+    def search(query=None, state=None, chamber=None, subjects=None,
+               bill_id=None, bill_id__in=None, search_window=None,
+               updated_since=None, sponsor_id=None, bill_fields=None):
+        _filter = {}
+        if search_window:
+            if search_window == 'session':
+                _filter['_current_session'] = True
+            elif search_window == 'term':
+                _filter['_current_term'] = True
+            elif search_window.startswith('session:'):
+                _filter['session'] = search_window.split('session:')[1]
+            elif search_window.startswith('term:'):
+                _filter['_term'] = search_window.split('term:')[1]
+            elif search_window == 'all':
+                pass
+            else:
+                raise ValueError('invalid search_window. valid choices are '
+                                 ' "term", "session", "all"')
+        if updated_since:
+            try:
+                _filter['updated_at'] = {'$gte': parse_param_dt(updated_since)}
+            except ValueError:
+                raise ValueError('invalid updated_since parameter. '
+                                 'please supply date in YYYY-MM-DD format')
+        if sponsor_id:
+            _filter['sponsors.leg_id'] = sponsor_id
+
+        # process full-text query
+        if query:
+            query = {"query_string": {"fields": ["text", "title"],
+                                      "default_operator": "AND",
+                                      "query": query}}
+            search = pyes.Search(query, fields=[])
+
+            # take terms from mongo query
+            es_terms = []
+            if 'state' in _filter:
+                es_terms.append(pyes.TermFilter('state',
+                                                _filter.pop('state')))
+            if 'session' in _filter:
+                es_terms.append(pyes.TermFilter('session',
+                                                _filter.pop('session')))
+            if 'chamber' in _filter:
+                es_terms.append(pyes.TermFilter('chamber',
+                                                _filter.pop('chamber')))
+            if 'subjects' in _filter:
+                es_terms.append(pyes.TermFilter('subjects',
+                                           _filter.pop('subjects')['$all']))
+            if 'sponsors.leg_id' in _filter:
+                es_terms.append(pyes.TermFilter('sponsors',
+                                                _filter.pop('sponsors.leg_id')))
+
+            # add terms
+            if es_terms:
+                search.filter = pyes.ANDFilter(es_terms)
+
+            # page size is a guess, could use tweaks
+            es_result = elasticsearch.search(search, search_type='scan',
+                                             scroll='3m', size=250)
+            doc_ids = [r.get_id() for r in es_result]
+            _filter['versions.doc_id'] = {'$in': doc_ids}
+
+        # return query
+        return db.bills.find(_filter, bill_fields)
