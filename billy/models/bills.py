@@ -185,6 +185,9 @@ class Bill(Document):
     def most_recent_action(self):
         return self['actions'][-1]
 
+    def events(self):
+        return db.events.find({"related_bills.bill_id": self['_id']})
+
     @property
     def chamber_name(self):
         '''"lower" --> "House of Representatives"'''
