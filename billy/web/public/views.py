@@ -888,6 +888,7 @@ def bills(request, abbr):
 def bill(request, abbr, bill_id):
 
     bill = db.bills.find_one({'_id': bill_id})
+    # events = db.events.find({
     if bill is None:
         raise Http404
 

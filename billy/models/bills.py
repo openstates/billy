@@ -189,6 +189,9 @@ class Bill(Document):
         else:
             return {}
 
+    def events(self):
+        return db.events.find({"related_bills.bill_id": self['_id']})
+
     @property
     def chamber_name(self):
         '''"lower" --> "House of Representatives"'''
