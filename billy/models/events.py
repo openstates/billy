@@ -5,10 +5,6 @@ from .metadata import Metadata
 class Event(Document):
 
     collection = db.events
-    committee_object = RelatedDocument(
-        'Committee',
-        instance_key='participants.committee_id'
-    )
 
     @property
     def metadata(self):
