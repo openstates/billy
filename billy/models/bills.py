@@ -271,7 +271,14 @@ class Bill(Document):
     def search(query=None, state=None, chamber=None, subjects=None,
                bill_id=None, bill_id__in=None, search_window=None,
                updated_since=None, sponsor_id=None, bill_fields=None):
+
         _filter = {}
+        for key, value in [('state', state),
+                            ('chamber', chamber),
+                            ('subjects', subjects)]:
+            if value is not None:
+                _filter[key] = value
+
         if search_window:
             if search_window == 'session':
                 _filter['_current_session'] = True

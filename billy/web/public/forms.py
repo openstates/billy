@@ -77,7 +77,7 @@ def get_filter_bills_form(metadata):
                         #widget=forms.CheckboxSelectMultiple())
                         )
 
-        subjects = forms.ChoiceField(
+        subjects = forms.MultipleChoiceField(
                     choices=BILL_SUBJECTS,
                     required=False,
                     #widget=forms.CheckboxSelectMultiple()

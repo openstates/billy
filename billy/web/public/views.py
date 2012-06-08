@@ -17,7 +17,7 @@ from django.http import Http404, HttpResponse
 from django.conf import settings
 
 import billy.models
-from billy.models import db, Metadata, DoesNotExist
+from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 from billy.conf import settings as billy_settings
 from billy.importers.utils import fix_bill_id
@@ -125,14 +125,21 @@ def search(request, scope):
 
     # The input didn't contain \d{4}, so assuming it's not a bill,
     # search bill title and legislator names.
-    scope_name = None
-    spec = {'title': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'us':
-        abbr = scope
-        scope_name = Metadata.get_object(abbr)['name']
-        spec.update(state=abbr)
-    bill_results = db.bills.find(spec)
+    if settings.ENABLE_ELASTICSEARCH:
+        kwargs = {}
+        if scope != 'us':
+            kwargs['state'] = scope
+        bill_results = Bill.search(search_text, **kwargs)
+    else:
+        scope_name = None
+        spec = {'title': {'$regex': search_text, '$options': 'i'}}
+        if scope != 'us':
+            abbr = scope
+            scope_name = Metadata.get_object(abbr)['name']
+            spec.update(state=abbr)
+        bill_results = db.bills.find(spec)
 
+    # See if any legislator names match.
     spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
     if scope != 'us':
         abbr = scope
@@ -352,27 +359,53 @@ class FilterBills(RelatedBillsList):
         metadata = Metadata.get_object(self.kwargs['abbr'])
         FilterBillsForm = get_filter_bills_form(metadata)
         form = FilterBillsForm(self.request.GET)
-
         params = [
             'chamber',
             'subjects',
             'sponsor__leg_id',
             'actions__type',
             'type']
-
-        spec = {'state': metadata['abbreviation']}
-        for key in params:
-            val = form.data.get(key)
-            if val:
-                key = key.replace('__', '.')
-                spec[key] = val
-
         search_text = form.data.get('search_text')
-        if search_text:
-            spec['title'] = {'$regex': search_text, '$options': 'i'}
 
-        return self.paginator(db.bills.find(spec),
-                              show_per_page=self.show_per_page)
+        if settings.ENABLE_ELASTICSEARCH:
+
+            kwargs = {}
+
+            state = self.kwargs['abbr']
+            if state != 'us':
+                kwargs['state'] = state
+
+            chamber = form.data.get('chamber')
+            if chamber:
+                kwargs['chamber'] = chamber
+
+            subjects = form.data.getlist('subjects')
+            if subjects:
+                kwargs['subjects'] = {'$all': filter(None, subjects)}
+
+            sponsor_id = form.data.get('sponsor__leg_id')
+            if sponsor_id:
+                kwargs['sponsor_id'] = sponsor_id
+
+            cursor = Bill.search(search_text, **kwargs)
+            return self.paginator(
+                cursor, show_per_page=self.show_per_page)
+
+        else:
+            # Elastic search not enabled--query mongo normally.
+            # Mainly here for local work on search views.
+            spec = {'state': metadata['abbreviation']}
+            for key in params:
+                val = form.data.get(key)
+                if val:
+                    key = key.replace('__', '.')
+                    spec[key] = val
+
+            if search_text:
+                spec['title'] = {'$regex': search_text, '$options': 'i'}
+
+            return self.paginator(db.bills.find(spec),
+                                  show_per_page=self.show_per_page)
 
 
 class SponsoredBillsList(RelatedBillsList):
