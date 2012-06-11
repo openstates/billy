@@ -111,24 +111,24 @@ class Metadata(Document):
     def get_absolute_url(self):
         return urlresolvers.reverse('state', args=[self['abbreviation']])
 
-    def _bills_by_chamber_action(self, chamber, action):
+    def _bills_by_chamber_action(self, chamber, action, *args, **kwargs):
         bills = self.bills({'session': self.most_recent_session,
                             'chamber': chamber,
                             'actions.type': action,
-                            'type': 'bill'})
+                            'type': 'bill'}, *args, **kwargs)
         # Not worrying about date sorting until later.
         return bills
 
-    def bills_introduced_upper(self):
+    def bills_introduced_upper(self, *args, **kwargs):
         return self._bills_by_chamber_action('upper', 'bill:introduced')
 
-    def bills_introduced_lower(self):
+    def bills_introduced_lower(self, *args, **kwargs):
         return self._bills_by_chamber_action('lower', 'bill:introduced')
 
-    def bills_passed_upper(self):
+    def bills_passed_upper(self, *args, **kwargs):
         return self._bills_by_chamber_action('upper', 'bill:passed')
 
-    def bills_passed_lower(self):
+    def bills_passed_lower(self, *args, **kwargs):
         return self._bills_by_chamber_action('lower', 'bill:passed')
 
     @property

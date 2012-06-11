@@ -111,7 +111,10 @@ class BillVote(DictManager):
         '''Return the yes/total ratio as a percetage string
         suitable for use as as css attribute.'''
         total = float(self._total_votes())
-        return math.floor(self[key] / total * 100)
+        try:
+            return math.floor(self[key] / total * 100)
+        except ZeroDivisionError:
+            return float(0)
 
     def yes_ratio(self):
         return self._ratio('yes_count')
@@ -151,6 +154,10 @@ class BillVote(DictManager):
 
     def index(self):
         return self.bill['votes'].index(self)
+
+    def get_absolute_url(self):
+        return urlresolvers.reverse('vote',
+            args=[self.bill['state'], self.bill['_id'], self.index()])
 
 
 class BillVotesManager(ListManager):
