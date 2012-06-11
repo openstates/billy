@@ -907,6 +907,22 @@ def bill(request, abbr, bill_id):
         context_instance=RequestContext(request, default_context))
 
 
+def event(request, abbr, event_id):
+
+    event = db.events.find_one({'_id': event_id})
+    if bill is None:
+        raise Http404
+
+    return render_to_response(
+        template_name=templatename('event'),
+        dictionary=dict(
+            abbr=abbr,
+            state=Metadata.get_object(abbr),
+            event=event,
+            sources=event['sources'],
+            statenav_active='events'),
+        context_instance=RequestContext(request, default_context))
+
 def vote(request, abbr, bill_id, vote_index):
     bill = db.bills.find_one({'_id': bill_id})
     if bill is None:
