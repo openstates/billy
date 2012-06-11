@@ -40,6 +40,9 @@ class Committee(Document):
             except KeyError:
                 raise
 
+    def events(self):
+        return db.events.find({"participants.committee_id": self['_id']})
+
     @property
     def metadata(self):
         return Metadata.get_object(self['state'])

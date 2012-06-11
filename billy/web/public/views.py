@@ -888,7 +888,6 @@ def bills(request, abbr):
 def bill(request, abbr, bill_id):
 
     bill = db.bills.find_one({'_id': bill_id})
-    # events = db.events.find({
     if bill is None:
         raise Http404
 
@@ -910,7 +909,7 @@ def bill(request, abbr, bill_id):
 def event(request, abbr, event_id):
 
     event = db.events.find_one({'_id': event_id})
-    if bill is None:
+    if event is None:
         raise Http404
 
     return render_to_response(
@@ -920,6 +919,19 @@ def event(request, abbr, event_id):
             state=Metadata.get_object(abbr),
             event=event,
             sources=event['sources'],
+            statenav_active='events'),
+        context_instance=RequestContext(request, default_context))
+
+def events(request, abbr):
+
+    events = db.events.find({'state': abbr})
+
+    return render_to_response(
+        template_name=templatename('events'),
+        dictionary=dict(
+            abbr=abbr,
+            state=Metadata.get_object(abbr),
+            events=events,
             statenav_active='events'),
         context_instance=RequestContext(request, default_context))
 
