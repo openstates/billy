@@ -1,3 +1,5 @@
+import itertools
+
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DEBUG, logger)
 from .metadata import Metadata
@@ -12,16 +14,16 @@ class CommitteeMemberManager(ListManager):
     keyname = 'members'
 
     def __iter__(self):
-        for obj in self.document['members']:
-            # This would be better as an '_id': {$or: [id1, id2,...]}
-            if 'leg_id' in obj:
-                if DEBUG:
-                    msg = '{0}.{1}({2}, {3}, {4})'.format(
-                                'legislators',
-                                'find_one', {'_id': obj['leg_id']}, (), {})
-                    logger.debug(msg)
-                legislator = db.legislators.find_one({'_id': obj['leg_id']})
-                yield obj, legislator
+        members = self.committee['members']
+        ids = filter(None, [obj['leg_id'] for obj in members])
+        spec = {'_id': {'$in': ids}}
+        if DEBUG:
+            msg = '{0}.{1}({2}, {3}, {4})'.format(
+                        'legislators',
+                        'find', spec, (), {})
+            logger.debug(msg)
+
+        return itertools.izip(members, db.legislators.find(spec))
 
 
 class Committee(Document):
