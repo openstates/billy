@@ -402,6 +402,7 @@ class FilterBills(RelatedBillsList):
                 kwargs['sponsor_id'] = sponsor_id
 
             cursor = Bill.search(search_text, **kwargs)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
             return self.paginator(cursor, page=page,
                                   show_per_page=self.show_per_page)
 
@@ -418,8 +419,10 @@ class FilterBills(RelatedBillsList):
             if search_text:
                 spec['title'] = {'$regex': search_text, '$options': 'i'}
 
-            return self.paginator(db.bills.find(spec),
-                                  show_per_page=self.show_per_page)
+            cursor = db.bills.find(spec)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
+
+            return self.paginator(cursor, show_per_page=self.show_per_page)
 
 
 class SponsoredBillsList(RelatedBillsList):
