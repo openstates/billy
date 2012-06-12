@@ -65,6 +65,19 @@ class Action(dict):
     def bill(self):
         return self.manager.document
 
+    def action_display(self):
+        '''The action text, with any hyperlinked related entities.'''
+        if '+actor_collection' in self:
+            collection = getattr(db, self['+actor_collection'])
+            actor = collection.find_one(self['+actor_id'])
+            actor_url = actor.get_absolute_url()
+            actor_text = self['+actor_text']
+            action = self['action'].replace(actor_text,
+                '<a href=%s>%s</a>' % (actor_url, actor_text))
+            return action
+        else:
+            return self['action']
+
 
 class ActionsManager(ListManager):
     wrapper = Action

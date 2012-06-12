@@ -1,5 +1,7 @@
 import itertools
 
+from django.core import urlresolvers
+
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DEBUG, logger)
 from .metadata import Metadata
@@ -48,3 +50,9 @@ class Committee(Document):
     @property
     def metadata(self):
         return Metadata.get_object(self['state'])
+
+    def get_absolute_url(self):
+        args = [self.metadata['abbreviation'],
+                self['_id']]
+        return urlresolvers.reverse('committee', args=args)
+
