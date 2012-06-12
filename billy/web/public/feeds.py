@@ -2,6 +2,7 @@ import operator
 from itertools import islice
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
+from django.utils.html import strip_tags
 
 from billy.models import db
 
@@ -127,3 +128,26 @@ class VotesListFeed(GenericListFeed):
         return sorted(obj.votes_manager,
                       key=operator.itemgetter('date'),
                       reverse=True)
+
+
+class NewsListFeed(GenericListFeed):
+    collection_name = 'legislators'
+    query_attribute = 'feed_entries'
+
+    def title(self, obj):
+        s = u"OpenStates.org: News stories mentioning {0}."
+        return s.format(obj.display_name())
+
+    description = title
+
+    def item_link(self, item):
+        return item['link']
+
+    def item_description(self, item):
+        return strip_tags(item['summary'])
+
+    def item_title(self, item):
+        return '%s (%s)' % (
+            item['title'],
+            item.published().strftime('%B %d, %Y'))
+

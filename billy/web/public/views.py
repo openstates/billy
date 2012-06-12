@@ -1,5 +1,6 @@
 import re
 import json
+import urllib
 import urllib2
 import operator
 
@@ -23,7 +24,7 @@ from billy.conf import settings as billy_settings
 from billy.importers.utils import fix_bill_id
 
 from .forms import (get_state_select_form, ChamberSelectForm,
-                    FindYourLegislatorForm, get_filter_bills_form)
+                    get_filter_bills_form)
 from .viewdata import overview
 
 
@@ -352,9 +353,22 @@ class FilterBills(RelatedBillsList):
         search_text = form.data.get('search_text')
         context.update(search_text=search_text)
         context.update(form=FilterBillsForm(self.request.GET))
+
+        full_url = self.request.path + '?'
+        full_url += urllib.urlencode(self.request.GET)
+        context.update(full_url=full_url)
         return context
 
     def get_queryset(self):
+
+        get = self.request.GET.get
+
+        # Setup the paginator arguments.
+        show_per_page = getattr(self, 'show_per_page', 10)
+        show_per_page = int(get('show_per_page', show_per_page))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
 
         metadata = Metadata.get_object(self.kwargs['abbr'])
         FilterBillsForm = get_filter_bills_form(metadata)
@@ -388,8 +402,8 @@ class FilterBills(RelatedBillsList):
                 kwargs['sponsor_id'] = sponsor_id
 
             cursor = Bill.search(search_text, **kwargs)
-            return self.paginator(
-                cursor, show_per_page=self.show_per_page)
+            return self.paginator(cursor, page=page,
+                                  show_per_page=self.show_per_page)
 
         else:
             # Elastic search not enabled--query mongo normally.
