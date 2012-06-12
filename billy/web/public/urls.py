@@ -22,6 +22,8 @@ urlpatterns = patterns('billy.web.public.views',
         name='pick_a_state'),
     url(r'^chamber_select/(?P<collection_name>\w+)$', 'chamber_select',
         name='chamber_select'),
+    url(r'^get_district/(?P<district_id>.+)/$',
+        'get_district', name='get_district'),
 
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/legislators/$',

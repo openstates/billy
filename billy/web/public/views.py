@@ -701,6 +701,16 @@ def legislators(request, abbr):
             ),
         context_instance=RequestContext(request, default_context))
 
+def get_district(request, district_id):
+    qurl = "%s/api/v1/districts/boundary/%s/?apikey=%s" % (
+        openstates_api_host,
+        district_id,
+        billy_settings.SUNLIGHT_API_KEY
+    )
+    print qurl
+    f = urllib2.urlopen(qurl)
+    return HttpResponse(f)
+
 
 def legislator(request, abbr, leg_id):
     '''
@@ -710,13 +720,26 @@ def legislator(request, abbr, leg_id):
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
-
     legislator = db.legislators.find_one({'_id': leg_id})
     if legislator is None:
         raise Http404('No legislator was found with led_id = %r' % leg_id)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
+
+    qurl = "%s/api/v1/districts/%s/?apikey=%s" % (
+        openstates_api_host,
+        abbr,
+        billy_settings.SUNLIGHT_API_KEY
+    )
+    f = urllib2.urlopen(qurl)
+    districts = json.load(f)
+    district_id = None
+    for district in districts:
+        legs = [ x['leg_id'] for x in district['legislators'] ]
+        if legislator['leg_id'] in legs:
+            district_id = district['boundary_id']
+            break
 
     # Note to self: Slow query
     sponsored_bills = legislator.sponsored_bills(
@@ -732,6 +755,7 @@ def legislator(request, abbr, leg_id):
             vote_preview_row_template=templatename('vote_preview_row'),
             roles=legislator.roles_manager,
             abbr=abbr,
+            district_id=district_id,
             metadata=meta,
             legislator=legislator,
             sources=legislator['sources'],
