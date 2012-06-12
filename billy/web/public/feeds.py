@@ -102,6 +102,24 @@ class BillsIntroducedUpperFeed(BillsFeed):
     description = title
 
 
+class BillsBySubjectFeed(BillsFeed):
+    collection_name = 'metadata'
+
+    def get_object(self, request, **kwargs):
+        self.request = request
+        self.kwargs = kwargs
+        obj = super(BillsBySubjectFeed, self).get_object(request, **kwargs)
+        return obj
+
+    def title(self, obj):
+        s = u"OpenStates.org: Bills related to {0}."
+        return s.format(self.kwargs['subject'])
+
+    def items(self, obj):
+        return db.bills.find(
+            {'state': self.kwargs['abbr'], 'subjects': self.kwargs['subject']})
+
+
 class VotesListFeed(GenericListFeed):
     collection_name = 'legislators'
     query_attribute = 'votes_manager'

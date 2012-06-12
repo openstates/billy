@@ -8,7 +8,7 @@ from billy.web.public.views import (VotesList, FeedsList,
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
-    BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed)
+    BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed, BillsBySubjectFeed)
 
 
 urlpatterns = patterns('billy.web.public.views',
@@ -46,6 +46,9 @@ urlpatterns = patterns('billy.web.public.views',
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/$',
         BillsBySubject.as_view(), name='bills_by_subject'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/rss/$',
+        BillsBySubjectFeed(), name='bills_by_subject_rss'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills_introduced_upper/$',
         BillsIntroducedUpper.as_view(), name='bills_introduced_upper'),

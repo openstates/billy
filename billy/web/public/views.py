@@ -361,15 +361,6 @@ class FilterBills(RelatedBillsList):
 
     def get_queryset(self):
 
-        get = self.request.GET.get
-
-        # Setup the paginator arguments.
-        show_per_page = getattr(self, 'show_per_page', 10)
-        show_per_page = int(get('show_per_page', show_per_page))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
-
         metadata = Metadata.get_object(self.kwargs['abbr'])
         FilterBillsForm = get_filter_bills_form(metadata)
         form = FilterBillsForm(self.request.GET)
@@ -403,8 +394,6 @@ class FilterBills(RelatedBillsList):
 
             cursor = Bill.search(search_text, **kwargs)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
-            return self.paginator(cursor, page=page,
-                                  show_per_page=self.show_per_page)
 
         else:
             # Elastic search not enabled--query mongo normally.
@@ -422,7 +411,16 @@ class FilterBills(RelatedBillsList):
             cursor = db.bills.find(spec)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
 
-            return self.paginator(cursor, show_per_page=self.show_per_page)
+        # Setup the paginator.
+        get = self.request.GET.get
+        show_per_page = getattr(self, 'show_per_page', 10)
+        show_per_page = int(get('show_per_page', show_per_page))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
+
+        return self.paginator(cursor, page=page,
+                              show_per_page=self.show_per_page)
 
 
 class SponsoredBillsList(RelatedBillsList):
@@ -450,12 +448,12 @@ class BillsBySubject(BillsList):
         if 100 < show_per_page:
             show_per_page = 100
 
-        # Apply any specified sorting.
-        sort_func = getattr(self, 'sort_func', None)
-        sort_reversed = bool(getattr(self, 'sort_reversed', None))
-        if sort_func:
-            objects = sorted(objects, key=sort_func,
-                             reverse=sort_reversed)
+        # # Apply any specified sorting.
+        # sort_func = getattr(self, 'sort_func', None)
+        # sort_reversed = bool(getattr(self, 'sort_reversed', None))
+        # if sort_func:
+        #     objects = sorted(objects, key=sort_func,
+        #                      reverse=sort_reversed)
 
         paginator = self.paginator(objects, page=page,
                                    show_per_page=show_per_page)
