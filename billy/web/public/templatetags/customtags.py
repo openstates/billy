@@ -25,6 +25,10 @@ def plusfield(object, key):
 
 
 @register.filter
+def underscore_field(object, key):
+    return object['_' + key]
+
+@register.filter
 def decimal_format(value, TWOPLACES=Decimal(100) ** -2):
     'Format a decimal.Decimal like to 2 decimal places.'
     if not isinstance(value, Decimal):
