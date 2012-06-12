@@ -23,6 +23,12 @@ def sources(obj):
 def plusfield(object, key):
     return object['+' + key]
 
+@register.filter
+def trunc(string):
+    if len(string) > 75:
+        return "%s [...]" % string[:75]
+    else:
+        return string
 
 @register.filter
 def underscore_field(object, key):
