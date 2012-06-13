@@ -2,6 +2,7 @@ import operator
 import itertools
 import collections
 
+import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
@@ -119,7 +120,8 @@ class Legislator(Document):
         if extra_spec is None:
             extra_spec = {}
         extra_spec.update({'sponsors.leg_id': self.id})
-        return self.metadata.bills(extra_spec, *args, **kwargs)
+        return self.metadata.bills(extra_spec,
+            sort=[('updated_at', pymongo.DESCENDING)], *args, **kwargs)
 
     def primary_sponsored_bills(self):
         return self.metadata.bills({'sponsors.type': 'primary',

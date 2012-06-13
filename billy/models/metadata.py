@@ -1,6 +1,7 @@
 import operator
 import itertools
 
+import pymongo
 from django.core import urlresolvers
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
@@ -68,7 +69,8 @@ class Metadata(Document):
                                   instance_key='abbreviation')
 
     bills = RelatedDocuments('Bill', model_keys=['state'],
-                             instance_key='abbreviation')
+                             instance_key='abbreviation', 
+                             sort=[('updated_at', pymongo.DESCENDING)])
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['state'],
                                     instance_key='abbreviation')
