@@ -938,6 +938,7 @@ def bill(request, abbr, bill_id):
             bill_progress_template=templatename('bill_progress_template'),
             abbr=abbr,
             state=Metadata.get_object(abbr),
+            metadata=Metadata.get_object(abbr),
             bill=bill,
             show_all_sponsors=show_all_sponsors,
             sources=bill['sources'],
@@ -956,6 +957,7 @@ def event(request, abbr, event_id):
         dictionary=dict(
             abbr=abbr,
             state=Metadata.get_object(abbr),
+            metadata=Metadata.get_object(abbr),
             event=event,
             sources=event['sources'],
             statenav_active='events'),
@@ -970,6 +972,7 @@ def events(request, abbr):
         dictionary=dict(
             abbr=abbr,
             state=Metadata.get_object(abbr),
+            metadata=Metadata.get_object(abbr),
             events=events,
             statenav_active='events'),
         context_instance=RequestContext(request, default_context))
@@ -984,6 +987,7 @@ def vote(request, abbr, bill_id, vote_index):
         dictionary=dict(
             abbr=abbr,
             state=Metadata.get_object(abbr),
+            metadata=Metadata.get_object(abbr),
             bill=bill,
             vote=nth(bill.votes_manager, int(vote_index)),
             statenav_active='bills'),
