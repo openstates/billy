@@ -257,7 +257,11 @@ class RelatedObjectsList(ListViewBase):
         # function or a manager class.
         # This is to work around a pain-point in models.py.
         if callable(objects):
-            objects = objects()
+            kwargs = {}
+            sort = getattr(self, 'sort', None)
+            if sort is not None:
+                kwargs['sort'] = sort
+            objects = objects(**kwargs)
 
         # Apply any specified sorting.
         sort_func = getattr(self, 'sort_func', None)
@@ -291,6 +295,7 @@ class FeedsList(RelatedObjectsList):
     list_item_context_name = 'entry'
     # sort_func = operator.itemgetter('published_parsed')
     # sort_reversed = True
+    mongo_sort = [('updated_at', pymongo.DESCENDING)]
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
