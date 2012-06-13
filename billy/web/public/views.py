@@ -556,7 +556,7 @@ def pick_a_state(request):
 
 def chamber_select(request, collection_name):
     '''Handle the chamber selection radio button, i.e.,
-    in legislators_chamber and committees_chamber views.
+    in legislator and committees views.
     '''
     if collection_name not in ('legislators', 'committees'):
         raise Http404
@@ -684,7 +684,7 @@ def legislators(request, abbr):
     chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
 
     return render_to_response(
-        template_name=templatename('legislators_chamber'),
+        template_name=templatename('legislators'),
         dictionary=dict(
             metadata=meta,
             chamber=chamber,
@@ -700,6 +700,7 @@ def legislators(request, abbr):
             statenav_active='legislators',
             ),
         context_instance=RequestContext(request, default_context))
+
 
 def get_district(request, district_id):
     qurl = "%s/api/v1/districts/boundary/%s/?apikey=%s" % (
