@@ -69,8 +69,7 @@ class Metadata(Document):
                                   instance_key='abbreviation')
 
     bills = RelatedDocuments('Bill', model_keys=['state'],
-                             instance_key='abbreviation', 
-                             sort=[('updated_at', pymongo.DESCENDING)])
+                             instance_key='abbreviation')
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['state'],
                                     instance_key='abbreviation')
