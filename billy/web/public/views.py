@@ -830,7 +830,7 @@ def committees(request, abbr):
     chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
 
     return render_to_response(
-        template_name=templatename('committees_chamber'),
+        template_name=templatename('committees'),
         dictionary=dict(
             chamber=chamber,
             committees=committees,
@@ -842,51 +842,6 @@ def committees(request, abbr):
             committees_table_template=templatename('committees_table'),
             chamber_select_collection='committees',
             show_chamber_column=show_chamber_column,
-            sort_order=sort_order,
-            statenav_active='committees'),
-        context_instance=RequestContext(request, default_context))
-
-
-def committees_chamber(request, abbr, chamber):
-
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    chamber_name = meta['%s_chamber_name' % chamber]
-
-    # Query params
-    spec = {'chamber': chamber}
-
-    fields = ['committee', 'subcommittee', 'members']
-    fields = dict(zip(fields, repeat1))
-
-    sort_key = 'committee'
-    sort_order = 1
-
-    if request.GET:
-        sort_key = request.GET['key']
-        sort_order = int(request.GET['order'])
-
-    committees = meta.committees(spec, fields=fields,
-                                  sort=[(sort_key, sort_order)])
-
-    sort_order = {1: -1, -1: 1}[sort_order]
-
-    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
-
-    return render_to_response(
-        template_name=templatename('committees_chamber'),
-        dictionary=dict(
-            committees=committees,
-            abbr=abbr,
-            metadata=meta,
-            chamber_name=chamber_name,
-            chamber_select_form=chamber_select_form,
-            chamber_select_template=templatename('chamber_select_form'),
-            committees_table_template=templatename('committees_table'),
-            chamber_select_collection='committees',
             sort_order=sort_order,
             statenav_active='committees'),
         context_instance=RequestContext(request, default_context))
