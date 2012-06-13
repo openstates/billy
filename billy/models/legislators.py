@@ -3,6 +3,8 @@ import itertools
 import collections
 
 from django.core import urlresolvers
+from django.template.defaultfilters import slugify
+
 from billy.web.public.viewdata import blurbs
 
 from .base import (db, Document, RelatedDocuments, ListManager, DictManager,
@@ -94,7 +96,9 @@ class Legislator(Document):
 
     def get_absolute_url(self):
         args = (self.metadata['abbreviation'], self.id)
-        return urlresolvers.reverse('legislator', args=args)
+        url = urlresolvers.reverse('legislator', args=args)
+        slug = slugify(self.display_name())
+        return '%s%s/' % (url, slug)
 
     def votes_3_sorted(self):
         _id = self['_id']

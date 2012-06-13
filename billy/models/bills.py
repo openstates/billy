@@ -3,6 +3,7 @@ import operator
 import collections
 
 from django.core import urlresolvers
+from django.template.defaultfilters import slugify
 import pyes
 
 from billy.conf import settings
@@ -169,8 +170,12 @@ class BillVote(DictManager):
         return self.bill['votes'].index(self)
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('vote',
+        text = '%s--%s' % (self.bill['bill_id'],
+                               self['date'].strftime('%m-%d-%Y'))
+        slug = slugify(text)
+        url = urlresolvers.reverse('vote',
             args=[self.bill['state'], self.bill['_id'], self.index()])
+        return '%s%s/' % (url, slug)
 
 
 class BillVotesManager(ListManager):
@@ -196,8 +201,9 @@ class Bill(Document):
         return Metadata.get_object(self['state'])
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('bill', args=[self['state'],
-                                                       self.id])
+        url = urlresolvers.reverse('bill', args=[self['state'], self.id])
+        slug = slugify(self['bill_id'])
+        return '%s%s/' % (url, slug)
 
     def session_details(self):
         metadata = self.metadata

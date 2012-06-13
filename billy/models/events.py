@@ -1,3 +1,6 @@
+from django.core import urlresolvers
+from django.template.defaultfilters import slugify, truncatewords
+
 from .base import db, Document, RelatedDocuments, RelatedDocument
 from .metadata import Metadata
 
@@ -23,3 +26,8 @@ class Event(Document):
             if 'committee_id' in committee:
                 committees.append(committee['committee_id'])
         return db.committees.find({"_id": { "$in": committees }})
+
+    def get_absolute_url(self):
+        slug = slugify(truncatewords(self['description'], 10))
+        url = urlresolvers.reverse('event', args=[self['state'], self['_id']])
+        return '%s%s/' % (url, slug)

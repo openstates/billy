@@ -1,6 +1,7 @@
 import itertools
 
 from django.core import urlresolvers
+from django.template.defaultfilters import slugify
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DEBUG, logger)
@@ -17,6 +18,7 @@ class CommitteeMemberManager(ListManager):
 
     def __iter__(self):
         members = self.committee['members']
+
         ids = filter(None, [obj['leg_id'] for obj in members])
         spec = {'_id': {'$in': ids}}
         if DEBUG:
@@ -25,7 +27,13 @@ class CommitteeMemberManager(ListManager):
                         'find', spec, (), {})
             logger.debug(msg)
 
-        return itertools.izip(members, db.legislators.find(spec))
+        objs = dict((obj['_id'], obj) for obj in db.legislators.find(spec))
+        for member in members:
+            _id = member['leg_id']
+            if _id is not None:
+                yield (member, objs[_id])
+            else:
+                yield (member, None)
 
 
 class Committee(Document):
@@ -37,12 +45,14 @@ class Committee(Document):
 
     def display_name(self):
         try:
-            return self['committee']
+            name = self['committee']
         except KeyError:
-            try:
-                return self['subcommittee']
-            except KeyError:
-                raise
+            return self['subcommittee']
+        else:
+            sub = self['subcommittee']
+            if sub is not None:
+                name = '%s: %s' % (name, sub)
+        return name
 
     def events(self):
         return db.events.find({"participants.committee_id": self['_id']})
@@ -54,5 +64,7 @@ class Committee(Document):
     def get_absolute_url(self):
         args = [self.metadata['abbreviation'],
                 self['_id']]
-        return urlresolvers.reverse('committee', args=args)
+        url = urlresolvers.reverse('committee', args=args)
+        slug = slugify(self.display_name())
+        return '%s%s/' % (url, slug)
 

@@ -29,20 +29,17 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/legislators/$',
         'legislators', name='legislators'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislator/(?P<leg_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<leg_id>\w+)/',
         'legislator', name='legislator'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislator_inactive/(?P<leg_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators_inactive/(?P<leg_id>\w+)/$',
         'legislator_inactive', name='legislator_inactive'),
 
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/committees/$',
         'committees', name='committees'),
 
-    url(r'^(?P<abbr>[a-z]{2})/committees/(?P<chamber>\w+)/$',
-        'committees_chamber', name='committees_chamber'),
-
-    url(r'^(?P<abbr>[a-z]{2})/committee/(?P<committee_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/committees/(?P<committee_id>[A-Z]{3}\d+)/',
         'committee', name='committee'),
 
     #------------------------------------------------------------------------
@@ -82,10 +79,10 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/sponsored_bills/(?P<collection_name>[^/]+)/(?P<id>[^/]+)/rss/$',
         SponsoredBillsFeed(), name='sponsored_bills_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bill/(?P<bill_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
         'bill', name='bill'),
 
-    url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/',
         'event', name='event'),
 
     url(r'^(?P<abbr>[a-z]{2})/events/$',
@@ -95,7 +92,7 @@ urlpatterns = patterns('billy.web.public.views',
 
     url(r'^(?P<abbr>[a-z]{2})/filter_bills', FilterBills.as_view(), name='filter_bills'),
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/vote/(?P<bill_id>\w+)/(?P<vote_index>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/$',
         'vote', name='vote'),
 
     url(r'^(?P<abbr>[a-z]{2})/votes_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',

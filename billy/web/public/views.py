@@ -650,7 +650,7 @@ def legislators(request, abbr):
         chamber = 'both'
 
     fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
-              'chamber', 'state', 'last_name']
+              'first_name', 'last_name', 'chamber', 'state', 'last_name']
     fields = dict(zip(fields, repeat1))
 
     sort_key = 'district'
