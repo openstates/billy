@@ -5,7 +5,6 @@ import urllib2
 import operator
 
 from random import choice
-
 from operator import itemgetter
 from itertools import repeat, islice
 
@@ -25,7 +24,7 @@ from billy.importers.utils import fix_bill_id
 
 from .forms import (get_state_select_form, ChamberSelectForm,
                     get_filter_bills_form)
-from .viewdata import overview
+from .viewdata import overview, funfacts
 
 
 default_context = dict(base_template='billy/web/public/base.html')
@@ -511,7 +510,7 @@ def state(request, abbr):
     chambers = [
         overview.chamber(abbr, 'upper'),
         overview.chamber(abbr, 'lower'),
-    ]
+        ]
 
     return render_to_response(
         template_name=templatename('state'),
@@ -520,7 +519,8 @@ def state(request, abbr):
             sessions=reversed(list(report.session_link_data())),
             chambers=chambers,
             recent_actions=overview.recent_actions(abbr),
-            statenav_active=None),
+            statenav_active=None,
+            funfact=funfacts.get_funfact(abbr)),
         context_instance=RequestContext(request, default_context))
 
 
