@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django import template
+from django.utils.html import strip_tags
 
 from billy.web.public.views import templatename
 from billy.web.public.forms import get_state_select_form
@@ -40,3 +41,20 @@ def decimal_format(value, TWOPLACES=Decimal(100) ** -2):
     if not isinstance(value, Decimal):
         value = Decimal(str(value))
     return value.quantize(TWOPLACES)
+
+
+@register.tag
+def striptags(parser, token):
+    nodelist = parser.parse(('end_striptags',))
+    parser.delete_first_token()
+    return StrippedTagsNode(nodelist)
+
+
+class StrippedTagsNode(template.Node):
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        output = strip_tags(self.nodelist.render(context))
+        return output
