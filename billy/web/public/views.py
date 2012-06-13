@@ -893,7 +893,6 @@ def bill(request, abbr, bill_id):
             vote_preview_row_template=templatename('vote_preview_row'),
             bill_progress_template=templatename('bill_progress_template'),
             abbr=abbr,
-            state=Metadata.get_object(abbr),
             metadata=Metadata.get_object(abbr),
             bill=bill,
             show_all_sponsors=show_all_sponsors,
@@ -912,12 +911,12 @@ def event(request, abbr, event_id):
         template_name=templatename('event'),
         dictionary=dict(
             abbr=abbr,
-            state=Metadata.get_object(abbr),
             metadata=Metadata.get_object(abbr),
             event=event,
             sources=event['sources'],
             statenav_active='events'),
         context_instance=RequestContext(request, default_context))
+
 
 def events(request, abbr):
 
@@ -927,11 +926,11 @@ def events(request, abbr):
         template_name=templatename('events'),
         dictionary=dict(
             abbr=abbr,
-            state=Metadata.get_object(abbr),
             metadata=Metadata.get_object(abbr),
             events=events,
             statenav_active='events'),
         context_instance=RequestContext(request, default_context))
+
 
 def vote(request, abbr, bill_id, vote_index):
     bill = db.bills.find_one({'_id': bill_id})
@@ -942,7 +941,6 @@ def vote(request, abbr, bill_id, vote_index):
         template_name=templatename('vote'),
         dictionary=dict(
             abbr=abbr,
-            state=Metadata.get_object(abbr),
             metadata=Metadata.get_object(abbr),
             bill=bill,
             vote=nth(bill.votes_manager, int(vote_index)),
