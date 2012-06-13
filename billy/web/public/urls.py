@@ -88,11 +88,11 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/events/$',
         'events', name='events'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills', StateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/', StateBills.as_view(), name='bills'),
 
     url(r'^(?P<abbr>[a-z]{2})/filter_bills', FilterBills.as_view(), name='filter_bills'),
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
         'vote', name='vote'),
 
     url(r'^(?P<abbr>[a-z]{2})/votes_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
