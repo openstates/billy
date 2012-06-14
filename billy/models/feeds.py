@@ -1,13 +1,14 @@
 import urlparse
 import datetime
 from django.core import urlresolvers
+from django.template.defaultfilters import slugify
 
-from .base import db, Document
+from .base import feeds_db, Document
 from .metadata import Metadata
 
 
 class FeedEntry(Document):
-    collection = db.feed_entries
+    collection = feeds_db.entries
 
     def __init__(self, *args, **kw):
         super(FeedEntry, self).__init__(*args, **kw)
@@ -40,7 +41,11 @@ class FeedEntry(Document):
                     _entity_strings.append(entity_string)
                     _entity_ids.append(_id)
                 entity_type = entity_types[_id[2]]
-                url = urlresolvers.reverse(entity_type, args=[state, _id])
+                if entity_type == 'legislator':
+                    url = urlresolvers.reverse(
+                        entity_type, args=[state, _id, slugify(entity_string)])
+                else:
+                    url = urlresolvers.reverse(entity_type, args=[state, _id])
                 _entity_urls.append(url)
                 summary = summary.replace(entity_string,
                     '<b><a href="%s">%s</a></b>' % (url, entity_string))

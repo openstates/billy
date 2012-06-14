@@ -165,7 +165,7 @@ class NewsListFeed(GenericListFeed):
         return item['link']
 
     def item_description(self, item):
-        return strip_tags(item['summary'])
+        return truncatewords(strip_tags(item['summary']), 100)
 
     def item_title(self, item):
         return '%s (%s)' % (

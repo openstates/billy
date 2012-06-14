@@ -302,7 +302,7 @@ class EventsList(RelatedObjectsList):
     description_template = templatename('list_descriptions/events')
 
 
-class FeedsList(RelatedObjectsList):
+class NewsList(RelatedObjectsList):
 
     list_item_context_name = 'entry'
     # sort_func = operator.itemgetter('published_parsed')
@@ -313,7 +313,7 @@ class FeedsList(RelatedObjectsList):
     rowtemplate_name = templatename('feed_entry')
     column_headers = ('feeds',)
     statenav_active = 'bills'
-    description_template = templatename('list_descriptions/feeds')
+    description_template = templatename('list_descriptions/news')
 
 
 class BillsList(ListViewBase):
