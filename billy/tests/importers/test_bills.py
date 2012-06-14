@@ -44,6 +44,15 @@ def test_import_bill():
                          ],
             'documents': [{'title': 'fiscal note',
                           'url': 'http://example.com/fn'}],
+            'actions': [{'action': 'Introduced', 'type': ['bill:introduced'],
+                         'actor': 'upper', 'date': 1331000000},
+                        {'action': 'Referred to committee', 'type': ['committee:referred'],
+                         'actor': 'upper', 'date': 1332000000},
+                        {'action': 'Passed by voice vote', 'type': ['bill:passed'],
+                         'actor': 'upper', 'date': 1333000000},
+                        {'action': 'Signed', 'type': ['governor:signed'],
+                         'actor': 'governor', 'date': 1334000000},
+                       ],
             'votes': [{'motion': 'passage', 'chamber': 'upper', 'date': None,
                        'yes_count': 1, 'no_count': 1, 'other_count': 0,
                        'yes_votes': ['John Adams'],
@@ -89,6 +98,13 @@ def test_import_bill():
     assert bill['votes'][0]['vote_id'] == 'EXV00000001'
     assert bill['votes'][0]['yes_votes'][0]['leg_id'] == 'EXL000001'
     assert 'committee_id' in bill['votes'][1]
+
+    # test actions
+    assert bill['action_dates']['first'] == 1331000000
+    assert bill['action_dates']['last'] == 1334000000
+    assert bill['action_dates']['passed_upper'] == 1333000000
+    assert bill['action_dates']['signed'] == 1334000000
+    assert bill['action_dates']['passed_lower'] == None
 
     # titles from alternate_titles & versions (not main title)
     assert 'main title' not in bill['alternate_titles']
@@ -138,6 +154,7 @@ def test_import_bill_with_partial_bill_vote_id():
             'versions': [],
             'documents': [],
             'votes': [],
+            'actions': [],
            }
     standalone_votes = {
         # chamber, session, bill id -> vote list

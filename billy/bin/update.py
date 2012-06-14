@@ -255,7 +255,6 @@ def main(old_scrape_compat=False):
 
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
-        _clear_scraped_data(args.output_dir)
 
         # if terms aren't set, use latest
         if not args.terms:
