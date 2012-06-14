@@ -132,6 +132,7 @@ def import_bill(data, votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
 
+    # process votes
     for vote in data['votes']:
 
         # committee_ids
@@ -149,6 +150,32 @@ def import_bill(data, votes, categorizer):
                 svlist.append({'name': svote, 'leg_id': id})
 
             vote[vtype] = svlist
+
+    # process actions
+    dates = {'first': None, 'last': None, 'passed_upper': None,
+             'passed_lower': None, 'signed': None}
+    last_ad = data['actions']['date']
+    for action in data['actions']:
+        adate = action['date']
+
+        # first & last
+        if not dates['first'] or adate < dates['first']
+            dates['first'] = adate
+        elif not dates['last'] or adate > dates['last']:
+            dates['last'] = adate
+
+        # passed & signed
+        if (not dates['passed_upper'] and action['actor'] == 'upper'
+            and 'bill:passed' in action['type']):
+            dates['passed_upper'] = adate
+        elif (not dates['passed_lower'] and action['actor'] == 'lower'
+            and 'bill:passed' in action['type']):
+            dates['passed_lower'] = adate
+        elif (not dates['signed'] and 'governor:signed' in action['type']):
+            dates['signed'] = adate
+
+    # save action dates to data
+    data['action_dates'] = dates
 
     data['_term'] = term_for_session(abbr, data['session'])
 
