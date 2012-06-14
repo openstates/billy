@@ -46,18 +46,18 @@ def templatename(name):
 
 
 def sort_by_district(obj):
-        matchobj = re.search(r'\d+', obj['district'])
-        if matchobj:
-            return int(matchobj.group())
-        else:
-            return obj['district']
+    matchobj = re.search(r'\d+', obj['district'])
+    if matchobj:
+        return int(matchobj.group())
+    else:
+        return obj['district']
 
 
 def state_not_active_yet(request, args, kwargs):
     try:
         metadata = Metadata.get_object(kwargs['abbr'])
     except DoesNotExist:
-        return redirect(pick_a_state)
+        raise Http404
 
     return render_to_response(
         template_name=templatename('state_not_active_yet'),
@@ -80,6 +80,7 @@ def search(request, scope):
 
     abbr = None
     search_text = request.GET['q']
+    scope_name = None
     spec = {}
 
     # If the input looks like a bill id, try to fetch the bill.
@@ -88,7 +89,7 @@ def search(request, scope):
         collection = db.bills
         spec.update(bill_id=bill_id)
 
-        if scope != 'us':
+        if scope != 'all':
             abbr = scope
             spec.update(state=abbr)
 
@@ -125,13 +126,12 @@ def search(request, scope):
     # search bill title and legislator names.
     if settings.ENABLE_ELASTICSEARCH:
         kwargs = {}
-        if scope != 'us':
+        if scope != 'all':
             kwargs['state'] = scope
         bill_results = Bill.search(search_text, **kwargs)
     else:
-        scope_name = None
         spec = {'title': {'$regex': search_text, '$options': 'i'}}
-        if scope != 'us':
+        if scope != 'all':
             abbr = scope
             scope_name = Metadata.get_object(abbr)['name']
             spec.update(state=abbr)
@@ -139,7 +139,7 @@ def search(request, scope):
 
     # See if any legislator names match.
     spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'us':
+    if scope != 'all':
         abbr = scope
         scope_name = Metadata.get_object(abbr)['name']
         spec.update(state=abbr)
@@ -547,29 +547,10 @@ def state_selection(request):
     in the base template.
     '''
     form = get_state_select_form(request.GET)
-    abbr = form.data['abbr']
-    if len(abbr) != 2:
-        return redirect('pick_a_state')
+    abbr = form.data.get('abbr')
+    if not abbr or len(abbr) != 2:
+        raise Http404
     return redirect('state', abbr=abbr)
-
-
-def pick_a_state(request):
-    metadata = db.metadata.find({'_id': {'$in': settings.ACTIVE_STATES}},
-                                ['_id', 'name'], sort=[('name', 1)])
-
-    def columns(cursor, num_columns):
-        percolumn, _ = divmod(cursor.count(), num_columns)
-        iterator = iter(cursor)
-        for i in range(num_columns):
-            yield list(islice(iterator, percolumn))
-
-    return render_to_response(
-        template_name=templatename('pick_a_state'),
-        dictionary=dict(
-            columns=columns(metadata, 3),
-            metadata=metadata,
-            statenav_active=None),
-        context_instance=RequestContext(request, default_context))
 
 
 def chamber_select(request, collection_name):

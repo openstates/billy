@@ -1,4 +1,3 @@
-
 from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views import (VotesList, NewsList,
@@ -19,8 +18,6 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection',
         name='state_selection'),
-    url(r'^pick_a_state/$', 'pick_a_state',
-        name='pick_a_state'),
     url(r'^chamber_select/(?P<collection_name>\w+)$', 'chamber_select',
         name='chamber_select'),
     url(r'^get_district/(?P<district_id>.+)/$',
