@@ -3,6 +3,8 @@ from itertools import islice
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
 from django.utils.html import strip_tags
+from django.template.defaultfilters import truncatewords
+
 
 from billy.models import db
 
@@ -21,7 +23,7 @@ class GenericListFeed(Feed):
             collection = getattr(db, self.collection_name)
 
         try:
-            obj = collection.find_one(kwargs['id'])
+            obj = collection.find_one(kwargs['_id'])
         except KeyError:
             obj = collection.find_one(kwargs['abbr'])
 
@@ -51,6 +53,7 @@ class BillsFeed(GenericListFeed):
 
 class SponsoredBillsFeed(BillsFeed):
     query_attribute = 'sponsored_bills'
+    collection_name = 'legislators'
 
     def title(self, obj):
         return u"OpenStates.org: Bills sponsored by " + obj.display_name()
@@ -168,4 +171,21 @@ class NewsListFeed(GenericListFeed):
         return '%s (%s)' % (
             item['title'],
             item.published().strftime('%B %d, %Y'))
+
+
+class StateEventsFeed(GenericListFeed):
+    collection_name = 'metadata'
+    query_attribute = 'events'
+
+    def title(self, obj):
+        s = u"OpenStates.org: {0} legislative events."
+        return s.format(obj.display_name())
+
+    description = title
+
+    def item_description(self, item):
+        return truncatewords(item['description'], 100)
+
+    def item_title(self, item):
+        return item['when'].strftime('%B %d, %Y')
 

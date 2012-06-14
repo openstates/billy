@@ -223,7 +223,7 @@ class RelatedObjectsList(ListViewBase):
             }.get(collection_name, collection_name)
 
         try:
-            _id = self.kwargs['id']
+            _id = self.kwargs['_id']
         except KeyError:
             _id = self.kwargs['abbr']
 
@@ -286,6 +286,20 @@ class VotesList(RelatedObjectsList):
                       'No', 'Other', 'Motion')
     statenav_active = 'bills'
     description_template = templatename('list_descriptions/votes')
+
+
+class EventsList(RelatedObjectsList):
+    collection_name = 'metadata'
+    sort_func = operator.itemgetter('when')
+    sort_reversed = True
+    paginator = IteratorPaginator
+    query_attr = 'events'
+    use_table = True
+    rowtemplate_name = templatename('events_list_row')
+    column_headers = ('Date', 'Description',)
+    show_per_page = 15
+    statenav_active = 'events'
+    description_template = templatename('list_descriptions/events')
 
 
 class FeedsList(RelatedObjectsList):
@@ -426,6 +440,7 @@ class FilterBills(RelatedBillsList):
 
 
 class SponsoredBillsList(RelatedBillsList):
+    collection_name = 'legislators'
     query_attr = 'sponsored_bills'
     description_template = templatename(
         'list_descriptions/sponsored_bills')
@@ -716,17 +731,14 @@ def get_district(request, district_id):
     return HttpResponse(f)
 
 
-def legislator(request, abbr, leg_id):
-    '''
-    Note - changes needed before we can display "sessions served" info.
-    '''
+def legislator(request, abbr, _id, slug):
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
-    legislator = db.legislators.find_one({'_id': leg_id})
+    legislator = db.legislators.find_one({'_id': _id})
     if legislator is None:
-        raise Http404('No legislator was found with led_id = %r' % leg_id)
+        raise Http404('No legislator was found with led_id = %r' % _id)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
@@ -740,7 +752,7 @@ def legislator(request, abbr, leg_id):
     districts = json.load(f)
     district_id = None
     for district in districts:
-        legs = [ x['leg_id'] for x in district['legislators'] ]
+        legs = [x['leg_id'] for x in district['legislators']]
         if legislator['leg_id'] in legs:
             district_id = district['boundary_id']
             break
@@ -750,7 +762,7 @@ def legislator(request, abbr, leg_id):
         limit=5, sort=[('actions.1.date', pymongo.DESCENDING)])
 
     # Note to self: Another slow query
-    legislator_votes = legislator.votes_3_sorted()
+    legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
     return render_to_response(
         template_name=templatename('legislator'),
@@ -778,7 +790,7 @@ def legislator_inactive(request, abbr, legislator):
         limit=5, sort=[('actions.1.date', pymongo.DESCENDING)])
 
     # Note to self: Another slow query
-    legislator_votes = legislator.votes_3_sorted()
+    legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
     return render_to_response(
         template_name=templatename('legislator_inactive'),
@@ -921,18 +933,18 @@ def event(request, abbr, event_id):
         context_instance=RequestContext(request, default_context))
 
 
-def events(request, abbr):
+# def events(request, abbr):
 
-    events = db.events.find({'state': abbr})
+#     events = db.events.find({'state': abbr})
 
-    return render_to_response(
-        template_name=templatename('events'),
-        dictionary=dict(
-            abbr=abbr,
-            metadata=Metadata.get_object(abbr),
-            events=events,
-            statenav_active='events'),
-        context_instance=RequestContext(request, default_context))
+#     return render_to_response(
+#         template_name=templatename('events'),
+#         dictionary=dict(
+#             abbr=abbr,
+#             metadata=Metadata.get_object(abbr),
+#             events=events,
+#             statenav_active='events'),
+#         context_instance=RequestContext(request, default_context))
 
 
 def vote(request, abbr, bill_id, vote_index):
