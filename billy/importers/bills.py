@@ -154,7 +154,6 @@ def import_bill(data, votes, categorizer):
     # process actions
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
-    last_ad = data['actions']['date']
     for action in data['actions']:
         adate = action['date']
 
