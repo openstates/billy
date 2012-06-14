@@ -10,6 +10,10 @@ import functools
 import unicodecsv
 import datetime
 import urlparse
+
+from bson import ObjectId
+from json import JSONEncoder
+
 from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict, OrderedDict
@@ -585,9 +589,6 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
 def object_json(request, collection, _id,
                 re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
-
-    from pymongo.objectid import ObjectId
-    from json import JSONEncoder
 
     class MongoEncoder(JSONEncoder):
 

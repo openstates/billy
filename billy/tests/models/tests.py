@@ -7,7 +7,7 @@ from billy.models.committees import CommitteeMember
 from billy import db
 
 
-class TestNoConflict(unittest.TestCase):
+class DisabledTestNoConflict(unittest.TestCase):
     '''
     Make sure no model attribute names conflict with document keys.
     '''

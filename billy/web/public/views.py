@@ -28,8 +28,6 @@ from .viewdata import overview, funfacts
 
 
 default_context = dict(base_template='billy/web/public/base.html')
-openstates_api_host = "http://openstates.org"
-
 
 def nth(iterable, n, default=None):
     "Returns the nth item or a default value"
@@ -619,8 +617,8 @@ def find_your_legislator(request):
         kwargs['lon'] = lon
         kwargs['located'] = True
 
-        qurl = "%s/api/v1/legislators/geo/?long=%s&lat=%s&apikey=%s" % (
-            openstates_api_host,
+        qurl = "%slegislators/geo/?long=%s&lat=%s&apikey=%s" % (
+            billy_settings.API_BASE_URL,
             lon,
             lat,
             billy_settings.SUNLIGHT_API_KEY
@@ -635,8 +633,8 @@ def find_your_legislator(request):
             borders = set(to_search)
             ret = {}
             for border in borders:
-                qurl = "%s/api/v1/districts/boundary/%s/?apikey=%s" % (
-                    openstates_api_host,
+                qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
+                    billy_settings.API_BASE_URL,
                     border,
                     billy_settings.SUNLIGHT_API_KEY
                 )
@@ -723,8 +721,8 @@ def legislators(request, abbr):
 
 
 def get_district(request, district_id):
-    qurl = "%s/api/v1/districts/boundary/%s/?apikey=%s" % (
-        openstates_api_host,
+    qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
+        billy_settings.API_BASE_URL,
         district_id,
         billy_settings.SUNLIGHT_API_KEY
     )
@@ -745,8 +743,8 @@ def legislator(request, abbr, _id, slug):
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
 
-    qurl = "%s/api/v1/districts/%s/?apikey=%s" % (
-        openstates_api_host,
+    qurl = "%sdistricts/%s/?apikey=%s" % (
+        billy_settings.API_BASE_URL,
         abbr,
         billy_settings.SUNLIGHT_API_KEY
     )
