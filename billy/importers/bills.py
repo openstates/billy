@@ -155,6 +155,13 @@ def import_bill(data, votes, categorizer):
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
     for action in data['actions']:
+
+        # We'll try to recover some Committee IDs here.
+        if "committee" in action:
+            cid = get_committee_id(level, abbr, data['chamber'], committee)
+            #print cid
+            #raise Exception
+
         adate = action['date']
 
         # first & last
