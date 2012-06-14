@@ -7,32 +7,32 @@ from billy.models.committees import CommitteeMember
 from billy import db
 
 
-class DisabledTestNoConflict(unittest.TestCase):
-    '''
-    Make sure no model attribute names conflict with document keys.
-    '''
-    def conflict_exists(self, model_attrs, doc_keys):
-        return model_attrs & doc_keys
+#class TestNoConflict(unittest.TestCase):
+#    '''
+#    Make sure no model attribute names conflict with document keys.
+#    '''
+#    def conflict_exists(self, model_attrs, doc_keys):
+#        return model_attrs & doc_keys
 
-    def test_all_models(self):
-        conflict_exists = self.conflict_exists
-        for model in _model_registry.values():
-            model_attrs = set(dir(model))
-            for document in model.collection.find():
-                doc_keys = set(document)
-                conflict = conflict_exists(model_attrs, doc_keys)
-                self.assertFalse(conflict,
-                                 "conflicting keys ({0}) in {1}".format(
-                                     ','.join(conflict), model.__name__))
+#    def test_all_models(self):
+#        conflict_exists = self.conflict_exists
+#        for model in _model_registry.values():
+#            model_attrs = set(dir(model))
+#            for document in model.collection.find():
+#                doc_keys = set(document)
+#                conflict = conflict_exists(model_attrs, doc_keys)
+#                self.assertFalse(conflict,
+#                                 "conflicting keys ({0}) in {1}".format(
+#                                     ','.join(conflict), model.__name__))
 
-    def test_bogus_key(self, model=Bill):
-        document = model.collection.find_one()
-        model_attrs = set(dir(model))
-        doc_keys = set(document)
-        bogus_key = choice(list(model_attrs - doc_keys))
-        document[bogus_key] = 3
-        doc_keys = set(document)
-        self.assertTrue(self.conflict_exists(model_attrs, doc_keys))
+#    def test_bogus_key(self, model=Bill):
+#        document = model.collection.find_one()
+#        model_attrs = set(dir(model))
+#        doc_keys = set(document)
+#        bogus_key = choice(list(model_attrs - doc_keys))
+#        document[bogus_key] = 3
+#        doc_keys = set(document)
+#        self.assertTrue(self.conflict_exists(model_attrs, doc_keys))
 
 
 class TestDereferencing(unittest.TestCase):
