@@ -158,9 +158,10 @@ def import_bill(data, votes, categorizer):
 
         # We'll try to recover some Committee IDs here.
         if "committee" in action:
-            cid = get_committee_id(level, abbr, data['chamber'], committee)
-            #print cid
-            #raise Exception
+            cid = get_committee_id(level, abbr, data['chamber'],
+                                   action['committee'])
+            action['_scraped_committee_name'] = action['committee']
+            action['committee'] = cid
 
         adate = action['date']
 
@@ -346,7 +347,11 @@ def get_committee_id(level, abbr, chamber, committee):
     comms = db.committees.find(spec)
 
     if comms.count() != 1:
-        spec['committee'] = 'Committee on ' + committee
+        flag = 'Committee on'
+        if flag not in committee:
+            spec['committee'] = 'Committee on ' + committee
+        else:
+            spec['committee'] = committee.replace(flag, "").strip()
         comms = db.committees.find(spec)
 
     if comms and comms.count() == 1:
