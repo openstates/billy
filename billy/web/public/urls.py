@@ -4,11 +4,12 @@ from django.conf.urls.defaults import patterns, url
 from billy.web.public.views import (VotesList, FeedsList,
     BillsBySubject, SponsoredBillsList, BillsIntroducedUpper,
     BillsIntroducedLower, BillsPassedUpper, BillsPassedLower,
-    StateBills, FilterBills)
+    StateBills, FilterBills, EventsList,)
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
-    BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed, BillsBySubjectFeed)
+    BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed, BillsBySubjectFeed,
+    StateEventsFeed,)
 
 
 urlpatterns = patterns('billy.web.public.views',
@@ -26,13 +27,25 @@ urlpatterns = patterns('billy.web.public.views',
         'get_district', name='get_district'),
 
     #------------------------------------------------------------------------
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/$',
+        SponsoredBillsList.as_view(), name='legislator_sponsored_bills'),
+
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/rss/$',
+        SponsoredBillsFeed(), name='legislator_sponsored_bills_rss'),
+
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/$',
+        VotesList.as_view(), name='votes_list'),
+
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/rss/$',
+        VotesListFeed(), name='votes_list_rss'),
+
     url(r'^(?P<abbr>[a-z]{2})/legislators/$',
         'legislators', name='legislators'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<leg_id>\w+)/',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]+)/$',
         'legislator', name='legislator'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators_inactive/(?P<leg_id>\w+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/inactive/(?P<id>\w+)/$',
         'legislator_inactive', name='legislator_inactive'),
 
     #------------------------------------------------------------------------
@@ -43,50 +56,48 @@ urlpatterns = patterns('billy.web.public.views',
         'committee', name='committee'),
 
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/$',
         BillsBySubject.as_view(), name='bills_by_subject'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_by_subject/(?P<subject>[^/]+)/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/rss/$',
         BillsBySubjectFeed(), name='bills_by_subject_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_upper/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/$',
         BillsIntroducedUpper.as_view(), name='bills_introduced_upper'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_upper/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/rss/$',
         BillsIntroducedUpperFeed(), name='bills_introduced_upper_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_lower/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/$',
         BillsIntroducedLower.as_view(), name='bills_introduced_lower'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_introduced_lower/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/rss/$',
         BillsIntroducedLowerFeed(), name='bills_introduced_lower_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_passed_upper/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/upper/$',
         BillsPassedUpper.as_view(), name='bills_passed_upper'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_passed_upper/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/upper/rss/$',
         BillsPassedUpperFeed(), name='bills_passed_upper_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_passed_lower/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/$',
         BillsPassedLower.as_view(), name='bills_passed_lower'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills_passed_lower/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/rss/$',
         BillsPassedLowerFeed(), name='bills_passed_lower_rss/'),
 
-    url(r'^(?P<abbr>[a-z]{2})/sponsored_bills/(?P<collection_name>[^/]+)/(?P<id>[^/]+)/$',
-        SponsoredBillsList.as_view(), name='sponsored_bills'),
-
-    url(r'^(?P<abbr>[a-z]{2})/sponsored_bills/(?P<collection_name>[^/]+)/(?P<id>[^/]+)/rss/$',
-        SponsoredBillsFeed(), name='sponsored_bills_rss'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
         'bill', name='bill'),
 
-    url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/',
-        'event', name='event'),
 
     url(r'^(?P<abbr>[a-z]{2})/events/$',
-        'events', name='events'),
+        EventsList.as_view(), name='events'),
+
+    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', StateEventsFeed(), name='events_rss'),
+
+    url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/',
+        'event', name='event'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills/', StateBills.as_view(), name='bills'),
 
@@ -95,11 +106,6 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
         'vote', name='vote'),
 
-    url(r'^(?P<abbr>[a-z]{2})/votes_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
-        VotesList.as_view(), name='votes_list'),
-
-    url(r'^(?P<abbr>[a-z]{2})/votes_list/(?P<collection_name>\w+)/(?P<id>\w+)/rss/$',
-        VotesListFeed(), name='votes_list_rss'),
 
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',

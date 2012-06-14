@@ -95,16 +95,27 @@ class Legislator(Document):
     def metadata(self):
         return Metadata.get_object(self['state'])
 
-    def get_absolute_url(self):
-        args = (self.metadata['abbreviation'], self.id)
-        url = urlresolvers.reverse('legislator', args=args)
-        slug = slugify(self.display_name())
-        return '%s%s/' % (url, slug)
+    def slug(self):
+        return slugify(self.display_name())
 
-    def votes_3_sorted(self):
+    def get_absolute_url(self):
+        kwargs = dict(abbr=self.metadata['abbreviation'],
+                      _id=self.id,
+                      slug=self.slug())
+        return urlresolvers.reverse('legislator', kwargs=kwargs)
+
+    def get_sponsored_bills_url(self):
+        kwargs = dict(abbr=self.metadata['abbreviation'],
+                      _id=self.id,
+                      slug=self.slug(),
+                      collection_name='legislators')
+        return urlresolvers.reverse(
+            'legislator_sponsored_bills', kwargs=kwargs)
+
+    def votes_5_sorted(self):
         _id = self['_id']
         votes = self.votes_manager
-        votes = take(3, sorted(votes, key=operator.itemgetter('date')))
+        votes = take(5, sorted(votes, key=operator.itemgetter('date')))
         for i, vote in enumerate(votes):
             for vote_value in ['yes', 'no', 'other']:
                 id_getter = operator.itemgetter('leg_id')
@@ -120,8 +131,9 @@ class Legislator(Document):
         if extra_spec is None:
             extra_spec = {}
         extra_spec.update({'sponsors.leg_id': self.id})
-        return self.metadata.bills(extra_spec,
-            sort=[('updated_at', pymongo.DESCENDING)], *args, **kwargs)
+        if 'sort' not in kwargs:
+            kwargs.update(sort=[('updated_at', pymongo.DESCENDING)])
+        return self.metadata.bills(extra_spec, *args, **kwargs)
 
     def primary_sponsored_bills(self):
         return self.metadata.bills({'sponsors.type': 'primary',
