@@ -1,7 +1,7 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from billy.web.public.views import (VotesList, FeedsList,
+from billy.web.public.views import (VotesList, NewsList,
     BillsBySubject, SponsoredBillsList, BillsIntroducedUpper,
     BillsIntroducedLower, BillsPassedUpper, BillsPassedLower,
     StateBills, FilterBills, EventsList,)
@@ -84,7 +84,7 @@ urlpatterns = patterns('billy.web.public.views',
         BillsPassedLower.as_view(), name='bills_passed_lower'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/rss/$',
-        BillsPassedLowerFeed(), name='bills_passed_lower_rss/'),
+        BillsPassedLowerFeed(), name='bills_passed_lower_rss'),
 
 
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
@@ -99,20 +99,20 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/',
         'event', name='event'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills/', StateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
 
-    url(r'^(?P<abbr>[a-z]{2})/filter_bills', FilterBills.as_view(), name='filter_bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/filter$', FilterBills.as_view(), name='filter_bills'),
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
         'vote', name='vote'),
 
 
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/$',
-        FeedsList.as_view(), name='feeds_list'),
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/$',
+        NewsList.as_view(), name='news_list'),
 
-    url(r'^(?P<abbr>[a-z]{2})/feeds_list/(?P<collection_name>\w+)/(?P<id>\w+)/rss/$',
-        NewsListFeed(), name='feeds_list_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/rss/$',
+        NewsListFeed(), name='news_list_rss'),
 )
 
 urlpatterns += patterns('',

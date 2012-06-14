@@ -13,8 +13,10 @@ def take(n, iterable):
     return list(itertools.islice(iterable, n))
 
 # get db connection
-db = Connection(host=billy_settings.MONGO_HOST, port=billy_settings.MONGO_PORT)
-db = getattr(db, billy_settings.MONGO_DATABASE)
+connection = Connection(host=billy_settings.MONGO_HOST,
+                        port=billy_settings.MONGO_PORT)
+db = getattr(connection, billy_settings.MONGO_DATABASE)
+feeds_db = connection.newsblogs
 
 # configure logging (FIXME)
 DEBUG = 1  # django_settings.DEBUG
