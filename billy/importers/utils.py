@@ -133,7 +133,9 @@ def compare_committee(ctty1, ctty2):
         c2 = ctty2.replace(old, new)
         c1 = _cleanup(c1)
         c2 = _cleanup(c2)
-        return c1 == c2
+        if c1 == c2:
+            return True
+    return False
 
 
 def update(old, new, collection, sneaky_update_filter=None):
