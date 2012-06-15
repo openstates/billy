@@ -12,7 +12,8 @@ from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
-                                   next_big_id, oysterize, fix_bill_id)
+                                   next_big_id, oysterize, fix_bill_id,
+                                   compare_committee)
 
 import pymongo
 
@@ -161,7 +162,10 @@ def import_bill(data, votes, categorizer):
             cid = get_committee_id(level, abbr, data['chamber'],
                                    action['committee'])
             action['_scraped_committee_name'] = action['committee']
-            action['committee'] = cid
+            if cid is not None:
+                action['committee'] = cid
+            else:
+                del(action['committee'])
 
         adate = action['date']
 
@@ -372,6 +376,17 @@ def get_committee_id(level, abbr, chamber, committee):
     if comms and comms.count() == 1:
         __committee_ids[key] = comms[0]['_id']
     else:
-        __committee_ids[key] = None
+        # last resort :(
+        comm_id = get_committee_id_alt(level, abbr, committee, chamber)
+        __committee_ids[key] = comm_id
 
     return __committee_ids[key]
+
+def get_committee_id_alt(level, abbr, name, chamber):
+    spec = {"state": abbr, "chamber": chamber}
+    comms = db.committees.find(spec)
+    for committee in comms:
+        c = committee['committee']
+        if compare_committee(name, c):
+            return committee['_id']
+    return None

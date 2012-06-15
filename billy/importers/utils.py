@@ -124,9 +124,18 @@ def compare_committee(ctty1, ctty2):
             obj = re.sub(junk, " ", obj).strip()
         obj = re.sub("\s+", " ", obj)
         return obj
-    ctty1 = _cleanup(ctty1)
-    ctty2 = _cleanup(ctty2)
-    return ctty1 == ctty2
+    check_both = [
+        ( "", "" ),
+        ( "&", "and" )
+    ]
+    for old, new in check_both:
+        c1 = ctty1.replace(old, new)
+        c2 = ctty2.replace(old, new)
+        c1 = _cleanup(c1)
+        c2 = _cleanup(c2)
+        if c1 == c2:
+            return True
+    return False
 
 
 def update(old, new, collection, sneaky_update_filter=None):
