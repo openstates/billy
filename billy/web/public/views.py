@@ -389,7 +389,6 @@ class FilterBills(RelatedBillsList):
         search_text = form.data.get('search_text')
 
         if settings.ENABLE_ELASTICSEARCH:
-
             kwargs = {}
 
             state = self.kwargs['abbr']
@@ -844,22 +843,6 @@ def committee(request, abbr, committee_id):
         context_instance=RequestContext(request, default_context))
 
 
-def bills(request, abbr):
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    return render_to_response(
-        template_name=templatename('bills'),
-        dictionary=dict(
-            committee=committee,
-            abbr=abbr,
-            metadata=meta,
-            statenav_active='bills'),
-        context_instance=RequestContext(request, default_context))
-
-
 def bill(request, abbr, bill_id):
 
     bill = db.bills.find_one({'_id': bill_id})
@@ -871,7 +854,6 @@ def bill(request, abbr, bill_id):
         template_name=templatename('bill'),
         dictionary=dict(
             vote_preview_row_template=templatename('vote_preview_row'),
-            bill_progress_template=templatename('bill_progress_template'),
             abbr=abbr,
             metadata=Metadata.get_object(abbr),
             bill=bill,
