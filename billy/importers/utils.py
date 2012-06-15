@@ -72,12 +72,13 @@ def insert_with_id(obj):
     else:
         raise ValueError("unknown _type for object")
 
-    level = obj[obj['level']].upper()
+    # get abbr from level
+    abbr = obj[obj['level']].upper()
 
-    id_reg = re.compile('^%s%s' % (level, id_type))
+    id_reg = re.compile('^%s%s' % (abbr, id_type))
 
     # Find the next available _id and insert
-    id_prefix = '%s%s' % (level, id_type)
+    id_prefix = '%s%s' % (abbr, id_type)
     cursor = collection.find({'_id': id_reg}).sort('_id', -1).limit(1)
 
     try:

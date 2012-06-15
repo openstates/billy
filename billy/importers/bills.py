@@ -211,10 +211,12 @@ def import_bill(data, votes, categorizer):
     data['alternate_titles'] = list(alt_titles)
 
     if not bill:
-        insert_with_id(data)
+        bill_id = insert_with_id(data)
+        denormalize_votes(data, bill_id)
         return "insert"
     else:
         update(bill, data, db.bills)
+        denormalize_votes(data, bill['_id'])
         return "update"
 
 
@@ -279,6 +281,19 @@ def populate_current_fields(level, abbr):
             bill['_current_term'] = False
 
         db.bills.save(bill, safe=True)
+
+
+def denormalize_votes(bill, bill_id):
+    # remove all existing votes for this bill
+    db.votes.remove({'bill_id': bill_id}, safe=True)
+
+    # add votes
+    for vote in bill.get('votes', []):
+        vote = vote.copy()
+        vote['_id'] = vote['vote_id']
+        vote['bill_id'] = bill_id
+        vote['state'] = bill['state']
+        db.votes.save(vote, safe=True)
 
 
 class GenericIDMatcher(object):
