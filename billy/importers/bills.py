@@ -284,7 +284,7 @@ def denormalize_votes(bill, bill_id):
     db.votes.remove({'bill_id': bill_id}, safe=True)
 
     # add votes
-    for vote in bill['votes']:
+    for vote in bill.get('votes', []):
         vote = vote.copy()
         vote['_id'] = vote['vote_id']
         vote['bill_id'] = bill_id
