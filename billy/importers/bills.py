@@ -383,7 +383,7 @@ def get_committee_id(level, abbr, chamber, committee):
     return __committee_ids[key]
 
 def get_committee_id_alt(level, abbr, name, chamber):
-    spec = {"state": abbr}
+    spec = {"state": abbr, "chamber": chamber}
     comms = db.committees.find(spec)
     for committee in comms:
         c = committee['committee']
