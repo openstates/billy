@@ -553,22 +553,6 @@ def state_selection(request):
     return redirect('state', abbr=abbr)
 
 
-def chamber_select(request, collection_name):
-    '''Handle the chamber selection radio button, i.e.,
-    in legislator and committees views.
-    '''
-    if collection_name not in ('legislators', 'committees'):
-        raise Http404
-    form = ChamberSelectForm(request.GET)
-    chamber = form.data['chamber']
-    abbr = form.data['abbr']
-
-    if chamber != 'both':
-        return redirect('%s_chamber' % collection_name, abbr, chamber)
-    else:
-        return redirect(collection_name, abbr)
-
-
 def find_your_legislator(request):
     # check if lat/lon are set
     # if leg_search is set, they most likely don't have ECMAScript enabled.
