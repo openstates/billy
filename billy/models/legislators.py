@@ -63,33 +63,19 @@ class OldRolesManager(DictManager):
         return dict(sessions)
 
 
-class LegislatorVotesManager(AttrManager):
-    methods_only = True
-
-    def __iter__(self):
-        _id = self.document['_id']
-        for bill in self.document.metadata.bills(
-            {'$or': [{'votes.yes_votes.leg_id': _id},
-                     {'votes.no_votes.leg_id': _id},
-                     {'votes.other_votes.leg_id': _id}]}
-        ):
-            for vote in bill.votes_manager:
-                for k in ['yes_votes', 'no_votes', 'other_votes']:
-                    for voter in vote[k]:
-                        if voter['leg_id'] == _id:
-                            yield vote
-
-
 class Legislator(Document):
 
     collection = db.legislators
-    istance_key = 'leg_id'
+    instance_key = 'leg_id'
 
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
     roles_manager = RolesManager()
     old_roles_manager = OldRolesManager()
-    votes_manager = LegislatorVotesManager()
+    votes_manager = RelatedDocuments('BillVote', model_keys=[
+        'yes_votes.leg_id',
+        'no_votes.leg_id',
+        'other_votes.leg_id'])
 
     @property
     def metadata(self):
