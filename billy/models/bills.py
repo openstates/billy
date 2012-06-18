@@ -120,6 +120,8 @@ class BillVote(Document):
 
     collection = db.votes
 
+    bill = RelatedDocument('Bill')
+
     def _total_votes(self):
         return self['yes_count'] + self['no_count'] + self['other_count']
 
@@ -172,27 +174,23 @@ class BillVote(Document):
         return self.bill['votes'].index(self)
 
     def get_absolute_url(self):
-        text = '%s--%s' % (self.bill['bill_id'],
-                               self['date'].strftime('%m-%d-%Y'))
+        bill = self.bill()
+        text = '%s--%s' % (bill['_id'],
+                           self['date'].strftime('%m-%d-%Y'))
         slug = slugify(text)
-        url = urlresolvers.reverse('vote',
-            args=[self.bill['state'], self.bill['_id'], self.index()])
+        url = urlresolvers.reverse(
+            'vote', args=[bill['state'], self['_id']])
         return '%s%s/' % (url, slug)
-
-
-class BillVotesManager(RelatedDocuments):
-
-    def has_votes(self):
-        return bool(self.bill['votes'])
 
 
 class Bill(Document):
 
     collection = db.bills
+    instance_key = 'bill_id'
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
-    votes_manager = BillVotesManager('BillVote', model_keys=['bill_id'])
+    votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'])
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 

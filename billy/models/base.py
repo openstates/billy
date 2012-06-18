@@ -1,3 +1,4 @@
+import re
 import copy
 import logging
 import itertools
@@ -56,8 +57,8 @@ class ModelBase(type):
 
 class ReadOnlyAttribute(object):
     ''' ensure that an attribute can't be set '''
-    def __set__(self, instance, value):
-        raise AttributeError
+    # def __set__(self, instance, value):
+    #     raise AttributeError
 
 
 class ModelDefinitionError(Exception):
@@ -244,6 +245,13 @@ class RelatedDocument(ReadOnlyAttribute):
         return self
 
     def __call__(self, extra_spec={}, *args, **kwargs):
+
+        # Only do this lookup once for each instance.
+        try:
+            return self._obj
+        except AttributeError:
+            pass
+
         spec = {'_id': self.model_id}
         spec.update(extra_spec)
         if DEBUG:
@@ -257,6 +265,8 @@ class RelatedDocument(ReadOnlyAttribute):
                                           (spec, args, kwargs))
 
             raise DoesNotExist(msg)
+
+        self._obj = obj
         return obj
 
 
@@ -325,4 +335,14 @@ class RelatedDocuments(ReadOnlyAttribute):
             msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
                                                  'find', spec, args, kwargs)
             logger.debug(msg)
+
         return self.model.collection.find(spec, *args, **kwargs)
+
+    @property
+    def _related_name(self):
+        related_name = getattr(self.instance, 'related_name', None)
+        if related_name is not None:
+            return related_name
+        related_name = self.model.__name__.lower()
+        related_name = re.sub(r'manager$', '', related_name)
+        return related_name

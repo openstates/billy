@@ -100,14 +100,14 @@ class Legislator(Document):
 
     def votes_5_sorted(self):
         _id = self['_id']
-        votes = self.votes_manager
-        votes = take(5, sorted(votes, key=operator.itemgetter('date')))
+        votes = self.votes_manager(limit=5,
+            sort=[('date', pymongo.DESCENDING)])
+        vote_value = 'other'
         for i, vote in enumerate(votes):
-            for vote_value in ['yes', 'no', 'other']:
-                id_getter = operator.itemgetter('leg_id')
-                ids = map(id_getter, vote['%s_votes' % vote_value])
-                if _id in ids:
-                    break
+            if _id in vote['yes_votes']:
+                vote_value = 'yes'
+            if _id in vote['no_votes']:
+                vote_value = 'no'
             yield i, vote_value, vote
 
     def bio_blurb(self):
