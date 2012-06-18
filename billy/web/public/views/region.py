@@ -131,3 +131,13 @@ def search(request, scope):
                                   'Recent Action', 'Votes'),
              show_chamber_column=True,
              statenav_active=None))
+
+
+def not_active_yet(request, args, kwargs):
+    try:
+        metadata = Metadata.get_object(kwargs['abbr'])
+    except DoesNotExist:
+        raise Http404
+
+    return render(request, templatename('state_not_active_yet'),
+                  dict(metadata=metadata, statenav_active=None))

@@ -1,23 +1,18 @@
-import re
-import json
 import urllib
-import urllib2
 import operator
 
-from operator import itemgetter
 from itertools import islice
 
 import pymongo
 
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import Http404, HttpResponse
+from django.http import Http404
 
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 
-from ..forms import (ChamberSelectForm, get_filter_bills_form)
-from ..viewdata import overview, funfacts
+from ..forms import get_filter_bills_form
 
 from .utils import templatename, RelatedObjectsList, ListViewBase
 
@@ -35,21 +30,6 @@ def sort_by_district(obj):
         return int(matchobj.group())
     else:
         return obj['district']
-
-
-def state_not_active_yet(request, args, kwargs):
-    try:
-        metadata = Metadata.get_object(kwargs['abbr'])
-    except DoesNotExist:
-        raise Http404
-
-    return render_to_response(
-        template_name=templatename('state_not_active_yet'),
-        dictionary=dict(
-            metadata=metadata,
-            statenav_active=None),
-        context_instance=RequestContext(request, default_context))
-
 
 class VotesList(RelatedObjectsList):
 
@@ -98,22 +78,6 @@ class RelatedBillsList(RelatedObjectsList):
     rowtemplate_name = templatename('bills_list_row')
     column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
     statenav_active = 'bills'
-
-
-# class StateBills(RelatedBillsList):
-#     template_name = templatename('state_bills_list')
-#     collection_name = 'metadata'
-#     query_attr = 'bills'
-#     description_template = templatename(
-#         'list_descriptions/bills')
-
-#     def get_context_data(self, *args, **kwargs):
-#         context = super(RelatedObjectsList, self).get_context_data(
-#                                                         *args, **kwargs)
-#         metadata = context['metadata']
-#         FilterBillsForm = get_filter_bills_form(metadata)
-#         context.update(form=FilterBillsForm())
-#         return context
 
 
 class StateBills(RelatedBillsList):
