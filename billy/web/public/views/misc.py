@@ -4,14 +4,18 @@
 import json
 import random
 import urllib2
+import operator
+
+import pymongo
 
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse
 
 from billy.models import db, Metadata
+from billy.models.pagination import IteratorPaginator, CursorPaginator
 from billy.conf import settings as billy_settings
-from .utils import templatename
+from .utils import templatename, RelatedObjectsList
 
 
 def homepage(request):
@@ -95,3 +99,35 @@ def get_district(request, district_id):
     )
     f = urllib2.urlopen(qurl)
     return HttpResponse(f)
+
+
+### Votes & News don't really fit here or anywhere
+
+
+class VotesList(RelatedObjectsList):
+
+    list_item_context_name = 'vote'
+    sort_func = operator.itemgetter('date')
+    sort_reversed = True
+    paginator = IteratorPaginator
+    query_attr = 'votes_manager'
+    use_table = True
+    rowtemplate_name = templatename('votes_list_row')
+    column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
+                      'No', 'Other', 'Motion')
+    statenav_active = 'bills'
+    description_template = templatename('list_descriptions/votes')
+
+
+class NewsList(RelatedObjectsList):
+
+    list_item_context_name = 'entry'
+    # sort_func = operator.itemgetter('published_parsed')
+    # sort_reversed = True
+    mongo_sort = [('updated_at', pymongo.DESCENDING)]
+    paginator = CursorPaginator
+    query_attr = 'feed_entries'
+    rowtemplate_name = templatename('feed_entry')
+    column_headers = ('feeds',)
+    statenav_active = 'bills'
+    description_template = templatename('list_descriptions/news')

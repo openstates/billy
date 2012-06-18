@@ -3,7 +3,7 @@ from decimal import Decimal
 from django import template
 from django.utils.html import strip_tags
 
-from billy.web.public.views import templatename
+from billy.web.public.views.utils import templatename
 from billy.web.public.forms import get_state_select_form
 
 

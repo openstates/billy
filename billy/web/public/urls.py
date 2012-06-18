@@ -1,15 +1,14 @@
 from django.conf.urls.defaults import patterns, url
 
-from billy.web.public.views import (VotesList, NewsList,
-    BillsBySubject, SponsoredBillsList, BillsPassedUpper, BillsPassedLower,
-    StateBills)
-
+from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
+from billy.web.public.views.bills import (BillsBySubject, SponsoredBillsList,
+                                          StateBills)
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
     BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed, BillsBySubjectFeed,
-    StateEventsFeed,)
+    StateEventsFeed)
 
 # misc. views
 urlpatterns = patterns('billy.web.public.views.misc',
@@ -19,6 +18,17 @@ urlpatterns = patterns('billy.web.public.views.misc',
         name='find_your_legislator'),
     url(r'^get_district/(?P<district_id>.+)/$', 'get_district',
         name='get_district'),
+
+    # votes & news
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/$',
+        NewsList.as_view(), name='news_list'),
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/rss/$',
+        NewsListFeed(), name='news_list_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/$',
+        VotesList.as_view(), name='votes_list'),
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/rss/$',
+        VotesListFeed(), name='votes_list_rss'),
+
 )
 
 # region/state specific
@@ -59,56 +69,22 @@ urlpatterns += patterns('billy.web.public.views.legislators',
         SponsoredBillsFeed(), name='legislator_sponsored_bills_rss'),
 )
 
-urlpatterns += patterns('billy.web.public.views',
-
-
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/$',
-        VotesList.as_view(), name='votes_list'),
-
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/rss/$',
-        VotesListFeed(), name='votes_list_rss'),
-
-
-    # bills ---------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/$',
-        BillsBySubject.as_view(), name='bills_by_subject'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/rss/$',
-        BillsBySubjectFeed(), name='bills_by_subject_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/rss/$',
-        BillsIntroducedUpperFeed(), name='bills_introduced_upper_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/rss/$',
-        BillsIntroducedLowerFeed(), name='bills_introduced_lower_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/passed/upper/$',
-        BillsPassedUpper.as_view(), name='bills_passed_upper'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/passed/upper/rss/$',
-        BillsPassedUpperFeed(), name='bills_passed_upper_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/$',
-        BillsPassedLower.as_view(), name='bills_passed_lower'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/rss/$',
-        BillsPassedLowerFeed(), name='bills_passed_lower_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
-        'bill', name='bill'),
-
+urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
-
-
-    #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
         'vote', name='vote'),
-
-
-    #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/$',
-        NewsList.as_view(), name='news_list'),
-
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/rss/$',
-        NewsListFeed(), name='news_list_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/$',
+        BillsBySubject.as_view(), name='bills_by_subject'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/rss/$',
+        BillsBySubjectFeed(), name='bills_by_subject_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/rss/$',
+        BillsIntroducedUpperFeed(), name='bills_introduced_upper_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/rss/$',
+        BillsIntroducedLowerFeed(), name='bills_introduced_lower_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/upper/rss/$',
+        BillsPassedUpperFeed(), name='bills_passed_upper_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/passed/lower/rss/$',
+        BillsPassedLowerFeed(), name='bills_passed_lower_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
+        'bill', name='bill'),
 )
