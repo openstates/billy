@@ -77,6 +77,10 @@ class _vDatetime(icalendar.vDatetime):
         self.params = icalendar.Parameters(dict(value='DATETIME'))
 
 
+def clean_for_ical(obj):
+    if not obj is None:
+        return obj.encode("ascii", "replace")
+
 class ICalendarEmitter(Emitter):
     """
     Emits an iCalendar-format calendar from a list of 'event' objects.
@@ -121,46 +125,48 @@ class ICalendarEmitter(Emitter):
                     comm = "%s %s" % (chamber_name(obj[obj['level']], chamber),
                                       comm)
 
-                summary = "%s Committee Meeting" % comm
+                summary = "%s Committee Meeting" % clean_for_ical(comm)
             elif obj['type'] == 'bill:action':
-                summary = obj['description']
+                summary = clean_for_ical(obj['description'])
             else:
                 continue
 
-            event.add('summary', summary)
-            event.add('location', obj.get('location', 'Unknown'))
-            event['uid'] = obj['_id']
+            event.add('summary', clean_for_ical(summary))
+            event.add('location', clean_for_ical(
+                obj.get('location', 'Unknown')))
+            event['uid'] = clean_for_ical(obj['_id'])
 
-            status = obj.get('status')
+            status = clean_for_ical(obj.get('status'))
             if status:
-                event.add('status', status.upper())
+                event.add('status', clean_for_ical(status.upper()))
 
-            notes = obj.get('notes')
+            notes = clean_for_ical(obj.get('notes'))
             if notes:
-                event.add('description', notes)
+                event.add('description', clean_for_ical(notes))
 
-            link = obj.get('link')
+            link = clean_for_ical(obj.get('link'))
             if link:
-                event.add('attach', link)
+                event.add('attach', clean_for_ical(link))
 
             for participant in obj['participants']:
                 addr = icalendar.vCalAddress('MAILTO:noone@example.com')
 
-                chamber = participant.get('chamber')
+                chamber = clean_for_ical(participant.get('chamber'))
                 if chamber:
-                    cn = chamber_name(obj[obj['level']], chamber) + " "
+                    cn = clean_for_ical(
+                        chamber_name(obj[obj['level']], chamber) + " ")
                 else:
                     cn = ""
 
-                cn += participant['participant']
+                cn += clean_for_ical(participant['participant'])
 
                 if participant['type'] == 'committee':
                     cn += ' Committee'
 
                 addr.params['cn'] = icalendar.vText(cn)
                 #addr.params['ROLE'] = icalendar.vText('COMMITTEE')
-                event.add('attendee', addr, encode=0)
-                event['organizer'] = addr
+                event.add('attendee', clean_for_ical(addr))
+                event['organizer'] = clean_for_ical(addr)
 
             cal.add_component(event)
 

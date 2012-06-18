@@ -4,6 +4,12 @@ billy changelog
 1.3-dev
 -------
 **in development**
+    * first truly usable version of billy.web.public
+    * remove retire & prune_committees commands in favor of admin
+    * refactor of billy.models
+    * db: denormalize votes into own collection on bill import
+    * db: add action_dates to bills
+    * bugfix for billy-update deleting metadata without --scrape
 
 1.2.0
 -----
