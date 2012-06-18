@@ -24,7 +24,7 @@ def state_selection(request):
     abbr = form.data.get('abbr')
     if not abbr or len(abbr) != 2:
         raise Http404
-    return redirect(request, 'state', abbr=abbr)
+    return redirect('state', abbr=abbr)
 
 
 def state(request, abbr):
