@@ -511,12 +511,6 @@ class BillsPassedLower(RelatedBillsList):
         'list_descriptions/bills_passed_lower')
 
 
-def state_nav(active_collection):
-    'Produce data for the state navigation bar.'
-    collections = ('legislators', 'bills', 'committees',)
-    return ((active_collection == c, c) for c in collections)
-
-
 def state(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     try:
@@ -529,14 +523,24 @@ def state(request, abbr):
         overview.chamber(abbr, 'lower'),
         ]
 
+    # session listing
+    sessions = []
+    for t in meta['terms']:
+        for s in t['sessions']:
+            sobj = {'id': s,
+                    'name': meta['session_details'][s]['display_name']}
+            sobj['bill_count'] = (report['bills']['sessions'][s]['upper_count']
+                              + report['bills']['sessions'][s]['lower_count'])
+            sessions.append(sobj)
+
     return render_to_response(
         template_name=templatename('state'),
         dictionary=dict(abbr=abbr,
             metadata=meta,
-            sessions=reversed(list(report.session_link_data())),
+            sessions=sessions,
             chambers=chambers,
             recent_actions=overview.recent_actions(abbr),
-            statenav_active=None,
+            statenav_active='home',
             funfact=funfacts.get_funfact(abbr)),
         context_instance=RequestContext(request, default_context))
 
