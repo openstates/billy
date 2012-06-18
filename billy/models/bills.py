@@ -116,7 +116,9 @@ class ActionsManager(ListManager):
         return self._bytype_latest('bill:introduced', {'actor': 'lower'})
 
 
-class BillVote(DictManager):
+class BillVote(Document):
+
+    collection = db.votes
 
     def _total_votes(self):
         return self['yes_count'] + self['no_count'] + self['other_count']
@@ -178,12 +180,10 @@ class BillVote(DictManager):
         return '%s%s/' % (url, slug)
 
 
-class BillVotesManager(ListManager):
-        wrapper = BillVote
-        keyname = 'votes'
+class BillVotesManager(RelatedDocuments):
 
-        def has_votes(self):
-            return bool(self.bill['votes'])
+    def has_votes(self):
+        return bool(self.bill['votes'])
 
 
 class Bill(Document):
@@ -192,7 +192,7 @@ class Bill(Document):
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
-    votes_manager = BillVotesManager()
+    votes_manager = BillVotesManager('BillVote', model_keys=['bill_id'])
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
