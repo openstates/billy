@@ -4,7 +4,6 @@ import urllib
 import urllib2
 import operator
 
-from random import choice
 from operator import itemgetter
 from itertools import repeat, islice
 
@@ -14,17 +13,15 @@ from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic import TemplateView
 from django.http import Http404, HttpResponse
-from django.conf import settings
 
 import billy.models
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
-from billy.conf import settings as billy_settings
-from billy.importers.utils import fix_bill_id
 
-from .forms import (get_state_select_form, ChamberSelectForm,
-                    get_filter_bills_form)
-from .viewdata import overview, funfacts
+from ..forms import (ChamberSelectForm, get_filter_bills_form)
+from ..viewdata import overview, funfacts
+
+from .utils import templatename
 
 
 default_context = dict(base_template='billy/web/public/base.html')
@@ -36,9 +33,6 @@ def nth(iterable, n, default=None):
 
 repeat1 = repeat(1)
 
-
-def templatename(name):
-    return 'billy/web/public/%s.html' % name
 
 
 def sort_by_district(obj):
@@ -61,101 +55,6 @@ def state_not_active_yet(request, args, kwargs):
             metadata=metadata,
             statenav_active=None),
         context_instance=RequestContext(request, default_context))
-
-
-def homepage(request):
-    return render_to_response(
-        template_name=templatename('homepage'),
-        dictionary=dict(
-            active_states=map(Metadata.get_object, settings.ACTIVE_STATES),
-            statenav_active=None),
-        context_instance=RequestContext(request, default_context))
-
-
-def search(request, scope):
-
-    abbr = None
-    search_text = request.GET['q']
-    scope_name = None
-    spec = {}
-
-    # If the input looks like a bill id, try to fetch the bill.
-    if re.search(r'\d', search_text):
-        bill_id = fix_bill_id(search_text).upper()
-        collection = db.bills
-        spec.update(bill_id=bill_id)
-
-        if scope != 'all':
-            abbr = scope
-            spec.update(state=abbr)
-
-        docs = collection.find(spec, limit=10)
-
-        # If there were actual results, return a bill_id result view.
-        if 0 < docs.count():
-
-            def sortkey(doc):
-                session = doc['session']
-                years = re.findall(r'\d{4}', session)
-                try:
-                    return int(years[-1])
-                except IndexError:
-                    return session
-
-            docs = sorted(docs, key=operator.itemgetter('session'),
-                          reverse=True)
-
-            return render_to_response(
-                template_name=templatename('search_results_bill_id'),
-                dictionary=dict(
-                    bill_id=bill_id,
-                    abbr=abbr,
-                    rowtemplate_name=templatename('bills_list_row_with_session'),
-                    object_list=IteratorPaginator(docs),
-                    use_table=True,
-                    column_headers=('Title', 'Session', 'Introduced',
-                                    'Recent Action', 'Votes'),
-                    statenav_active=None),
-                context_instance=RequestContext(request, default_context))
-
-    # The input didn't contain \d{4}, so assuming it's not a bill,
-    # search bill title and legislator names.
-    if settings.ENABLE_ELASTICSEARCH:
-        kwargs = {}
-        if scope != 'all':
-            kwargs['state'] = scope
-        bill_results = Bill.search(search_text, **kwargs)
-    else:
-        spec = {'title': {'$regex': search_text, '$options': 'i'}}
-        if scope != 'all':
-            abbr = scope
-            scope_name = Metadata.get_object(abbr)['name']
-            spec.update(state=abbr)
-        bill_results = db.bills.find(spec)
-
-    # See if any legislator names match.
-    spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'all':
-        abbr = scope
-        scope_name = Metadata.get_object(abbr)['name']
-        spec.update(state=abbr)
-    legislator_results = db.legislators.find(spec)
-
-    return render_to_response(
-        template_name=templatename('search_results_bills_legislators'),
-        dictionary=dict(
-            search_text=search_text,
-            abbr=abbr,
-            scope_name=scope_name,
-            bills_list=bill_results.limit(5),
-            more_bills_available=(5 < bill_results.count()),
-            legislators_list=legislator_results.limit(5),
-            more_legislators_available=(5 < legislator_results.count()),
-            bill_column_headers=('State', 'Title', 'Session', 'Introduced',
-                                 'Recent Action', 'Votes'),
-            show_chamber_column=True,
-            statenav_active=None),
-            context_instance=RequestContext(request, default_context))
 
 
 class ListViewBase(TemplateView):
@@ -498,111 +397,6 @@ class BillsPassedLower(RelatedBillsList):
         'list_descriptions/bills_passed_lower')
 
 
-def state(request, abbr):
-    report = db.reports.find_one({'_id': abbr})
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    chambers = [
-        overview.chamber(abbr, 'upper'),
-        overview.chamber(abbr, 'lower'),
-        ]
-
-    # session listing
-    sessions = meta.sessions()
-    for s in sessions:
-        s['bill_count'] = (report['bills']['sessions'][s['id']]['upper_count']
-                       + report['bills']['sessions'][s['id']]['lower_count'])
-
-    return render_to_response(
-        template_name=templatename('state'),
-        dictionary=dict(abbr=abbr,
-            metadata=meta,
-            sessions=sessions,
-            chambers=chambers,
-            recent_actions=overview.recent_actions(abbr),
-            statenav_active='home',
-            funfact=funfacts.get_funfact(abbr)),
-        context_instance=RequestContext(request, default_context))
-
-
-def state_selection(request):
-    '''Handle submission of the state selection form
-    in the base template.
-    '''
-    form = get_state_select_form(request.GET)
-    abbr = form.data.get('abbr')
-    if not abbr or len(abbr) != 2:
-        raise Http404
-    return redirect('state', abbr=abbr)
-
-
-def find_your_legislator(request):
-    # check if lat/lon are set
-    # if leg_search is set, they most likely don't have ECMAScript enabled.
-    # XXX: fallback behavior here for alpha.
-
-    get = request.GET
-    kwargs = {}
-    template = 'find_your_legislator'
-
-    addrs = [
-        "50 Rice Street, Wellesley, MA",
-        "20700 North Park Blvd. University Heights, Ohio",
-        "1818 N Street NW, Washington, DC"
-    ]
-
-    kwargs['address'] = choice(addrs)
-
-    if "q" in get:
-        kwargs['request'] = get['q']
-
-    if "lat" in get and "lon" in get:
-        # We've got a passed lat/lon. Let's build off it.
-        lat = get['lat']
-        lon = get['lon']
-
-        kwargs['lat'] = lat
-        kwargs['lon'] = lon
-        kwargs['located'] = True
-
-        qurl = "%slegislators/geo/?long=%s&lat=%s&apikey=%s" % (
-            billy_settings.API_BASE_URL,
-            lon,
-            lat,
-            billy_settings.SUNLIGHT_API_KEY
-        )
-        f = urllib2.urlopen(qurl)
-
-        if "boundary" in get:
-            legs = json.load(f)
-            to_search = []
-            for leg in legs:
-                to_search.append(leg['boundary_id'])
-            borders = set(to_search)
-            ret = {}
-            for border in borders:
-                qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
-                    billy_settings.API_BASE_URL,
-                    border,
-                    billy_settings.SUNLIGHT_API_KEY
-                )
-                f = urllib2.urlopen(qurl)
-                resp = json.load(f)
-                ret[border] = resp
-            return HttpResponse(json.dumps(ret))
-
-        kwargs['legislators'] = json.load(f)
-        template = 'find_your_legislator_table'
-
-    return render_to_response(
-        template_name=templatename(template),
-        dictionary=kwargs,
-        context_instance=RequestContext(request, default_context))
-
-
 def legislators(request, abbr):
 
     try:
@@ -670,16 +464,6 @@ def legislators(request, abbr):
             ),
         context_instance=RequestContext(request, default_context))
 
-
-def get_district(request, district_id):
-    qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
-        billy_settings.API_BASE_URL,
-        district_id,
-        billy_settings.SUNLIGHT_API_KEY
-    )
-    print qurl
-    f = urllib2.urlopen(qurl)
-    return HttpResponse(f)
 
 
 def legislator(request, abbr, _id, slug):
