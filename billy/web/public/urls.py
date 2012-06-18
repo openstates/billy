@@ -94,7 +94,7 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
 
     #------------------------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
+    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<_id>\w+)/',
         'vote', name='vote'),
 
 
