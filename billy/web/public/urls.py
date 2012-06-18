@@ -42,9 +42,6 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]+)/$',
         'legislator', name='legislator'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators/inactive/(?P<id>\w+)/$',
-        'legislator_inactive', name='legislator_inactive'),
-
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/committees/$',
         'committees', name='committees'),
