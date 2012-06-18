@@ -489,27 +489,6 @@ class BillsBySubject(BillsList):
         return paginator
 
 
-class BillsIntroducedUpper(RelatedBillsList):
-    collection_name = 'metadata'
-    query_attr = 'bills_introduced_upper'
-    description_template = templatename(
-        'list_descriptions/bills_introduced_upper')
-
-
-class BillsIntroducedLower(RelatedBillsList):
-    collection_name = 'metadata'
-    query_attr = 'bills_introduced_lower'
-    description_template = templatename(
-        'list_descriptions/bills_introduced_lower')
-
-
-class BillsIntroducedUpper(RelatedBillsList):
-    collection_name = 'metadata'
-    query_attr = 'bills_introduced_upper'
-    description_template = templatename(
-        'list_descriptions/bills_introduced_upper')
-
-
 class BillsPassedUpper(RelatedBillsList):
     collection_name = 'metadata'
     query_attr = 'bills_passed_upper'
