@@ -5,23 +5,21 @@ import urllib2
 import operator
 
 from operator import itemgetter
-from itertools import repeat, islice
+from itertools import islice
 
 import pymongo
 
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
-from django.views.generic import TemplateView
 from django.http import Http404, HttpResponse
 
-import billy.models
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
 
 from ..forms import (ChamberSelectForm, get_filter_bills_form)
 from ..viewdata import overview, funfacts
 
-from .utils import templatename
+from .utils import templatename, RelatedObjectsList, ListViewBase
 
 
 default_context = dict(base_template='billy/web/public/base.html')
@@ -29,10 +27,6 @@ default_context = dict(base_template='billy/web/public/base.html')
 def nth(iterable, n, default=None):
     "Returns the nth item or a default value"
     return next(islice(iterable, n, None), default)
-
-
-repeat1 = repeat(1)
-
 
 
 def sort_by_district(obj):
@@ -57,117 +51,6 @@ def state_not_active_yet(request, args, kwargs):
         context_instance=RequestContext(request, default_context))
 
 
-class ListViewBase(TemplateView):
-    '''Base class for VoteList, FeedList, etc.
-
-    I tried using generic views for bill lists to cut down the
-    boilerplate, but I'm not sure that has succeeded. One downside
-    has been the reuse of what attempts to be a generic sort of
-    template but in reality has become an awful monster template,
-    named "object_list.html." Possibly more tuning needed.
-    '''
-
-    template_name = templatename('object_list')
-
-    def get_context_data(self, *args, **kwargs):
-        super(ListViewBase, self).get_context_data(*args, **kwargs)
-        context = {}
-        context.update(**default_context)
-        context.update(column_headers=self.column_headers,
-                       rowtemplate_name=self.rowtemplate_name,
-                       description_template=self.description_template,
-                       object_list=self.get_queryset(),
-                       statenav_active=self.statenav_active,
-                       abbr=self.kwargs['abbr'],
-                       metadata=Metadata.get_object(self.kwargs['abbr']),
-                       url=self.request.path,
-                       use_table=getattr(self, 'use_table', False))
-
-        # Include the kwargs to enable references to url paramaters.
-        context.update(**kwargs)
-        return context
-
-
-class RelatedObjectsList(ListViewBase):
-    '''A generic list view where there's a main object, like a
-    legislator or state, and we want to display all of the main
-    object's "sponsored_bills" or "introduced_bills." This class
-    basically hacks the ListViewBase to add the main object into
-    the template context so it can be used to generate a phrase like
-    'showing all sponsored bills for Wesley Chesebro.'
-    '''
-    def get_context_data(self, *args, **kwargs):
-        context = super(RelatedObjectsList, self).get_context_data(
-                                                        *args, **kwargs)
-        context.update(obj=self.get_object())
-        return context
-
-    def get_object(self):
-        try:
-            return self.obj
-        except AttributeError:
-            pass
-
-        try:
-            collection_name = self.kwargs['collection_name']
-        except KeyError:
-            collection_name = self.collection_name
-
-        collection_name = {
-            'state': 'metadata',
-            }.get(collection_name, collection_name)
-
-        try:
-            _id = self.kwargs['_id']
-        except KeyError:
-            _id = self.kwargs['abbr']
-
-        # Get the related object.
-        collection = getattr(billy.models.db, collection_name)
-
-        try:
-            obj = collection.find_one(_id)
-        except DoesNotExist:
-            raise Http404
-
-        self.obj = obj
-        return obj
-
-    def get_queryset(self):
-
-        get = self.request.GET.get
-
-        # Setup the paginator arguments.
-        show_per_page = getattr(self, 'show_per_page', 10)
-        show_per_page = int(get('show_per_page', show_per_page))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
-
-        objects = getattr(self.get_object(), self.query_attr)
-
-        # The related collection of objects might be a
-        # function or a manager class.
-        # This is to work around a pain-point in models.py.
-        if callable(objects):
-            kwargs = {}
-            sort = getattr(self, 'sort', None)
-            if sort is not None:
-                kwargs['sort'] = sort
-            objects = objects(**kwargs)
-
-        # Apply any specified sorting.
-        sort_func = getattr(self, 'sort_func', None)
-        sort_reversed = bool(getattr(self, 'sort_reversed', None))
-        if sort_func:
-            objects = sorted(objects, key=sort_func,
-                             reverse=sort_reversed)
-
-        paginator = self.paginator(objects, page=page,
-                                   show_per_page=show_per_page)
-        return paginator
-
-
 class VotesList(RelatedObjectsList):
 
     list_item_context_name = 'vote'
@@ -181,20 +64,6 @@ class VotesList(RelatedObjectsList):
                       'No', 'Other', 'Motion')
     statenav_active = 'bills'
     description_template = templatename('list_descriptions/votes')
-
-
-class EventsList(RelatedObjectsList):
-    collection_name = 'metadata'
-    sort_func = operator.itemgetter('when')
-    sort_reversed = True
-    paginator = IteratorPaginator
-    query_attr = 'events'
-    use_table = True
-    rowtemplate_name = templatename('events_list_row')
-    column_headers = ('Date', 'Description',)
-    show_per_page = 15
-    statenav_active = 'events'
-    description_template = templatename('list_descriptions/events')
 
 
 class NewsList(RelatedObjectsList):
@@ -397,221 +266,7 @@ class BillsPassedLower(RelatedBillsList):
         'list_descriptions/bills_passed_lower')
 
 
-def legislators(request, abbr):
-
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    spec = {'active': True}
-
-    chamber = request.GET.get('chamber', 'both')
-    if chamber in ('upper', 'lower'):
-        spec['chamber'] = chamber
-    else:
-        chamber = 'both'
-
-    fields = ['leg_id', 'full_name', 'photo_url', 'district', 'party',
-              'first_name', 'last_name', 'chamber', 'state', 'last_name']
-    fields = dict(zip(fields, repeat1))
-
-    sort_key = 'district'
-    sort_order = 1
-
-    if request.GET:
-        sort_key = request.GET.get('key', sort_key)
-        sort_order = int(request.GET.get('order', sort_order))
-
-    legislators = meta.legislators(extra_spec=spec, fields=fields)
-
-    def sort_by_district(obj):
-        matchobj = re.search(r'\d+', obj['district'])
-        if matchobj:
-            return int(matchobj.group())
-        else:
-            return obj['district']
-
-    legislators = sorted(legislators, key=sort_by_district)
-
-    if sort_key != 'district':
-        legislators = sorted(legislators, key=itemgetter(sort_key),
-                             reverse=(sort_order == -1))
-    else:
-        legislators = sorted(legislators, key=sort_by_district,
-                             reverse=bool(0 > sort_order))
-
-    sort_order = {1: -1, -1: 1}[sort_order]
-    legislators = list(legislators)
-    initial = {'key': 'district', 'chamber': chamber}
-    chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
-
-    return render_to_response(
-        template_name=templatename('legislators'),
-        dictionary=dict(
-            metadata=meta,
-            chamber=chamber,
-            chamber_select_form=chamber_select_form,
-            chamber_select_template=templatename('chamber_select_form'),
-            chamber_select_collection='legislators',
-            show_chamber_column=True,
-            abbr=abbr,
-            legislators=legislators,
-            sort_order=sort_order,
-            sort_key=sort_key,
-            legislator_table=templatename('legislator_table'),
-            statenav_active='legislators',
-            ),
-        context_instance=RequestContext(request, default_context))
-
-
-
-def legislator(request, abbr, _id, slug):
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-    legislator = db.legislators.find_one({'_id': _id})
-    if legislator is None:
-        raise Http404('No legislator was found with led_id = %r' % _id)
-
-    if not legislator['active']:
-        return legislator_inactive(request, abbr, legislator)
-
-    qurl = "%sdistricts/%s/?apikey=%s" % (
-        billy_settings.API_BASE_URL,
-        abbr,
-        billy_settings.SUNLIGHT_API_KEY
-    )
-    f = urllib2.urlopen(qurl)
-    districts = json.load(f)
-    district_id = None
-    for district in districts:
-        legs = [x['leg_id'] for x in district['legislators']]
-        if legislator['leg_id'] in legs:
-            district_id = district['boundary_id']
-            break
-
-    # Note to self: Slow query
-    sponsored_bills = legislator.sponsored_bills(
-        limit=5, sort=[('actions.1.date', pymongo.DESCENDING)])
-
-    # Note to self: Another slow query
-    legislator_votes = legislator.votes_5_sorted()
-    has_votes = bool(legislator_votes)
-    return render_to_response(
-        template_name=templatename('legislator'),
-        dictionary=dict(
-            feed_entry_template=templatename('feed_entry'),
-            vote_preview_row_template=templatename('vote_preview_row'),
-            roles=legislator.roles_manager,
-            abbr=abbr,
-            district_id=district_id,
-            metadata=meta,
-            legislator=legislator,
-            sources=legislator['sources'],
-            sponsored_bills=sponsored_bills,
-            legislator_votes=legislator_votes,
-            has_votes=has_votes,
-            statenav_active='legislators'),
-        context_instance=RequestContext(request, default_context))
-
-
-def legislator_inactive(request, abbr, legislator):
-    '''
-    '''
-    # Note to self: Slow query
-    sponsored_bills = legislator.sponsored_bills(
-        limit=5, sort=[('actions.1.date', pymongo.DESCENDING)])
-
-    # Note to self: Another slow query
-    legislator_votes = legislator.votes_5_sorted()
-    has_votes = bool(legislator_votes)
-    return render_to_response(
-        template_name=templatename('legislator_inactive'),
-        dictionary=dict(
-            feed_entry_template=templatename('feed_entry'),
-            vote_preview_row_template=templatename('vote_preview_row'),
-            old_roles=legislator.old_roles_manager,
-            abbr=abbr,
-            metadata=legislator.metadata,
-            legislator=legislator,
-            sources=legislator['sources'],
-            sponsored_bills=sponsored_bills,
-            legislator_votes=legislator_votes,
-            has_votes=has_votes,
-            statenav_active='legislators'),
-        context_instance=RequestContext(request, default_context))
-
-
 #----------------------------------------------------------------------------
-def committees(request, abbr):
-    try:
-        meta = Metadata.get_object(abbr)
-    except DoesNotExist:
-        raise Http404
-
-    chamber = request.GET.get('chamber', 'both')
-    if chamber in ('upper', 'lower'):
-        chamber_name = meta['%s_chamber_name' % chamber]
-        spec = {'chamber': chamber}
-        show_chamber_column = False
-    else:
-        chamber = 'both'
-        spec = {}
-        show_chamber_column = True
-        chamber_name = ''
-
-    fields = ['committee', 'subcommittee', 'members', 'state',
-              'chamber']
-    fields = dict(zip(fields, repeat1))
-
-    sort_key = 'committee'
-    sort_order = 1
-
-    sort_key = request.GET.get('key', 'committee')
-    sort_order = int(request.GET.get('order', 1))
-
-    committees = meta.committees(spec, fields=fields,
-                                  sort=[(sort_key, sort_order)])
-
-    sort_order = {1: -1, -1: 1}[sort_order]
-
-    chamber_select_form = ChamberSelectForm.unbound(meta, chamber)
-
-    return render_to_response(
-        template_name=templatename('committees'),
-        dictionary=dict(
-            chamber=chamber,
-            committees=committees,
-            abbr=abbr,
-            metadata=meta,
-            chamber_name=chamber_name,
-            chamber_select_form=chamber_select_form,
-            chamber_select_template=templatename('chamber_select_form'),
-            committees_table_template=templatename('committees_table'),
-            chamber_select_collection='committees',
-            show_chamber_column=show_chamber_column,
-            sort_order=sort_order,
-            statenav_active='committees'),
-        context_instance=RequestContext(request, default_context))
-
-
-def committee(request, abbr, committee_id):
-
-    committee = db.committees.find_one({'_id': committee_id})
-    if committee is None:
-        raise Http404
-
-    return render_to_response(
-        template_name=templatename('committee'),
-        dictionary=dict(
-            committee=committee,
-            abbr=abbr,
-            metadata=Metadata.get_object(abbr),
-            sources=committee['sources'],
-            statenav_active='committees'),
-        context_instance=RequestContext(request, default_context))
 
 
 def bill(request, abbr, bill_id):
@@ -632,37 +287,6 @@ def bill(request, abbr, bill_id):
             sources=bill['sources'],
             statenav_active='bills'),
         context_instance=RequestContext(request, default_context))
-
-
-def event(request, abbr, event_id):
-
-    event = db.events.find_one({'_id': event_id})
-    if event is None:
-        raise Http404
-
-    return render_to_response(
-        template_name=templatename('event'),
-        dictionary=dict(
-            abbr=abbr,
-            metadata=Metadata.get_object(abbr),
-            event=event,
-            sources=event['sources'],
-            statenav_active='events'),
-        context_instance=RequestContext(request, default_context))
-
-
-# def events(request, abbr):
-
-#     events = db.events.find({'state': abbr})
-
-#     return render_to_response(
-#         template_name=templatename('events'),
-#         dictionary=dict(
-#             abbr=abbr,
-#             metadata=Metadata.get_object(abbr),
-#             events=events,
-#             statenav_active='events'),
-#         context_instance=RequestContext(request, default_context))
 
 
 def vote(request, abbr, bill_id, vote_index):

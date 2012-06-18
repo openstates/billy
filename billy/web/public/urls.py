@@ -2,13 +2,16 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views import (VotesList, NewsList,
     BillsBySubject, SponsoredBillsList, BillsPassedUpper, BillsPassedLower,
-    StateBills, EventsList,)
+    StateBills)
+
+from billy.web.public.views.events import EventsList
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
     BillsIntroducedUpperFeed, VotesListFeed, NewsListFeed, BillsBySubjectFeed,
     StateEventsFeed,)
 
+# misc. views
 urlpatterns = patterns('billy.web.public.views.misc',
     url(r'^$', 'homepage', name='homepage'),
     url(r'^downloads/$', 'downloads', name='downloads'),
@@ -18,21 +21,46 @@ urlpatterns = patterns('billy.web.public.views.misc',
         name='get_district'),
 )
 
+# region/state specific
 urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<scope>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection', name='state_selection'),
 )
 
-urlpatterns += patterns('billy.web.public.views',
+# events
+urlpatterns += patterns('billy.web.public.views.events',
+    url(r'^(?P<abbr>[a-z]{2})/events/$', EventsList.as_view(),
+        name='events'),
+    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', StateEventsFeed(),
+        name='events_rss'),
+    url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/', 'event',
+        name='event'),
+)
 
+# committees
+urlpatterns += patterns('billy.web.public.views.committees',
+    url(r'^(?P<abbr>[a-z]{2})/committees/$', 'committees', name='committees'),
+    url(r'^(?P<abbr>[a-z]{2})/committees/(?P<committee_id>[A-Z]{3}\d+)/',
+        'committee', name='committee'),
+)
 
-    #- legislators-----------------------------------------------------------
+# legislators
+urlpatterns += patterns('billy.web.public.views.legislators',
+
+    url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
+        name='legislators'),
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]+)/$',
+        'legislator', name='legislator'),
     url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/$',
         SponsoredBillsList.as_view(), name='legislator_sponsored_bills'),
 
     url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/rss/$',
         SponsoredBillsFeed(), name='legislator_sponsored_bills_rss'),
+)
+
+urlpatterns += patterns('billy.web.public.views',
+
 
     url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/$',
         VotesList.as_view(), name='votes_list'),
@@ -40,18 +68,6 @@ urlpatterns += patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/rss/$',
         VotesListFeed(), name='votes_list_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators/$',
-        'legislators', name='legislators'),
-
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]+)/$',
-        'legislator', name='legislator'),
-
-    #  committees ----------------------------------------------------------
-    url(r'^(?P<abbr>[a-z]{2})/committees/$',
-        'committees', name='committees'),
-
-    url(r'^(?P<abbr>[a-z]{2})/committees/(?P<committee_id>[A-Z]{3}\d+)/',
-        'committee', name='committee'),
 
     # bills ---------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/$',
@@ -82,15 +98,6 @@ urlpatterns += patterns('billy.web.public.views',
         'bill', name='bill'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
-
-    # events ----------------------------
-    url(r'^(?P<abbr>[a-z]{2})/events/$',
-        EventsList.as_view(), name='events'),
-
-    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', StateEventsFeed(), name='events_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/',
-        'event', name='event'),
 
 
     #------------------------------------------------------------------------
