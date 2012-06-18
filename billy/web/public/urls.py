@@ -1,8 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views import (VotesList, NewsList,
-    BillsBySubject, SponsoredBillsList, BillsIntroducedUpper,
-    BillsIntroducedLower, BillsPassedUpper, BillsPassedLower,
+    BillsBySubject, SponsoredBillsList, BillsPassedUpper, BillsPassedLower,
     StateBills, EventsList,)
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
@@ -54,14 +53,8 @@ urlpatterns = patterns('billy.web.public.views',
     url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/rss/$',
         BillsBySubjectFeed(), name='bills_by_subject_rss'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/$',
-        BillsIntroducedUpper.as_view(), name='bills_introduced_upper'),
-
     url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/rss/$',
         BillsIntroducedUpperFeed(), name='bills_introduced_upper_rss'),
-
-    url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/$',
-        BillsIntroducedLower.as_view(), name='bills_introduced_lower'),
 
     url(r'^(?P<abbr>[a-z]{2})/bills/introduced/lower/rss/$',
         BillsIntroducedLowerFeed(), name='bills_introduced_lower_rss'),
