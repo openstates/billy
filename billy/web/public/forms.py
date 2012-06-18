@@ -73,6 +73,14 @@ def get_filter_bills_form(metadata):
                     widget=forms.CheckboxSelectMultiple(),
                     required=False)
 
+        status = forms.ChoiceField(
+                    choices=(
+                        ('', ''),
+                        ('passed_lower', 'Passed ' + metadata['lower_chamber_name']),
+                        ('passed_upper', 'Passed ' + metadata['upper_chamber_name']),
+                        ('signed', 'Signed'),
+                    ), required=False)
+
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 
         subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
