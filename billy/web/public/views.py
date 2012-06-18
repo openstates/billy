@@ -336,23 +336,23 @@ class RelatedBillsList(RelatedObjectsList):
     statenav_active = 'bills'
 
 
+# class StateBills(RelatedBillsList):
+#     template_name = templatename('state_bills_list')
+#     collection_name = 'metadata'
+#     query_attr = 'bills'
+#     description_template = templatename(
+#         'list_descriptions/bills')
+
+#     def get_context_data(self, *args, **kwargs):
+#         context = super(RelatedObjectsList, self).get_context_data(
+#                                                         *args, **kwargs)
+#         metadata = context['metadata']
+#         FilterBillsForm = get_filter_bills_form(metadata)
+#         context.update(form=FilterBillsForm())
+#         return context
+
+
 class StateBills(RelatedBillsList):
-    template_name = templatename('state_bills_list')
-    collection_name = 'metadata'
-    query_attr = 'bills'
-    description_template = templatename(
-        'list_descriptions/bills')
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(RelatedObjectsList, self).get_context_data(
-                                                        *args, **kwargs)
-        metadata = context['metadata']
-        FilterBillsForm = get_filter_bills_form(metadata)
-        context.update(form=FilterBillsForm())
-        return context
-
-
-class FilterBills(RelatedBillsList):
     template_name = templatename('state_bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
@@ -365,20 +365,41 @@ class FilterBills(RelatedBillsList):
                                                         *args, **kwargs)
         metadata = context['metadata']
         FilterBillsForm = get_filter_bills_form(metadata)
-        form = FilterBillsForm(self.request.GET)
-        search_text = form.data.get('search_text')
-        context.update(search_text=search_text)
-        context.update(form=FilterBillsForm(self.request.GET))
 
-        full_url = self.request.path + '?'
-        full_url += urllib.urlencode(self.request.GET)
-        context.update(full_url=full_url)
+        if self.request.GET:
+            form = FilterBillsForm(self.request.GET)
+            search_text = form.data.get('search_text')
+            context.update(search_text=search_text)
+            context.update(form=FilterBillsForm(self.request.GET))
+
+            full_url = self.request.path + '?'
+            full_url += urllib.urlencode(self.request.GET)
+            context.update(full_url=full_url)
+        else:
+            context.update(form=FilterBillsForm())
+
         return context
 
     def get_queryset(self):
 
         metadata = Metadata.get_object(self.kwargs['abbr'])
         FilterBillsForm = get_filter_bills_form(metadata)
+
+        # Setup the paginator.
+        get = self.request.GET.get
+        show_per_page = getattr(self, 'show_per_page', 10)
+        show_per_page = int(get('show_per_page', show_per_page))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
+
+        if not self.request.GET:
+            spec = {}
+            cursor = db.bills.find(spec)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
+            return self.paginator(cursor, page=page,
+                      show_per_page=show_per_page)
+
         form = FilterBillsForm(self.request.GET)
         params = [
             'chamber',
@@ -426,16 +447,8 @@ class FilterBills(RelatedBillsList):
             cursor = db.bills.find(spec)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
 
-        # Setup the paginator.
-        get = self.request.GET.get
-        show_per_page = getattr(self, 'show_per_page', 10)
-        show_per_page = int(get('show_per_page', show_per_page))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
-
         return self.paginator(cursor, page=page,
-                              show_per_page=self.show_per_page)
+                              show_per_page=show_per_page)
 
 
 class SponsoredBillsList(RelatedBillsList):

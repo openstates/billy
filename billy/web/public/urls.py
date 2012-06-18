@@ -3,7 +3,7 @@ from django.conf.urls.defaults import patterns, url
 from billy.web.public.views import (VotesList, NewsList,
     BillsBySubject, SponsoredBillsList, BillsIntroducedUpper,
     BillsIntroducedLower, BillsPassedUpper, BillsPassedLower,
-    StateBills, FilterBills, EventsList,)
+    StateBills, EventsList,)
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
@@ -93,7 +93,6 @@ urlpatterns = patterns('billy.web.public.views',
 
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
 
-    url(r'^(?P<abbr>[a-z]{2})/bills/filter$', FilterBills.as_view(), name='filter_bills'),
     #------------------------------------------------------------------------
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<bill_id>\w+)/(?P<vote_index>\w+)/',
         'vote', name='vote'),
