@@ -37,10 +37,6 @@ def nth(iterable, n, default=None):
 repeat1 = repeat(1)
 
 
-def include_fields(*field_names):
-    return zip(field_names, repeat1)
-
-
 def templatename(name):
     return 'billy/web/public/%s.html' % name
 
@@ -357,8 +353,7 @@ class StateBills(RelatedBillsList):
     collection_name = 'metadata'
     query_attr = 'bills'
     paginator = CursorPaginator
-    description_template = templatename(
-        'list_descriptions/bills')
+    description_template = templatename('list_descriptions/bills')
 
     def get_context_data(self, *args, **kwargs):
         context = super(RelatedObjectsList, self).get_context_data(
@@ -412,9 +407,9 @@ class StateBills(RelatedBillsList):
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
 
-            state = self.kwargs['abbr']
-            if state != 'us':
-                kwargs['state'] = state
+            abbr = self.kwargs['abbr']
+            if abbr != 'us':
+                kwargs['state'] = abbr
 
             chamber = form.data.get('chamber')
             if chamber:
