@@ -106,6 +106,15 @@ class Metadata(Document):
         session = self['terms'][-1]['sessions'][-1]
         return session
 
+    def sessions(self):
+        sessions = []
+        for t in self['terms']:
+            for s in t['sessions']:
+                sobj = {'id': s,
+                        'name': self['session_details'][s]['display_name']}
+                sessions.append(sobj)
+        return sessions
+
     def display_name(self):
         return self['name']
 
