@@ -529,11 +529,21 @@ def state(request, abbr):
         overview.chamber(abbr, 'lower'),
         ]
 
+    # session listing
+    sessions = []
+    for t in meta['terms']:
+        for s in t['sessions']:
+            sobj = {'id': s,
+                    'name': meta['session_details'][s]['display_name']}
+            sobj['bill_count'] = (report['bills']['sessions'][s]['upper_count']
+                              + report['bills']['sessions'][s]['lower_count'])
+            sessions.append(sobj)
+
     return render_to_response(
         template_name=templatename('state'),
         dictionary=dict(abbr=abbr,
             metadata=meta,
-            sessions=reversed(list(report.session_link_data())),
+            sessions=sessions,
             chambers=chambers,
             recent_actions=overview.recent_actions(abbr),
             statenav_active=None,
