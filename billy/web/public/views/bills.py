@@ -63,6 +63,10 @@ class StateBills(RelatedBillsList):
         else:
             context.update(form=FilterBillsForm())
 
+        params = dict(self.request.GET.items())
+        if 'page' in params:
+            del params['page']
+        context.update(get_params=urllib.urlencode(params))
         return context
 
     def get_queryset(self):
@@ -191,13 +195,14 @@ def bill(request, abbr, bill_id):
              statenav_active='bills'))
 
 
-def vote(request, abbr, bill_id, vote_index):
-    bill = db.bills.find_one({'_id': bill_id})
-    if bill is None:
+def vote(request, abbr, _id):
+    vote = db.votes.find_one(_id)
+    if vote is None:
         raise Http404
+    bill = vote.bill()
 
     return render(request, templatename('vote'),
                   dict(abbr=abbr, metadata=Metadata.get_object(abbr),
                        bill=bill,
-                       vote=nth(bill.votes_manager, int(vote_index)),
+                       vote=vote,
                        statenav_active='bills'))
