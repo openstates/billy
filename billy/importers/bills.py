@@ -132,6 +132,10 @@ def import_bill(data, votes, categorizer):
         id = get_legislator_id(abbr, data['session'], None,
                                sponsor['name'])
         sponsor['leg_id'] = id
+        if id is None:
+            cid = get_committee_id(level, abbr, data['chamber'], sponsor['name'])
+            if not cid is None:
+                sponsor['committee_id'] = cid
 
     # process votes
     for vote in data['votes']:
@@ -384,9 +388,13 @@ def get_committee_id(level, abbr, chamber, committee):
 
 def get_committee_id_alt(level, abbr, name, chamber):
     spec = {"state": abbr, "chamber": chamber}
+    if chamber is None:
+        del(spec['chamber'])
     comms = db.committees.find(spec)
     for committee in comms:
         c = committee['committee']
         if compare_committee(name, c):
             return committee['_id']
+    if not chamber is None:
+        return get_committee_id_alt(level, abbr, name, None)
     return None
