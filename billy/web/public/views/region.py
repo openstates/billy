@@ -68,7 +68,6 @@ def search(request, scope):
 
         if scope != 'all':
             abbr = scope
-            spec.update(state=abbr)
 
         docs = collection.find(spec, limit=10)
 
@@ -89,7 +88,7 @@ def search(request, scope):
             return render(request, templatename('search_results_bill_id'),
               dict(bill_id=bill_id,
                abbr=abbr,
-               rowtemplate_name=templatename('bills_list_row_with_session'),
+               rowtemplate_name=templatename('bills_list_row_with_state_and_session'),
                object_list=IteratorPaginator(docs),
                use_table=True,
                column_headers=('Title', 'Session', 'Introduced',
@@ -128,7 +127,8 @@ def search(request, scope):
              legislators_list=legislator_results.limit(5),
              more_legislators_available=(5 < legislator_results.count()),
              bill_column_headers=('State', 'Title', 'Session', 'Introduced',
-                                  'Recent Action', 'Votes'),
+                                  'Recent Action',),
+             rowtemplate_name=templatename('bills_list_row_with_state_and_session'),
              show_chamber_column=True,
              statenav_active=None))
 
