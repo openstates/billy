@@ -25,17 +25,25 @@ class ListViewBase(TemplateView):
     '''
 
     template_name = templatename('object_list')
+    statenav_active = None
 
     def get_context_data(self, *args, **kwargs):
         super(ListViewBase, self).get_context_data(*args, **kwargs)
+
+        abbr = self.kwargs['abbr']
+        if abbr == 'all':
+            metadata = None
+        else:
+            metadata = Metadata.get_object(abbr)
+
         context = {}
         context.update(column_headers=self.column_headers,
                        rowtemplate_name=self.rowtemplate_name,
                        description_template=self.description_template,
                        object_list=self.get_queryset(),
                        statenav_active=self.statenav_active,
-                       abbr=self.kwargs['abbr'],
-                       metadata=Metadata.get_object(self.kwargs['abbr']),
+                       abbr=abbr,
+                       metadata=metadata,
                        url=self.request.path,
                        use_table=getattr(self, 'use_table', False))
 
@@ -107,7 +115,7 @@ class RelatedObjectsList(ListViewBase):
         # This is to work around a pain-point in models.py.
         if callable(objects):
             kwargs = {}
-            sort = getattr(self, 'sort', None)
+            sort = getattr(self, 'mongo_sort', None)
             if sort is not None:
                 kwargs['sort'] = sort
             objects = objects(**kwargs)
