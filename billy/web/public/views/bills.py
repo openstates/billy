@@ -34,7 +34,7 @@ class RelatedBillsList(RelatedObjectsList):
     list_item_context_name = 'bill'
     paginator = CursorPaginator
     rowtemplate_name = templatename('bills_list_row')
-    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
+    column_headers = ('Title', 'Introduced', 'Recent Action',)
     statenav_active = 'bills'
 
 
@@ -56,13 +56,10 @@ class StateBills(RelatedBillsList):
             search_text = form.data.get('search_text')
             context.update(search_text=search_text)
             context.update(form=FilterBillsForm(self.request.GET))
-
-            full_url = self.request.path + '?'
-            full_url += urllib.urlencode(self.request.GET)
-            context.update(full_url=full_url)
         else:
             context.update(form=FilterBillsForm())
 
+        # Add the correct path to paginated links.
         params = dict(self.request.GET.items())
         if 'page' in params:
             del params['page']
@@ -70,7 +67,6 @@ class StateBills(RelatedBillsList):
         return context
 
     def get_queryset(self):
-
         metadata = Metadata.get_object(self.kwargs['abbr'])
         FilterBillsForm = get_filter_bills_form(metadata)
 
@@ -101,10 +97,6 @@ class StateBills(RelatedBillsList):
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
 
-            abbr = self.kwargs['abbr']
-            if abbr != 'us':
-                kwargs['state'] = abbr
-
             chamber = form.data.get('chamber')
             if chamber:
                 kwargs['chamber'] = chamber
@@ -124,6 +116,98 @@ class StateBills(RelatedBillsList):
             # Elastic search not enabled--query mongo normally.
             # Mainly here for local work on search views.
             spec = {'state': metadata['abbreviation']}
+            for key in params:
+                val = form.data.get(key)
+                if val:
+                    key = key.replace('__', '.')
+                    spec[key] = val
+
+            if search_text:
+                spec['title'] = {'$regex': search_text, '$options': 'i'}
+
+            cursor = db.bills.find(spec)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
+
+        return self.paginator(cursor, page=page,
+                              show_per_page=show_per_page)
+
+
+class AllStateBills(ListViewBase):
+    template_name = templatename('state_bills_list')
+    rowtemplate_name = templatename('bills_list_row_with_state_and_session')
+    paginator = CursorPaginator
+    description_template = templatename('list_descriptions/all_state_bills')
+    column_headers = ('State', 'Session', 'Title', 'Introduced',
+                      'Recent Action')
+    use_table = True
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(AllStateBills, self).get_context_data(
+                                                        *args, **kwargs)
+        metadata = context['metadata']
+        FilterBillsForm = get_filter_bills_form(metadata)
+
+        if self.request.GET:
+            form = FilterBillsForm(self.request.GET)
+            search_text = form.data.get('search_text')
+            context.update(search_text=search_text)
+            context.update(form=FilterBillsForm(self.request.GET))
+        else:
+            context.update(form=FilterBillsForm())
+
+        # Add the correct path to paginated links.
+        params = dict(self.request.GET.items())
+        if 'page' in params:
+            del params['page']
+        context.update(get_params=urllib.urlencode(params))
+        context.update(abbr='all')
+        return context
+
+    def get_queryset(self):
+
+        FilterBillsForm = get_filter_bills_form(None)
+
+        # Setup the paginator.
+        get = self.request.GET.get
+        show_per_page = getattr(self, 'show_per_page', 10)
+        show_per_page = int(get('show_per_page', show_per_page))
+        page = int(get('page', 1))
+        if 100 < show_per_page:
+            show_per_page = 100
+
+        if not self.request.GET:
+            spec = {}
+            cursor = db.bills.find(spec)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
+            return self.paginator(cursor, page=page,
+                      show_per_page=show_per_page)
+
+        form = FilterBillsForm(self.request.GET)
+        params = [
+            'chamber',
+            'subjects',
+            'sponsor__leg_id',
+            'actions__type',
+            'type']
+        search_text = form.data.get('search_text')
+
+        if settings.ENABLE_ELASTICSEARCH:
+            kwargs = {}
+
+            chamber = form.data.get('chamber')
+            if chamber:
+                kwargs['chamber'] = chamber
+
+            subjects = form.data.getlist('subjects')
+            if subjects:
+                kwargs['subjects'] = {'$all': filter(None, subjects)}
+
+            cursor = Bill.search(search_text, **kwargs)
+            cursor.sort([('updated_at', pymongo.DESCENDING)])
+
+        else:
+            # Elastic search not enabled--query mongo normally.
+            # Mainly here for local work on search views.
             for key in params:
                 val = form.data.get(key)
                 if val:
@@ -185,12 +269,17 @@ def bill(request, abbr, bill_id):
         raise Http404
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
+    if show_all_sponsors:
+        sponsors = bill.sponsors_manager
+    else:
+        sponsors = bill.sponsors_manager.first_five
     return render(request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
              show_all_sponsors=show_all_sponsors,
+             sponsors=sponsors,
              sources=bill['sources'],
              statenav_active='bills'))
 

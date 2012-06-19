@@ -1,7 +1,7 @@
 import urlparse
 import datetime
 from django.core import urlresolvers
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify, truncatewords
 
 from .base import feeds_db, Document
 from .metadata import Metadata
@@ -23,7 +23,7 @@ class FeedEntry(Document):
                         'B': 'bill'}
         entry = self
 
-        summary = entry['summary']
+        summary = truncatewords(entry['summary'], 50)
         entity_strings = entry['entity_strings']
         entity_ids = entry['entity_ids']
         state = entry['state']

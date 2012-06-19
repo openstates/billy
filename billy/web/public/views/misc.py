@@ -4,7 +4,6 @@
 import json
 import random
 import urllib2
-import operator
 
 import pymongo
 
@@ -13,7 +12,7 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from billy.models import db, Metadata
-from billy.models.pagination import IteratorPaginator, CursorPaginator
+from billy.models.pagination import CursorPaginator
 from billy.conf import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
 
@@ -107,9 +106,8 @@ def get_district(request, district_id):
 class VotesList(RelatedObjectsList):
 
     list_item_context_name = 'vote'
-    sort_func = operator.itemgetter('date')
-    sort_reversed = True
-    paginator = IteratorPaginator
+    mongo_sort = [('date', pymongo.DESCENDING)]
+    paginator = CursorPaginator
     query_attr = 'votes_manager'
     use_table = True
     rowtemplate_name = templatename('votes_list_row')
@@ -122,9 +120,7 @@ class VotesList(RelatedObjectsList):
 class NewsList(RelatedObjectsList):
 
     list_item_context_name = 'entry'
-    # sort_func = operator.itemgetter('published_parsed')
-    # sort_reversed = True
-    mongo_sort = [('updated_at', pymongo.DESCENDING)]
+    mongo_sort = [('published_parsed', pymongo.DESCENDING)]
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
