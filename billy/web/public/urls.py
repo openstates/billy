@@ -87,3 +87,4 @@ urlpatterns += patterns('billy.web.public.views.bills',
         BillsPassedLowerFeed(), name='bills_passed_lower_rss'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<bill_id>\w+)/',
         'bill', name='bill'),
+)
