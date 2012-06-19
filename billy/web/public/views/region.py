@@ -40,7 +40,8 @@ def state(request, abbr):
     # Maybe later, mapreduce instead?
     party_counts = defaultdict(lambda: defaultdict(int))
     for leg in legislators:
-        party_counts[leg['chamber']][leg['party']] += 1
+        if 'chamber' in leg: # if statement to exclude lt. governors
+            party_counts[leg['chamber']][leg['party']] += 1
 
     chambers = []
 
