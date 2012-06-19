@@ -12,7 +12,6 @@ from django.conf import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import IteratorPaginator
 from billy.importers.utils import fix_bill_id
-from ..viewdata import funfacts
 from ..forms import get_state_select_form
 from .utils import templatename
 
@@ -75,19 +74,11 @@ def state(request, abbr):
         s['bill_count'] = (report['bills']['sessions'][s['id']]['upper_count']
                        + report['bills']['sessions'][s['id']]['lower_count'])
 
-    #res = dict(
-    #    passed_upper=f('bill:passed', 'upper'),
-    #    passed_lower=f('bill:passed', 'lower'),
-    #    introduced_upper=f('bill:introduced', 'upper'),
-    #    introduced_lower=f('bill:introduced', 'lower'))
-
     return render(request, templatename('state'),
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,
-    #                   recent_actions=recent_actions,
-                       statenav_active='home',
-                       funfact=funfacts.get_funfact(abbr)))
+                       statenav_active='home'))
 
 
 def search(request, scope):
