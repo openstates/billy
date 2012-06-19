@@ -17,7 +17,7 @@ class LimitStatesMiddleware(object):
 
         # For public views, make sure the state is active.
         if 'abbr' in kw:
-            if kw['abbr'] not in settings.ACTIVE_STATES:
+            if kw['abbr'] not in settings.ACTIVE_STATES + ['all']:
                 return not_active_yet(request, args, kw)
             else:
                 return func(request, *args, **kw)
