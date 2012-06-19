@@ -6,8 +6,6 @@ import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
-from billy.web.public.viewdata import blurbs
-
 from .base import (db, Document, RelatedDocuments, ListManager, DictManager,
                    AttrManager, take)
 from .metadata import Metadata
