@@ -1,10 +1,10 @@
-import operator
 from itertools import islice
+
+import pymongo
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
 from django.utils.html import strip_tags
 from django.template.defaultfilters import truncatewords
-
 
 from billy.models import db
 
@@ -37,7 +37,11 @@ class GenericListFeed(Feed):
     def items(self, obj):
         attr = getattr(obj, self.query_attribute)
         if callable(attr):
-            return attr()
+            kwargs = {'limit': 100}
+            sort = getattr(self, 'sort', None)
+            if sort is not None:
+                kwargs['sort'] = sort
+            return attr(**kwargs)
         else:
             return attr
 
@@ -126,6 +130,7 @@ class BillsBySubjectFeed(BillsFeed):
 class VotesListFeed(GenericListFeed):
     collection_name = 'legislators'
     query_attribute = 'votes_manager'
+    sort = [('date', pymongo.DESCENDING)]
 
     def title(self, obj):
         s = u"OpenStates.org: Votes by {0}."
@@ -138,17 +143,12 @@ class VotesListFeed(GenericListFeed):
         <b>motion:</b> {0}</br>
         <b>bill description:</b> {1}
         '''
-        return template.format(item['motion'], item.bill['title'])
+        return template.format(item['motion'], item.bill()['title'])
 
     def item_title(self, item):
         return '%s (%s)' % (
-            item.bill['bill_id'],
+            item.bill()['bill_id'],
             item['date'].strftime('%B %d, %Y'))
-
-    def items(self, obj):
-        return sorted(obj.votes_manager,
-                      key=operator.itemgetter('date'),
-                      reverse=True)
 
 
 class NewsListFeed(GenericListFeed):
