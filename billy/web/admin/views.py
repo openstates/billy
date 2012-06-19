@@ -841,7 +841,7 @@ def events(request, abbr):
     events = db.events.find({
         'level': level,
         level: abbr.lower()
-    }).limit(20)
+    }, sort=[('when', pymongo.DESCENDING)]).limit(20)
 
     # sort and get rid of old events.
 
