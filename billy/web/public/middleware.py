@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from billy.web.public.views import state_not_active_yet
+from billy.web.public.views.region import not_active_yet
 
 
 class LimitStatesMiddleware(object):
@@ -18,6 +18,6 @@ class LimitStatesMiddleware(object):
         # For public views, make sure the state is active.
         if 'abbr' in kw:
             if kw['abbr'] not in settings.ACTIVE_STATES:
-                return state_not_active_yet(request, args, kw)
+                return not_active_yet(request, args, kw)
             else:
                 return func(request, *args, **kw)
