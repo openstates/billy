@@ -72,8 +72,13 @@ def state(request, abbr):
     # add bill counts to session listing
     sessions = meta.sessions()
     for s in sessions:
-        s['bill_count'] = (report['bills']['sessions'][s['id']]['upper_count']
-                       + report['bills']['sessions'][s['id']]['lower_count'])
+        try:
+            s['bill_count'] = (
+                report['bills']['sessions'][s['id']]['upper_count']
+                + report['bills']['sessions'][s['id']]['lower_count'])
+        except KeyError:
+            # there's a chance that the session had no bills
+            s['bill_count'] = 0
 
     return render(request, templatename('state'),
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
