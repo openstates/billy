@@ -3,6 +3,7 @@
 """
 import re
 import operator
+from collections import defaultdict
 
 from django.shortcuts import redirect, render
 from django.http import Http404
@@ -11,7 +12,7 @@ from django.conf import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import IteratorPaginator
 from billy.importers.utils import fix_bill_id
-from ..viewdata import overview, funfacts
+from ..viewdata import funfacts
 from ..forms import get_state_select_form
 from .utils import templatename
 
@@ -34,10 +35,39 @@ def state(request, abbr):
     except DoesNotExist:
         raise Http404
 
-    chambers = [
-        overview.chamber(abbr, 'upper'),
-        overview.chamber(abbr, 'lower'),
-    ]
+    # count legislators
+    legislators = meta.legislators({'active': True}, {'party': True,
+                                                      'chamber': True})
+    # Maybe later, mapreduce instead?
+    party_counts = defaultdict(lambda: defaultdict(int))
+    for leg in legislators:
+        party_counts[leg['chamber']][leg['party']] += 1
+
+    chambers = []
+
+    for chamber in ('upper', 'lower'):
+        res = {}
+
+        # chamber metadata
+        res['type'] = chamber
+        res['title'] = meta[chamber + '_chamber_title']
+        res['name'] = meta[chamber + '_chamber_name']
+
+        # legislators
+        res['legislators'] = {
+            'count': sum(party_counts[chamber].values()),
+            'party_counts': dict(party_counts[chamber]),
+        }
+
+        # committees
+        res['committees_count'] = meta.committees({'chamber': chamber}).count()
+
+        res['latest_bills'] = meta.bills({'chamber': chamber}).sort([('action_dates.first', -1)]).limit(2)
+        res['passed_bills'] = meta.bills({'chamber': chamber}).sort([('action_dates.passed_' + chamber, -1)]).limit(2)
+
+        chambers.append(res)
+
+    joint_committee_count = meta.committees({'chamber': 'joint'}).count()
 
     # add bill counts to session listing
     sessions = meta.sessions()
@@ -45,10 +75,17 @@ def state(request, abbr):
         s['bill_count'] = (report['bills']['sessions'][s['id']]['upper_count']
                        + report['bills']['sessions'][s['id']]['lower_count'])
 
+    #res = dict(
+    #    passed_upper=f('bill:passed', 'upper'),
+    #    passed_lower=f('bill:passed', 'lower'),
+    #    introduced_upper=f('bill:introduced', 'upper'),
+    #    introduced_lower=f('bill:introduced', 'lower'))
+
     return render(request, templatename('state'),
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
-                       recent_actions=overview.recent_actions(abbr),
+                       joint_committee_count=joint_committee_count,
+    #                   recent_actions=recent_actions,
                        statenav_active='home',
                        funfact=funfacts.get_funfact(abbr)))
 
