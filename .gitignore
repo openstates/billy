@@ -14,3 +14,4 @@ MANIFEST
 *.class
 *.jar
 build
+.tox
