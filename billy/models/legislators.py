@@ -110,9 +110,6 @@ class Legislator(Document):
                 vote_value = 'no'
             yield i, vote_value, vote
 
-    def bio_blurb(self):
-        return blurbs.bio_blurb(self)
-
     def sponsored_bills(self, extra_spec=None, *args, **kwargs):
         if extra_spec is None:
             extra_spec = {}
