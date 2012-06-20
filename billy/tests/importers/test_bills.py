@@ -2,13 +2,16 @@ import copy
 from billy import db
 from billy.importers import bills, names
 
-from nose.tools import with_setup
+from nose.tools import with_setup, assert_equal
+
 
 def setup_func():
     db.metadata.drop()
     db.bills.drop()
     db.legislators.drop()
+    db.document_ids.drop()
     db.vote_ids.drop()
+    db.committees.drop()
     names.__matchers = {}
 
     db.metadata.insert({'level': 'state', '_id': 'ex',
@@ -34,8 +37,22 @@ def test_import_bill():
                          {'name': 'Jackson', 'type': 'cosponsor'}],
             'title': 'main title',
             'alternate_titles': ['second title'],
-            'versions': [{'title': 'old title'},
-                         {'title': 'main title'}],
+            'versions': [{'title': 'old title',
+                          'url': 'http://example.com/old'},
+                         {'title': 'main title',
+                          'url': 'http://example.com/current'},
+                         ],
+            'documents': [{'title': 'fiscal note',
+                          'url': 'http://example.com/fn'}],
+            'actions': [{'action': 'Introduced', 'type': ['bill:introduced'],
+                         'actor': 'upper', 'date': 1331000000},
+                        {'action': 'Referred to committee', 'type': ['committee:referred'],
+                         'actor': 'upper', 'date': 1332000000},
+                        {'action': 'Passed by voice vote', 'type': ['bill:passed'],
+                         'actor': 'upper', 'date': 1333000000},
+                        {'action': 'Signed', 'type': ['governor:signed'],
+                         'actor': 'governor', 'date': 1334000000},
+                       ],
             'votes': [{'motion': 'passage', 'chamber': 'upper', 'date': None,
                        'yes_count': 1, 'no_count': 1, 'other_count': 0,
                        'yes_votes': ['John Adams'],
@@ -64,12 +81,12 @@ def test_import_bill():
 
     # test that basics work
     bill = db.bills.find_one()
+    assert bill['_id'] == 'EXB00000001'
     assert bill['bill_id'] == 'S 1'
     assert bill['chamber'] == 'upper'
     assert bill['scraped_subjects'] == data['subjects']
     assert 'subjects' not in bill
     assert bill['_term'] == 'T1'
-    assert '_keywords' in bill
     assert bill['created_at'] == bill['updated_at']
 
     # assure sponsors are there and that John Adams gets matched
@@ -82,13 +99,26 @@ def test_import_bill():
     assert bill['votes'][0]['yes_votes'][0]['leg_id'] == 'EXL000001'
     assert 'committee_id' in bill['votes'][1]
 
+    # test actions
+    assert bill['action_dates']['first'] == 1331000000
+    assert bill['action_dates']['last'] == 1334000000
+    assert bill['action_dates']['passed_upper'] == 1333000000
+    assert bill['action_dates']['signed'] == 1334000000
+    assert bill['action_dates']['passed_lower'] == None
+
     # titles from alternate_titles & versions (not main title)
     assert 'main title' not in bill['alternate_titles']
     assert 'second title' in bill['alternate_titles']
     assert 'old title' in bill['alternate_titles']
 
+    # test version/document import
+    assert_equal(bill['versions'][0]['doc_id'], 'EXD00000001')
+    assert bill['versions'][1]['doc_id'] == 'EXD00000002'
+    assert bill['documents'][0]['doc_id'] == 'EXD00000003'
+
     # now test an update
-    data['versions'].append({'title': 'third title'})
+    data['versions'].append({'title': 'third title',
+                             'url': 'http://example.com/3rd'})
     data['sponsors'].pop()
     bills.import_bill(data, standalone_votes, None)
 
@@ -102,6 +132,11 @@ def test_import_bill():
     assert len(bill['versions']) == 3
     assert len(bill['sponsors']) == 1
     assert 'third title' in bill['alternate_titles']
+    # check that old doc ids haven't changed, and new one is 4
+    assert bill['versions'][0]['doc_id'] == 'EXD00000001'
+    assert bill['versions'][1]['doc_id'] == 'EXD00000002'
+    assert bill['versions'][2]['doc_id'] == 'EXD00000004'
+    assert bill['documents'][0]['doc_id'] == 'EXD00000003'
 
 
 @with_setup(setup_func)
@@ -117,7 +152,9 @@ def test_import_bill_with_partial_bill_vote_id():
             'title': 'main title',
             'sponsors': [],
             'versions': [],
+            'documents': [],
             'votes': [],
+            'actions': [],
            }
     standalone_votes = {
         # chamber, session, bill id -> vote list
@@ -151,18 +188,6 @@ def test_fix_bill_id():
     assert bills.fix_bill_id('999') == '999'
 
 
-
-def test_bill_keywords():
-    bill = {'title': 'transportation of hazardous materials',
-            'bill_id': 'HB 201',
-            'alternate_titles': [
-                'cephalopod waste disposal',
-                'elimination of marine garbage'
-            ]}
-    expected = set(['201', 'elimin', 'garbag', 'materi', 'wast', 'hazard',
-                    'marin', 'hb', 'dispos', 'cephalopod', 'transport'])
-    assert bills.bill_keywords(bill) == expected
-
 @with_setup(setup_func)
 def test_populate_current_fields():
     db.bills.insert({'level': 'state', 'state': 'ex', 'session': 'S1',
@@ -187,7 +212,7 @@ def test_populate_current_fields():
     assert not b['_current_term']
 
 
-@with_setup(db.vote_ids.drop)
+@with_setup(setup_func)
 def test_votematcher():
     # three votes, two with the same fingerprint
     votes = [{'motion': 'a', 'chamber': 'b', 'date': 'c',
@@ -199,14 +224,14 @@ def test_votematcher():
             ]
     vm = bills.VoteMatcher('ex')
 
-    vm.set_vote_ids(votes)
+    vm.set_ids(votes)
     assert votes[0]['vote_id'] == 'EXV00000001'
     assert votes[1]['vote_id'] == 'EXV00000002'
     assert votes[2]['vote_id'] == 'EXV00000003'
 
     # a brand new matcher has to learn first
     vm = bills.VoteMatcher('ex')
-    vm.learn_vote_ids(votes)
+    vm.learn_ids(votes)
 
     # clear vote_ids & add a new vote
     for v in votes:
@@ -215,14 +240,14 @@ def test_votematcher():
                   'yes_count': 5, 'no_count': 5, 'other_count': 5})
 
     # setting ids now should restore old ids & give the new vote a new id
-    vm.set_vote_ids(votes)
+    vm.set_ids(votes)
     assert votes[0]['vote_id'] == 'EXV00000001'
     assert votes[1]['vote_id'] == 'EXV00000002'
     assert votes[2]['vote_id'] == 'EXV00000004'
     assert votes[3]['vote_id'] == 'EXV00000003'
 
 
-@with_setup(db.committees.drop)
+@with_setup(setup_func)
 def test_get_committee_id():
     # 3 committees with the same name, different levels & chamber
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'upper',

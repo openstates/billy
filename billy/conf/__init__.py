@@ -10,10 +10,6 @@ base_arg_parser = argparse.ArgumentParser(add_help=False)
 global_group = base_arg_parser.add_argument_group('global settings',
                               'settings that apply to all billy commands')
 
-global_group.add_argument('-v', '--verbose', action='count',
-                          dest='verbose', default=False,
-                          help=("be verbose (use multiple times for "
-                                "more debugging information)"))
 global_group.add_argument('--mongo_host', help='mongo host', dest='MONGO_HOST')
 global_group.add_argument('--mongo_port', help='mongo port', dest='MONGO_PORT')
 global_group.add_argument('--mongo_db', help='mongo database name',
@@ -27,11 +23,16 @@ class Settings(object):
         pass
 
     def update(self, module):
-        for setting in dir(module):
-            if setting.isupper():
-                val = getattr(module, setting)
-                if val is not None:
+        if isinstance(module, dict):
+            for setting, val in module.iteritems():
+                if setting.isupper() and val is not None:
                     setattr(self, setting, val)
+        else:
+            for setting in dir(module):
+                if setting.isupper():
+                    val = getattr(module, setting)
+                    if val is not None:
+                        setattr(self, setting, val)
 
 settings = Settings()
 settings.update(default_settings)

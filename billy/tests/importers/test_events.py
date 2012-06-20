@@ -3,9 +3,11 @@ from nose.tools import with_setup
 from billy import db
 from billy.importers import events
 
+
 def setup_func():
     db.events.drop()
     db.event_ids.drop()
+
 
 @with_setup(setup_func)
 def test_import_event_guid():
@@ -31,7 +33,7 @@ def test_import_event_guid():
 @with_setup(setup_func)
 def test_import_event_no_guid():
     event = {'level': 'state', 'state': 'ex', 'description': 'TBD',
-             'when': 'now', 'end': 'never', 'type': 'party',}
+             'when': 'now', 'end': 'never', 'type': 'party'}
 
     # test insert
     events.import_event(event)

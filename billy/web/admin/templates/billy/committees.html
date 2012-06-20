@@ -1,0 +1,124 @@
+{% extends "billy/base.html" %}
+{% load billy_utiltags %}
+{% block title %}{{metadata.name}} committees{% endblock %}
+
+{% block content %}
+
+<form action="{% url delete_committees %}" method="POST">
+
+<div>
+    <h3>{{metadata.upper_chamber_name}} Committees </h3>
+    <table class="table table-bordered table-striped">
+    <tr>
+        <td>Committee</td>
+        <td>Members</td>
+        <td>Sources</td>
+        <td>Delete?</td>
+    </tr>
+    {% for com in upper_coms %}
+    <tr>
+        <td> {{com.committee}}
+             {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
+             {% with com|key:"_id" as comm_id %}<br/>
+             <a href="{% url object_json "committees" comm_id %}"><b>json</b></a>
+             {% endwith %}
+        </td>
+        <td> <ul>
+            {%for m in com.members %}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
+                {{ m.name }}
+                {% if m.leg_id %}</a> {%endif%}
+            ({{m.role}})
+            </li>
+            {% endfor %}
+        </ul> </td>
+        <td> <ul>
+            {%for s in com.sources %}
+                <li><a href="{{s.url}}">{{s.url}}</a></li>
+            {% endfor %}
+        </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+
+<div>
+    <h3>{{metadata.lower_chamber_name}} Committees </h3>
+    <table class="table table-bordered table-striped">
+    <tr>
+        <td>Committee</td>
+        <td>Members</td>
+        <td>Sources</td>
+        <td>Delete?</td>
+    </tr>
+    {% for com in lower_coms %}
+    <tr>
+        <td> {{com.committee}}
+             {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
+             {% with com|key:"_id" as comm_id %}<br/>
+             <a href="{% url object_json "committees" comm_id %}"><b>json</b></a>
+             {% endwith %}
+        </td>
+        <td> <ul>
+            {%for m in com.members %}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
+                {{ m.name }}
+                {% if m.leg_id %}</a> {%endif%}
+            ({{m.role}})
+            </li>
+            {% endfor %}
+        </ul> </td>
+        <td> <ul>
+            {%for s in com.sources %}
+                <li><a href="{{s.url}}">{{s.url}}</a></li>
+            {% endfor %}
+        </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+
+
+<div>
+    <h3>Joint Committees </h3>
+    <table class="table table-bordered table-striped">
+    <tr>
+        <td>Committee</td>
+        <td>Members</td>
+        <td>Sources</td>
+        <td>Delete?</td>
+    </tr>
+    {% for com in joint_coms %}
+    <tr>
+        <td> {{com.committee}}
+             {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
+             {% with com|key:"_id" as comm_id %}<br/>
+             <a href="{% url object_json "committees" comm_id %}"><b>json</b></a>
+             {% endwith %}
+        </td>
+        <td> <ul>
+            {%for m in com.members %}
+            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
+                {{ m.name }}
+                {% if m.leg_id %}</a> {%endif%}
+            ({{m.role}})
+            </li>
+            {% endfor %}
+        </ul> </td>
+        <td> <ul>
+            {%for s in com.sources %}
+                <li><a href="{{s.url}}">{{s.url}}</a></li>
+            {% endfor %}
+        </ul> </td>
+        <td> <input type="checkbox" name="committees" value="{{com|key:"_id"}}"> </td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+
+<button type="submit" class="btn btn-danger">Delete Checked Committees</button>
+</form>
+
+{% endblock %}

@@ -11,7 +11,6 @@ from billy.conf import settings, base_arg_parser
 from billy.commands.dump import APIValidator, api_url
 
 import scrapelib
-import lxml.etree
 import validictory
 
 class ValidateApi(BaseCommand):
@@ -19,36 +18,14 @@ class ValidateApi(BaseCommand):
     help = 'validate data from the API'
 
     def add_args(self):
-        self.add_argument('states', nargs='+', help='states to oysterize')
         self.add_argument('--sunlight_key', dest='SUNLIGHT_SERVICES_KEY',
                   help='the Sunlight API key to use')
         self.add_argument('--schema_dir', default=None,
                   help='directory to use for API schemas (optional)')
 
     def handle(self, args):
-        for state in args.states:
-            validate_api(state, args.schema_dir)
-
-def get_xml_schema():
-    cwd = os.path.split(__file__)[0]
-    schema_dir = os.path.join(cwd, "../schemas/relax/")
-
-    rnc_path = os.path.join(schema_dir, 'api.rnc')
-    rng_path = '/tmp/api_gen.rng'
-
-    subprocess.check_call(["trang", rnc_path, rng_path])
-
-    with open(rng_path) as f:
-        schema = lxml.etree.RelaxNG(lxml.etree.parse(f))
-
-    return schema
-
-
-def validate_xml(url, schema):
-    response = scrapelib.urlopen(url + "&format=xml")
-    xml = lxml.etree.fromstring(response)
-    for child in xml.xpath("/results/*"):
-        schema.assertValid(child)
+        for metadata in db.metadata.find():
+            validate_api(metadata['abbreviation'], args.schema_dir)
 
 
 def get_json_schema(name, schema_dir):
@@ -70,15 +47,12 @@ def get_json_schema(name, schema_dir):
 
 
 def validate_api(abbr, schema_dir=None):
-    xml_schema = get_xml_schema()
-
     metadata_schema = get_json_schema("metadata", schema_dir)
     path = "metadata/%s" % abbr
     url = api_url(path)
     json_response = scrapelib.urlopen(url)
     validictory.validate(json.loads(json_response), metadata_schema,
                          validator_cls=APIValidator)
-    validate_xml(url, xml_schema)
 
     bill_schema = get_json_schema("bill", schema_dir)
 
@@ -96,8 +70,6 @@ def validate_api(abbr, schema_dir=None):
         validictory.validate(json.loads(json_response), bill_schema,
                                  validator_cls=APIValidator)
 
-        validate_xml(url, xml_schema)
-
     legislator_schema = get_json_schema("legislator", schema_dir)
     for legislator in db.legislators.find(spec):
         path = 'legislators/%s' % legislator['_id']
@@ -107,8 +79,6 @@ def validate_api(abbr, schema_dir=None):
         validictory.validate(json.loads(json_response), legislator_schema,
                              validator_cls=APIValidator)
 
-        validate_xml(url, xml_schema)
-
     committee_schema = get_json_schema("committee", schema_dir)
     for committee in db.committees.find(spec):
         path = "committees/%s" % committee['_id']
@@ -117,8 +87,6 @@ def validate_api(abbr, schema_dir=None):
         json_response = scrapelib.urlopen(url)
         validictory.validate(json.loads(json_response), committee_schema,
                              validator_cls=APIValidator)
-
-        validate_xml(url, xml_schema)
 
     event_schema = get_json_schema("event", schema_dir)
     total_events = db.events.find(spec).count()
@@ -132,5 +100,3 @@ def validate_api(abbr, schema_dir=None):
             json_response = scrapelib.urlopen(url)
             validictory.validate(json.loads(json_response), event_schema,
                                  validator_cls=APIValidator)
-
-            validate_xml(url, xml_schema)

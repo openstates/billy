@@ -1,0 +1,66 @@
+{% extends "billy/www/base.html" %}
+
+{% load customtags %}
+{% load url from future %}
+
+{% block title %}{{metadata.name}}{% endblock %}
+
+
+
+{% block sidebar %}{% states_sidebar abbr %}{% endblock %}
+
+
+
+{% block content %}
+<h1>{{metadata.legislature_name}}</h1>
+
+
+<div class="page-header"><h2>Find Your Legislator</h2></div>
+<p></p>
+
+<div class="page-header"><h2>Sessions</h2></div>
+
+<ul>
+{% for session_id, session_name in sessions  %}
+  <li><a href="/{{abbr}}/{{session_id}}/">{{ session_name }}</a></li>
+{% endfor %}
+</ul>
+
+
+
+<div class="page-header"><h2>Chambers</h2></div>
+{% for upperlower, chamber in chambers.items %}
+
+<h3>{{ chamber.name }}</h3>
+<ul>
+
+  <li>{{ chamber.legislators.count }} 
+    <a href="{% url 'legislators' abbr %}">Legislators</a>
+  </li>
+
+  <ul>
+    {% for party, count in chamber.legislators.party_counts.items %}
+    <li>{{ count }} {{ party }}</li>
+    {% endfor %}
+  </ul>
+
+  <li>{{ chamber.committees.count }} 
+    <a href="{% url 'committees' abbr %}">Committees</a>
+  </li>
+
+  <li>{{ chamber.committees.joint_count }} 
+    <a href="{% url 'committees' abbr %}">Joint Committees</a>
+  </li>
+
+  <li>{{ chamber.bills_count }} 
+    <a href="{% url 'bills' abbr %}">Count</a>
+  </li>
+
+ </ul>
+{% endfor %}
+
+
+
+
+
+{% endblock %}

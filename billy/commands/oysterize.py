@@ -1,37 +1,25 @@
 from billy import db
 from billy.commands import BaseCommand
+from oyster.core import kernel
+from billy.importers.bills import oysterize_version
 
-from oyster.client import get_configured_client
 
 class Oysterize(BaseCommand):
     name = 'oysterize'
     help = 'send bill versions to oyster'
 
     def add_args(self):
-        self.add_argument('states', nargs='+', help='states to oysterize')
+        self.add_argument('state', help='state to oysterize')
 
     def handle(self, args):
-        oclient = get_configured_client()
-        new_bills = list(db.bills.find({'state': state,
-                                        'versions.url': {'$exists': True},
-                                        #'versions._oyster_id': {'$exists': False}
-                                       }))
-        print '%s bills with versions to oysterize' % len(new_bills)
-        for bill in new_bills:
+        state = args.state
+        known_ids = kernel.db.tracked.find({'metadata.state': state}
+                                          ).distinct('_id')
+        bills = db.bills.find({'state': state,
+                               'versions.url': {'$exists': True}
+                              }, timeout=False)
+        print '%s bills with versions to oysterize' % bills.count()
+        for bill in bills:
             for version in bill['versions']:
-                if 'url' in version and '_oyster_id' not in version:
-                    try:
-                        _id = oclient.track_url(version['url'],
-                                                update_mins=update_mins,
-                                                name=version['name'],
-                                                state=bill['state'],
-                                                session=bill['session'],
-                                                chamber=bill['chamber'],
-                                                bill_id=bill['bill_id'],
-                                                openstates_bill_id=bill['_id'])
-                        #version['_oyster_id'] = _id
-                    except Exception as e:
-                        print e
-
-            # save bill after updating all versions
-            #db.bills.save(bill, safe=True)
+                if 'url' in version and version['doc_id'] not in known_ids:
+                    oysterize_version(bill, version)

@@ -138,7 +138,8 @@ class NameMatcher(object):
         if '_code' in name:
             code = name['_code']
             if code in self._codes[chamber] or code in self._codes[None]:
-                raise ValueError("non-unique legislator code: %s" % code)
+                raise ValueError("non-unique legislator code [%s] for %s" %
+                                 (code, name['full_name']))
             self._codes[chamber][code] = obj
             self._codes[None][code] = obj
 

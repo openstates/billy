@@ -1,8 +1,76 @@
-scrapelib changelog
-===================
+billy changelog
+===============
+
+1.3-dev
+-------
+**in development**
+    * first truly usable version of billy.web.public
+    * remove retire & prune_committees commands in favor of admin
+    * refactor of billy.models
+    * db: denormalize votes into own collection on bill import
+    * db: add action_dates to bills
+    * bugfix for billy-update deleting metadata without --scrape
+
+1.2.0
+-----
+**29 May 2012**
+    * further development of the public site
+    * use elasticsearch for bill search
+    * improvements to event support
+    * refresh of settings
+        * ENABLE_OYSTER setting replaces --oyster
+        * support for module-specific settings overrides
+    * support for a new scrape signature (chambers vs. chamber)
+    * utility function for pulling data from .doc files
+    * bugfix for pymongo 2.2
+
+1.1.0
+-----
+**23 April 2012**
+    * large refactor of billy.site.{browse,www} into billy.web.{admin,public}
+    * require new scrapelib >= 0.7
+    * overhaul of event support, greatly improved schema
+    * scrape: improved vote validation
+    * API: expose internal id on all objects, including bills
+    * API: new method for direct lookup of bills by id
+    * API: added created_at sort to bills
+    * add support for text extraction from bills
+
+1.0.0
+-----
+**2 April 2012**
+    * lots of improvements to billy admin
+        * general style overhaul
+        * duplicate_versions view
+    * API:
+        * removal of XML
+        * removal of RSS emitter and broken stats endpoint
+    * billy-update command line radically changed
+        * defaults to actually doing work
+        * -vvv dropped
+        * --strict dropped, --nostrict now exists
+        * simplification of how --session/--term work
+    * drop billy-util districtcsv in favor of an admin view
+    * previously internal bill ids are now 8 digits
+    * addition of billy-update --oyster argument, adds tracking of versions
+    * duplicate_versions is now just that, not versions+documents
+    * bugfix: stop silently swallowing errors in subject csvs
+
+0.9.6
+-----
+**27 February 2012**
+    * add alternate_bill_ids and related functionality (needed for TN)
+    * updated oysterize command to work with oyster >= 0.3
+    * added initial work on class-based models
+    * added new beginning of web frontend
+    * added run logging work
+    * bugfix: billy-util broken by jenkins command
+    * bugfix: random_bill restricted session
 
 0.9.5
 -----
+**21 February 2012**
+    * added doc_ids on versions and documents
     * API: add boundary_id to legislator responses (experimental)
     * browse: MOM legislator merge tool
     * browse: improved browse templates & random_bill

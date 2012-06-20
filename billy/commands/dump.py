@@ -5,7 +5,6 @@ import logging
 import os
 import re
 import urllib
-import shutil
 import zipfile
 import unicodecsv
 
@@ -20,14 +19,18 @@ import boto
 from boto.s3.key import Key
 
 
-def upload(abbr, filename, type):
+# TODO: make prefix/use_cname configurable
+def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
     today = datetime.date.today()
 
     # build URL
     s3_bucket = settings.AWS_BUCKET
-    s3_path = '%s-%02d-%02d-%s-%s.zip' % (today.year, today.month, today.day,
-                                          abbr, type)
-    s3_url = 'http://%s.s3.amazonaws.com/%s' % (s3_bucket, s3_path)
+    s3_path = '%s%s-%02d-%02d-%s-%s.zip' % (s3_prefix, today.year, today.month,
+                                            today.day, abbr, type)
+    if use_cname:
+        s3_url = 'http://%s/%s' % (s3_bucket, s3_path)
+    else:
+        s3_url = 'http://%s.s3.amazonaws.com/%s' % (s3_bucket, s3_path)
 
     # S3 upload
     s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET)
@@ -45,8 +48,8 @@ def upload(abbr, filename, type):
 
     logging.info('uploaded to %s' % s3_url)
 
+# JSON ################################
 
-# JSON ###########
 
 class APIValidator(validictory.SchemaValidator):
     def validate_type_datetime(self, val):
@@ -60,9 +63,8 @@ def api_url(path):
     return "%s%s/?apikey=%s" % (settings.API_BASE_URL, urllib.quote(path),
                                 settings.SUNLIGHT_SERVICES_KEY)
 
+# CSV ################################
 
-
-# CSV ################
 
 def _make_csv(abbr, name, fields):
     filename = '/tmp/{0}_{1}'.format(abbr, name)
@@ -231,7 +233,6 @@ class DumpJSON(BaseCommand):
             self.dump(abbr, args.file, not args.novalidate, args.schema_dir)
             if args.upload:
                 upload(abbr, args.file, 'json')
-
 
     def dump(self, abbr, filename, validate, schema_dir):
         scraper = scrapelib.Scraper(requests_per_minute=600,

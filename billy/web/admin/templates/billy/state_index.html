@@ -1,0 +1,114 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block title %}
+    {{ metadata.name}}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ metadata.name }}</h1>
+    <a href="{% url object_json "metadata" metadata.abbreviation %}">Metadata</a>
+</div>
+
+<div class="container">
+<div class="row">
+
+<div class="span6">
+<div class="well">
+    <h3><a href="{% url state_run_detail metadata.abbreviation %}" >Last run information</a></h3>
+    <ul>
+    {% if runlog %}
+    <li>Last run took {{ runlog.scraped.time_delta }} seconds, and was
+        started on
+        {{ runlog.scraped.started }}</li>
+        <li>{% if runlog.failure %}
+            <b>There was a failure during runtime</b>
+        {% else %}
+            The scrape took place without exception
+        {% endif %}</li>
+        {% for key, val in runlog.import.items %}
+            <li>{{ key }} - out of {{ val.total }} records, {{ val.insert }}
+            records were inserted, and {{ val.update }} were updated</li>
+        {% endfor %}
+    {% else %}
+        <li>No records found, sadly. You might have run the import with an old
+        version of Billy, or perhaps haven't run this state yet. However,
+        the fact you're here might throw a wrench in all that.</li>
+    {% endif %}
+    </ul>
+</div>
+
+<div class="well">
+    <h3><a href="{% url admin_bills metadata.abbreviation %}">Bills</a></h3>
+    <dl>
+        <dt>Upper:</dt><dd>{{report.bills.upper_count}}</dd>
+        <dt>Lower:</dt><dd>{{report.bills.lower_count}}</dd>
+        <dt>Versions:</dt><dd>{{report.bills.version_count}}</dd>
+        <dt>Duplicate Versions:</dt><dd>{{report.bills.duplicate_versions|length}}</dd>
+        <dt>without actions:</dt><dd>{{report.bills.actionless_count}}</dd>
+        <dt>without sponsors:</dt><dd>{{report.bills.sponsorless_count}}</dd>
+        <dt>without versions:</dt><dd>{{report.bills.versionless_count}}</dd>
+        <dt>without sources:</dt><dd>{{report.bills.sourceless_count}}</dd>
+        <dt>Updated Today:</dt><dd>{{report.bills.updated_today}}%</dd>
+        <dt>Updated This Month:</dt><dd>{{report.bills.updated_this_month}}%</dd>
+        <dt>Updated This Year:</dt><dd>{{report.bills.updated_this_year}}%</dd>
+    </dl>
+</div>
+
+
+<div class="well">
+    <h3>Distinct Object Values</h3>
+    <p>These pages display distinct values for each key found in objects in the collections in mongo.</p>
+    {% for session in sessions %}
+        <a href="{% url summary_index metadata.abbreviation session %}">{{session}}</a></br>
+    {% endfor %}
+</div>
+
+<div class="well">
+    <h3><a href="{% url events metadata.abbreviation %}">Events</a></h3>
+    <p>View the first 20 events for this state.</p>
+</div>
+</div>
+
+<div class="span6">
+
+    <div class="well">
+    <h3><a href="legislators/">Legislators</a></h3>
+    <dl>
+      <dt>Upper:</dt><dd>{{report.legislators.upper_active_count}}</dd>
+      <dt>Lower:</dt><dd>{{report.legislators.lower_active_count}}</dd>
+      <dt>Inactive:</dt><dd>{{report.legislators.inactive_count}}</dd>
+      <dt>with PVS id:</dt><dd>{{report.legislators.votesmart_id}}</dd>
+      <dt>with TransparencyData id:</dt><dd>{{report.legislators.transparencydata_id}}</dd>
+      <dt>with URL:</dt><dd>{{report.legislators.url}}</dd>
+      <dt>with Photo URL:</dt><dd>{{report.legislators.photo_url}}</dd>
+      <dt>with Email:</dt><dd>{{report.legislators.email}}</dd>
+      <dt>without sources:</dt><dd>{{report.legislators.sourceless|length}}</dd>
+      <dt>Updated Today:</dt><dd>{{report.legislators.updated_today}}%</dd>
+      <dt>Updated This Month:</dt><dd>{{report.legislators.updated_this_month}}%</dd>
+      <dt>Updated This Year:</dt><dd>{{report.legislators.updated_this_year}}%</dd>
+    </dl>
+    </div>
+
+    <div class="well">
+    <h3><a href="committees/">Committees</a></h3>
+    <dl>
+      <dt>Upper:</dt><dd>{{report.committees.upper_count}}</dd>
+      <dt>Lower:</dt><dd>{{report.committees.lower_count}}</dd>
+      <dt>Joint:</dt><dd>{{report.committees.joint_count}}</dd>
+      <dt>Empty:</dt><dd>{{report.committees.empty_count}}</dd>
+      <dt>without sources:</dt><dd>{{report.committees.sourceless|length}}</dd>
+      <dt>Updated Today:</dt><dd>{{report.committees.updated_today}}%</dd>
+      <dt>Updated This Month:</dt><dd>{{report.committees.updated_this_month}}%</dd>
+      <dt>Updated This Year:</dt><dd>{{report.committees.updated_this_year}}%</dd>
+    </dl>
+</div>
+</div>
+
+
+</div>
+</div>
+
+{% endblock %}

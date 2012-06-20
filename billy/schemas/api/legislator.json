@@ -26,6 +26,14 @@
      "end_date": {"type": ["datetime", "null"], "required": false},
      "position": {"type": "string", "required": false}
    }}},
+   "offices": {"type": "array", "items": {"type": "object", "properties": {
+        "type": {"type": "string", "enum": ["capitol", "district"]},
+        "name": {"type": "string"},
+        "address": {"type": ["string", "null"]},
+        "phone": {"type": ["string", "null"]},
+        "fax": {"type": ["string", "null"]},
+        "email": {"type": ["string", "null"]}
+   }}},
    "sources": {"type": "array", "items": {"type": "object", "properties": {
      "url": {"type": "string"}
    }}},

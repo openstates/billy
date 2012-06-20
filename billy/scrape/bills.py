@@ -1,7 +1,7 @@
 import os
 import json
 
-from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape import Scraper, SourcedObject
 
 
 class BillScraper(Scraper):
@@ -62,6 +62,7 @@ class Bill(SourcedObject):
         bill and stored in the database.
         """
         super(Bill, self).__init__('bill', **kwargs)
+        self._seen_versions = set()
         self['session'] = session
         self['chamber'] = chamber
         self['bill_id'] = bill_id
@@ -108,7 +109,8 @@ class Bill(SourcedObject):
             d['mimetype'] = mimetype
         self['documents'].append(d)
 
-    def add_version(self, name, url, mimetype=None, **kwargs):
+    def add_version(self, name, url, mimetype=None, on_duplicate='error',
+                    **kwargs):
         """
         Add a version of the text of this bill.
 
@@ -116,10 +118,27 @@ class Bill(SourcedObject):
                      'As Introduced', 'Version 2', 'As amended', 'Enrolled'
         :param url: the location of this version on the legislative website.
         :param mimetype: MIME type of the document
+        :param on_duplicate: What to do if a duplicate is seen:
+            error - default option, raises a ValueError
+            ignore - add the document twice (rarely the right choice)
+            use_new - use the new name, removing the old document
+            use_old - use the old name, not adding the new document
 
         If multiple formats are provided, a good rule of thumb is to
         prefer text, followed by html, followed by pdf/word/etc.
         """
+        if on_duplicate != 'ignore':
+            if url in self._seen_versions:
+                if on_duplicate == 'error':
+                    raise ValueError('duplicate version url %s' % url)
+                elif on_duplicate == 'use_new':
+                    # delete the old version
+                    self['versions'] = [v for v in self['versions']
+                                        if v['url'] != url]
+                elif on_duplicate == 'use_old':
+                    return       # do nothing
+            self._seen_versions.add(url)
+
         d = dict(name=name, url=url, **kwargs)
         if mimetype:
             d['mimetype'] = mimetype

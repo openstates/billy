@@ -1,8 +1,8 @@
-import datetime
 from collections import defaultdict
 
 from billy import db
 from billy.reports.utils import update_common
+
 
 def scan_committees(abbr):
     metadata = db.metadata.find_one({'_id': abbr})
@@ -60,7 +60,7 @@ def scan_committees(abbr):
 
 def calculate_percentages(report):
     total_count = float(report['lower_count'] + report['upper_count'] +
-                        report['joint_count'])/100
+                        report['joint_count']) / 100
     if total_count:
         report['updated_this_year'] = (report.pop('_updated_this_year_count') /
                                        total_count)
@@ -69,7 +69,7 @@ def calculate_percentages(report):
         report['updated_today'] = (report.pop('_updated_today_count') /
                                    total_count)
 
-    member_count = float(report['_member_count'])/100
+    member_count = float(report['_member_count']) / 100
     if member_count:
         report['members_with_leg_id'] = (
             report.pop('_members_with_leg_id_count') / member_count)

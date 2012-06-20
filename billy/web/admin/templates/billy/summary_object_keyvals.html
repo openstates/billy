@@ -1,0 +1,47 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+
+<style>
+tr:hover {cursor: pointer;}
+</style>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var trs = $("tr");
+      trs.click(function(){
+        var href = $(this).attr('href');
+        window.location = (href || window.location);
+        });
+      });    
+  </script>
+
+<div class="container">
+  
+<h2>{{ meta.name }} [{{ session }}]</h2>
+<h3>{{object_type}}</h3> 
+<p><strong>Mongo spec:</strong></p>
+<p><pre>{{spec}}</pre></p>
+
+
+<table class="table table-striped table-bordered table-condensed">
+  <thead>
+  <tr><th>id</th></tr>
+  </thead>
+  <tbody>
+  {% for obj_type, obj_id in objects  %}
+  <tr class="link" href="/admin/object_json/{{ obj_type }}/{{obj_id}}/"><td>{{ obj_id }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+
+
+
+</div>
+
+
+{% endblock %}

@@ -3,6 +3,7 @@ from billy.commands import BaseCommand
 from billy.utils import metadata
 from billy.importers.names import NameMatcher
 
+
 class UpdateLegIds(BaseCommand):
     name = 'update_leg_ids'
     help = '''update leg_ids for a specific session'''
@@ -10,7 +11,6 @@ class UpdateLegIds(BaseCommand):
     def add_args(self):
         self.add_argument('abbr', help='abbr to run matching for')
         self.add_argument('term', help='term to run matching for')
-
 
     def handle(self, args):
         level = metadata(args.abbr)['level']

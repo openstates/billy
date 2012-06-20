@@ -3,6 +3,7 @@ import unicodecsv
 from billy import db
 from billy.commands import BaseCommand
 
+
 class LoadLegislators(BaseCommand):
     name = 'loadlegislators'
     help = '''load legislator data from a CSV file allowing for manual updates
@@ -14,11 +15,7 @@ of their data'''
         self.add_argument('--save', action='store_true', default=False,
                           help='save changes to database (default is dry run)')
 
-
     def handle(self, args):
-
-        # print initial missing counts (a hack)
-        state = args.filename.split('_')[0]
 
         namefile = unicodecsv.DictReader(open(args.filename))
 

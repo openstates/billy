@@ -3,7 +3,6 @@ import time
 import logging
 import datetime
 import json
-from collections import defaultdict
 
 from billy.scrape.validator import DatetimeValidator
 
@@ -54,6 +53,7 @@ class JSONDateEncoder(json.JSONEncoder):
 # maps scraper_type -> scraper
 _scraper_registry = dict()
 
+
 class ScraperMeta(type):
     """ register derived scrapers in a central registry """
 
@@ -85,38 +85,26 @@ class Scraper(scrapelib.Scraper):
 
     latest_only = False
 
-    def __init__(self, metadata, no_cache=False, output_dir=None,
-                 strict_validation=None, **kwargs):
+    def __init__(self, metadata, output_dir=None, strict_validation=None,
+                 fastmode=False, **kwargs):
         """
         Create a new Scraper instance.
 
         :param metadata: metadata for this scraper
-        :param no_cache: if True, will ignore any cached downloads
         :param output_dir: the data directory to use
         :param strict_validation: exit immediately if validation fails
         """
 
         # configure underlying scrapelib object
-        if no_cache:
-            kwargs['cache_dir'] = None
-        elif 'cache_dir' not in kwargs:
-            kwargs['cache_dir'] = settings.BILLY_CACHE_DIR
+        kwargs['cache_obj'] = scrapelib.FileCache(settings.BILLY_CACHE_DIR)
+        kwargs['requests_per_minute'] = settings.SCRAPELIB_RPM
+        kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
+        kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
+        kwargs['retry_wait_seconds'] = settings.SCRAPELIB_RETRY_WAIT_SECONDS
 
-        if 'error_dir' not in kwargs:
-            kwargs['error_dir'] = settings.BILLY_ERROR_DIR
-
-        if 'timeout' not in kwargs:
-            kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
-
-        if 'requests_per_minute' not in kwargs:
-            kwargs['requests_per_minute'] = None
-
-        if 'retry_attempts' not in kwargs:
-            kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
-
-        if 'retry_wait_seconds' not in kwargs:
-            kwargs['retry_wait_seconds'] = \
-                    settings.SCRAPELIB_RETRY_WAIT_SECONDS
+        if fastmode:
+            kwargs['requests_per_minute'] = 0
+            kwargs['cache_write_only'] = False
 
         super(Scraper, self).__init__(**kwargs)
 
@@ -128,14 +116,8 @@ class Scraper(scrapelib.Scraper):
         self.metadata = metadata
         self.output_dir = output_dir
 
-        # make output dir, error dir, and cache dir
-        for d in (self.output_dir, kwargs['cache_dir'], kwargs['error_dir']):
-            try:
-                if d:
-                    os.makedirs(d)
-            except OSError as e:
-                if e.errno != 17:
-                    raise e
+        # make output_dir
+        os.path.isdir(self.output_dir) or os.path.makedirs(self.output_dir)
 
         # validation
         self.strict_validation = strict_validation
@@ -212,6 +194,7 @@ class Scraper(scrapelib.Scraper):
         # validate after writing, allows for inspection
         self.validate_json(obj)
 
+
 class SourcedObject(dict):
     """ Base object used for data storage.
 
@@ -260,13 +243,13 @@ def get_scraper(mod_path, scraper_type):
 
 
 def check_sessions(metadata, sessions):
-    all_sessions_in_terms = list(reduce(lambda x,y: x+y,
+    all_sessions_in_terms = list(reduce(lambda x, y: x + y,
                                    [x['sessions'] for x in metadata['terms']]))
     # copy the list to avoid modifying it
     metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
                                                  []))
 
-    for k,v in metadata['session_details'].iteritems():
+    for k, v in metadata['session_details'].iteritems():
         try:
             all_sessions_in_terms.remove(k)
         except ValueError:

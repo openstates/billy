@@ -2,6 +2,7 @@ import re
 import urllib
 import urlparse
 import logging
+import datetime
 
 from billy import db
 import difflib
@@ -9,46 +10,6 @@ import difflib
 
 # metadata cache
 __metadata = {}
-
-# Adapted from NLTK's english stopwords
-stop_words = [
-    'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves',
-    'you', 'your', 'yours', 'yourself', 'yourselves',
-    'he', 'him', 'his', 'himself', 'she', 'her', 'hers',
-    'herself', 'it', 'its', 'itself', 'they',
-    'them', 'their', 'theirs', 'themselves', 'what',
-    'which',  'who', 'whom', 'this', 'that', 'these', 'those',
-    'am', 'is', 'are', 'was', 'were', 'be', 'been',
-    'being', 'have', 'has', 'had', 'having', 'do', 'does',
-    'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or',
-    'because', 'as', 'until', 'while', 'of', 'at', 'by',
-    'for', 'with', 'about', 'against', 'between',
-    'into', 'through', 'during', 'before', 'after',
-    'above', 'below', 'to', 'from', 'up', 'down', 'in',
-    'out', 'on', 'off', 'over', 'under', 'again', 'further',
-    'then', 'once', 'here', 'there', 'when', 'where', 'why',
-    'how', 'all', 'any', 'both', 'each', 'few', 'more',
-    'most', 'other', 'some', 'such', 'no', 'nor', 'not',
-    'only', 'own', 'same', 'so', 'than', 'too', 'very',
-    's', 't', 'can', 'will', 'just', 'don', 'should',
-    'now', '']
-
-
-def tokenize(str):
-    return re.split(r"[\s.,!?'\"`()]+", str)
-
-
-def keywordize(str):
-    """
-    Splits a string into words, removes common stopwords, stems and removes
-    duplicates.
-    """
-    import jellyfish
-    return set([jellyfish.porter_stem(word.lower().encode('ascii',
-                                                          'ignore'))
-                for word in tokenize(str)
-                if (word.isalpha() or word.isdigit()) and
-                word.lower() not in stop_words])
 
 
 def metadata(abbr):
@@ -70,8 +31,21 @@ def chamber_name(abbr, chamber):
     return metadata(abbr)['%s_chamber_name' % chamber].split()[0]
 
 
-def term_for_session(abbr, session):
-    meta = metadata(abbr)
+def parse_param_dt(dt):
+    formats = ['%Y-%m-%d %H:%M',    # here for legacy reasons
+               '%Y-%m-%dT%H:%M:%S',
+               '%Y-%m-%d']
+    for format in formats:
+        try:
+            return datetime.datetime.strptime(dt, format)
+        except ValueError:
+            pass
+    raise ValueError('unable to parse %s' % dt)
+
+
+def term_for_session(abbr, session, meta=None):
+    if not meta:
+        meta = metadata(abbr)
 
     for term in meta['terms']:
         if session in term['sessions']:
@@ -100,37 +74,45 @@ def extract_fields(d, fields, delimiter='|'):
     return rd
 
 
-def configure_logging(verbosity_count=0, module=None):
-    verbosity = {0: logging.WARNING, 1: logging.INFO}.get(verbosity_count,
-                                                          logging.DEBUG)
+def configure_logging(module=None):
+    # TODO: make this a lot better
     if module:
         format = ("%(asctime)s %(name)s %(levelname)s " + module +
                   " %(message)s")
     else:
         format = "%(asctime)s %(name)s %(levelname)s %(message)s"
-    logging.basicConfig(level=verbosity, format=format, datefmt="%H:%M:%S")
+    logging.basicConfig(level=logging.DEBUG, format=format, datefmt="%H:%M:%S")
 
-def textual_diff( l1, l2 ):
+
+def textual_diff(l1, l2):
     lines = {}
     types = {
-        "?" : "info",
-        "-" : "sub",
-        "+" : "add",
-        ""  : "noop"
+        "?": "info",
+        "-": "sub",
+        "+": "add",
+        "": "noop"
     }
     lineno = 0
 
-    for line in '\n'.join(difflib.ndiff( l1, l2 )).split("\n"):
-        prefix  = line[:1].strip()
+    for line in '\n'.join(difflib.ndiff(l1, l2)).split("\n"):
+        prefix = line[:1].strip()
         lastfix = line[2:].rstrip()
 
         if lastfix == "":
             continue
 
         lineno += 1
-        cline = {}
-        lines[ lineno ] = {
-            "type" : types[prefix],
-            "line" : lastfix
+        lines[lineno] = {
+            "type": types[prefix],
+            "line": lastfix
         }
     return lines
+
+
+def find_bill(query, fields=None):
+    bill = db.bills.find_one(query, fields=fields)
+    if not bill and 'bill_id' in query:
+        bill_id = query.pop('bill_id')
+        query['alternate_bill_ids'] = bill_id
+        bill = db.bills.find_one(query, fields=fields)
+    return bill

@@ -1,0 +1,71 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block content %}
+<p>
+    <h1>Run Detail <small>( for the <b>{{ run.state }}</b> scraper)</small></h1>
+</p>
+<p>
+<div class = 'alert alert-info' >
+    Scrape took place <b>{{ run.scraped.started|date_display }}</b><br />
+</div>
+</p>
+<p>
+{% if run.imported %}
+<h3>Import Statistics</h3>
+<br />
+<table class = 'table table-bordered table-striped' >
+    <tr>
+        <th>Stage</th>
+        <th>Total</th>
+        <th>Inserted</th>
+        <th>Updated</th>
+    </tr>
+{% for import in run.imported %}
+    <tr>
+        <td>{{ import }}</td>
+        <td>{{ run.imported|key:import|key:'total' }}</td>
+        <td>{{ run.imported|key:import|key:'insert' }}</td>
+        <td>{{ run.imported|key:import|key:'update' }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+<h3>No import run</h3>
+<div class = 'alert alert-error' >
+For some reason there was no import run. This may be due to a failure in the
+scrape. Actually, it most always is, since we'll only pull in run logging when
+we've got the import flag.
+</div>
+{% endif %}
+</p>
+<p>
+<h3>Scrape Statistics</h3>
+<table class = 'table table-bordered table-striped' >
+    <tr>
+        <th>Scrape Type</th>
+        <th>Information</th>
+        <th>Details</th>
+    </tr>
+    {% for scrape in run.scraped.run_record %}
+    <tr>
+        <td>{{ scrape.type }}
+        {% if scrape.noscraper %}
+            ( no scraper )
+        {% endif %}</td>
+        {% if not scrape.exception %}
+            <td>took {{ scrape.end_time|minus:scrape.start_time }}</dd>
+            <td><b>Success</b></td>
+        {% else %}
+        <td>This stage threw an exception and ended the run.</td>
+        <td>
+<pre>{{ scrape.exception.type }}: {{ scrape.exception.message }}</pre>
+<pre>{{ scrape.exception.traceback }}</pre>
+        </td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
+</p>
+{% endblock %}

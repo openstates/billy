@@ -1,10 +1,12 @@
 import subprocess
 
+
 def url_xpath(url, path):
     import scrapelib
     import lxml.html
     doc = lxml.html.fromstring(scrapelib.urlopen(url))
     return doc.xpath(path)
+
 
 def convert_pdf(filename, type='xml'):
     commands = {'text': ['pdftotext', '-layout', filename, '-'],
