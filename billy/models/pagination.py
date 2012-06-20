@@ -71,7 +71,7 @@ class PaginatorBase(object):
                          ^
         '''
         count = self.count
-        range_end = self.range_start + self.limit
+        range_end = self.range_start + self.limit - 1
         if count < range_end:
             range_end = count
         return range_end
