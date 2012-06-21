@@ -90,10 +90,13 @@ class StateBills(RelatedBillsList):
 
         # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
-                                             search_text)
-        if found_by_bill_id:
-            return IteratorPaginator(found_by_bill_id)
+        if search_text is None:
+            pass
+        else:
+            found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
+                                                 search_text)
+            if found_by_bill_id:
+                return IteratorPaginator(found_by_bill_id)
 
         # Then fall back to search form use.
         params = [
@@ -146,7 +149,7 @@ class AllStateBills(ListViewBase):
     rowtemplate_name = templatename('bills_list_row_with_state_and_session')
     paginator = CursorPaginator
     description_template = templatename('list_descriptions/all_state_bills')
-    column_headers = ('State', 'Session', 'Title', 'Introduced',
+    column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
     use_table = True
 
@@ -195,10 +198,13 @@ class AllStateBills(ListViewBase):
 
         # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
-                                             search_text)
-        if found_by_bill_id:
-            return found_by_bill_id
+        if search_text is None:
+            pass
+        else:
+            found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
+                                                 search_text)
+            if found_by_bill_id:
+                return IteratorPaginator(found_by_bill_id)
 
         params = [
             'chamber',

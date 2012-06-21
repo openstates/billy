@@ -1,6 +1,8 @@
 """
     views that are specific to a state/region
 """
+import re
+import urllib
 from collections import defaultdict
 
 from django.shortcuts import redirect, render
@@ -96,25 +98,22 @@ def not_active_yet(request, args, kwargs):
 
 def search(request, abbr):
 
-    search_text = request.GET['q']
+    search_text = request.GET['search_text']
 
     # First try to get by bill_id.
-    found_by_bill_id = search_by_bill_id(abbr, search_text)
-    if found_by_bill_id:
-        bill_results = found_by_bill_id
-        more_bills_available = False
-        legislator_results = []
-        more_legislators_available = False
-        found_by_id = True
+    if re.search(r'\d', search_text):
+        url = '/%s/bills?' % abbr
+        url += urllib.urlencode([('search_text', search_text)])
+        print url
+        return redirect(url)
 
-    # Search bills.
     else:
         found_by_id = False
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
             if abbr != 'all':
                 kwargs['state'] = abbr
-                bill_results = Bill.search(search_text, **kwargs)
+            bill_results = Bill.search(search_text, **kwargs)
         else:
             spec = {'title': {'$regex': search_text, '$options': 'i'}}
             if abbr != 'all':
@@ -122,8 +121,8 @@ def search(request, abbr):
             bill_results = db.bills.find(spec)
 
         # Limit the bills if it's a search.
-        bill_results = list(bill_results.limit(5))
-        more_bills_available = (5 < len(bill_results))
+        more_bills_available = (5 < bill_results.count())
+        bill_results = bill_results.limit(5)
 
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
@@ -133,10 +132,15 @@ def search(request, abbr):
         more_legislators_available = (5 < legislator_results.count())
         legislator_results = legislator_results.limit(5)
 
+    if abbr != 'all':
+        metadata = Metadata.get_object(abbr)
+    else:
+        metadata = {'name': 'All fifty states'}
+
     return render(request, templatename('search_results_bills_legislators'),
         dict(search_text=search_text,
              abbr=abbr,
-             metadata=Metadata.get_object(abbr),
+             metadata=metadata,
              found_by_id=found_by_id,
              bill_results=bill_results,
              more_bills_available=more_bills_available,

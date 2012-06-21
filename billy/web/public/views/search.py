@@ -23,7 +23,7 @@ def search_by_bill_id(abbr, search_text):
         if abbr != 'all':
             spec['state'] = abbr
 
-        docs = collection.find(spec, limit=10)
+        docs = collection.find(spec)
 
         # If there were actual results, return a bill_id result view.
         if 0 < docs.count():
@@ -44,7 +44,7 @@ def search_by_bill_id(abbr, search_text):
 
 def search_combined_bills_legislators(request, scope):
 
-    search_text = request.GET['q']
+    search_text = request.GET['search_text']
 
     # Search bills.
     if settings.ENABLE_ELASTICSEARCH:
