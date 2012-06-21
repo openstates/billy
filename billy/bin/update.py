@@ -305,6 +305,8 @@ def main(old_scrape_compat=False):
         scrape_data = {}
 
         if 'scrape' in args.actions:
+            _clear_scraped_data(args.output_dir)
+
             # validate then write metadata
             if hasattr(module, 'session_list'):
                 session_list = module.session_list()
