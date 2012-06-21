@@ -48,7 +48,7 @@ class FeedEntry(Document):
                     url = urlresolvers.reverse(entity_type, args=[state, _id])
                 _entity_urls.append(url)
                 summary = summary.replace(entity_string,
-                    '<b><a href="%s">%s</a></b>' % (url, entity_string))
+                    '<a href="%s">%s</a>' % (url, entity_string))
             entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
             entry['summary'] = summary
             entry['entity_data'] = entity_data
