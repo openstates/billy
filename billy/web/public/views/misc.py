@@ -46,6 +46,7 @@ def find_your_legislator(request):
 
     context['address'] = random.choice(addrs)
 
+    context['request'] = ""
     if "q" in get:
         context['request'] = get['q']
 
