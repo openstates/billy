@@ -33,7 +33,7 @@ urlpatterns = patterns('billy.web.public.views.misc',
 
 # region/state specific
 urlpatterns += patterns('billy.web.public.views.region',
-    url(r'^(?P<scope>[a-z]{,3})/search/$', 'search', name='search'),
+    url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection', name='state_selection'),
 )

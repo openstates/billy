@@ -7,10 +7,11 @@ from django.http import Http404
 from django.conf import settings
 
 from billy.models import db, Metadata, Bill
-from billy.models.pagination import CursorPaginator
+from billy.models.pagination import CursorPaginator, IteratorPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
+from .search import search_by_bill_id
 
 
 def nth(iterable, n, default=None):
@@ -86,13 +87,21 @@ class StateBills(RelatedBillsList):
                       show_per_page=show_per_page)
 
         form = FilterBillsForm(self.request.GET)
+
+        # First try to get by bill_id.
+        search_text = form.data.get('search_text')
+        found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
+                                             search_text)
+        if found_by_bill_id:
+            return IteratorPaginator(found_by_bill_id)
+
+        # Then fall back to search form use.
         params = [
             'chamber',
             'subjects',
             'sponsor__leg_id',
             'actions__type',
             'type']
-        search_text = form.data.get('search_text')
 
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
@@ -183,6 +192,14 @@ class AllStateBills(ListViewBase):
                       show_per_page=show_per_page)
 
         form = FilterBillsForm(self.request.GET)
+
+        # First try to get by bill_id.
+        search_text = form.data.get('search_text')
+        found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
+                                             search_text)
+        if found_by_bill_id:
+            return found_by_bill_id
+
         params = [
             'chamber',
             'subjects',

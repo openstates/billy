@@ -7,7 +7,7 @@ from billy.models import db, Metadata
 
 def get_state_select_form(data):
     states = map(Metadata.get_object, sorted(settings.ACTIVE_STATES))
-    state_abbrs = []  # [('', 'Select a state')]
+    state_abbrs = [('', '')]
     state_abbrs += [(obj['_id'], obj['name']) for obj in states]
 
     class StateSelectForm(forms.Form):

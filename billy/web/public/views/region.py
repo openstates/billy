@@ -1,8 +1,6 @@
 """
     views that are specific to a state/region
 """
-import re
-import operator
 from collections import defaultdict
 
 from django.shortcuts import redirect, render
@@ -10,10 +8,9 @@ from django.http import Http404
 from django.conf import settings
 
 from billy.models import db, Metadata, DoesNotExist, Bill
-from billy.models.pagination import IteratorPaginator
-from billy.importers.utils import fix_bill_id
 from ..forms import get_state_select_form
 from .utils import templatename
+from .search import search_by_bill_id
 
 
 def state_selection(request):
@@ -87,86 +84,6 @@ def state(request, abbr):
                        statenav_active='home'))
 
 
-def search(request, scope):
-
-    abbr = None
-    search_text = request.GET['q']
-    scope_name = None
-    spec = {}
-
-    # If the input looks like a bill id, try to fetch the bill.
-    if re.search(r'\d', search_text):
-        bill_id = fix_bill_id(search_text).upper()
-        collection = db.bills
-        spec.update(bill_id=bill_id)
-
-        if scope != 'all':
-            abbr = scope
-
-        docs = collection.find(spec, limit=10)
-
-        # If there were actual results, return a bill_id result view.
-        if 0 < docs.count():
-
-            def sortkey(doc):
-                session = doc['session']
-                years = re.findall(r'\d{4}', session)
-                try:
-                    return int(years[-1])
-                except IndexError:
-                    return session
-
-            docs = sorted(docs, key=operator.itemgetter('session'),
-                          reverse=True)
-
-            return render(request, templatename('search_results_bill_id'),
-              dict(bill_id=bill_id,
-               abbr=abbr,
-               rowtemplate_name=templatename('bills_list_row_with_state_and_session'),
-               object_list=IteratorPaginator(docs),
-               use_table=True,
-               column_headers=('Title', 'Session', 'Introduced',
-                               'Recent Action', 'Votes'),
-               statenav_active=None))
-
-    # The input didn't contain \d{4}, so assuming it's not a bill,
-    # search bill title and legislator names.
-    if settings.ENABLE_ELASTICSEARCH:
-        kwargs = {}
-        if scope != 'all':
-            kwargs['state'] = scope
-        bill_results = Bill.search(search_text, **kwargs)
-    else:
-        spec = {'title': {'$regex': search_text, '$options': 'i'}}
-        if scope != 'all':
-            abbr = scope
-            scope_name = Metadata.get_object(abbr)['name']
-            spec.update(state=abbr)
-        bill_results = db.bills.find(spec)
-
-    # See if any legislator names match.
-    spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
-    if scope != 'all':
-        abbr = scope
-        scope_name = Metadata.get_object(abbr)['name']
-        spec.update(state=abbr)
-    legislator_results = db.legislators.find(spec)
-
-    return render(request, templatename('search_results_bills_legislators'),
-        dict(search_text=search_text,
-             abbr=abbr,
-             scope_name=scope_name,
-             bills_list=bill_results.limit(5),
-             more_bills_available=(5 < bill_results.count()),
-             legislators_list=legislator_results.limit(5),
-             more_legislators_available=(5 < legislator_results.count()),
-             bill_column_headers=('State', 'Title', 'Session', 'Introduced',
-                                  'Recent Action',),
-             rowtemplate_name=templatename('bills_list_row_with_state_and_session'),
-             show_chamber_column=True,
-             statenav_active=None))
-
-
 def not_active_yet(request, args, kwargs):
     try:
         metadata = Metadata.get_object(kwargs['abbr'])
@@ -175,3 +92,59 @@ def not_active_yet(request, args, kwargs):
 
     return render(request, templatename('state_not_active_yet'),
                   dict(metadata=metadata, statenav_active=None))
+
+
+def search(request, abbr):
+
+    search_text = request.GET['q']
+
+    # First try to get by bill_id.
+    found_by_bill_id = search_by_bill_id(abbr, search_text)
+    if found_by_bill_id:
+        bill_results = found_by_bill_id
+        more_bills_available = False
+        legislator_results = []
+        more_legislators_available = False
+        found_by_id = True
+
+    # Search bills.
+    else:
+        found_by_id = False
+        if settings.ENABLE_ELASTICSEARCH:
+            kwargs = {}
+            if abbr != 'all':
+                kwargs['state'] = abbr
+                bill_results = Bill.search(search_text, **kwargs)
+        else:
+            spec = {'title': {'$regex': search_text, '$options': 'i'}}
+            if abbr != 'all':
+                spec.update(state=abbr)
+            bill_results = db.bills.find(spec)
+
+        # Limit the bills if it's a search.
+        bill_results = list(bill_results.limit(5))
+        more_bills_available = (5 < len(bill_results))
+
+        # See if any legislator names match.
+        spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
+        if abbr != 'all':
+            spec.update(state=abbr)
+        legislator_results = db.legislators.find(spec)
+        more_legislators_available = (5 < legislator_results.count())
+        legislator_results = legislator_results.limit(5)
+
+    return render(request, templatename('search_results_bills_legislators'),
+        dict(search_text=search_text,
+             abbr=abbr,
+             metadata=Metadata.get_object(abbr),
+             found_by_id=found_by_id,
+             bill_results=bill_results,
+             more_bills_available=more_bills_available,
+             legislators_list=legislator_results,
+             more_legislators_available=more_legislators_available,
+             bill_column_headers=('State', 'Title', 'Session', 'Introduced',
+                                  'Recent Action',),
+             rowtemplate_name=templatename('bills_list_row_with'
+                                           '_state_and_session'),
+             show_chamber_column=True,
+             statenav_active=None))
