@@ -108,8 +108,10 @@ class RelatedBillsList(RelatedObjectsList):
             'type']
 
         if settings.ENABLE_ELASTICSEARCH:
+            kwargs = {}
+
             if abbr != 'all':
-                kwargs = {'state': abbr}
+                kwargs['state'] = abbr
 
             chamber = form.data.get('chamber')
             if chamber:
@@ -171,7 +173,7 @@ class AllStateBills(RelatedBillsList):
                       'Recent Action')
     description_template = 'Bills from all 50 States'
     title_template = ('Search and filter bills for all '
-                      'fifty states - OpenStates')
+                      '50 States - OpenStates')
 
     # def get_queryset(self):
 
