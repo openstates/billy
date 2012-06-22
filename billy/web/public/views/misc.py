@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse
 
-from billy.models import db, Metadata
+from billy.models import db, Metadata, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.conf import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
@@ -85,7 +85,7 @@ def find_your_legislator(request):
                 ret[border] = resp
             return HttpResponse(json.dumps(ret))
 
-        context['legislators'] = json.load(f)
+        context['legislators'] = map(Legislator, json.load(f))
         template = 'find_your_legislator_table'
 
     return render(request, templatename(template), context)

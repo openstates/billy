@@ -114,7 +114,11 @@ class Document(dict):
         Alias '_id' to avoid django template complaints about names
         with leading underscores.
         '''
-        return self['_id']
+        try:
+            return self['_id']
+        except KeyError:
+            # In API results, some records have an 'id' instead if '_id'.
+            return self['id']
 
     def chamber_name(self):
         chamber = self['chamber']
