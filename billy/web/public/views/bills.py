@@ -80,7 +80,7 @@ class StateBills(RelatedBillsList):
             show_per_page = 100
 
         if not self.request.GET:
-            spec = {}
+            spec = {'state': self.kwargs['abbr']}
             cursor = db.bills.find(spec)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
             return self.paginator(cursor, page=page,
@@ -295,7 +295,7 @@ def bill(request, abbr, bill_id):
     if show_all_sponsors:
         sponsors = bill.sponsors_manager
     else:
-        sponsors = bill.sponsors_manager.first_five
+        sponsors = bill.sponsors_manager.first_fifteen
     return render(request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
