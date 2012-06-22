@@ -23,6 +23,7 @@ class EventsList(RelatedObjectsList):
     show_per_page = 15
     statenav_active = 'events'
     description_template = templatename('list_descriptions/events')
+    title_template = 'Events - {{obj.legislature_name}} - OpenStates'
 
 
 def event(request, abbr, event_id):

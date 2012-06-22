@@ -1,7 +1,9 @@
 import itertools
+import re
 
 from django.views.generic import TemplateView
 from django.http import Http404
+from django.template import Template, Context
 
 from billy.models import db, Metadata, DoesNotExist
 
@@ -12,6 +14,10 @@ def templatename(name):
 
 def mongo_fields(*fields):
     fields = dict(zip(fields, itertools.repeat(1)))
+
+
+def normalize_whitespace(s):
+    return re.sub(ur'\s+', ' ', s)
 
 
 class ListViewBase(TemplateView):
@@ -49,6 +55,11 @@ class ListViewBase(TemplateView):
 
         # Include the kwargs to enable references to url paramaters.
         context.update(**kwargs)
+
+        # Get the page title.
+        if hasattr(self, 'get_title'):
+            context.update(title=self.get_title(context))
+
         return context
 
 
@@ -63,7 +74,14 @@ class RelatedObjectsList(ListViewBase):
     def get_context_data(self, *args, **kwargs):
         context = super(RelatedObjectsList, self).get_context_data(
                                                         *args, **kwargs)
-        context.update(obj=self.get_object())
+        context.update(
+            obj=self.get_object(),
+            collection_name=self.collection_name)
+
+        # Get the formatted page title and description.
+        for attr in ('title', 'description'):
+            context[attr] = self._render(attr, context)
+
         return context
 
     def get_object(self):
@@ -130,3 +148,12 @@ class RelatedObjectsList(ListViewBase):
         paginator = self.paginator(objects, page=page,
                                    show_per_page=show_per_page)
         return paginator
+
+    def _render(self, attr, context):
+        try:
+            template = getattr(self, '%s_template' % attr)
+        except AttributeError:
+            return
+        template = Template(normalize_whitespace(template))
+        context = Context(context)
+        return template.render(context)

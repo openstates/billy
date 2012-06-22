@@ -107,6 +107,7 @@ def get_district(request, district_id):
 class VotesList(RelatedObjectsList):
 
     list_item_context_name = 'vote'
+    collection_name = 'votes'
     mongo_sort = [('date', pymongo.DESCENDING)]
     paginator = CursorPaginator
     query_attr = 'votes_manager'
@@ -115,7 +116,18 @@ class VotesList(RelatedObjectsList):
     column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
                       'No', 'Other', 'Motion')
     statenav_active = 'bills'
-    description_template = templatename('list_descriptions/votes')
+    description_template = '''
+        Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
+        '''
+    title_template = '''
+        {% if obj.collection_name == 'bills' %}
+            Votes on bill {{obj.display_name}} -
+            {{metadata.legislature_name}} - OpenStates
+        {% elif obj.collection_name == 'legislators' %}
+            Votes by {{obj.display_name}} -
+            {{metadata.legislature_name}} - OpenStates
+        {% endif %}
+        '''
 
 
 class NewsList(RelatedObjectsList):
@@ -127,4 +139,11 @@ class NewsList(RelatedObjectsList):
     rowtemplate_name = templatename('feed_entry')
     column_headers = ('feeds',)
     statenav_active = 'bills'
-    description_template = templatename('list_descriptions/news')
+    collection_name = 'entries'
+    description_template = '''
+        news and blog entries mentioning <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
+        '''
+    title_template = '''
+        New and blogs mentioning {{obj.display_name}} -
+        {{metadata.legislature_name}} - OpenStates
+        '''

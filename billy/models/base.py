@@ -126,6 +126,14 @@ class Document(dict):
             return 'Joint'
         return self.metadata['%s_chamber_name' % self['chamber']]
 
+    @property
+    def collection_name(self):
+        '''If you try to reference {{obj.collection.name}} in django template,
+        it will return a new collection named `collection`.name then call
+        its __unicode__. Fail.
+        '''
+        return self.collection.name
+
 
 class AttrManager(object):
     def __init__(self, *args, **kwargs):
