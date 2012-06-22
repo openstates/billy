@@ -91,7 +91,7 @@ class PaginatorBase(object):
     def has_previous(self):
         return self.current_page != 1
 
-    def pagination_data(self, max_number_of_links=11):
+    def pagination_data(self, max_number_of_links=7):
         '''Returns a generator of tuples (string, page_number, clickable),
         where `string` is the text of the html link, `page_number` is
         the number of the page the link points to, and `clickable` is
