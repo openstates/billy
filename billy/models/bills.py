@@ -41,14 +41,14 @@ class SponsorsManager(AttrManager):
         except StopIteration:
             return
 
-    def first_five(self):
+    def first_fifteen(self):
         'views.bill'
-        return take(5, self)
+        return take(15, self)
 
-    def first_five_remainder(self):
+    def first_fifteen_remainder(self):
         len_ = len(self.document['sponsors'])
-        if 5 < len_:
-            return len_ - 5
+        if 15 < len_:
+            return len_ - 15
 
 
 class Action(dict):
