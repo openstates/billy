@@ -1,5 +1,6 @@
 import itertools
 import re
+import urllib
 
 from django.views.generic import TemplateView
 from django.http import Http404
@@ -56,11 +57,32 @@ class ListViewBase(TemplateView):
         # Include the kwargs to enable references to url paramaters.
         context.update(**kwargs)
 
-        # Get the page title.
-        if hasattr(self, 'get_title'):
-            context.update(title=self.get_title(context))
+        # Get the formatted page title and description.
+        # Wait to render until get_object has been called in subclasses.
+        if not getattr(self, 'defer_rendering_title', False):
+            for attr in ('title', 'description'):
+                if attr not in context:
+                    context[attr] = self._render(attr, context,
+                                                    request=self.request)
+
+        # Add the correct path to paginated links. Yuck.
+        if self.request.GET:
+            params = dict(self.request.GET.items())
+            if 'page' in params:
+                del params['page']
+            context.update(get_params=urllib.urlencode(params))
 
         return context
+
+    def _render(self, attr, context, **extra_context):
+        try:
+            template = getattr(self, '%s_template' % attr)
+        except AttributeError:
+            return
+        template = Template(normalize_whitespace(template))
+        context.update(**extra_context)
+        context = Context(context)
+        return template.render(context)
 
 
 class RelatedObjectsList(ListViewBase):
@@ -71,6 +93,8 @@ class RelatedObjectsList(ListViewBase):
     the template context so it can be used to generate a phrase like
     'showing all sponsored bills for Wesley Chesebro.'
     '''
+    defer_rendering_title = True
+
     def get_context_data(self, *args, **kwargs):
         context = super(RelatedObjectsList, self).get_context_data(
                                                         *args, **kwargs)
@@ -80,7 +104,8 @@ class RelatedObjectsList(ListViewBase):
 
         # Get the formatted page title and description.
         for attr in ('title', 'description'):
-            context[attr] = self._render(attr, context)
+            if attr not in context:
+                context[attr] = self._render(attr, context)
 
         return context
 
