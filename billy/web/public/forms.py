@@ -82,7 +82,8 @@ def get_filter_bills_form(metadata):
                         ), required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
-                                                required=False)
+                                                required=False,
+                                                label='Sponsor name')
 
         else:
             _bill_types = db.bills.distinct('type')
