@@ -8,11 +8,12 @@ from collections import defaultdict
 from django.shortcuts import redirect, render
 from django.http import Http404
 from django.conf import settings
+from django.template.defaultfilters import striptags
 
 from billy.models import db, Metadata, DoesNotExist, Bill
+from billy.models.pagination import CursorPaginator
 from ..forms import get_state_select_form
-from .utils import templatename
-from .search import search_by_bill_id
+from .utils import templatename, ListViewBase
 
 
 def state_selection(request):
@@ -98,13 +99,16 @@ def not_active_yet(request, args, kwargs):
 
 def search(request, abbr):
 
+    if not request.GET:
+        return render(request, templatename('search_results_no_query'),
+                      {'abbr': abbr})
+
     search_text = request.GET['search_text']
 
     # First try to get by bill_id.
     if re.search(r'\d', search_text):
         url = '/%s/bills?' % abbr
         url += urllib.urlencode([('search_text', search_text)])
-        print url
         return redirect(url)
 
     else:
@@ -135,7 +139,7 @@ def search(request, abbr):
     if abbr != 'all':
         metadata = Metadata.get_object(abbr)
     else:
-        metadata = {'name': 'All fifty states'}
+        metadata = None
 
     return render(request, templatename('search_results_bills_legislators'),
         dict(search_text=search_text,
@@ -152,3 +156,28 @@ def search(request, abbr):
                                            '_state_and_session'),
              show_chamber_column=True,
              statenav_active=None))
+
+
+class ShowMoreLegislators(ListViewBase):
+    template_name = templatename('object_list')
+    rowtemplate_name = templatename('legislators_list_row')
+    statenav_active = None
+    column_headers = ('', 'State', 'Name', 'District', 'Party', 'Chamber')
+    use_table = True
+    description_template = '''
+        <a href={{metadata.get_absolute_url}}>{{metadata.name}}</a>
+        legislator names containing "{{request.GET.search_text}}"'''
+    title_template = striptags(description_template)
+
+    def get_queryset(self):
+        abbr = self.kwargs['abbr']
+        search_text = self.request.GET['search_text']
+
+        # See if any legislator names match.
+        spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
+        if abbr != 'all':
+            spec.update(state=abbr)
+        legislator_results = db.legislators.find(spec)
+        return CursorPaginator(legislator_results, show_per_page=10,
+                               page=int(self.request.GET.get('page', 1)))
+

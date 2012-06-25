@@ -4,6 +4,7 @@ from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
 from billy.web.public.views.bills import (BillsBySubject, SponsoredBillsList,
                                           StateBills, AllStateBills)
+from billy.web.public.views.region import ShowMoreLegislators
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
     BillsPassedLowerFeed, BillsPassedUpperFeed, BillsIntroducedLowerFeed,
@@ -34,6 +35,8 @@ urlpatterns = patterns('billy.web.public.views.misc',
 # region/state specific
 urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
+    url(r'^(?P<abbr>[a-z]{,3})/search/show_more_legislators/$',
+        ShowMoreLegislators.as_view(), name='show_more_legislators'),
     url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
     url(r'^state_selection/$', 'state_selection', name='state_selection'),
 )

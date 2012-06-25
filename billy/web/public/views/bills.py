@@ -27,6 +27,7 @@ class BillsList(ListViewBase):
     rowtemplate_name = templatename('bills_list_row')
     column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
     statenav_active = 'bills'
+    show_per_page = 10
 
 
 class RelatedBillsList(RelatedObjectsList):
@@ -37,6 +38,7 @@ class RelatedBillsList(RelatedObjectsList):
     rowtemplate_name = templatename('bills_list_row')
     column_headers = ('Title', 'Introduced', 'Recent Action',)
     statenav_active = 'bills'
+    defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
         context = super(RelatedBillsList, self).get_context_data(
