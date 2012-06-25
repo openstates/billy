@@ -25,6 +25,10 @@ def ensure_indexes():
                                  ('middle_name', pymongo.ASCENDING),
                                  ('suffixes', pymongo.ASCENDING)],
                                 name='role_and_name_parts')
+    db.legislators.ensure_index([('active', pymongo.ASCENDING),
+                                 ('state', pymongo.ASCENDING),
+                                 ('chamber', pymongo.ASCENDING),
+                                ])
 
 
 def import_legislators(abbr, data_dir):
