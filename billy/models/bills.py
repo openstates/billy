@@ -330,7 +330,9 @@ class Bill(Document):
             _filter['sponsors.leg_id'] = sponsor_id
 
         if status:
-            _filter['status'] = status
+            # Status is slightly different: it's a dict like--
+            # {'action_dates.signed': {'$ne': None}}
+            _filter.update(**status)
 
         if type_:
             _filter['type'] = type_
