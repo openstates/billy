@@ -58,6 +58,10 @@ def import_events(abbr, data_dir, import_actions=False):
             if cttyid:
                 committee['committee_id'] = cttyid
 
+            # Move the chamber out.
+            committee['_chamber'] = committee['chamber']
+            del(committee['chamber'])
+
         for bill in data['related_bills']:
             bill['_scraped_bill_id'] = bill['bill_id']
             bill_id = bill['bill_id']
