@@ -78,6 +78,7 @@ class RelatedBillsList(RelatedObjectsList):
         if 100 < show_per_page:
             show_per_page = 100
 
+        # If the request is for /xy/bills/ without search params:
         if not self.request.GET:
             spec = {}
             if abbr != 'all':
@@ -87,6 +88,7 @@ class RelatedBillsList(RelatedObjectsList):
             return self.paginator(cursor, page=page,
                       show_per_page=show_per_page)
 
+        # If search params are given:
         form = FilterBillsForm(self.request.GET)
 
         # First try to get by bill_id.
@@ -105,7 +107,8 @@ class RelatedBillsList(RelatedObjectsList):
             'subjects',
             'sponsor__leg_id',
             'actions__type',
-            'type']
+            'type',
+            'status']
 
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
@@ -124,6 +127,14 @@ class RelatedBillsList(RelatedObjectsList):
             sponsor_id = form.data.get('sponsor__leg_id')
             if sponsor_id:
                 kwargs['sponsor_id'] = sponsor_id
+
+            status = form.data.get('status')
+            if status:
+                kwargs['status'] = {status: {'$ne': None}}
+
+            type_ = form.data.get('type')
+            if type_:
+                kwargs['type_'] = type_
 
             cursor = Bill.search(search_text, **kwargs)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
