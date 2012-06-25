@@ -12,7 +12,7 @@ import difflib
 __metadata = {}
 
 
-def metadata(abbr):
+def metadata(abbr, __metadata=__metadata):
     """
     Grab the metadata for the given two-letter abbreviation.
     """
@@ -21,7 +21,9 @@ def metadata(abbr):
     abbr = abbr.lower()
     if abbr in __metadata:
         return __metadata[abbr]
-    return db.metadata.find_one({'_id': abbr})
+    rv = db.metadata.find_one({'_id': abbr})
+    __metadata[abbr] = rv
+    return rv
 
 
 def chamber_name(abbr, chamber):
