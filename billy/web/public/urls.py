@@ -60,7 +60,7 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 
     url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
         name='legislators'),
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]+)/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]*)/$',
         'legislator', name='legislator'),
     url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/$',
         SponsoredBillsList.as_view(), name='legislator_sponsored_bills'),
