@@ -118,33 +118,3 @@ def import_event(data):
         _insert_with_id(data)
     else:
         update(event, data, db.events)
-
-
-# IMPORTANT: if/when actions_to_events is re-enabled it definitely
-# needs to be updated to support level
-#    if import_actions:
-#        actions_to_events(state)
-def actions_to_events(state):
-    for bill in db.bills.find({'state': state}):
-        count = 1
-        for action in bill['actions']:
-            guid = "%s:action:%06d" % (bill['_id'], count)
-            count += 1
-
-            event = db.events.find_one({'state': state,
-                                        '_guid': guid})
-
-            description = "%s: %s" % (bill['bill_id'], action['action'])
-            data = Event(bill['session'], action['date'],
-                         'bill:action', description, location=action['actor'],
-                         action_type=action['type'])
-            data.add_participant('actor', action['actor'])
-            data['_guid'] = guid
-            data['state'] = state
-
-            if not event:
-                data['created_at'] = datetime.datetime.utcnow()
-                data['updated_at'] = data['created_at']
-                _insert_with_id(data)
-            else:
-                update(event, data, db.events)
