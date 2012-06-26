@@ -24,16 +24,29 @@ class Sponsor(dict):
 class SponsorsManager(AttrManager):
 
     def __iter__(self):
-        '''Another unoptimized method that ultimately hits
-        mongo once for each sponsor.'''
-        for spons in self.document['sponsors']:
-            yield Sponsor(spons)
+        '''Lazily fetch all legislator objects from the db.
+        '''
+        sponsors = self.bill['sponsors']
+        try:
+            legislators = self._legislators
+        except AttributeError:
+            ids = filter(None, map(operator.itemgetter('leg_id'), sponsors))
+            legislators = db.legislators.find({'_id': {'$in': ids}})
+            legislators = dict((obj['_id'], obj) for obj in legislators)
+            self._legislators = legislators
+        for sponsor in sponsors:
+            if 'leg_id' in sponsor:
+                legislator = legislators[sponsor['leg_id']]
+                legislator.update(sponsor)
+                yield legislator
+            else:
+                yield sponsor
 
     def primary_list(self):
         'Return the first primary sponsor on the bill.'
-        for sponsor in self.document['sponsors']:
+        for sponsor in self:
             if sponsor['type'] == 'primary':
-                yield Sponsor(sponsor)
+                yield sponsor
 
     def first_primary(self):
         try:
