@@ -63,7 +63,7 @@ def find_your_legislator(request):
             billy_settings.API_BASE_URL,
             lon,
             lat,
-            billy_settings.SUNLIGHT_API_KEY
+            billy_settings.API_KEY
         )
         f = urllib2.urlopen(qurl)
 
@@ -78,7 +78,7 @@ def find_your_legislator(request):
                 qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
                     billy_settings.API_BASE_URL,
                     border,
-                    billy_settings.SUNLIGHT_API_KEY
+                    billy_settings.API_KEY
                 )
                 f = urllib2.urlopen(qurl)
                 resp = json.load(f)
@@ -95,7 +95,7 @@ def get_district(request, district_id):
     qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
         billy_settings.API_BASE_URL,
         district_id,
-        billy_settings.SUNLIGHT_API_KEY
+        billy_settings.API_KEY
     )
     f = urllib2.urlopen(qurl)
     return HttpResponse(f)

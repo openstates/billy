@@ -18,8 +18,8 @@ class ValidateApi(BaseCommand):
     help = 'validate data from the API'
 
     def add_args(self):
-        self.add_argument('--sunlight_key', dest='SUNLIGHT_SERVICES_KEY',
-                  help='the Sunlight API key to use')
+        self.add_argument('--apikey', dest='API_KEY',
+                  help='the API key to use')
         self.add_argument('--schema_dir', default=None,
                   help='directory to use for API schemas (optional)')
 

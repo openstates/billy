@@ -41,6 +41,10 @@ def ensure_indexes():
                            ('chamber', pymongo.ASCENDING),
                            ('sponsors.leg_id', pymongo.ASCENDING)])
 
+    # votes index
+    db.votes.ensure_index([('_voters', pymongo.ASCENDING),
+                           ('date', pymongo.ASCENDING)])
+
 
 def import_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
@@ -297,6 +301,9 @@ def denormalize_votes(bill, bill_id):
         vote['_id'] = vote['vote_id']
         vote['bill_id'] = bill_id
         vote['state'] = bill['state']
+        vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
+        vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
+        vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]
         db.votes.save(vote, safe=True)
 
 

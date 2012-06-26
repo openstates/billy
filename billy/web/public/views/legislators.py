@@ -96,7 +96,7 @@ def legislator(request, abbr, _id, slug):
     qurl = "%sdistricts/%s/?apikey=%s" % (
         billy_settings.API_BASE_URL,
         abbr,
-        billy_settings.SUNLIGHT_API_KEY
+        billy_settings.API_KEY
     )
     f = urllib2.urlopen(qurl)
     districts = json.load(f)
