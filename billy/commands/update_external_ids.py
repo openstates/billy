@@ -26,7 +26,7 @@ def update_transparencydata_legislators(meta):
     abbrev = meta['_id'].upper()
 
     for leg in db.legislators.find(query):
-        query = urllib.urlencode({'apikey': settings.SUNLIGHT_SERVICES_KEY,
+        query = urllib.urlencode({'apikey': settings.API_KEY,
                                   'search': leg['full_name'].encode('utf8')})
         url = 'http://transparencydata.com/api/1.0/entities.json?' + query
         data = urllib2.urlopen(url).read()
@@ -55,8 +55,8 @@ class UpdateMissingIds(BaseCommand):
     def add_args(self):
         self.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
                           help='abbreviations for data to update')
-        self.add_argument('--sunlight_key', help='the Sunlight API key to use',
-                          dest='SUNLIGHT_SERVICES_KEY')
+        self.add_argument('--apikey', help='the API key to use',
+                          dest='API_KEY')
 
     def handle(self, args):
         for abbr in args.abbrs:

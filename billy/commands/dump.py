@@ -61,7 +61,7 @@ class APIValidator(validictory.SchemaValidator):
 
 def api_url(path):
     return "%s%s/?apikey=%s" % (settings.API_BASE_URL, urllib.quote(path),
-                                settings.SUNLIGHT_SERVICES_KEY)
+                                settings.API_KEY)
 
 # CSV ################################
 
@@ -219,8 +219,8 @@ class DumpJSON(BaseCommand):
                   help='filename to output to (defaults to <abbr>.zip)')
         self.add_argument('--upload', '-u', action='store_true', default=False,
                   help='upload the created archives to S3')
-        self.add_argument('--sunlight_key', dest='SUNLIGHT_SERVICES_KEY',
-                  help='the Sunlight API key to use')
+        self.add_argument('--apikey', dest='API_KEY',
+                  help='the API key to use')
         self.add_argument('--schema_dir', default=None,
                   help='directory to use for API schemas (optional)')
         self.add_argument('--novalidate', action='store_true', default=False,

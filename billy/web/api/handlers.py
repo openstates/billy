@@ -337,7 +337,7 @@ class ReconciliationHandler(BaseHandler):
     for the API specification.
     """
     allowed_methods = ('GET', 'POST')
-    key = getattr(settings, 'SUNLIGHT_SERVICES_KEY', 'no-key')
+    key = getattr(settings, 'API_KEY', 'no-key')
 
     metadata = {
         "name": "Billy Reconciliation Service",
