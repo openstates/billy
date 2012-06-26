@@ -35,7 +35,7 @@ class SponsorsManager(AttrManager):
             legislators = dict((obj['_id'], obj) for obj in legislators)
             self._legislators = legislators
         for sponsor in sponsors:
-            if 'leg_id' in sponsor:
+            if sponsor['leg_id'] is not None:
                 legislator = legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
                 yield legislator
