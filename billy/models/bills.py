@@ -216,6 +216,9 @@ class Bill(Document):
         slug = slugify(self['bill_id'])
         return '%s%s/' % (url, slug)
 
+    def get_admin_url(self):
+        return urlresolvers.reverse('bill', args=[self['state'], self.id])
+
     def session_details(self):
         metadata = self.metadata
         return metadata['session_details'][self['session']]

@@ -127,7 +127,7 @@ def legislator(request, abbr, _id, slug):
             sponsored_bills=sponsored_bills,
             legislator_votes=legislator_votes,
             feed_entries=feed_entries.limit(5),
-            feed_entries_count=feed_entries.count() - 5,
+            feed_entries_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
             statenav_active='legislators'))
 
