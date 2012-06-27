@@ -194,7 +194,7 @@ class BillSearchHandler(BillyHandler):
             query = query.limit(per_page).skip(per_page*(page-1))
         else:
             # limit response size
-            if query.count() > 5000:
+            if query.count() > 10000:
                 resp = rc.BAD_REQUEST
                 resp.write(': request too large, try narrowing your search by '
                            'adding more filters.')
@@ -206,6 +206,8 @@ class BillSearchHandler(BillyHandler):
             query = query.sort([('updated_at', -1)])
         elif sort == 'created_at':
             query = query.sort([('created_at', -1)])
+        elif sort == 'last_action':
+            query = query.sort([('action_dates.last', -1)])
 
         return list(query)
 
