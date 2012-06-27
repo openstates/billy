@@ -5,7 +5,10 @@ import itertools
 
 from pymongo import Connection
 
+from django.core import urlresolvers
+
 from billy.conf import settings as billy_settings
+from billy.web.admin import urls as admin_urls
 
 
 # TODO: put this in a util file
@@ -133,6 +136,11 @@ class Document(dict):
         its __unicode__. Fail.
         '''
         return self.collection.name
+
+    def get_admin_json_url(self):
+        return '/admin' + urlresolvers.reverse(
+            'object_json', urlconf=admin_urls,
+            args=[self.collection_name, self.id])
 
 
 class AttrManager(object):
