@@ -180,7 +180,7 @@ def import_bill(data, votes, categorizer):
         # first & last
         if not dates['first'] or adate < dates['first']:
             dates['first'] = adate
-        elif not dates['last'] or adate > dates['last']:
+        if not dates['last'] or adate > dates['last']:
             dates['last'] = adate
 
         # passed & signed
