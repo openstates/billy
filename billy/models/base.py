@@ -47,6 +47,14 @@ def get_model(classname):
     return _model_registry[classname]
 
 
+class classproperty(property):
+    '''Based on the python 2.2 release notes--
+    http://www.python.org/download/releases/2.2/descrintro/#property
+    '''
+    def __get__(self, cls, instance):
+        return self.fget.__get__(None, instance)()
+
+
 class ModelBase(type):
     def __new__(meta, classname, bases, classdict):
         cls = type.__new__(meta, classname, bases, classdict)
@@ -103,13 +111,25 @@ class Document(dict):
         # they contain to easily reference the top-level document.
         self.context = {}
 
-    @property
-    def related_name(self):
+    @classmethod
+    def related_name(cls):
         try:
-            return self._related_name
+            return cls._related_name
         except:
-            related_name = self.__class__.__name__.lower()
+            related_name = cls.__name__.lower()
             return related_name
+
+    @property
+    def _related_cache(self):
+        '''A cache for storing related objects already retrieved from
+        mongo.
+        '''
+        try:
+            return self._related_cache_dict
+        except AttributeError:
+            _related_cache_dict = {}
+            self._related_cache_dict = _related_cache_dict
+            return _related_cache_dict
 
     @property
     def id(self):
@@ -158,7 +178,7 @@ class AttrManager(object):
         # Create a child context for the new classes.
         context = copy.copy(inst.context)
         context['context'] = context
-        context[inst.related_name] = inst
+        context[inst.related_name()] = inst
         if 'document' not in context and isinstance(inst, Document):
             context.update(document=inst)
 
@@ -267,9 +287,10 @@ class RelatedDocument(ReadOnlyAttribute):
     def __call__(self, extra_spec={}, *args, **kwargs):
 
         # Only do this lookup once for each instance.
+        related_name = self.model.related_name()
         try:
-            return self._obj
-        except AttributeError:
+            return self.instance._related_cache[related_name]
+        except KeyError:
             pass
 
         spec = {'_id': self.model_id}
@@ -286,7 +307,7 @@ class RelatedDocument(ReadOnlyAttribute):
 
             raise DoesNotExist(msg)
 
-        self._obj = obj
+        self.instance._related_cache_dict[related_name] = obj
         return obj
 
 
