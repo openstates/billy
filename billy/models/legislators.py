@@ -100,13 +100,18 @@ class Legislator(Document):
         _id = self['_id']
         votes = self.votes_manager(limit=5,
             sort=[('date', pymongo.DESCENDING)])
-        vote_value = 'other'
-        for i, vote in enumerate(votes):
-            if _id in vote['yes_votes']:
-                vote_value = 'yes'
-            if _id in vote['no_votes']:
-                vote_value = 'no'
-            yield i, vote_value, vote
+        for vote in votes:
+            vote_value = 'other'
+            for obj in vote['yes_votes']:
+                if _id == obj['leg_id']:
+                    vote_value = 'yes'
+                    break
+            if vote_value == 'other':
+                for obj in vote['no_votes']:
+                    if _id == obj['leg_id']:
+                        vote_value = 'no'
+                        break
+            yield vote_value, vote
 
     def sponsored_bills(self, extra_spec=None, *args, **kwargs):
         if extra_spec is None:
@@ -116,9 +121,12 @@ class Legislator(Document):
             kwargs.update(sort=[('updated_at', pymongo.DESCENDING)])
         return self.metadata.bills(extra_spec, *args, **kwargs)
 
-    def primary_sponsored_bills(self):
+    def primary_sponsored_bills(self, fields=None):
+        kwargs = {}
+        if fields is not None:
+            kwargs['fields'] = fields
         return self.metadata.bills({'sponsors.type': 'primary',
-                                    'sponsors.leg_id': self.id})
+                                    'sponsors.leg_id': self.id}, **kwargs)
 
     def secondary_sponsored_bills(self):
         return self.metadata.bills({'sponsors.type': {'$ne': 'primary'},
