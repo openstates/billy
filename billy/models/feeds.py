@@ -1,3 +1,4 @@
+import re
 import urlparse
 import datetime
 from django.core import urlresolvers
@@ -33,7 +34,10 @@ class FeedEntry(Document):
         _entity_urls = []
         _done = []
         if entity_strings:
-            for entity_string, _id in zip(entity_strings, entity_ids):
+            data = zip(entity_strings, entity_ids)
+            data = sorted(data, key=lambda t: len(t[0]), reverse=True)
+            hyperlinked_spans = []
+            for entity_string, _id in data:
                 if entity_string in _done:
                     continue
                 else:
@@ -47,8 +51,21 @@ class FeedEntry(Document):
                 else:
                     url = urlresolvers.reverse(entity_type, args=[state, _id])
                 _entity_urls.append(url)
-                summary = summary.replace(entity_string,
-                    '<a href="%s">%s</a>' % (url, entity_string))
+
+                # This is tricky. Need to hyperlink the entity without mangling
+                # other previously hyperlinked strings, like Fiona Ma and Mark Leno.
+                matches = re.finditer(entity_string, summary)
+                replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
+                for match in matches:
+
+                    # Only hyperlink if no previous hyperlink has been added
+                    # in the same span.
+                    if any((start <= n < stop) for n in match.span()
+                           for (start, stop) in hyperlinked_spans):
+                        continue
+
+                    summary = re.sub(entity_string, replacer, summary)
+                    hyperlinked_spans.append(match.span())
             entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
             entry['summary'] = summary
             entry['entity_data'] = entity_data
