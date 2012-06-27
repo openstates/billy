@@ -12,6 +12,7 @@ from billy.utils import parse_param_dt
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DictManager, AttrManager, take, DEBUG, logger)
 from .metadata import Metadata
+from .utils import CachedAttribute
 
 elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
                         settings.ELASTICSEARCH_TIMEOUT)
@@ -156,23 +157,42 @@ class BillVote(Document):
     def other_ratio(self):
         return self._ratio('other_count')
 
-    def _vote_legislators(self, yes_no_other):
-        '''This function will hit the database individually
-        to get each legislator object. Good if the number of
-        voters is small (i.e., committee vote), but possibly
-        bad if it's high (full roll call vote).'''
+    @CachedAttribute
+    def _legislator_objects(self, fields=['first_name', 'last_name']):
+        '''A cache of dereferenced legislator objects.
+        '''
+        kwargs = {}
+        if fields is not None:
+            kwargs['fields'] = fields
         id_getter = operator.itemgetter('leg_id')
-        for _id in map(id_getter, self['%s_votes' % yes_no_other]):
-            if DEBUG:
-                msg = '{0}.{1}({2}, {3}, {4})'.format(
-                    'legislators', 'find_one', {'_id': _id}, (), {})
-                logger.debug(msg)
-            obj = db.legislators.find_one({'_id': _id})
-            if obj is None:
-                msg = 'No legislator found with id %r' % _id
-                continue
-                #raise DoesNotExist(msg)
-            yield obj
+        ids = []
+        for k in ('yes', 'no', 'other'):
+            ids.extend(map(id_getter, self[k + '_votes']))
+        objs = db.legislators.find({'_id': {'$in': ids}}, **kwargs)
+        objs = dict((obj['_id'], obj) for obj in objs)
+        return objs
+
+    @CachedAttribute
+    def legislator_vote_value(self):
+        '''If this vote was accessed through the legislator.votes_manager,
+        return the value of this legislator's vote.
+        '''
+        if not hasattr(self, 'legislator'):
+            msg = ('legislator_vote_value can only be called '
+                   'from a vote accessed by legislator.votes_manager.')
+            raise ValueError(msg)
+        leg_id = self.legislator.id
+        for k in ('yes', 'no', 'other'):
+            for leg in self[k + '_votes']:
+                if leg['leg_id'] == leg_id:
+                    return k
+
+    def _vote_legislators(self, yes_no_other):
+        '''Return all legislators who votes yes/no/other on this bill.
+        '''
+        id_getter = operator.itemgetter('leg_id')
+        ids = map(id_getter, self['%s_votes' % yes_no_other])
+        return map(self._legislator_objects.get, ids)
 
     def yes_vote_legislators(self):
         return self._vote_legislators('yes')
@@ -182,9 +202,6 @@ class BillVote(Document):
 
     def other_vote_legislators(self):
         return self._vote_legislators('other')
-
-    def index(self):
-        return self.bill['votes'].index(self)
 
     def get_absolute_url(self):
         bill = self.bill()
