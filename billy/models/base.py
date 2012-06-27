@@ -66,12 +66,6 @@ class ModelBase(type):
         return cls
 
 
-class ReadOnlyAttribute(object):
-    ''' ensure that an attribute can't be set '''
-    # def __set__(self, instance, value):
-    #     raise AttributeError
-
-
 class ModelDefinitionError(Exception):
     '''Raised if there's a problem with a model definition.'''
     pass
@@ -244,7 +238,7 @@ class DictManager(dict, AttrManager):
         return self._wrapper(dict.__getitem__(self, key))
 
 
-class RelatedDocument(ReadOnlyAttribute):
+class RelatedDocument(object):
     '''
     Set an instance of this descriptor as a class attribute on a
     Document subclass, and when accessed from a document it will deference
@@ -311,7 +305,7 @@ class RelatedDocument(ReadOnlyAttribute):
         return obj
 
 
-class RelatedDocuments(ReadOnlyAttribute):
+class RelatedDocuments(object):
     '''
     Set an instance of this descriptor as class attribute on a Document
     subclass, and when accessed on an instance, it will return
@@ -349,6 +343,7 @@ class RelatedDocuments(ReadOnlyAttribute):
             model = self.model = get_model(model)
 
         self.instance_val = instance[self.instance_key]
+        self.instance = instance
 
         return self
 
@@ -377,7 +372,9 @@ class RelatedDocuments(ReadOnlyAttribute):
                                                  'find', spec, args, kwargs)
             logger.debug(msg)
 
-        return self.model.collection.find(spec, *args, **kwargs)
+        instance = self.instance
+        cursor = self.model.collection.find(spec, *args, **kwargs)
+        return CursorWrapper(cursor, instance)
 
     @property
     def _related_name(self):
@@ -387,3 +384,59 @@ class RelatedDocuments(ReadOnlyAttribute):
         related_name = self.model.__name__.lower()
         related_name = re.sub(r'manager$', '', related_name)
         return related_name
+
+
+class CursorWrapper(object):
+    '''The purpose of this hack is to make the original object
+    accessible via its related name on related objects retrieved
+    through a RelatedDocuments attribute.
+
+    In English, this enables:
+
+    for vote in legislator.votes_manager():
+        print vote.legislator
+
+    This was the only way I could think of to do this without
+    a huge rewrite. The solution in the AttrManager classes is
+    better (IMO) but not an option when we're using the pymongo
+    Transformer gizmo (see .base)
+    '''
+
+    def __init__(self, cursor, instance):
+        self.cursor = cursor
+        self.instance = instance
+
+    def __iter__(self):
+        instance = self.instance
+        related_name = instance.related_name()
+        for obj in self.cursor:
+            try:
+                setattr(obj, related_name, instance)
+            except AttributeError:
+                # Obj has a read-only metadata property. Skip.
+                pass
+            yield obj
+
+    def next(self):
+        obj = next(self.cursor)
+        setattr(obj, self.instance.related_name(), self.instance)
+        return obj
+
+    def count(self):
+        return self.cursor.count()
+
+    def skip(self, *args, **kwargs):
+        return CursorWrapper(
+            self.cursor.skip(*args, **kwargs), self.instance)
+
+    def limit(self, *args, **kwargs):
+        return CursorWrapper(
+            self.cursor.limit(*args, **kwargs), self.instance)
+
+    def sort(self, *args, **kwargs):
+        return CursorWrapper(
+            self.cursor.sort(*args, **kwargs), self.instance)
+
+    def distinct(self, *args, **kwargs):
+        return CursorWrapper(
+            self.cursor.distinct(*args, **kwargs), self.instance)
