@@ -264,7 +264,9 @@ class Bill(Document):
         return self.metadata['%s_chamber_name' % self.other_chamber]
 
     def type_string(self):
-        return self['_type']
+        msg = "Bill had more than 2 types: %r" % self['type']
+        assert len(self['type']) == 1, msg
+        return self['type'][0]
 
     # Bill progress properties
     @property
