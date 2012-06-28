@@ -98,7 +98,10 @@ class NameMatcher(object):
                 for (term, chamber, name, leg_id) in reader:
                     if term == self._term and leg_id:
                         self._manual[chamber][name] = leg_id
-                        self._manual[None][name] = leg_id
+                        if name in self._manual[None]:
+                            self._manual[None][name] = None
+                        else:
+                            self._manual[None][name] = leg_id
         except IOError:
             pass
 
