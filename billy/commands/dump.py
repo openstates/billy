@@ -261,7 +261,7 @@ class DumpJSON(BaseCommand):
                                           bill['chamber'], bill['bill_id'])
             url = api_url(path)
 
-            response = scraper.urlopen(url)
+            response = scraper.urlopen(url).bytes
             if validate:
                 validictory.validate(json.loads(response), bill_schema,
                                      validator_cls=APIValidator)
@@ -273,7 +273,7 @@ class DumpJSON(BaseCommand):
             path = 'legislators/%s' % legislator['_id']
             url = api_url(path)
 
-            response = scraper.urlopen(url)
+            response = scraper.urlopen(url).bytes
             if validate:
                 validictory.validate(json.loads(response), legislator_schema,
                                      validator_cls=APIValidator)
@@ -285,7 +285,7 @@ class DumpJSON(BaseCommand):
             path = 'committees/%s' % committee['_id']
             url = api_url(path)
 
-            response = scraper.urlopen(url)
+            response = scraper.urlopen(url).bytes
             if validate:
                 validictory.validate(json.loads(response), committee_schema,
                                      validator_cls=APIValidator)
