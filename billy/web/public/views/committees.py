@@ -33,8 +33,8 @@ def committees(request, abbr):
     sort_key = request.GET.get('key', 'committee')
     sort_order = int(request.GET.get('order', 1))
 
-    committees = meta.committees(spec, fields=fields,
-                                  sort=[(sort_key, sort_order)])
+    committees = meta.committees_legislators(spec, fields=fields,
+                                 sort=[(sort_key, sort_order)])
 
     sort_order = -sort_order
 
