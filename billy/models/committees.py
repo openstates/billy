@@ -19,15 +19,21 @@ class CommitteeMemberManager(ListManager):
     def __iter__(self):
         members = self.committee['members']
 
-        ids = filter(None, [obj['leg_id'] for obj in members])
-        spec = {'_id': {'$in': ids}}
-        if DEBUG:
-            msg = '{0}.{1}({2}, {3}, {4})'.format(
-                        'legislators',
-                        'find', spec, (), {})
-            logger.debug(msg)
-
-        objs = dict((obj['_id'], obj) for obj in db.legislators.find(spec))
+        # First check whether legislators are cached
+        # in this instance.
+        try:
+            objs = self._legislators
+        except AttributeError:
+            # If this was a metadata.committees_legislators,
+            # all the state's legislators will be accessible
+            # from the committee instance.
+            try:
+                objs = self.committee._legislators
+            except AttributeError:
+                ids = filter(None, [obj['leg_id'] for obj in members])
+                spec = {'_id': {'$in': ids}}
+                objs = dict((obj['_id'], obj) for obj in db.legislators.find(spec))
+                self._legislators = objs
         for member in members:
             _id = member['leg_id']
             if _id is not None:

@@ -160,3 +160,16 @@ class Metadata(Document):
 
     def distinct_bill_types(self):
         return sorted(self.bills().distinct('type'))
+
+    def committees_legislators(self, *args, **kwargs):
+        '''Return an iterable of committees with all the state'
+        legislators cached for reference in the Committee model.
+        So do a "select_related" operation on committee members.
+        '''
+        committees = list(self.committees(*args, **kwargs))
+        legislators = self.legislators(
+            fields=['first_name', 'last_name', 'state'])
+        legislators = dict((obj['_id'], obj) for obj in legislators)
+        for com in committees:
+            com._legislators = legislators
+        return committees
