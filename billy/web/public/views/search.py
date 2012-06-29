@@ -25,6 +25,11 @@ def search_by_bill_id(abbr, search_text):
 
         docs = collection.find(spec)
 
+        # Do a regex search if the input consists solely of digits.
+        if 0 == docs.count():
+            spec['bill_id'] = {'$regex': bill_id}
+            docs = collection.find(spec)
+
         # If there were actual results, return a bill_id result view.
         if 0 < docs.count():
 
