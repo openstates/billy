@@ -110,7 +110,8 @@ class RelatedBillsList(RelatedObjectsList):
             'sponsor__leg_id',
             'actions__type',
             'type',
-            'status']
+            'status',
+            'session']
 
         if settings.ENABLE_ELASTICSEARCH:
             kwargs = {}
@@ -137,6 +138,10 @@ class RelatedBillsList(RelatedObjectsList):
             type_ = form.data.get('type')
             if type_:
                 kwargs['type_'] = type_
+
+            session = form.data.get('session')
+            if session:
+                kwargs['session'] = session
 
             cursor = Bill.search(search_text, **kwargs)
             cursor.sort([('updated_at', pymongo.DESCENDING)])
