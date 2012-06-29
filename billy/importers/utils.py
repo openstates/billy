@@ -335,15 +335,16 @@ def merge_legislators(leg1, leg2):
         #      old_roles & roles!! There's a potenital for data loss, but it's
         #      not that big of a thing.
         #   -- paultag & jamesturk, 02-02-2012
-        crole = leg1[roles][0]
-        try:
-            leg1[old_roles][crole['term']].append(crole)
-        except KeyError:
+        if len(leg1[roles]) > 0:
+            crole = leg1[roles][0]
             try:
-                leg1[old_roles][crole['term']] = [crole]
+                leg1[old_roles][crole['term']].append(crole)
             except KeyError:
-                # dear holy god this needs to be fixed.
-                leg1[old_roles] = {crole['term']: [crole]}
+                try:
+                    leg1[old_roles][crole['term']] = [crole]
+                except KeyError:
+                    # dear holy god this needs to be fixed.
+                    leg1[old_roles] = {crole['term']: [crole]}
 
         # OK. We've migrated the newly old roles to the old_roles entry.
         leg1[roles] = [leg2[roles][0]]
