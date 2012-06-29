@@ -204,7 +204,7 @@ class BillVote(Document):
         return self._vote_legislators('other')
 
     def get_absolute_url(self):
-        bill = self.bill()
+        bill = self.bill
         text = '%s--%s' % (bill['_id'],
                            self['date'].strftime('%m-%d-%Y'))
         slug = slugify(text)
@@ -331,7 +331,7 @@ class Bill(Document):
     def search(query=None, state=None, chamber=None, subjects=None,
                bill_id=None, bill_id__in=None, search_window=None,
                updated_since=None, sponsor_id=None, bill_fields=None,
-               status=None, type_=None):
+               status=None, type_=None, session=None):
         _filter = {}
         for key, value in [('state', state),
                             ('chamber', chamber),
@@ -369,6 +369,9 @@ class Bill(Document):
 
         if type_:
             _filter['type'] = type_
+
+        if session:
+            _filter['session'] = session
 
         # process full-text query
         if query:
