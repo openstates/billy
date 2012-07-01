@@ -1,7 +1,6 @@
 from billy import db, utils
 
 import numpy
-from numpy import linalg
 
 
 def generate_leg_indexes(state, term, chamber):

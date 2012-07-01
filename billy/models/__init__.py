@@ -9,6 +9,9 @@ from .feeds import FeedEntry
 
 from pymongo.son_manipulator import SONManipulator
 
+__all__ = [db, Metadata, Bill, Event, Legislator, DoesNotExist, Committee,
+           Report, FeedEntry]
+
 
 class Transformer(SONManipulator):
     def transform_outgoing(self, son, collection,

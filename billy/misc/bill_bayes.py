@@ -6,8 +6,8 @@ from nltk.corpus import stopwords
 from nltk.corpus.reader.plaintext import CategorizedPlaintextCorpusReader
 from nltk.classify import NaiveBayesClassifier
 import nltk.classify.util
-from nltk.collocations import BigramCollocationFinder, TrigramCollocationFinder
-from nltk.metrics import BigramAssocMeasures, TrigramAssocMeasures
+from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
 from nltk.probability import FreqDist, ConditionalFreqDist
 
 stopset = set(stopwords.words('english'))

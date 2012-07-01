@@ -1050,7 +1050,6 @@ def newsblogs(request):
         j = tab_index
         k = j + 5
         previous = tab_range[i: j]
-        current = j
         next_ = tab_range[j + 1: k]
         pagination_truncated = True
     elif tab_range_len == 8:
@@ -1114,22 +1113,22 @@ def newsblogs(request):
         entry['id'] = entry['_id']
         entry['host'] = urlparse.urlparse(entry['link']).netloc
 
-        # Now hyperlink the inbox data.
-        # if '_inbox_data' in entry:
-        #     inbox_data = entry['_inbox_data']
-        #     for entity in inbox_data['entities']:
-        #         entity_data = entity['entity_data']
-        #         if entity_data['type'] == 'organization':
-        #             ie_url = 'http://influenceexplorer.com/organization/%s/%s'
-        #             ie_url = ie_url % (entity_data['slug'], entity_data['id'])
-        #             print 'found one!'
-        #         else:
-        #             continue
-        #         summary = entry['summary']
-        #         tmpl = '<a href="%s">%s</a>'
-        #         for string in entity['matched_text']:
-        #             summary = summary.replace(string, tmpl % (ie_url, string))
-        #     entry['summary'] = summary
+    # Now hyperlink the inbox data.
+    # if '_inbox_data' in entry:
+    #     inbox_data = entry['_inbox_data']
+    #     for entity in inbox_data['entities']:
+    #         entity_data = entity['entity_data']
+    #         if entity_data['type'] == 'organization':
+    #             ie_url = 'http://influenceexplorer.com/organization/%s/%s'
+    #             ie_url = ie_url % (entity_data['slug'], entity_data['id'])
+    #             print 'found one!'
+    #         else:
+    #             continue
+    #         summary = entry['summary']
+    #         tmpl = '<a href="%s">%s</a>'
+    #         for string in entity['matched_text']:
+    #             summary = summary.replace(string, tmpl % (ie_url, string))
+    #     entry['summary'] = summary
 
         _entries.append(entry)
 

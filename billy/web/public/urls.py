@@ -22,13 +22,16 @@ urlpatterns = patterns('billy.web.public.views.misc',
         name='get_district'),
 
     # votes & news
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/$',
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/'
+        '(?P<slug>[^/]+)/news/$',
         NewsList.as_view(), name='news_list'),
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/(?P<slug>[^/]+)/news/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/'
+        '(?P<slug>[^/]+)/news/rss/$',
         NewsListFeed(), name='news_list_rss'),
     url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/$',
         VotesList.as_view(), name='votes_list'),
-    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/votes/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/(?P<collection_name>\w+)/(?P<_id>\w+)/'
+        'votes/rss/$',
         VotesListFeed(), name='votes_list_rss'),
 
 )
@@ -66,10 +69,12 @@ urlpatterns += patterns('billy.web.public.views.legislators',
         name='legislators'),
     url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>\w+)/(?P<slug>[^/]*)/$',
         'legislator', name='legislator'),
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)'
+        '/bills/sponsored/$',
         SponsoredBillsList.as_view(), name='legislator_sponsored_bills'),
 
-    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/bills/sponsored/rss/$',
+    url(r'^(?P<abbr>[a-z]{2})/legislators/(?P<_id>[^/]+)/(?P<slug>[^/]+)/'
+        'bills/sponsored/rss/$',
         SponsoredBillsFeed(), name='legislator_sponsored_bills_rss'),
 )
 
