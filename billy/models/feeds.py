@@ -53,9 +53,11 @@ class FeedEntry(Document):
                 _entity_urls.append(url)
 
                 # This is tricky. Need to hyperlink the entity without mangling
-                # other previously hyperlinked strings, like Fiona Ma and Mark Leno.
+                # other previously hyperlinked strings, like Fiona Ma and
+                # Mark Leno.
                 matches = re.finditer(entity_string, summary)
-                replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
+                replacer = lambda m: '<a href="%s">%s</a>' % (url,
+                                                              entity_string)
                 for match in matches:
 
                     # Only hyperlink if no previous hyperlink has been added

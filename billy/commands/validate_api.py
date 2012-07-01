@@ -1,17 +1,16 @@
 import os
 import json
 import random
-import subprocess
 
 from billy import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
 
-from billy.conf import settings, base_arg_parser
 from billy.commands.dump import APIValidator, api_url
 
 import scrapelib
 import validictory
+
 
 class ValidateApi(BaseCommand):
     name = 'validateapi'
@@ -24,8 +23,8 @@ class ValidateApi(BaseCommand):
                   help='directory to use for API schemas (optional)')
 
     def handle(self, args):
-        for metadata in db.metadata.find():
-            validate_api(metadata['abbreviation'], args.schema_dir)
+        for meta in db.metadata.find():
+            validate_api(meta['abbreviation'], args.schema_dir)
 
 
 def get_json_schema(name, schema_dir):

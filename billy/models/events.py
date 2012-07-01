@@ -1,7 +1,7 @@
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
 
-from .base import db, Document, RelatedDocuments, RelatedDocument
+from .base import db, Document
 from .metadata import Metadata
 
 
@@ -18,14 +18,14 @@ class Event(Document):
         for bill in self['related_bills']:
             if 'bill_id' in bill:
                 bills.append(bill['bill_id'])
-        return db.bills.find({"_id": { "$in": bills }})
+        return db.bills.find({"_id": {"$in": bills}})
 
     def committees(self):
         committees = []
         for committee in self['participants']:
             if 'committee_id' in committee:
                 committees.append(committee['committee_id'])
-        return db.committees.find({"_id": { "$in": committees }})
+        return db.committees.find({"_id": {"$in": committees}})
 
     def get_absolute_url(self):
         slug = slugify(truncatewords(self['description'], 10))

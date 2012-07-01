@@ -1,4 +1,3 @@
-import operator
 import itertools
 import collections
 
@@ -6,8 +5,7 @@ import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
-from .base import (db, Document, RelatedDocuments, ListManager, DictManager,
-                   AttrManager, take)
+from .base import (db, Document, RelatedDocuments, ListManager, DictManager)
 from .metadata import Metadata
 
 

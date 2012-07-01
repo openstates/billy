@@ -20,7 +20,7 @@ def worddata_to_text(data):
         with tempfile.NamedTemporaryFile(delete=True) as tmpf:
             tmpf.write(data)
             tmpf.flush()
-            subprocess.check_call(['abiword', '--to=%s' %txtfile, tmpf.name])
+            subprocess.check_call(['abiword', '--to=%s' % txtfile, tmpf.name])
             f = open(txtfile)
             text = f.read()
             tmpf.close()
@@ -29,6 +29,7 @@ def worddata_to_text(data):
         os.remove(txtfile)
         os.close(desc)
     return text.decode('utf8')
+
 
 def text_after_line_numbers(lines):
     text = []
@@ -51,9 +52,9 @@ def _clean_text(text):
         text = text.encode('ascii', 'ignore')
     else:
         text = text.decode('utf8', 'ignore').encode('ascii', 'ignore')
-    text = text.replace(u'\xa0', u' ') # nbsp -> sp
-    text = PUNCTUATION.sub(' ', text)  # strip punctuation
-    text = re.sub('\s+', ' ', text)    # collapse spaces
+    text = text.replace(u'\xa0', u' ')  # nbsp -> sp
+    text = PUNCTUATION.sub(' ', text)   # strip punctuation
+    text = re.sub('\s+', ' ', text)     # collapse spaces
     return text
 
 

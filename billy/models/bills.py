@@ -10,7 +10,7 @@ from billy.conf import settings
 from billy.utils import parse_param_dt
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
-                   ListManager, DictManager, AttrManager, take, DEBUG, logger)
+                   ListManager, AttrManager, take)
 from .metadata import Metadata
 from .utils import CachedAttribute
 
@@ -396,7 +396,7 @@ class Bill(Document):
                                            _filter.pop('subjects')['$all']))
             if 'sponsors.leg_id' in _filter:
                 es_terms.append(pyes.TermFilter('sponsors',
-                                                _filter.pop('sponsors.leg_id')))
+                                            _filter.pop('sponsors.leg_id')))
 
             # add terms
             if es_terms:

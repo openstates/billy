@@ -53,7 +53,7 @@ class Event(SourcedObject):
         self['documents'].append(d)
 
     def add_related_bill(self, bill_id, **kwargs):
-        kwargs.update({ "bill_id" : bill_id })
+        kwargs.update({"bill_id": bill_id})
         self['related_bills'].append(kwargs)
 
     def add_participant(self, type, participant, **kwargs):

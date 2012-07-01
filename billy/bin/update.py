@@ -48,9 +48,11 @@ def _get_configured_scraper(scraper_type, options, metadata):
                         strict_validation=options.strict,
                         fastmode=options.fastmode)
 
+
 def _is_old_scrape(f):
     argspec = inspect.getargspec(f)
     return 'chamber' in argspec.args
+
 
 def _run_scraper(scraper_type, options, metadata):
     """
@@ -65,7 +67,6 @@ def _run_scraper(scraper_type, options, metadata):
             "noscraper": True,
             "end_time": dt.datetime.utcnow()
         }]
-
 
     runs = []
 
@@ -251,7 +252,8 @@ def main(old_scrape_compat=False):
         # configure oyster
         if settings.ENABLE_OYSTER:
             from oyster.conf import settings as oyster_settings
-            oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = module.document_class
+            oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = \
+                    module.document_class
 
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
@@ -350,7 +352,7 @@ def main(old_scrape_compat=False):
                         run_record += _run_scraper(stype, args, metadata)
             except Exception as e:
                 _traceback = _, _, exc_traceback = sys.exc_info()
-                run_record += [{"exception": e, "type": stype }]
+                run_record += [{"exception": e, "type": stype}]
                 lex = e
 
             exec_end = dt.datetime.utcnow()

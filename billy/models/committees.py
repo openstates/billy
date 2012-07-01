@@ -1,10 +1,8 @@
-import itertools
-
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
-                   ListManager, DEBUG, logger)
+                   ListManager)
 from .metadata import Metadata
 
 
@@ -32,7 +30,8 @@ class CommitteeMemberManager(ListManager):
             except AttributeError:
                 ids = filter(None, [obj['leg_id'] for obj in members])
                 spec = {'_id': {'$in': ids}}
-                objs = dict((obj['_id'], obj) for obj in db.legislators.find(spec))
+                objs = dict((obj['_id'], obj) for obj in
+                            db.legislators.find(spec))
                 self._legislators = objs
         for member in members:
             _id = member['leg_id']
@@ -73,4 +72,3 @@ class Committee(Document):
         url = urlresolvers.reverse('committee', args=args)
         slug = slugify(self.display_name())
         return '%s%s/' % (url, slug)
-

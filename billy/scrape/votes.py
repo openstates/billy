@@ -116,20 +116,19 @@ class Vote(SourcedObject):
             # If we have *any* specific votes, then validate the counts
             # for all types.
             for type in ('yes', 'no', 'other'):
-                votes = len(self[type+'_votes'])
-                count = self[type+'_count']
+                votes = len(self[type + '_votes'])
+                count = self[type + '_count']
                 if votes != count:
                     try:
-                        raise ValueError('bad %s vote count for %s %s votes=%s count=%s' %
-                                         (type, self['bill_id'], self['motion'],
-                                          votes, count))
+                        raise ValueError('bad %s vote count for %s %s votes=%s'
+                                         'count=%s' %
+                             (type, self['bill_id'], self['motion'],
+                              votes, count))
                     except KeyError:
                         # self-bill_id-might be missing under some
                         # cases. Warn an pass the error.
                         # self.warning("XXX: Warning! Missing bill_id!")
                         pass
-
-
 
     def get_filename(self):
         filename = '%s_%s_%s_seq%s.json' % (self['session'],

@@ -15,6 +15,7 @@ scraper = scrapelib.Scraper(follow_robots=False)
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 
+
 class DownloadPhotos(BaseCommand):
 
     name = 'download-photos'
@@ -56,9 +57,9 @@ class DownloadPhotos(BaseCommand):
                 # error retrieving photo, skip it
                 try:
                     tmpname, resp = scraper.urlretrieve(leg['photo_url'])
-                except scrapelib.HTTPError as he:
+                except scrapelib.HTTPError:
                     continue
-                except Exception as e:
+                except Exception:
                     continue
 
                 # original size, standardized filenames
