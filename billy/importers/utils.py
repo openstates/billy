@@ -101,6 +101,7 @@ def insert_with_id(obj):
         except pymongo.errors.DuplicateKeyError:
             new_id += 1
 
+
 def _timestamp_to_dt(timestamp):
     tstruct = time.localtime(timestamp)
     dt = datetime.datetime(*tstruct[0:6])
@@ -125,8 +126,8 @@ def compare_committee(ctty1, ctty2):
         obj = re.sub("\s+", " ", obj)
         return obj
     check_both = [
-        ( "", "" ),
-        ( "&", "and" )
+        ("", ""),
+        ("&", "and")
     ]
     for old, new in check_both:
         c1 = ctty1.replace(old, new)

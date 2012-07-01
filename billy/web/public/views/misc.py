@@ -141,7 +141,8 @@ class NewsList(RelatedObjectsList):
     statenav_active = 'bills'
     collection_name = 'entries'
     description_template = '''
-        news and blog entries mentioning <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
+        news and blog entries mentioning
+        <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
         '''
     title_template = '''
         New and blogs mentioning {{obj.display_name}} -

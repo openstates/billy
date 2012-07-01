@@ -4,8 +4,10 @@ from billy.importers.metadata import import_metadata, PRESERVED_FIELDS
 
 from nose.tools import with_setup
 
+
 def drop_metadata():
     db.metadata.drop()
+
 
 @with_setup(drop_metadata)
 def test_import_metadata():

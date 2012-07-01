@@ -191,7 +191,7 @@ class BillSearchHandler(BillyHandler):
         if page:
             page = int(page)
             per_page = int(per_page)
-            query = query.limit(per_page).skip(per_page*(page-1))
+            query = query.limit(per_page).skip(per_page * (page - 1))
         else:
             # limit response size
             if query.count() > 10000:
@@ -468,7 +468,8 @@ class LegislatorGeoHandler(BillyHandler):
                 filters.append({'state': state,
                                 'district': districts[0]['name'],
                                 'chamber': chamber})
-                boundary_mapping[(state, districts[0]['name'], chamber)] = census_name
+                boundary_mapping[(state, districts[0]['name'],
+                                  chamber)] = census_name
 
         if not filters:
             return []

@@ -24,6 +24,7 @@ def sources(obj):
 def plusfield(object, key):
     return object['+' + key]
 
+
 @register.filter
 def trunc(string):
     if len(string) > 75:
@@ -31,9 +32,11 @@ def trunc(string):
     else:
         return string
 
+
 @register.filter
 def underscore_field(object, key):
     return object['_' + key]
+
 
 @register.filter
 def decimal_format(value, TWOPLACES=Decimal(100) ** -2):

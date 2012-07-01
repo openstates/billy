@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import re
 import glob
 import json
 import logging
@@ -66,6 +65,7 @@ def import_votes(data_dir):
 
     logger.info('imported %s vote files' % len(paths))
     return votes
+
 
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
@@ -140,7 +140,8 @@ def import_bill(data, votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
-            cid = get_committee_id(level, abbr, data['chamber'], sponsor['name'])
+            cid = get_committee_id(level, abbr, data['chamber'],
+                                   sponsor['name'])
             if not cid is None:
                 sponsor['committee_id'] = cid
 
@@ -271,6 +272,7 @@ def import_bills(abbr, data_dir):
 
     return counts
 
+
 def populate_current_fields(level, abbr):
     """
     Set/update _current_term and _current_session fields on all bills
@@ -395,6 +397,7 @@ def get_committee_id(level, abbr, chamber, committee):
         __committee_ids[key] = comm_id
 
     return __committee_ids[key]
+
 
 def get_committee_id_alt(level, abbr, name, chamber):
     spec = {"state": abbr, "chamber": chamber}

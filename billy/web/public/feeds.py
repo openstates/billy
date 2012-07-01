@@ -206,4 +206,3 @@ class StateEventsFeed(GenericListFeed):
 
     def item_title(self, item):
         return item['when'].strftime('%B %d, %Y')
-

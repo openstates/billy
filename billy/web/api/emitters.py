@@ -81,6 +81,7 @@ def clean_for_ical(obj):
     if not obj is None:
         return obj.encode("ascii", "replace")
 
+
 class ICalendarEmitter(Emitter):
     """
     Emits an iCalendar-format calendar from a list of 'event' objects.

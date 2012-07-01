@@ -1,4 +1,3 @@
-import re
 import urllib
 import urlparse
 import logging

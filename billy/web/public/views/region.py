@@ -40,7 +40,7 @@ def state(request, abbr):
     # Maybe later, mapreduce instead?
     party_counts = defaultdict(lambda: defaultdict(int))
     for leg in legislators:
-        if 'chamber' in leg: # if statement to exclude lt. governors
+        if 'chamber' in leg:    # if statement to exclude lt. governors
             party_counts[leg['chamber']][leg['party']] += 1
 
     chambers = []
@@ -62,8 +62,10 @@ def state(request, abbr):
         # committees
         res['committees_count'] = meta.committees({'chamber': chamber}).count()
 
-        res['latest_bills'] = meta.bills({'chamber': chamber}).sort([('action_dates.first', -1)]).limit(2)
-        res['passed_bills'] = meta.bills({'chamber': chamber}).sort([('action_dates.passed_' + chamber, -1)]).limit(2)
+        res['latest_bills'] = meta.bills({'chamber': chamber}).sort(
+            [('action_dates.first', -1)]).limit(2)
+        res['passed_bills'] = meta.bills({'chamber': chamber}).sort(
+            [('action_dates.passed_' + chamber, -1)]).limit(2)
 
         chambers.append(res)
 
@@ -180,4 +182,3 @@ class ShowMoreLegislators(ListViewBase):
         legislator_results = db.legislators.find(spec)
         return CursorPaginator(legislator_results, show_per_page=10,
                                page=int(self.request.GET.get('page', 1)))
-

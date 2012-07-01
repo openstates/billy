@@ -60,7 +60,8 @@ def get_filter_bills_form(metadata):
                               metadata.legislators()]
             _sessions = [(s['id'], s['name']) for s in metadata.sessions()]
 
-            BILL_TYPES = [('', '')] + zip(_bill_types, [s.title() for s in _bill_types])
+            BILL_TYPES = [('', '')] + zip(_bill_types, [s.title()
+                                                        for s in _bill_types])
             BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
             BILL_SPONSORS = [('', '')] + _bill_sponsors
             SESSIONS = [('', '')] + _sessions
@@ -76,8 +77,10 @@ def get_filter_bills_form(metadata):
             status = forms.ChoiceField(
                         choices=(
                             ('', ''),
-                            ('passed_lower', 'Passed ' + metadata['lower_chamber_name']),
-                            ('passed_upper', 'Passed ' + metadata['upper_chamber_name']),
+                            ('passed_lower',
+                             'Passed ' + metadata['lower_chamber_name']),
+                            ('passed_upper',
+                             'Passed ' + metadata['upper_chamber_name']),
                             ('signed', 'Signed'),
                         ), required=False)
 
@@ -89,7 +92,8 @@ def get_filter_bills_form(metadata):
             _bill_types = db.bills.distinct('type')
             _bill_subjects = db.bills.distinct('subjects')
 
-            BILL_TYPES = [('', '')] + zip(_bill_types, [s.title() for s in _bill_types])
+            BILL_TYPES = [('', '')] + zip(_bill_types,
+                                          [s.title() for s in _bill_types])
             BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
 
             chamber = forms.MultipleChoiceField(
@@ -112,8 +116,8 @@ def get_filter_bills_form(metadata):
 
         subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
                                              required=False,
-                    #widget=forms.CheckboxSelectMultiple()
-                    #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
+                #widget=forms.CheckboxSelectMultiple()
+                #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
                     )
 
     return FilterBillsForm

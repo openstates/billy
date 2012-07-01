@@ -18,8 +18,6 @@ from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict, OrderedDict
 
-from bson.objectid import ObjectId
-
 from django.http import Http404, HttpResponse
 from django.core import urlresolvers
 from django.template.loader import render_to_string
@@ -60,7 +58,7 @@ def _csv_response(request, csv_name, columns, data, abbr):
     else:
         return render(request, 'billy/generic_table.html',
                       {'columns': columns,
-                       'data':data, 'metadata': metadata(abbr)})
+                       'data': data, 'metadata': metadata(abbr)})
 
 
 def browse_index(request, template='billy/index.html'):
@@ -94,10 +92,10 @@ def overview(request, abbr):
 
     try:
         runlog = db.billy_runs.find({
-            "scraped.state" : abbr
-        }).sort( "scraped.started", direction=pymongo.DESCENDING )[0]
+            "scraped.state": abbr
+        }).sort("scraped.started", direction=pymongo.DESCENDING)[0]
         # This hack brought to you by Django's inability to do subtraction
-        # in the template :)
+        # in the template:)
         runlog['scraped']['time_delta'] = (runlog['scraped']['ended'] -
                                            runlog['scraped']['started'])
         context['runlog'] = runlog
@@ -118,6 +116,7 @@ def metadata_json(request, abbr):
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
     obj = metadata(abbr)
     obj_json = json.dumps(obj, indent=4, cls=JSONDateEncoder)
+
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
         return tmpl % (val, val)
@@ -136,18 +135,17 @@ def metadata_json(request, abbr):
 
 def run_detail_graph_data(request, abbr):
 
-    def rolling_average( oldAverage, newItem, oldAverageCount ):
+    def rolling_average(oldAverage, newItem, oldAverageCount):
         """
         Simple, unweighted rolling average. If you don't get why we have
         to factor the oldAverageCount back in, it's because new values will
         have as much weight as the last sum combined if you put it over 2.
         """
         return float(
-            ( newItem +  ( oldAverageCount * ( oldAverage ) ) ) /
-                        ( oldAverageCount + 1 )
-            )
+            (newItem + (oldAverageCount * (oldAverage))) /
+                        (oldAverageCount + 1))
 
-    def _do_pie( runs ):
+    def _do_pie(runs):
         excs = {}
         for run in runs:
             if "failure" in run:
@@ -160,11 +158,11 @@ def run_detail_graph_data(request, abbr):
                             excs[ex['type']] = 1
         ret = []
         for l in excs:
-            ret.append([ l, excs[l] ])
+            ret.append([l, excs[l]])
         return ret
 
-    def _do_stacked( runs ):
-        fields = [ "legislators", "bills", "votes", "committees" ]
+    def _do_stacked(runs):
+        fields = ["legislators", "bills", "votes", "committees"]
         ret = {}
         for field in fields:
             ret[field] = []
@@ -180,141 +178,123 @@ def run_detail_graph_data(request, abbr):
                     if not g:
                         raise KeyError("Missing kruft")
 
-                    delt = ( g['end_time'] - g['start_time'] ).total_seconds()
+                    delt = (g['end_time'] - g['start_time']).total_seconds()
                     ret[field].append(delt)
-                except KeyError: # XXX: THIS MESSES STUFF UP. REVISE.
+                except KeyError:        # XXX: THIS MESSES STUFF UP. REVISE.
                     ret[field].append(0)
         l = []
         for line in fields:
             l.append(ret[line])
         return l
 
-    def _do_digest( runs ):
-        oldAverage      = 0
+    def _do_digest(runs):
+        oldAverage = 0
         oldAverageCount = 0
-        data = { "runs" : [], "avgs" : [], "stat" : [] }
+        data = {"runs": [], "avgs": [], "stat": []}
         for run in runs:
             timeDelta = (
                 run['scraped']['ended'] - run['scraped']['started']
             ).total_seconds()
-            oldAverage = rolling_average( oldAverage, timeDelta, oldAverageCount )
+            oldAverage = rolling_average(oldAverage, timeDelta,
+                                         oldAverageCount)
             oldAverageCount += 1
             stat = "Failure" if "failure" in run else ""
 
             s = time.mktime(run['scraped']['started'].timetuple())
 
-            data['runs'].append([ s, timeDelta,  stat ])
-            data['avgs'].append([ s, oldAverage, '' ])
-            data['stat'].append( stat )
+            data['runs'].append([s, timeDelta, stat])
+            data['avgs'].append([s, oldAverage, ''])
+            data['stat'].append(stat)
         return data
     history_count = 50
 
-    default_spec = { "scraped.state" : abbr }
-    data = {
-        "lines"   : {},
-        "pies"    : {},
-        "stacked" : {},
-        "title"   : {}
-    }
+    default_spec = {"scraped.state": abbr}
+    data = {"lines": {}, "pies": {}, "stacked": {}, "title": {}}
 
     speck = {
-        "default-stacked" : { "run" : _do_stacked,
-            "title" : "Last %s runs" % ( history_count ),
-            "type" : "stacked",
-            "spec" : {}
+        "default-stacked": {"run": _do_stacked,
+            "title": "Last %s runs" % (history_count),
+            "type": "stacked",
+            "spec": {}
         },
-        #"default" : { "run" : _do_digest,
-        #    "title" : "Last %s runs" % ( history_count ),
-        #    "type" : "lines",
-        #    "spec" : {}
+        #"default": {"run": _do_digest,
+        #    "title": "Last %s runs" % (history_count),
+        #    "type": "lines",
+        #    "spec": {}
         #},
-        #"clean"   : { "run" : _do_digest,
-        #    "title" : "Last %s non-failed runs" % ( history_count ),
-        #    "type" : "lines",
-        #    "spec" : {
-        #        "failure" : { "$exists" : False }
+        #"clean": {"run": _do_digest,
+        #    "title": "Last %s non-failed runs" % (history_count),
+        #    "type": "lines",
+        #    "spec": {
+        #        "failure": {"$exists": False }
         #    }
         #},
-        #"failure"   : { "run" : _do_digest,
-        #    "title" : "Last %s failed runs" % ( history_count ),
-        #    "type" : "lines",
-        #    "spec" : {
-        #        "failure" : { "$exists" : True  }
+        #"failure": {"run": _do_digest,
+        #    "title": "Last %s failed runs" % (history_count),
+        #    "type": "lines",
+        #    "spec": {
+        #        "failure": {"$exists": True  }
         #    }
         #},
-        "falure-pie": { "run" : _do_pie,
-            "title" : "Digest of what exceptions have been thrown",
-            "type" : "pies",
-            "spec" : {
-                "failure" : { "$exists" : True  }
+        "falure-pie": {"run": _do_pie,
+            "title": "Digest of what exceptions have been thrown",
+            "type": "pies",
+            "spec": {
+                "failure": {"$exists": True}
             }
         },
     }
 
     for line in speck:
         query = speck[line]["spec"].copy()
-        query.update( default_spec )
+        query.update(default_spec)
         runs = db.billy_runs.find(query).sort(
-            "scrape.start", direction=pymongo.ASCENDING )[:history_count]
+            "scrape.start", direction=pymongo.ASCENDING)[:history_count]
         data[speck[line]['type']][line] = speck[line]["run"](runs)
         data['title'][line] = speck[line]['title']
 
     return HttpResponse(
-        json.dumps( data, cls=JSONDateEncoder ),
+        json.dumps(data, cls=JSONDateEncoder),
         #content_type="text/json"
-        content_type="text/plain"
-    )
+        content_type="text/plain")
 
 
 def run_detail(request, obj=None):
     try:
         run = db.billy_runs.find({
-            "_id" : ObjectId(obj)
+            "_id": ObjectId(obj)
         })[0]
     except IndexError as e:
         return render(request, 'billy/run_empty.html', {
-            "warning" : "No records exist. Fetch returned a(n) %s" % (
-                    e.__class__.__name__
-            )
-        })
+            "warning": "No records exist. Fetch returned a(n) %s" % (
+                    e.__class__.__name__)})
     return render(request, 'billy/run_detail.html', {
-        "run" : run,
-        "metadata" : {
-            "abbreviation" : run['state'],
-            "name"         : run['state']
-        }
+        "run": run,
+        "metadata": {"abbreviation": run['state'], "name": run['state']}
     })
 
 
 def state_run_detail(request, abbr):
     try:
         allruns = db.billy_runs.find({
-            "scraped.state" : abbr
-        }).sort( "scraped.started", direction=pymongo.DESCENDING )[:25]
+            "scraped.state": abbr
+        }).sort("scraped.started", direction=pymongo.DESCENDING)[:25]
         runlog = allruns[0]
     except IndexError as e:
         return render(request, 'billy/run_empty.html', {
-            "warning" : "No records exist. Fetch returned a(n) %s" % (
-                    e.__class__.__name__
-            )
-        })
+            "warning": "No records exist. Fetch returned a(n) %s" % (
+                    e.__class__.__name__)})
 
     # pre-process goodies for the template
     runlog['scraped']['t_delta'] = (
-        runlog['scraped']['ended'] - runlog['scraped']['started']
-    )
+        runlog['scraped']['ended'] - runlog['scraped']['started'])
     for entry in runlog['scraped']['run_record']:
         if not "exception" in entry:
             entry['t_delta'] = (
-                entry['end_time'] - entry['start_time']
-            )
+                entry['end_time'] - entry['start_time'])
 
-    context = {
-        "runlog"   : runlog,
-        "allruns"  : allruns,
-        "state"    : abbr,
-        "metadata" : metadata(abbr),
-    }
+    context = {"runlog": runlog, "allruns": allruns, "state": abbr,
+               "metadata": metadata(abbr)}
 
     if "failure" in runlog:
         context["alert"] = dict(type='error',
@@ -329,10 +309,11 @@ for the exception and error message.
 
 @never_cache
 def bills(request, abbr):
-    meta, report = _meta_and_report(abbr)    
+    meta, report = _meta_and_report(abbr)
 
-    terms = list(chain.from_iterable(map(itemgetter('sessions'), 
+    terms = list(chain.from_iterable(map(itemgetter('sessions'),
                                          meta['terms'])))
+
     def sorter(item, index=terms.index, len_=len(terms)):
         '''Sort session strings in order described in state's metadata.'''
         session, data = item
@@ -472,7 +453,8 @@ def bills(request, abbr):
                 sum_ = 'n/a'
             v.append(sum_)
 
-        rowdata = [((r, href_params.get(r)), cells) for (r, cells) in rows.items()]
+        rowdata = [((r, href_params.get(r)), cells)
+                   for (r, cells) in rows.items()]
         tabledata['rowdata'] = rowdata
 
         tables.append(tabledata)
@@ -534,6 +516,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
         fields_key = '%s.%s' % (object_type, key)
         objs = collection.find(spec, {fields_key: 1})
         objs = imap(itemgetter(object_type), objs)
+
         def get_objects(objs):
             for _list in objs:
                 for _obj in _list:
@@ -553,12 +536,13 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
 
     total = len(counter)
     objs = sorted(counter, key=counter.get, reverse=True)
-    objs = ((obj, counter[obj], counter[obj]/total, params(obj)) for obj in objs)
+    objs = ((obj, counter[obj], counter[obj] / total, params(obj))
+            for obj in objs)
     return render(request, 'billy/summary_object_key.html', locals())
 
 
 def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
-                            collections=("bills", "legislators", "committees")):
+                        collections=("bills", "legislators", "committees")):
     meta = metadata(abbr)
     session = request.GET['session']
     object_type = request.GET['object_type']
@@ -614,7 +598,6 @@ def object_json(request, collection, _id,
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
     keys = sorted(obj)
-
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
@@ -678,7 +661,7 @@ def district_stub(request, abbr):
 
     data = []
     for key, count in counts.iteritems():
-        chamber, district =  key
+        chamber, district = key
         data.append((abbr, chamber, district, count, ''))
 
     data.sort(key=keyfunc)
@@ -713,17 +696,13 @@ def random_bill(request, abbr):
         modi_flag = request.GET[random_flag]
 
     basic_specs = {
-        "no_versions" : { 'versions' : [] },
-        "no_sponsors" : { 'sponsors' : [] },
-        "no_actions"  : { 'actions'  : [] }
+        "no_versions": {'versions': []},
+        "no_sponsors": {'sponsors': []},
+        "no_actions": {'actions': []}
     }
 
     default = True
-    spec = {
-        'level' : level,
-        level   : abbr.lower(),
-        'session': latest_session
-    }
+    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
 
     if modi_flag == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr}
@@ -733,15 +712,13 @@ def random_bill(request, abbr):
 
     if modi_flag in basic_specs:
         default = False
-        spec.update( basic_specs[modi_flag] )
-        spec.pop('session') # all sessions
+        spec.update(basic_specs[modi_flag])
+        spec.pop('session')     # all sessions
 
     if modi_flag == 'current_term':
         default = False
         curTerms = meta['terms'][-1]['sessions']
-        spec['session'] = {
-            "$in" : curTerms
-        }
+        spec['session'] = {"$in": curTerms}
 
     count = db.bills.find(spec).count()
     if count:
@@ -757,14 +734,8 @@ def random_bill(request, abbr):
         # Bill was none (see above).
         bill_id = None
 
-    context = {
-        'bill'   : bill,
-        'id': bill_id,
-        'random' : True,
-        'state' : abbr.lower(),
-        'warning': warning,
-        'metadata': meta,
-    }
+    context = {'bill': bill, 'id': bill_id, 'random': True,
+               'state': abbr.lower(), 'warning': warning, 'metadata': meta}
 
     if default and modi_flag != "":
         context["warning"] = \
@@ -804,7 +775,7 @@ def bill(request, abbr, session, id):
     meta = metadata(abbr)
     level = meta['level']
     bill = find_bill({'level': level, level: abbr,
-                      'session':session, 'bill_id':id.upper()})
+                      'session': session, 'bill_id': id.upper()})
     if not bill:
         raise Http404
 
@@ -868,7 +839,8 @@ def legislator(request, id):
     meta = metadata(leg[leg['level']])
 
     return render(request, 'billy/legislator.html', {'leg': leg,
-                                                        'metadata': meta})
+                                                     'metadata': meta})
+
 
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})
@@ -902,6 +874,7 @@ def retire_legislator(request, id):
                                                      'alert': alert,
                                                     })
 
+
 def committees(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']
@@ -916,12 +889,13 @@ def committees(request, abbr):
     lower_coms = sorted(lower_coms)
     joint_coms = sorted(joint_coms)
 
-    return render( request, 'billy/committees.html', {
+    return render(request, 'billy/committees.html', {
         'upper_coms': upper_coms,
         'lower_coms': lower_coms,
         'joint_coms': joint_coms,
         'metadata': meta,
     })
+
 
 def delete_committees(request):
     ids = request.POST.getlist('committees')
@@ -929,13 +903,15 @@ def delete_committees(request):
     abbr = committees[0][committees[0]['level']]
     if not request.POST.get('confirm'):
         return render(request, 'billy/delete_committees.html',
-                      { 'abbr': abbr, 'committees': committees })
+                      {'abbr': abbr, 'committees': committees})
     else:
         db.committees.remove({'_id': {'$in': ids}}, safe=True)
         return redirect('admin_committees', abbr)
 
+
 def mom_index(request):
-    return render(request, 'billy/mom_index.html' )
+    return render(request, 'billy/mom_index.html')
+
 
 def mom_commit(request):
     actions = []
@@ -943,37 +919,37 @@ def mom_commit(request):
     leg1 = request.POST['leg1']
     leg2 = request.POST['leg2']
 
-    leg1 = db.legislators.find_one({'_id' : leg1 })
-    actions.append( "Loaded Legislator '%s as `leg1''" % leg1['leg_id'] )
-    leg2 = db.legislators.find_one({'_id' : leg2 })
-    actions.append( "Loaded Legislator '%s as `leg2''" % leg2['leg_id'] )
+    leg1 = db.legislators.find_one({'_id': leg1})
+    actions.append("Loaded Legislator '%s as `leg1''" % leg1['leg_id'])
+    leg2 = db.legislators.find_one({'_id': leg2})
+    actions.append("Loaded Legislator '%s as `leg2''" % leg2['leg_id'])
 
     # XXX: Re-direct on None
 
-    merged, remove = merge_legislators( leg1, leg2 )
-    actions.append( "Merged Legislators as '%s'" % merged['leg_id'] )
+    merged, remove = merge_legislators(leg1, leg2)
+    actions.append("Merged Legislators as '%s'" % merged['leg_id'])
 
-    db.legislators.remove({ '_id' : remove }, safe=True)
-    actions.append( "Deleted Legislator (which had the ID of %s)" %
-        remove )
+    db.legislators.remove({'_id': remove}, safe=True)
+    actions.append("Deleted Legislator (which had the ID of %s)" % remove)
 
-    db.legislators.save( merged, safe=True )
-    actions.append( "Saved Legislator %s with merged data" % merged['leg_id'] )
+    db.legislators.save(merged, safe=True)
+    actions.append("Saved Legislator %s with merged data" % merged['leg_id'])
 
     for attr in merged:
-        merged[attr] = _mom_mangle( merged[attr] )
+        merged[attr] = _mom_mangle(merged[attr])
 
-    return render( request, 'billy/mom_commit.html', {
-            "merged"  : merged,
-            "actions" : actions
+    return render(request, 'billy/mom_commit.html', {
+            "merged": merged,
+            "actions": actions
         })
 
-def _mom_attr_diff( merge, leg1, leg2 ):
+
+def _mom_attr_diff(merge, leg1, leg2):
     mv_info = {
-        "1" : "Root Legislator",
-        "2" : "Duplicate Legislator",
-        "U" : "Unchanged",
-        "N" : "New Information"
+        "1": "Root Legislator",
+        "2": "Duplicate Legislator",
+        "U": "Unchanged",
+        "N": "New Information"
     }
 
     mv = {}
@@ -991,19 +967,17 @@ def _mom_attr_diff( merge, leg1, leg2 ):
             mv[key] = "2"
         else:
             mv[key] = "N"
-    return ( mv, mv_info )
+    return (mv, mv_info)
 
-def _mom_mangle( attr ):
-    args    = {
-        "sort_keys" : True,
-        "indent"    : 4,
-        "cls"       : JSONDateEncoder
-    }
-    if isinstance( attr, types.ListType ):
-        return json.dumps( attr, **args )
-    if isinstance( attr, types.DictType ):
-        return json.dumps( attr, **args )
+
+def _mom_mangle(attr):
+    args = {"sort_keys": True, "indent": 4, "cls": JSONDateEncoder}
+    if isinstance(attr, types.ListType):
+        return json.dumps(attr, **args)
+    if isinstance(attr, types.DictType):
+        return json.dumps(attr, **args)
     return attr
+
 
 def mom_merge(request):
     leg1 = "leg1"
@@ -1012,48 +986,42 @@ def mom_merge(request):
     leg1 = request.GET[leg1]
     leg2 = request.GET[leg2]
 
-    leg1_db  = db.legislators.find_one({'_id' : leg1})
-    leg2_db  = db.legislators.find_one({'_id' : leg2})
+    leg1_db = db.legislators.find_one({'_id': leg1})
+    leg2_db = db.legislators.find_one({'_id': leg2})
 
-    if leg1_db == None or leg2_db == None: # XXX: Break this out into it's own
-        #                                         error page.
+    # XXX: break this out into its own error page
+    if leg1_db == None or leg2_db == None:
         nonNull = leg1_db if leg1_db != None else leg2_db
         if nonNull != None:
-            nonID   = leg1    if nonNull['_id'] == leg1 else leg2
+            nonID = leg1    if nonNull['_id'] == leg1 else leg2
         else:
-            nonID   = None
+            nonID = None
 
-        return render(request, 'billy/mom_error.html', {
-            "leg1"    : leg1,
-            "leg2"    : leg2,
-            "leg1_db" : leg1_db,
-            "leg2_db" : leg2_db,
-            "same"    : nonNull,
-            "sameid"  : nonID
-        })
+        return render(request, 'billy/mom_error.html', {"leg1": leg1,
+                                                        "leg2": leg2,
+                                                        "leg1_db": leg1_db,
+                                                        "leg2_db": leg2_db,
+                                                        "same": nonNull,
+                                                        "sameid": nonID})
 
     leg1, leg2 = leg1_db, leg2_db
-    merge, toRemove = merge_legislators( leg1, leg2 )
-    mv, mv_info = _mom_attr_diff( merge, leg1, leg2 )
+    merge, toRemove = merge_legislators(leg1, leg2)
+    mv, mv_info = _mom_attr_diff(merge, leg1, leg2)
 
-    for foo in [ leg1, leg2, merge ]:
+    for foo in [leg1, leg2, merge]:
         for attr in foo:
-            foo[attr] = _mom_mangle( foo[attr] )
+            foo[attr] = _mom_mangle(foo[attr])
 
     return render(request, 'billy/mom_merge.html', {
-       'leg1'   : leg1,
-       'leg2'   : leg2,
-       'merge'  : merge,
-       'merge_view'      : mv,
-       'remove'          : toRemove,
-       'merge_view_info' : mv_info })
+        'leg1': leg1, 'leg2': leg2, 'merge': merge, 'merge_view': mv,
+        'remove': toRemove, 'merge_view_info': mv_info})
 
 
 def newsblogs(request):
     '''
     Demo view for news/blog aggregation.
-    ''' 
-    
+    '''
+
     # Pagination insanity.
     total_count = db.feed_entries.count()
     limit = int(request.GET.get('limit', 6))
@@ -1093,7 +1061,7 @@ def newsblogs(request):
         if mod == 2:
             i = tab_range_len / 2
         else:
-            i = (tab_range_len - 1)/ 2
+            i = (tab_range_len - 1) / 2
         previous = tab_range[:i]
         next_ = tab_range[i:]
 
@@ -1123,7 +1091,7 @@ def newsblogs(request):
         _entity_strings = []
         _entity_ids = []
         _entity_urls = []
-        
+
         _done = []
         if entity_strings:
             for entity_string, _id in zip(entity_strings, entity_ids):
@@ -1134,10 +1102,12 @@ def newsblogs(request):
                     _entity_strings.append(entity_string)
                     _entity_ids.append(_id)
                 entity_type = entity_types[_id[2]]
-                url = urlresolvers.reverse('object_json', args=[entity_type, _id])
+                url = urlresolvers.reverse('object_json',
+                                           args=[entity_type, _id])
                 _entity_urls.append(url)
-                summary = summary.replace(entity_string, 
-                                '<b><a href="%s">%s</a></b>' % (url, entity_string))
+                summary = summary.replace(entity_string,
+                                '<b><a href="%s">%s</a></b>' % (url,
+                                                                entity_string))
             entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
             entry['summary'] = summary
             entry['entity_data'] = entity_data
@@ -1160,10 +1130,8 @@ def newsblogs(request):
         #         for string in entity['matched_text']:
         #             summary = summary.replace(string, tmpl % (ie_url, string))
         #     entry['summary'] = summary
-        
+
         _entries.append(entry)
-
-
 
     return render(request, 'billy/newsblogs.html', {
         'entries': _entries,

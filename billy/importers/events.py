@@ -7,7 +7,6 @@ import json
 
 from billy import db
 from billy.importers.utils import prepare_obj, update, next_big_id
-from billy.scrape.events import Event
 from billy.importers.utils import compare_committee
 from billy.importers.utils import fix_bill_id
 
@@ -35,6 +34,7 @@ def _insert_with_id(event):
 
     return id
 
+
 def get_committee_id(level, abbr, name, chamber):
     spec = {"state": abbr}
     comms = db.committees.find(spec)
@@ -43,6 +43,7 @@ def get_committee_id(level, abbr, name, chamber):
         if compare_committee(name, c):
             return committee['_id']
     return None
+
 
 def import_events(abbr, data_dir, import_actions=False):
     data_dir = os.path.join(data_dir, abbr)
@@ -54,7 +55,7 @@ def import_events(abbr, data_dir, import_actions=False):
         for committee in data['participants']:
             cttyid = get_committee_id(data['level'], data['state'],
                                       committee['participant'],
-                                      committee['chamber'] )
+                                      committee['chamber'])
             if cttyid:
                 committee['committee_id'] = cttyid
 

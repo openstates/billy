@@ -1,5 +1,4 @@
 import unittest
-from random import choice
 
 from billy.models import Bill, Metadata, Legislator
 from billy.models.base import _model_registry
