@@ -3,16 +3,25 @@ import os
 import glob
 import json
 import logging
+from time import time
 from collections import defaultdict
 
 from billy.conf import settings
 from billy.utils import metadata, term_for_session
+from billy.scrape import JSONDateEncoder
 from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
                                    next_big_id, oysterize, fix_bill_id,
                                    compare_committee)
+
+if hasattr(settings, "ENABLE_GIT") and settings.ENABLE_GIT:
+    from dulwich.repo import Repo
+    from dulwich.objects import Blob
+    from dulwich.objects import Tree
+    from dulwich.objects import Commit, parse_timezone
+
 
 import pymongo
 
@@ -66,6 +75,75 @@ def import_votes(data_dir):
     logger.info('imported %s vote files' % len(paths))
     return votes
 
+
+git_active_repo = None
+git_active_commit = None
+git_active_tree = None
+HEAD = None
+
+def git_add_bill(data):
+    if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
+        return
+
+    global git_active_repo
+    global git_active_tree
+    global git_active_commit
+
+    bill = json.dumps(data,
+                      cls=JSONDateEncoder,
+                      sort_keys=True,
+                      indent=4)
+    spam = Blob.from_string(bill)
+    bid = str(data['_id'])
+    git_active_repo.object_store.add_object(spam)
+    git_active_tree[bid] = (0100644, spam.id)
+    git_active_tree.check()
+    print "added %s - %s" % ( data['_id'], spam.id )
+
+def git_commit(message):
+    if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
+        return
+
+    print "Commiting import as '%s'" % ( message )
+
+    global git_active_repo
+    global git_active_tree
+    global git_active_commit
+    global HEAD
+    repo = git_active_repo
+
+    c = git_active_commit
+
+    print c
+
+    c.tree = git_active_tree.id
+    c.parents = [HEAD]
+    repo.object_store.add_object(git_active_tree)
+    author = "Billy <openstates@sunlightfoundation.com>"
+    c.author = c.committer = author
+    c.commit_time = c.author_time = int(time())
+    tz = parse_timezone("-0400")
+    c.commit_timezone = c.author_timezone = tz
+    c.encoding = "UTF-8"
+    c.message = message
+    repo.object_store.add_object(c)
+    repo.refs['refs/heads/master'] = commit.id
+
+def git_prelod(abbr):
+    if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
+        return
+
+    global git_active_repo
+    global git_active_commit
+    global git_active_tree
+    global HEAD
+
+    git_active_repo = Repo("%s/%s.git" % ( settings.GIT_PATH, abbr ))
+    git_active_commit = Commit()
+    HEAD = git_active_repo.head()
+    commit = git_active_repo.commit(HEAD)
+    tree = git_active_repo.tree(commit.tree)
+    git_active_tree = tree
 
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
@@ -222,11 +300,14 @@ def import_bill(data, votes, categorizer):
         pass
     data['alternate_titles'] = list(alt_titles)
 
+
     if not bill:
         bill_id = insert_with_id(data)
+        git_add_bill(data)
         denormalize_votes(data, bill_id)
         return "insert"
     else:
+        git_add_bill(bill)
         update(bill, data, db.bills)
         denormalize_votes(data, bill['_id'])
         return "update"
@@ -235,6 +316,8 @@ def import_bill(data, votes, categorizer):
 def import_bills(abbr, data_dir):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'bills', '*.json')
+
+    git_prelod(abbr)
 
     counts = {
         "update": 0,
@@ -267,6 +350,8 @@ def import_bills(abbr, data_dir):
     meta = db.metadata.find_one({'_id': abbr})
     level = meta['level']
     populate_current_fields(level, abbr)
+
+    git_commit("Q'plah!")
 
     ensure_indexes()
 
