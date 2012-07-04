@@ -113,21 +113,17 @@ def git_commit(message):
     repo = git_active_repo
 
     c = git_active_commit
-
-    print c
-
     c.tree = git_active_tree.id
     c.parents = [HEAD]
     repo.object_store.add_object(git_active_tree)
-    author = "Billy <openstates@sunlightfoundation.com>"
-    c.author = c.committer = author
+    c.author = c.committer = "Billy <openstates@sunlightfoundation.com>"
     c.commit_time = c.author_time = int(time())
-    tz = parse_timezone("-0400")
+    tz = parse_timezone("-0400")[0]
     c.commit_timezone = c.author_timezone = tz
     c.encoding = "UTF-8"
     c.message = message
     repo.object_store.add_object(c)
-    repo.refs['refs/heads/master'] = commit.id
+    repo.refs['refs/heads/master'] = c.id
 
 def git_prelod(abbr):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
