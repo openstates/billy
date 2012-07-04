@@ -125,6 +125,34 @@ def git_commit(message):
     repo.object_store.add_object(c)
     repo.refs['refs/heads/master'] = c.id
 
+def git_repo_init(gitdir):
+    os.mkdir(gitdir)
+    repo = Repo.init_bare(gitdir)
+    blob = Blob.from_string("""Why, Hello there!
+
+This is your friendly Legislation tracker, Billy here.
+
+This is a git repo full of everything I write to the DB. This isn't super
+useful unless you're debugging production issues.
+
+Fondly,
+   Bill, your local Billy instance.""")
+    tree = Tree()
+    tree.add("README", 0100644, blob.id)
+    commit = Commit()
+    commit.tree = tree.id
+    author = "Billy <openstates@sunlightfoundation.com>"
+    commit.author = commit.committer = author
+    commit.commit_time = commit.author_time = int(time())
+    tz = parse_timezone('-0400')[0]
+    commit.commit_timezone = commit.author_timezone = tz
+    commit.encoding = "UTF-8"
+    commit.message = "Initial commit"
+    repo.object_store.add_object(blob)
+    repo.object_store.add_object(tree)
+    repo.object_store.add_object(commit)
+    repo.refs['refs/heads/master'] = commit.id
+
 def git_prelod(abbr):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
@@ -134,7 +162,12 @@ def git_prelod(abbr):
     global git_active_tree
     global HEAD
 
-    git_active_repo = Repo("%s/%s.git" % ( settings.GIT_PATH, abbr ))
+    gitdir = "%s/%s.git" % ( settings.GIT_PATH, abbr )
+
+    if not os.path.exists(gitdir):
+        git_repo_init(gitdir)
+
+    git_active_repo = Repo(gitdir)
     git_active_commit = Commit()
     HEAD = git_active_repo.head()
     commit = git_active_repo.commit(HEAD)
@@ -347,7 +380,7 @@ def import_bills(abbr, data_dir):
     level = meta['level']
     populate_current_fields(level, abbr)
 
-    git_commit("Q'plah!")
+    git_commit("Import Update")
 
     ensure_indexes()
 
