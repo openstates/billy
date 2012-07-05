@@ -282,32 +282,16 @@ class Bill(Document):
         '''Currently returns the earliest date the bill was introduced
         in either chamber.
         '''
-        actions = self.actions_type_dict.get('bill:introduced', [])
-        actions = sorted(actions, key=operator.itemgetter('date'))
-        if actions:
-            for action in actions:
-                return action['date']
+        return self['action_dates']['first']
 
     def date_passed_lower(self):
-        chamber = 'lower'
-        actions = self.actions_type_dict.get('bill:passed')
-        if actions:
-            for action in actions:
-                if chamber in action['actor']:
-                    return action['date']
+        return self['action_dates']['passed_lower']
 
     def date_passed_upper(self):
-        chamber = 'upper'
-        actions = self.actions_type_dict.get('bill:passed')
-        if actions:
-            for action in actions:
-                if chamber in action['actor']:
-                    return action['date']
+        return self['action_dates']['passed_upper']
 
     def date_signed(self):
-        actions = self.actions_type_dict.get('governor:signed')
-        if actions:
-            return actions[-1]['date']
+        return self['action_dates']['signed']
 
     def progress_data(self):
 
