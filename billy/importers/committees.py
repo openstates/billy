@@ -65,6 +65,9 @@ def import_committees_from_legislators(current_term, level, abbr):
                         {'name': legislator['full_name'],
                          'leg_id': legislator['leg_id'],
                          'role': role.get('position') or 'member'})
+                    for source in legislator['sources']:
+                        if source not in committee['sources']:
+                            committee['sources'].append(source)
                     db.committees.save(committee, safe=True)
 
                     role['committee_id'] = committee['_id']
