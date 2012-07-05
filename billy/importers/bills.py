@@ -114,8 +114,9 @@ def git_commit(message):
     global HEAD
     repo = git_active_repo
 
-    if git_old_tree.id == git_active_tree.id:
+    if git_old_tree == git_active_tree.id:
         # We don't wait t commit twice.
+        print "Nothing new here. Bailing out."
         return
 
     c = git_active_commit
@@ -179,7 +180,7 @@ def git_prelod(abbr):
     HEAD = git_active_repo.head()
     commit = git_active_repo.commit(HEAD)
     tree = git_active_repo.tree(commit.tree)
-    git_old_tree = git_active_repo.tree(commit.tree)
+    git_old_tree = tree.id
     git_active_tree = tree
 
 def oysterize_version(bill, version):
