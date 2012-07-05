@@ -252,7 +252,8 @@ def import_bill(data, votes, categorizer):
 
     # match sponsor leg_ids
     for sponsor in data['sponsors']:
-        id = get_legislator_id(abbr, data['session'], None,
+        # use sponsor's chamber if specified
+        id = get_legislator_id(abbr, data['session'], sponsor.get('chamber'),
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
