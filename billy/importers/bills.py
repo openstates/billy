@@ -524,14 +524,22 @@ def get_committee_id(level, abbr, chamber, committee):
 
 
 def get_committee_id_alt(level, abbr, name, chamber):
+    matched_committee = None
     spec = {"state": abbr, "chamber": chamber}
     if chamber is None:
         del(spec['chamber'])
     comms = db.committees.find(spec)
     for committee in comms:
         c = committee['committee']
+        if committee['subcommittee'] != None:
+            c += " %s"% ( committee['subcommittee'] )
+
         if compare_committee(name, c):
-            return committee['_id']
-    if not chamber is None:
-        return get_committee_id_alt(level, abbr, name, None)
-    return None
+            if not matched_committee is None:
+                return None  # In the event we match more then one committee.
+            matched_committee = committee['_id']
+
+    if matched_committee is None and not chamber is None:
+        matched_committee = get_committee_id_alt(level, abbr, name, None)
+
+    return matched_committee
