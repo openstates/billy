@@ -29,7 +29,9 @@ def setup_func():
                   'level': 'state',
                   'type': 'committee member',  'committee': 'Agriculture',
                   'subcommittee': 'Tractors'},
-              ]}
+              ],
+             'sources': [{'url': 'http://example.com/feynman'}],
+            }
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
              '_id': 'EXL000002', 'level': 'state',
              'state': 'ex', 'country': 'zz',
@@ -47,7 +49,9 @@ def setup_func():
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
                   'level': 'state',
                   'type': 'committee member',  'committee': 'Appropriations'},
-              ]}
+              ],
+             'sources': [{'url': 'http://example.com/einstein'}],
+            }
     # in a different term
     leg_c = {'full_name': 'Werner Heisenberg', 'leg_id': 'EXL000003',
              '_id': 'EXL000003', 'level': 'state',
@@ -67,7 +71,9 @@ def setup_func():
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
                   'level': 'state',
                   'type': 'committee member', 'committee': 'Appropriations'},
-              ]}
+              ],
+             'sources': [{'url': 'http://example.com/einstein'}],
+            }
 
     db.legislators.insert(leg_a)
     db.legislators.insert(leg_b)
@@ -86,6 +92,8 @@ def test_committees_from_legislators():
     assert ag_com['members'][0]['leg_id'] == 'EXL000001'
     # Heisenberg isn't added (wrong term)
     assert len(ag_com['members']) == 2
+    # sources are copied over too
+    assert len(ag_com['sources']) == 2
     assert ag_com['members'][0]['role'] == 'member'
     # check that position is copied over
     assert ag_com['members'][1]['role'] == 'chairman'
