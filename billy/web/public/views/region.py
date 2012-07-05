@@ -126,6 +126,9 @@ def search(request, abbr):
                 spec.update(state=abbr)
             bill_results = db.bills.find(spec)
 
+        # add sorting
+        bill_results = bill_results.sort([('action_dates.last', -1)])
+
         # Limit the bills if it's a search.
         more_bills_available = (5 < bill_results.count())
         bill_results = bill_results.limit(5)
