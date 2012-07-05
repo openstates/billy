@@ -22,7 +22,7 @@ class EventsList(RelatedObjectsList):
     column_headers = ('Date', 'Description',)
     show_per_page = 15
     statenav_active = 'events'
-    description_template = templatename('list_descriptions/events')
+    description_template = '{{obj.legislature_name}} Events'
     title_template = 'Events - {{obj.legislature_name}} - OpenStates'
 
 
