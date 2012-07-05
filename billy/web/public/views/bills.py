@@ -169,7 +169,7 @@ class RelatedBillsList(RelatedObjectsList):
 
 
 class StateBills(RelatedBillsList):
-    template_name = templatename('state_bills_list')
+    template_name = templatename('bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
     paginator = CursorPaginator
@@ -177,12 +177,12 @@ class StateBills(RelatedBillsList):
         <a href="{{metadata.get_absolute_url}}">{{metadata.name}}</a> Bills
         '''
     title_template = '''
-        Search and filter bills -
-        {{ metadata.legislature_name }} - OpenStates'''
+        Search and bills -
+        {{ metadata.legislature_name }} - Open States'''
 
 
 class AllStateBills(RelatedBillsList):
-    template_name = templatename('state_bills_list')
+    template_name = templatename('bills_list')
     rowtemplate_name = templatename('bills_list_row_with_state_and_session')
     collection_name = 'bills'
     paginator = CursorPaginator
