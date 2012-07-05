@@ -79,7 +79,7 @@ def _run_scraper(scraper_type, options, metadata):
     if scraper_type in ('bills', 'votes', 'events'):
         times = options.sessions
         for time in times:
-            scraper.validate_session(time)
+            scraper.validate_session(time, scraper.latest_only)
     elif scraper_type in ('committees', 'legislators'):
         times = options.terms
         for time in times:

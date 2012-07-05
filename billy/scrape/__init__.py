@@ -147,13 +147,17 @@ class Scraper(scrapelib.Scraper):
             sessions.extend(t['sessions'])
         return sessions
 
-    def validate_session(self, session):
+    def validate_session(self, session, latest_only=False):
         """ Check that a session is present in the metadata dictionary.
 
         raises :exc:`~billy.scrape.NoDataForPeriod` if session is invalid
 
         :param session:  string representing session to check
         """
+        if latest_only:
+            if session != self.metadata['terms'][-1]['sessions'][-1]:
+                raise NoDataForPeriod(session)
+
         for t in self.metadata['terms']:
             if session in t['sessions']:
                 return True
