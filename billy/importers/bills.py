@@ -79,6 +79,7 @@ def import_votes(data_dir):
 git_active_repo = None
 git_active_commit = None
 git_active_tree = None
+git_old_tree = None
 HEAD = None
 
 def git_add_bill(data):
@@ -108,9 +109,14 @@ def git_commit(message):
 
     global git_active_repo
     global git_active_tree
+    global git_old_tree
     global git_active_commit
     global HEAD
     repo = git_active_repo
+
+    if git_old_tree.id == git_active_tree.id:
+        # We don't wait t commit twice.
+        return
 
     c = git_active_commit
     c.tree = git_active_tree.id
@@ -160,6 +166,7 @@ def git_prelod(abbr):
     global git_active_repo
     global git_active_commit
     global git_active_tree
+    global git_old_tree
     global HEAD
 
     gitdir = "%s/%s.git" % ( settings.GIT_PATH, abbr )
@@ -172,6 +179,7 @@ def git_prelod(abbr):
     HEAD = git_active_repo.head()
     commit = git_active_repo.commit(HEAD)
     tree = git_active_repo.tree(commit.tree)
+    git_old_tree = git_active_repo.tree(commit.tree)
     git_active_tree = tree
 
 def oysterize_version(bill, version):
