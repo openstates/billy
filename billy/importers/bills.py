@@ -516,9 +516,7 @@ def get_committee_id(level, abbr, chamber, committee):
         __committee_ids[key] = comms[0]['_id']
     else:
         # last resort :(
-        print committee
         comm_id = get_committee_id_alt(level, abbr, committee, chamber)
-        print comm_id
         __committee_ids[key] = comm_id
 
     return __committee_ids[key]
