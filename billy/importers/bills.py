@@ -516,7 +516,9 @@ def get_committee_id(level, abbr, chamber, committee):
         __committee_ids[key] = comms[0]['_id']
     else:
         # last resort :(
+        print committee
         comm_id = get_committee_id_alt(level, abbr, committee, chamber)
+        print comm_id
         __committee_ids[key] = comm_id
 
     return __committee_ids[key]
@@ -535,11 +537,10 @@ def get_committee_id_alt(level, abbr, name, chamber):
 
         if compare_committee(name, c):
             if not matched_committee is None:
-                print "Doublewide"
                 return None  # In the event we match more then one committee.
             matched_committee = committee['_id']
 
-    if not chamber is None:
-        return get_committee_id_alt(level, abbr, name, None)
+    if matched_committee is None and not chamber is None:
+        matched_committee = get_committee_id_alt(level, abbr, name, None)
 
     return matched_committee
