@@ -29,8 +29,10 @@ def legislators(request, abbr):
     chamber = request.GET.get('chamber', 'both')
     if chamber in ('upper', 'lower'):
         spec['chamber'] = chamber
+        chamber_title = meta['%s_chamber_title' % chamber] + 's'
     else:
         chamber = 'both'
+        chamber_title = 'Legislators'
 
     fields = mongo_fields('leg_id', 'full_name', 'photo_url', 'district',
                           'party', 'first_name', 'last_name', 'chamber',
@@ -69,6 +71,7 @@ def legislators(request, abbr):
     return render(request, templatename('legislators'),
                   dict(metadata=meta,
                    chamber=chamber,
+                   chamber_title=chamber_title,
                    chamber_select_form=chamber_select_form,
                    chamber_select_template=templatename('chamber_select_form'),
                    chamber_select_collection='legislators',

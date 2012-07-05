@@ -9,6 +9,9 @@ billy changelog
     * refactor of billy.models
     * db: denormalize votes into own collection on bill import
     * db: add action_dates to bills
+    * unification of numerous settings into API_KEY
+    * bugfix for unicode data in dumpjson
+    * bugfix for name matching being too loose from manual_data
     * bugfix for billy-update deleting metadata without --scrape
 
 1.2.0

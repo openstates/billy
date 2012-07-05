@@ -49,15 +49,11 @@ class Committee(Document):
     members_objects = CommitteeMemberManager()
 
     def display_name(self):
-        try:
-            name = self['committee']
-        except KeyError:
-            return self['subcommittee']
-        else:
-            sub = self['subcommittee']
-            if sub is not None:
-                name = '%s: %s' % (name, sub)
-        return name
+        name = self['committee']
+        sub = self['subcommittee']
+        if sub is not None:
+            name = '%s: %s' % (name, sub)
+        return name.title()
 
     def events(self):
         return db.events.find({"participants.committee_id": self['_id']})

@@ -251,16 +251,19 @@ def test_votematcher():
 def test_get_committee_id():
     # 3 committees with the same name, different levels & chamber
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'upper',
-                          'committee': 'Animal Control', '_id': 'EXC000001'})
+                          'committee': 'Animal Control', 'subcommittee': None,
+                          '_id': 'EXC000001'})
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'lower',
-                          'committee': 'Animal Control', '_id': 'EXC000002'})
+                          'committee': 'Animal Control', 'subcommittee': None,
+                          '_id': 'EXC000002'})
     db.committees.insert({'level': 'country', 'country': 'zz', 'state': 'ex',
                           'chamber': 'upper',
-                          'committee': 'Animal Control', '_id': 'ZZC000001'})
+                          'committee': 'Animal Control', 'subcommittee': None,
+                          '_id': 'ZZC000001'})
     # committee w/ subcommittee (also has 'Committee on' prefix)
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'upper',
                           'committee': 'Committee on Science',
-                          '_id': 'EXC000004'})
+                          'subcommittee': None, '_id': 'EXC000004'})
     db.committees.insert({'level': 'state', 'state': 'ex', 'chamber': 'upper',
                           'committee': 'Committee on Science',
                           'subcommittee': 'Space',
