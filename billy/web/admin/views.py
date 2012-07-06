@@ -804,7 +804,7 @@ def quality_exceptions(request, abbr):
         'abbr': abbr.lower()
     }) #  Natural sort is fine
 
-    extypes = QUALITY_EXCEPTIONS.keys()
+    extypes = QUALITY_EXCEPTIONS
 
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
@@ -864,6 +864,9 @@ def quality_exception_commit(request, abbr):
                 error.append("Object %s is not from this state." % ( obj ))
 
     type = get['extype'].strip()
+    if type not in QUALITY_EXCEPTIONS:
+        error.append("Type %s is not a real type" % type)
+
     notes = get['notes'].strip()
 
     if type == "":

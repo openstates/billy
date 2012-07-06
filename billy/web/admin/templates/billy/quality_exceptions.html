@@ -36,7 +36,7 @@
                 <div class="controls">
                     <select name = "extype" >
                     {% for val in extypes %}
-                        <option value = '{{ val }}' >{{ val }}</option>
+                        <option value = '{{ val }}' >{{ extypes|key:val }} ({{val}})</option>
                     {% endfor %}
                     </select>
                 </div>
