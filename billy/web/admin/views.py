@@ -804,6 +804,14 @@ def legislators(request, abbr):
         'metadata': meta,
     })
 
+def quality_exceptions(request, abbr):
+    meta = metadata(abbr)
+    level = metadata(abbr)['level']
+
+    return render(request, 'billy/quality_exceptions.html', {
+        'metadata': meta,
+    })
+
 
 def events(request, abbr):
     meta = metadata(abbr)
