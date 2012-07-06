@@ -2,9 +2,8 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
-from billy.web.public.views.bills import (BillsBySubject, SponsoredBillsList,
-                                          StateBills, AllStateBills,
-                                          BillsByType)
+from billy.web.public.views.bills import (SponsoredBillsList, StateBills,
+                                          AllStateBills)
 from billy.web.public.views.region import ShowMoreLegislators
 
 from billy.web.public.feeds import (SponsoredBillsFeed,
@@ -81,14 +80,10 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
     url(r'^(?P<abbr>all)/bills/$', AllStateBills.as_view(), name='bills'),
-    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<_id>\w+)/',
-        'vote', name='vote'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/$',
-        BillsBySubject.as_view(), name='bills_by_subject'),
+    url(r'^(?P<abbr>[a-z]{2})/votes/(?P<_id>\w+)/', 'vote', name='vote'),
+    # bill rss views
     url(r'^(?P<abbr>[a-z]{2})/bills/by_subject/(?P<subject>[^/]+)/rss/$',
         BillsBySubjectFeed(), name='bills_by_subject_rss'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/by_type/(?P<type>[^/]+)/$',
-        BillsByType.as_view(), name='bills_by_type'),
     url(r'^(?P<abbr>[a-z]{2})/bills/by_type/(?P<type>[^/]+)/rss/$',
         BillsByTypeFeed(), name='bills_by_type_rss'),
     url(r'^(?P<abbr>[a-z]{2})/bills/introduced/upper/rss/$',

@@ -169,7 +169,7 @@ class RelatedBillsList(RelatedObjectsList):
 
 
 class StateBills(RelatedBillsList):
-    template_name = templatename('state_bills_list')
+    template_name = templatename('bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
     paginator = CursorPaginator
@@ -177,12 +177,12 @@ class StateBills(RelatedBillsList):
         <a href="{{metadata.get_absolute_url}}">{{metadata.name}}</a> Bills
         '''
     title_template = '''
-        Search and filter bills -
-        {{ metadata.legislature_name }} - OpenStates'''
+        Search and bills -
+        {{ metadata.legislature_name }} - Open States'''
 
 
 class AllStateBills(RelatedBillsList):
-    template_name = templatename('state_bills_list')
+    template_name = templatename('bills_list')
     rowtemplate_name = templatename('bills_list_row_with_state_and_session')
     collection_name = 'bills'
     paginator = CursorPaginator
@@ -203,60 +203,6 @@ class SponsoredBillsList(RelatedBillsList):
         {{obj.display_name}}</a>
         '''
     title_template = 'Bills sponsored by {{obj.display_name}} - OpenStates'
-
-
-class BillsBySubject(BillsList):
-
-    description_template = '''
-        <a href="{{metadata.get_absolute_url}}">{{metadata.name}}</a>
-        bills relating to <b>{{subject}}</b>
-        '''
-    title_template = 'Bills relating to {{subject}} - OpenStates'
-
-    def get_queryset(self, *args, **kwargs):
-
-        get = self.request.GET.get
-
-        subject = self.kwargs['subject']
-        abbr = self.kwargs['abbr']
-        objects = db.bills.find({'state': abbr, 'subjects': subject})
-
-        # Setup the paginator arguments.
-        show_per_page = int(get('show_per_page', 20))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
-
-        paginator = self.paginator(objects, page=page,
-                                   show_per_page=show_per_page)
-        return paginator
-
-
-class BillsByType(BillsList):
-
-    description_template = '''
-        <a href="{{metadata.get_absolute_url}}">{{metadata.name}}</a>
-        <b>{{type|title}}</b> Legislation
-        '''
-    title_template = '{{type|title}} Legislation - OpenStates'
-
-    def get_queryset(self, *args, **kwargs):
-
-        get = self.request.GET.get
-
-        type_ = self.kwargs['type']
-        abbr = self.kwargs['abbr']
-        objects = db.bills.find({'state': abbr, 'type': type_})
-
-        # Setup the paginator arguments.
-        show_per_page = int(get('show_per_page', 20))
-        page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
-
-        paginator = self.paginator(objects, page=page,
-                                   show_per_page=show_per_page)
-        return paginator
 
 
 def bill(request, abbr, bill_id):
