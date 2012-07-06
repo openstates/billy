@@ -1,6 +1,5 @@
 import re
 import copy
-import logging
 import itertools
 
 from pymongo import Connection
@@ -22,17 +21,6 @@ connection = Connection(host=billy_settings.MONGO_HOST,
 db = getattr(connection, billy_settings.MONGO_DATABASE)
 feeds_db = connection.newsblogs
 
-# configure logging (FIXME)
-DEBUG = 1  # django_settings.DEBUG
-logger = logging.getLogger('billy.models')
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler()
-formatter = logging.Formatter('[%(name)s] %(asctime)s - %(message)s',
-                              datefmt='%H:%M:%S')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-query_log_template = 'Query: db.{0}.{1}({2}, {3}, {4})'
 
 _model_registry = {}
 _model_registry_by_collection = {}
@@ -289,10 +277,6 @@ class RelatedDocument(object):
 
         spec = {'_id': self.model_id}
         spec.update(extra_spec)
-        if DEBUG:
-            msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
-                                            'find_one', spec, args, kwargs)
-            logger.debug(msg)
 
         obj = self.model.collection.find_one(spec, *args, **kwargs)
         if obj is None:
@@ -366,11 +350,6 @@ class RelatedDocuments(object):
             _sort = self.sort
             if _sort is not None:
                 kwargs.update(sort=_sort)
-
-        if DEBUG:
-            msg = '{0}.{1}({2}, {3}, {4})'.format(self.model.collection.name,
-                                                 'find', spec, args, kwargs)
-            logger.debug(msg)
 
         instance = self.instance
         cursor = self.model.collection.find(spec, *args, **kwargs)
