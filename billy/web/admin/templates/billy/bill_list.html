@@ -25,4 +25,6 @@
     </tbody>
 </table>
 
+<h3>All {{bill_ids|length}} matching IDs:<h3>
+<textarea rows="10" cols="80" style="width: 100%;">{% for b in bill_ids %}{{b}} {% endfor %}</textarea>
 {% endblock %}

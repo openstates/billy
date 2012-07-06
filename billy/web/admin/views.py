@@ -679,21 +679,13 @@ def duplicate_versions(request, abbr):
     return render(request, "billy/duplicate_versions.html",
                   {'metadata': meta, 'report': report})
 
-
-@never_cache
-def random_bill(request, abbr):
-    meta = metadata(abbr)
-    if not meta:
-        raise Http404
-
+def _bill_spec(meta, limit):
+    abbr = meta['abbreviation']
     level = meta['level']
+
+    # basic spec
     latest_session = meta['terms'][-1]['sessions'][-1]
-
-    random_flag = "limit"
-
-    modi_flag = ""
-    if random_flag in request.GET:
-        modi_flag = request.GET[random_flag]
+    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
 
     basic_specs = {
         "no_versions": {'versions': []},
@@ -701,28 +693,37 @@ def random_bill(request, abbr):
         "no_actions": {'actions': []}
     }
 
-    default = True
-    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
-
-    if modi_flag == 'bad_vote_counts':
+    # apply modifier flag
+    if limit == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr}
                                              )['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
-        default = False
-
-    if modi_flag in basic_specs:
-        default = False
-        spec.update(basic_specs[modi_flag])
+    elif limit in basic_specs:
+        spec.update(basic_specs[limit])
         spec.pop('session')     # all sessions
-
-    if modi_flag == 'current_term':
-        default = False
+    elif limit == 'current_term':
         curTerms = meta['terms'][-1]['sessions']
         spec['session'] = {"$in": curTerms}
+    elif limit == '':
+        pass
+    else:
+        raise ValueError('invalid limit: {0}'.format(modi_flag))
 
-    count = db.bills.find(spec).count()
+    return spec
+
+
+@never_cache
+def random_bill(request, abbr):
+    meta = metadata(abbr)
+    if not meta:
+        raise Http404
+
+    spec = _bill_spec(meta, request.GET.get('limit', ''))
+    bills = db.bills.find(spec)
+
+    count = bills.count()
     if count:
-        bill = db.bills.find(spec)[random.randint(0, count - 1)]
+        bill = bills[random.randint(0, count - 1)]
         warning = None
     else:
         bill = None
@@ -737,15 +738,6 @@ def random_bill(request, abbr):
     context = {'bill': bill, 'id': bill_id, 'random': True,
                'state': abbr.lower(), 'warning': warning, 'metadata': meta}
 
-    if default and modi_flag != "":
-        context["warning"] = \
-"""
- It looks like you've set a limit flag, but the flag was not processed by
- billy. Sorry about that. This might be due to a programming error, or a
- bad guess of the URL flag. Rather then making a big fuss over this, i've just
- got a list of all random bills. Better luck next time!
-"""
-
     return render(request, 'billy/bill.html', context)
 
 
@@ -754,20 +746,20 @@ def bill_list(request, abbr):
     if not meta:
         raise Http404
 
-    level = meta['level']
-    spec = {'level': level, level: abbr}
-
     if 'version_url' in request.GET:
         version_url = request.GET.get('version_url')
-        spec['versions.url'] = version_url
+        spec = {'versions.url': version_url}
+    else:
+        spec = _bill_spec(meta, request.GET.get('limit', ''))
+    print spec
 
-    bills = db.bills.find(spec)
+    bills = list(db.bills.find(spec))
     query_text = repr(spec)
 
-    context = {'metadata': meta,
-               'query_text': query_text,
-               'bills': bills}
+    bill_ids = [b['_id'] for b in bills]
 
+    context = {'metadata': meta, 'query_text': query_text, 'bills': bills,
+               'bill_ids': bill_ids }
     return render(request, 'billy/bill_list.html', context)
 
 
