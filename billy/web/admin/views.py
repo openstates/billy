@@ -817,6 +817,8 @@ def quality_exceptions(request, abbr):
         'exceptions': exceptions
     })
 
+def quality_exception_commit(request, abbr):
+    pass
 
 def events(request, abbr):
     meta = metadata(abbr)
