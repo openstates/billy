@@ -53,6 +53,12 @@ def scan_bills(abbr):
     uncategorized_subjects = defaultdict(int)
     sessions = defaultdict(_bill_report_dict)
 
+    # load exception data into sets of ids indexed by exception type
+    quality_exceptions = defaultdict(set)
+    for qe in db.quality_exceptions.find({'abbr': abbr}):
+        if qe['type'].startswith('bills:'):
+            quality_exceptions[qe['type']].update(qe['ids'])
+
     for bill in db.bills.find({'level': level, level: abbr}):
         session_d = sessions[bill['session']]
 
@@ -79,8 +85,13 @@ def scan_bills(abbr):
                 other_actions[action['action']] += 1
             session_d['actions_per_actor'][action['actor']] += 1
             session_d['actions_per_month'][date.strftime('%Y-%m')] += 1
+
+        # handle no_actions bills
         if not bill['actions']:
-            session_d['actionless_count'] += 1
+            if bill['_id'] not in quality_exceptions['bills:no_actions']:
+                session_d['actionless_count'] += 1
+            else:
+                quality_exceptions['bills:no_actions'].remove(bill['_id'])
 
         # sponsors
         for sponsor in bill['sponsors']:
@@ -94,8 +105,13 @@ def scan_bills(abbr):
                     sponsor['name'])
                 )
             session_d['sponsors_per_type'][sponsor['type']] += 1
+
+        # handle no sponsors bills
         if not bill['sponsors']:
-            session_d['sponsorless_count'] += 1
+            if bill['_id'] not in quality_exceptions['bills:no_sponsors']:
+                session_d['sponsorless_count'] += 1
+            else:
+                quality_exceptions['bills:no_sponsors'].remove(bill['_id'])
 
         # votes
         for vote in bill['votes']:
@@ -150,13 +166,16 @@ def scan_bills(abbr):
         # versions
         if not bill['versions']:
             # total num of bills w/o versions
-            session_d['versionless_count'] += 1
+            if bill['_id'] not in quality_exceptions['bills:no_versions']:
+                session_d['versionless_count'] += 1
+            else:
+                quality_exceptions['bills:no_versions'].remove(bill['_id'])
         else:
             # total num of versions
             session_d['version_count'] += len(bill['versions'])
         for doc in bill['versions']:
             duplicate_versions[doc['url']] += 1
-        # TODO: add a duplicate documents back in?
+        # TODO: add duplicate document detection back in?
 
     dup_version_urls = []
     dup_source_urls = []
@@ -166,6 +185,12 @@ def scan_bills(abbr):
     for url, n in duplicate_sources.iteritems():
         if n > 1:
             dup_source_urls.append(url)
+
+    # do logging of unnecessary exceptions
+    for qe_type, qes in quality_exceptions.iteritems():
+        if qes:
+            logger.warning('unnecessary {0} exceptions for {1} bills: \n  {2}'
+                           .format(qe_type, len(qes), '\n  '.join(qes)))
 
     return {'duplicate_versions': dup_version_urls,
             'duplicate_sources': dup_source_urls,

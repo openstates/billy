@@ -1,0 +1,58 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load billy_utiltags %}
+
+{% block title %}Data Quality{% endblock %}
+
+{% block content %}
+<table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>Exception Type</th>
+        <th>Affected Entities</th>
+        <th>Note</th>
+        <th>Danger Zone</th>
+    </tr>
+{% for ex in exceptions %}
+    <tr>
+        <td>{{ ex.type }}</td>
+        <td>{% for i in ex.ids %}
+                <span class="label label-info">{{ i }}</span>
+            {% endfor %}</td>
+        <td>{{ ex.notes }}</td>
+        <td><a href = '{% url quality_exception_remove metadata.abbreviation ex|key:"_id" %}' >remove</a></td>
+    </tr>
+{% endfor %}
+</table>
+
+<br /><br />
+<h3>Add a new data quality exception</h3>
+<br /><br />
+
+<div class="span8">
+    <form method = 'POST' action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
+        <fieldset>
+            <div class="control-group">
+                <label class="control-label" for="focusedInput">Exception Type</label>
+                <div class="controls">
+                    <input class="input-xlarge focused" name="extype"
+                            type="text" placeholder="bills:can_not_grok">
+                </div>
+                <label class="control-label" for="focusedInput">Affected Entities</label>
+                <div class="controls">
+                    <input class="input-xlarge focused" name="affected"
+                            type="text" placeholder="LOL00002023, LUL00202023">
+                </div>
+                <label class="control-label" for="focusedInput">Notes</label>
+                <div class="controls">
+                    <input class="input-xlarge focused" name="notes"
+                            type="text" placeholder="Errorful stuff on the remote site">
+                </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Add Exception</button>
+                <button class="btn">Cancel</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+{% endblock %}
