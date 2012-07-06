@@ -808,8 +808,13 @@ def quality_exceptions(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']
 
+    exceptions = db.quality_exceptions.find({
+        'abbr': abbr.lower()
+    }) #  Natural sort is fine
+
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
+        'exceptions': exceptions
     })
 
 

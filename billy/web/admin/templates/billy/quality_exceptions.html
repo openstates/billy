@@ -4,4 +4,20 @@
 {% block title %}Data Quality{% endblock %}
 
 {% block content %}
+<table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>Exception Type</th>
+        <th>Affected Entities</th>
+        <th>Note</th>
+    </tr>
+{% for ex in exceptions %}
+    <tr>
+        <td>{{ ex.type }}</td>
+        <td>{% for i in ex.ids %}
+                <span class="label label-info">{{ i }}</span>
+            {% endfor %}</td>
+        <td>{{ ex.notes }}</td>
+    </tr>
+{% endfor %}
+</table>
 {% endblock %}
