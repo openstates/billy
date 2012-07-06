@@ -5,6 +5,17 @@
 
 {% block content %}
 
-<h1>{{ errors }}</h1>
+<h1>Oh shucks <small>(you've done goofed)</small></h1>
+<p>
+    The following errors happened during the attempt to carry out
+    your request.
+</p>
+<ul>
+    {% for error in errors %}
+        <li>{{ error }}</li>
+    {% endfor %}
+</ul>
+
+<a href = '{% url quality_exceptions metadata.abbreviation %}' >go back</a>
 
 {% endblock %}
