@@ -33,9 +33,11 @@ from billy.importers.legislators import deactivate_legislators
 
 def _meta_and_report(abbr):
     meta = metadata(abbr)
+    if not meta:
+        raise Http404('No metadata found for abbreviation %r.' % abbr)
     report = db.reports.find_one({'_id': abbr})
-    if not meta or not report:
-        raise Http404
+    if not report:
+        raise Http404('No reports found for abbreviation %r.' % abbr)
     return meta, report
 
 
@@ -616,7 +618,7 @@ def object_json(request, collection, _id,
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
-        raise Http404
+        raise Http404('No reports found for abbreviation %r.' % abbr)
     return _csv_response(request, 'other_actions', ('action', '#'),
                          sorted(report['bills']['other_actions']), abbr)
 
@@ -624,7 +626,7 @@ def other_actions(request, abbr):
 def unmatched_leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
-        raise Http404
+        raise Http404('No reports found for abbreviation %r.' % abbr)
     bill_unmatched = set(tuple(i) for i in
                          report['bills']['unmatched_leg_ids'])
     com_unmatched = set(tuple(i) for i in
@@ -637,7 +639,7 @@ def unmatched_leg_ids(request, abbr):
 def uncategorized_subjects(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
-        raise Http404
+        raise Http404('No reports found for abbreviation %r.' % abbr)
     subjects = sorted(report['bills']['uncategorized_subjects'],
                       key=lambda t: (t[1], t[0]), reverse=True)
     return _csv_response(request, 'uncategorized_subjects', ('subject', '#'),
@@ -684,7 +686,7 @@ def duplicate_versions(request, abbr):
 def random_bill(request, abbr):
     meta = metadata(abbr)
     if not meta:
-        raise Http404
+        raise Http404('No metadata found for abbreviation %r.' % abbr)
 
     level = meta['level']
     latest_session = meta['terms'][-1]['sessions'][-1]
@@ -752,7 +754,7 @@ def random_bill(request, abbr):
 def bill_list(request, abbr):
     meta = metadata(abbr)
     if not meta:
-        raise Http404
+        raise Http404('No metadata found for abbreviation %r' % abbr)
 
     level = meta['level']
     spec = {'level': level, level: abbr}
@@ -777,7 +779,8 @@ def bill(request, abbr, session, id):
     bill = find_bill({'level': level, level: abbr,
                       'session': session, 'bill_id': id.upper()})
     if not bill:
-        raise Http404
+        msg = 'No bill found in {meta[name]} session {session!r} with id {id!r}.'
+        raise Http404(msg.format(meta=meta, session=session, id=id))
 
     return render(request, 'billy/bill.html',
                   {'bill': bill, 'metadata': meta, 'id': bill['_id']})
@@ -912,7 +915,7 @@ def event(request, abbr, event_id):
 def legislator(request, id):
     leg = db.legislators.find_one({'_all_ids': id})
     if not leg:
-        raise Http404
+        raise Http404('No legislators found for id %r.' % id)
 
     meta = metadata(leg[leg['level']])
 
@@ -923,7 +926,7 @@ def legislator(request, id):
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})
     if not legislator:
-        raise Http404
+        raise Http404('No legislators found for id %r.' % id)
 
     # retire a legislator
     level = legislator['level']
