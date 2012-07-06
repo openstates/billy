@@ -30,6 +30,7 @@ from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
 
+from billy.reports.utils import QUALITY_EXCEPTIONS
 
 def _meta_and_report(abbr):
     meta = metadata(abbr)
@@ -804,9 +805,7 @@ def quality_exceptions(request, abbr):
         'abbr': abbr.lower()
     }) #  Natural sort is fine
 
-    extypes = [
-        # XXX: Fixme
-    ]
+    extypes = QUALITY_EXCEPTIONS
 
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
