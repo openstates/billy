@@ -18,3 +18,13 @@ def update_common(obj, report):
     # sources
     if not obj['sources']:
         report['sourceless_count'] += 1
+
+
+QUALITY_EXCEPTIONS = {
+    'bills:no_actions': 'Bill is missing actions',
+    'bills:no_sponsors': 'Bill is missing sponsors',
+    'bills:no_versions': 'Bill is missing versions',
+    'votes:bad_yes_count': 'Vote has a bad "yes" count',
+    'votes:bad_no_count': 'Vote has a bad "no" count',
+    'votes:bad_other_count': 'Vote has a bad "other" count',
+}
