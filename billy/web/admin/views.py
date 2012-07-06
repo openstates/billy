@@ -804,15 +804,28 @@ def quality_exceptions(request, abbr):
         'abbr': abbr.lower()
     }) #  Natural sort is fine
 
+    extypes = [
+        # XXX: Fixme
+    ]
+
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
-        'exceptions': exceptions
+        'exceptions': exceptions,
+        "extypes": extypes
     })
 
 def quality_exception_remove(request, abbr, obj):
+    errors = []
 
-    return render(request, 'billy/events.html', {
-    })
+    db.quality_exceptions.remove({"_id": ObjectId(obj)})
+
+    if errors != []:
+        return render(request, 'billy/quality_exception_error.html', {
+            'metadata': meta,
+            'errors': errors
+        })
+
+    return redirect('quality_exceptions', abbr)
 
 def quality_exception_commit(request, abbr):
     def classify_object(oid):
