@@ -812,9 +812,14 @@ def quality_exceptions(request, abbr):
         'abbr': abbr.lower()
     }) #  Natural sort is fine
 
+    extypes = [
+        # XXX: Fixme
+    ]
+
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
-        'exceptions': exceptions
+        'exceptions': exceptions,
+        "extypes": extypes
     })
 
 def quality_exception_remove(request, abbr, obj):
