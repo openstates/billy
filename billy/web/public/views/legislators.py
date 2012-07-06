@@ -142,7 +142,7 @@ def legislator_inactive(request, abbr, legislator):
     legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
 
-    return render(request, templatename('legislator_inactive'),
+    return render(request, templatename('legislator'),
         dict(feed_entry_template=templatename('feed_entry'),
             vote_preview_row_template=templatename('vote_preview_row'),
             old_roles=legislator.old_roles_manager,
