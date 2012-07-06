@@ -158,7 +158,8 @@ class BillVote(Document):
         return self._ratio('other_count')
 
     @CachedAttribute
-    def _legislator_objects(self, fields=['first_name', 'last_name']):
+    def _legislator_objects(self, fields=['first_name', 'last_name',
+                                          'party', 'district']):
         '''A cache of dereferenced legislator objects.
         '''
         kwargs = {}
