@@ -360,19 +360,20 @@ def bills(request, abbr):
                 'key': 'actor',
                 },
             }),
-        ('Quality Issues',   {'rownames': [
-                                 'sourceless_count', 'sponsorless_count',
-                                 'actionless_count', 'actions_unsorted',
-                                 'bad_vote_counts', 'version_count',
-                                 'versionless_count',
 
-                                 'sponsors_with_leg_id',
-                                 'rollcalls_with_leg_id',
-                                 'have_subjects',
-                                 'updated_this_year',
-                                 'updated_this_month',
-                                 'updated_today',
-                                 'vote_passed']}),
+        ('Quality Issues',   {'rownames': [
+                                'sourceless_count', 'sponsorless_count',
+                                'actionless_count', 'actions_unsorted',
+                                'bad_vote_counts', 'version_count',
+                                'versionless_count',
+
+                                'sponsors_with_leg_id',
+                                'rollcalls_with_leg_id',
+                                'have_subjects',
+                                'updated_this_year',
+                                'updated_this_month',
+                                'updated_today',
+                                'vote_passed']}),
         ]
 
     format_as_percent = [
@@ -426,12 +427,8 @@ def bills(request, abbr):
                     val += ' %'
                 rows[r].append(val)
 
-                # Link to summary/distint views.
+                # Link to summary/distinct views.
                 if 'summary' in spec:
-                    try:
-                        spec_key = '.'.join(spec['keypath'])
-                    except KeyError:
-                        spec_key = r
 
                     try:
                         spec_val = spec['spec'](r)
@@ -473,8 +470,6 @@ def bills(request, abbr):
 
 def summary_index(request, abbr, session):
 
-    meta = metadata(abbr)
-
     object_types = 'votes actions versions sponsors documents sources'.split()
 
     def build(context_set):
@@ -496,7 +491,7 @@ def summary_index(request, abbr, session):
         return res
     summary = build_state(abbr)
 
-    return render(request, 'billy/summary_index.html', locals())
+    return render(request, 'billy/summary_index.html', {'summary': summary})
 
 
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
@@ -570,7 +565,12 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
     spec = json.dumps(spec, cls=JSONDateEncoder, indent=4)
 
-    return render(request, 'billy/summary_object_keyvals.html', locals())
+    return render(request, 'billy/summary_object_keyvals.html', dict(
+        object_type=object_type,
+        objects=objects,
+        spec=spec,
+        meta=meta
+        ))
 
 
 def object_json(request, collection, _id,
@@ -599,7 +599,6 @@ def object_json(request, collection, _id,
 
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
-    keys = sorted(obj)
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
@@ -612,7 +611,9 @@ def object_json(request, collection, _id,
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
-    return render(request, 'billy/object_json.html', locals())
+    return render(request, 'billy/object_json.html', dict(
+        obj=obj, obj_id=obj_id, obj_json=obj_json,
+        obj_url=obj_url))
 
 
 def other_actions(request, abbr):
@@ -654,8 +655,6 @@ def district_stub(request, abbr):
             district = x[2]
         return x[1], district
 
-    fields = ('abbr', 'chamber', 'name', 'num_seats', 'boundary_id')
-
     counts = defaultdict(int)
     for leg in db.legislators.find({'state': abbr, 'active': True}):
         if 'chamber' in leg:
@@ -675,8 +674,6 @@ def district_stub(request, abbr):
 
 def duplicate_versions(request, abbr):
     meta, report = _meta_and_report(abbr)
-
-    data = report['bills']['duplicate_versions']
 
     return render(request, "billy/duplicate_versions.html",
                   {'metadata': meta, 'report': report})
@@ -807,6 +804,7 @@ def legislators(request, abbr):
         'metadata': meta,
     })
 
+
 def quality_exceptions(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']
@@ -820,10 +818,12 @@ def quality_exceptions(request, abbr):
         'exceptions': exceptions
     })
 
+
 def quality_exception_remove(request, abbr, obj):
 
     return render(request, 'billy/events.html', {
     })
+
 
 def quality_exception_commit(request, abbr):
     def classify_object(oid):
@@ -887,6 +887,7 @@ def quality_exception_commit(request, abbr):
 
     return redirect('quality_exceptions', abbr)
 
+
 def events(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']
@@ -902,6 +903,7 @@ def events(request, abbr):
         'events': ((e, e['_id']) for e in events),
         'metadata': meta,
     })
+
 
 def event(request, abbr, event_id):
     meta = metadata(abbr)
