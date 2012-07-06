@@ -204,13 +204,13 @@ class BillVote(Document):
         return self._vote_legislators('other')
 
     def get_absolute_url(self):
-        bill = self.bill
-        text = '%s--%s' % (bill['_id'],
-                           self['date'].strftime('%m-%d-%Y'))
+        bill_id = self['bill_id']
+        text = '%s--%s' % (bill_id, self['date'].strftime('%m-%d-%Y'))
         slug = slugify(text)
         url = urlresolvers.reverse(
-            'vote', args=[bill['state'], self['_id']])
-        return '%s%s/' % (url, slug)
+            'vote', args=[self['state'], self['_id']])
+        url = '%s%s/' % (url, slug)
+        return url
 
 
 class Bill(Document):
@@ -231,7 +231,8 @@ class Bill(Document):
     def get_absolute_url(self):
         url = urlresolvers.reverse('bill', args=[self['state'], self.id])
         slug = slugify(self['bill_id'])
-        return '%s%s/' % (url, slug)
+        url = '%s%s/' % (url, slug)
+        return url
 
     def get_admin_url(self):
         return urlresolvers.reverse('bill', args=[self['state'], self.id])
