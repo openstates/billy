@@ -818,9 +818,17 @@ def quality_exceptions(request, abbr):
     })
 
 def quality_exception_remove(request, abbr, obj):
+    errors = []
 
-    return render(request, 'billy/events.html', {
-    })
+    db.quality_exceptions.remove({"_id": ObjectId(obj)})
+
+    if errors != []:
+        return render(request, 'billy/quality_exception_error.html', {
+            'metadata': meta,
+            'errors': errors
+        })
+
+    return redirect('quality_exceptions', abbr)
 
 def quality_exception_commit(request, abbr):
     def classify_object(oid):
