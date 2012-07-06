@@ -818,7 +818,15 @@ def quality_exceptions(request, abbr):
     })
 
 def quality_exception_commit(request, abbr):
-    pass
+    meta = metadata(abbr)
+    level = metadata(abbr)['level']
+
+    error = "Oh noes."
+
+    return render(request, 'billy/quality_exception_error.html', {
+        'metadata': meta,
+        'error': error
+    })
 
 def events(request, abbr):
     meta = metadata(abbr)
