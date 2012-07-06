@@ -834,7 +834,7 @@ def quality_exception_commit(request, abbr):
     level = metadata(abbr)['level']
     error = []
 
-    get = request.GET
+    get = request.POST
     objects = [ x.strip() for x in get['affected'].split(",") ]
     if "" in objects:
         objects.remove("")

@@ -26,7 +26,7 @@
 <br /><br />
 
 <div class="span8">
-    <form action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
+    <form method = 'POST' action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
         <fieldset>
             <div class="control-group">
                 <label class="control-label" for="focusedInput">Exception Type</label>
