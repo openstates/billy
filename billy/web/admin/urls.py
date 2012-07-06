@@ -26,10 +26,13 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$', 'event',
         name='event'),
 
+    # Quality exceptions
     url(r'^(?P<abbr>[a-z]{2})/exceptions/$', 'quality_exceptions',
         name='quality_exceptions'),
     url(r'^(?P<abbr>[a-z]{2})/add_exception/$', 'quality_exception_commit',
         name='quality_exception_commit'),
+    url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$', 'quality_exception_remove',
+        name='quality_exception_remove'),
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',

@@ -1,5 +1,6 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
+{% load billy_utiltags %}
 
 {% block title %}Data Quality{% endblock %}
 
@@ -9,6 +10,7 @@
         <th>Exception Type</th>
         <th>Affected Entities</th>
         <th>Note</th>
+        <th>Danger Zone</th>
     </tr>
 {% for ex in exceptions %}
     <tr>
@@ -17,6 +19,7 @@
                 <span class="label label-info">{{ i }}</span>
             {% endfor %}</td>
         <td>{{ ex.notes }}</td>
+        <td><a href = '{% url quality_exception_remove metadata.abbreviation ex|key:"_id" %}' >remove</a></td>
     </tr>
 {% endfor %}
 </table>

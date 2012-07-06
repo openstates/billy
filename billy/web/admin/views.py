@@ -817,6 +817,11 @@ def quality_exceptions(request, abbr):
         'exceptions': exceptions
     })
 
+def quality_exception_remove(request, abbr, obj):
+
+    return render(request, 'billy/events.html', {
+    })
+
 def quality_exception_commit(request, abbr):
     def classify_object(oid):
         oid = oid.upper()
