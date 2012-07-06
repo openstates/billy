@@ -82,6 +82,7 @@ git_active_tree = None
 git_old_tree = None
 HEAD = None
 
+
 def git_add_bill(data):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
@@ -99,13 +100,14 @@ def git_add_bill(data):
     git_active_repo.object_store.add_object(spam)
     git_active_tree[bid] = (0100644, spam.id)
     git_active_tree.check()
-    print "added %s - %s" % ( data['_id'], spam.id )
+    print "added %s - %s" % (data['_id'], spam.id)
+
 
 def git_commit(message):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
 
-    print "Commiting import as '%s'" % ( message )
+    print "Commiting import as '%s'" % (message)
 
     global git_active_repo
     global git_active_tree
@@ -131,6 +133,7 @@ def git_commit(message):
     c.message = message
     repo.object_store.add_object(c)
     repo.refs['refs/heads/master'] = c.id
+
 
 def git_repo_init(gitdir):
     os.mkdir(gitdir)
@@ -160,6 +163,7 @@ Fondly,
     repo.object_store.add_object(commit)
     repo.refs['refs/heads/master'] = commit.id
 
+
 def git_prelod(abbr):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
@@ -170,7 +174,7 @@ def git_prelod(abbr):
     global git_old_tree
     global HEAD
 
-    gitdir = "%s/%s.git" % ( settings.GIT_PATH, abbr )
+    gitdir = "%s/%s.git" % (settings.GIT_PATH, abbr)
 
     if not os.path.exists(gitdir):
         git_repo_init(gitdir)
@@ -182,6 +186,7 @@ def git_prelod(abbr):
     tree = git_active_repo.tree(commit.tree)
     git_old_tree = tree.id
     git_active_tree = tree
+
 
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
@@ -338,7 +343,6 @@ def import_bill(data, votes, categorizer):
     except KeyError:
         pass
     data['alternate_titles'] = list(alt_titles)
-
 
     if not bill:
         bill_id = insert_with_id(data)
@@ -532,7 +536,7 @@ def get_committee_id_alt(level, abbr, name, chamber):
     for committee in comms:
         c = committee['committee']
         if committee['subcommittee'] != None:
-            c += " %s"% ( committee['subcommittee'] )
+            c += " %s" % (committee['subcommittee'])
 
         if compare_committee(name, c):
             if not matched_committee is None:
