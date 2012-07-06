@@ -818,15 +818,66 @@ def quality_exceptions(request, abbr):
     })
 
 def quality_exception_commit(request, abbr):
+    def classify_object(oid):
+        oid = oid.upper()
+        try:
+            return {
+                "L": "legislators",
+                "B": "bills",
+                "E": "events",
+                "V": "votes"
+            }[oid[2]]
+        except KeyError:
+            return None
+
     meta = metadata(abbr)
     level = metadata(abbr)['level']
+    error = []
 
-    error = "Oh noes."
+    get = request.GET
+    objects = [ x.strip() for x in get['affected'].split(",") ]
+    if "" in objects:
+        objects.remove("")
+    if len(objects) == 0:
+        error.append("No objects.")
 
-    return render(request, 'billy/quality_exception_error.html', {
-        'metadata': meta,
-        'error': error
+    for obj in objects:
+        classy = classify_object(obj)
+        o = getattr(db, classy, None).find({
+            "_id": obj
+        })
+        if o.count() == 0:
+            error.append("Unknown %s object - %s" % ( classy, obj ))
+        elif o.count() != 1:
+            error.append("Somehow %s matched more then one ID..." % ( obj ))
+        else:
+            o = o[0]
+            if o['state'] != abbr:
+                error.append("Object %s is not from this state." % ( obj ))
+
+    type = get['extype'].strip()
+    notes = get['notes'].strip()
+
+    if type == "":
+        error.append("Empty type")
+
+    if notes == "":
+        error.append("Empty notes")
+
+    if error != []:
+        return render(request, 'billy/quality_exception_error.html', {
+            'metadata': meta,
+            'errors': error
+        })
+
+    db.quality_exceptions.insert({
+        "abbr": abbr,
+        "notes": notes,
+        "ids": objects,
+        "type": type
     })
+
+    return redirect('quality_exceptions', abbr)
 
 def events(request, abbr):
     meta = metadata(abbr)
@@ -843,7 +894,6 @@ def events(request, abbr):
         'events': ((e, e['_id']) for e in events),
         'metadata': meta,
     })
-
 
 def event(request, abbr, event_id):
     meta = metadata(abbr)

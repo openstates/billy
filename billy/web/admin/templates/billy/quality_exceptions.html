@@ -26,22 +26,22 @@
 <br /><br />
 
 <div class="span8">
-    <form class="form-horizontal">
+    <form action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
         <fieldset>
             <div class="control-group">
                 <label class="control-label" for="focusedInput">Exception Type</label>
                 <div class="controls">
-                    <input class="input-xlarge focused" id="extype"
+                    <input class="input-xlarge focused" name="extype"
                             type="text" placeholder="bills:can_not_grok">
                 </div>
                 <label class="control-label" for="focusedInput">Affected Entities</label>
                 <div class="controls">
-                    <input class="input-xlarge focused" id="affected"
+                    <input class="input-xlarge focused" name="affected"
                             type="text" placeholder="LOL00002023, LUL00202023">
                 </div>
                 <label class="control-label" for="focusedInput">Notes</label>
                 <div class="controls">
-                    <input class="input-xlarge focused" id="notes"
+                    <input class="input-xlarge focused" name="notes"
                             type="text" placeholder="Errorful stuff on the remote site">
                 </div>
             <div class="form-actions">
