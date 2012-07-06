@@ -166,8 +166,8 @@ class Metadata(Document):
         So do a "select_related" operation on committee members.
         '''
         committees = list(self.committees(*args, **kwargs))
-        legislators = self.legislators(
-            fields=['first_name', 'last_name', 'state'])
+        legislators = self.legislators({'active': True},
+                    fields=['first_name', 'last_name', 'state'])
         legislators = dict((obj['_id'], obj) for obj in legislators)
         for com in committees:
             com._legislators = legislators
