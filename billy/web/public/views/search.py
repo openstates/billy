@@ -1,12 +1,8 @@
 import re
 import operator
 
-from django.shortcuts import render
-from django.conf import settings
-
-from billy.models import db, Metadata, Bill
+from billy.models import db
 from billy.importers.utils import fix_bill_id
-from .utils import templatename
 
 
 def search_by_bill_id(abbr, search_text):
@@ -45,4 +41,3 @@ def search_by_bill_id(abbr, search_text):
                           reverse=True)
 
             return docs
-

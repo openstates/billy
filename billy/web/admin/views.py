@@ -30,6 +30,8 @@ from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
 
+from billy.reports.utils import QUALITY_EXCEPTIONS
+
 
 def _meta_and_report(abbr):
     meta = metadata(abbr)
@@ -497,7 +499,6 @@ def summary_index(request, abbr, session):
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                        collections=("bills", "legislators", "committees"),
                        dumps=json.dumps, Decimal=decimal.Decimal):
-    meta = metadata(abbr)
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
@@ -685,14 +686,14 @@ def random_bill(request, abbr):
     if not meta:
         raise Http404('No metadata found for abbreviation %r.' % abbr)
 
+
+def _bill_spec(meta, limit):
+    abbr = meta['abbreviation']
     level = meta['level']
+
+    # basic spec
     latest_session = meta['terms'][-1]['sessions'][-1]
-
-    random_flag = "limit"
-
-    modi_flag = ""
-    if random_flag in request.GET:
-        modi_flag = request.GET[random_flag]
+    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
 
     basic_specs = {
         "no_versions": {'versions': []},
@@ -700,28 +701,37 @@ def random_bill(request, abbr):
         "no_actions": {'actions': []}
     }
 
-    default = True
-    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
-
-    if modi_flag == 'bad_vote_counts':
+    # apply modifier flag
+    if limit == 'bad_vote_counts':
         bad_vote_counts = db.reports.find_one({'_id': abbr}
                                              )['bills']['bad_vote_counts']
         spec = {'_id': {'$in': bad_vote_counts}}
-        default = False
-
-    if modi_flag in basic_specs:
-        default = False
-        spec.update(basic_specs[modi_flag])
+    elif limit in basic_specs:
+        spec.update(basic_specs[limit])
         spec.pop('session')     # all sessions
-
-    if modi_flag == 'current_term':
-        default = False
+    elif limit == 'current_term':
         curTerms = meta['terms'][-1]['sessions']
         spec['session'] = {"$in": curTerms}
+    elif limit == '':
+        pass
+    else:
+        raise ValueError('invalid limit: {0}'.format(modi_flag))
 
-    count = db.bills.find(spec).count()
+    return spec
+
+
+@never_cache
+def random_bill(request, abbr):
+    meta = metadata(abbr)
+    if not meta:
+        raise Http404
+
+    spec = _bill_spec(meta, request.GET.get('limit', ''))
+    bills = db.bills.find(spec)
+
+    count = bills.count()
     if count:
-        bill = db.bills.find(spec)[random.randint(0, count - 1)]
+        bill = bills[random.randint(0, count - 1)]
         warning = None
     else:
         bill = None
@@ -736,15 +746,6 @@ def random_bill(request, abbr):
     context = {'bill': bill, 'id': bill_id, 'random': True,
                'state': abbr.lower(), 'warning': warning, 'metadata': meta}
 
-    if default and modi_flag != "":
-        context["warning"] = \
-"""
- It looks like you've set a limit flag, but the flag was not processed by
- billy. Sorry about that. This might be due to a programming error, or a
- bad guess of the URL flag. Rather then making a big fuss over this, i've just
- got a list of all random bills. Better luck next time!
-"""
-
     return render(request, 'billy/bill.html', context)
 
 
@@ -753,20 +754,20 @@ def bill_list(request, abbr):
     if not meta:
         raise Http404('No metadata found for abbreviation %r' % abbr)
 
-    level = meta['level']
-    spec = {'level': level, level: abbr}
-
     if 'version_url' in request.GET:
         version_url = request.GET.get('version_url')
-        spec['versions.url'] = version_url
+        spec = {'versions.url': version_url}
+    else:
+        spec = _bill_spec(meta, request.GET.get('limit', ''))
+    print spec
 
-    bills = db.bills.find(spec)
+    bills = list(db.bills.find(spec))
     query_text = repr(spec)
 
-    context = {'metadata': meta,
-               'query_text': query_text,
-               'bills': bills}
+    bill_ids = [b['_id'] for b in bills]
 
+    context = {'metadata': meta, 'query_text': query_text, 'bills': bills,
+               'bill_ids': bill_ids }
     return render(request, 'billy/bill_list.html', context)
 
 
@@ -813,16 +814,27 @@ def quality_exceptions(request, abbr):
         'abbr': abbr.lower()
     }) #  Natural sort is fine
 
+    extypes = QUALITY_EXCEPTIONS
+
     return render(request, 'billy/quality_exceptions.html', {
         'metadata': meta,
-        'exceptions': exceptions
+        'exceptions': exceptions,
+        "extypes": extypes
     })
 
 
 def quality_exception_remove(request, abbr, obj):
+    errors = []
 
-    return render(request, 'billy/events.html', {
-    })
+    db.quality_exceptions.remove({"_id": ObjectId(obj)})
+
+    if errors != []:
+        return render(request, 'billy/quality_exception_error.html', {
+            'metadata': meta,
+            'errors': errors
+        })
+
+    return redirect('quality_exceptions', abbr)
 
 
 def quality_exception_commit(request, abbr):
@@ -864,6 +876,9 @@ def quality_exception_commit(request, abbr):
                 error.append("Object %s is not from this state." % ( obj ))
 
     type = get['extype'].strip()
+    if type not in QUALITY_EXCEPTIONS:
+        error.append("Type %s is not a real type" % type)
+
     notes = get['notes'].strip()
 
     if type == "":

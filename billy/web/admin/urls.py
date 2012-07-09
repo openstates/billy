@@ -3,6 +3,14 @@ from django.conf.urls.defaults import patterns, url
 urlpatterns = patterns('billy.web.admin.views',
     url(r'^$', 'browse_index', name='admin_index'),
 
+    # Quality exceptions (need to be above loose-matching bill view rule)
+    url(r'^(?P<abbr>[a-z]{2})/exceptions/$', 'quality_exceptions',
+        name='quality_exceptions'),
+    url(r'^(?P<abbr>[a-z]{2})/add_exception/$', 'quality_exception_commit',
+        name='quality_exception_commit'),
+    url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$',
+        'quality_exception_remove', name='quality_exception_remove'),
+
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
     url(r'^(?P<abbr>[a-z]{2})/metadata$', 'metadata_json',
@@ -25,14 +33,6 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='events'),
     url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$', 'event',
         name='event'),
-
-    # Quality exceptions
-    url(r'^(?P<abbr>[a-z]{2})/exceptions/$', 'quality_exceptions',
-        name='quality_exceptions'),
-    url(r'^(?P<abbr>[a-z]{2})/add_exception/$', 'quality_exception_commit',
-        name='quality_exception_commit'),
-    url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$', 'quality_exception_remove',
-        name='quality_exception_remove'),
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
