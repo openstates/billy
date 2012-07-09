@@ -124,6 +124,7 @@ def compare_committee(ctty1, ctty2):
         for junk in ctty_junk_words:
             obj = re.sub(junk, " ", obj).strip()
         obj = re.sub("\s+", " ", obj)
+        obj = re.sub(r'\s+', ' ', re.sub(r'\W+', ' ', obj)).strip()
         return obj
     check_both = [
         ("", ""),
