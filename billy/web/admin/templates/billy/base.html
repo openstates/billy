@@ -31,7 +31,7 @@
                     <ul class="dropdown-menu">
                     <li> <a href="{% url admin_bills metadata.abbreviation %}">Bill Overview</a> </li>
                     <li> <a href="{% url random_bill metadata.abbreviation %}">Random Bill</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=bad_vote_counts">Bad Vote Counts</a> </li>
+                    <li> <a href="{% url bad_vote_list metadata.abbreviation %}">Bad Vote Counts</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>

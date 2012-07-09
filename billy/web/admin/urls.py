@@ -13,23 +13,33 @@ urlpatterns = patterns('billy.web.admin.views',
 
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
-    url(r'^(?P<abbr>[a-z]{2})/metadata$', 'metadata_json',
+    url(r'^(?P<abbr>[a-z]{2})/metadata/$', 'metadata_json',
         name='metadata_json'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),
-    url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
-        name='admin_legislators'),
+
+    # committees
     url(r'^(?P<abbr>[a-z]{2})/committees/$', 'committees',
         name='admin_committees'),
     url(r'^delete_committees/$', 'delete_committees',
         name='delete_committees'),
+
+    # legislator list
+    url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
+        name='admin_legislators'),
     url(r'^legislators/(?P<id>\w+)/$', 'legislator', name='legislator'),
     url(r'^legislators/(?P<id>\w+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
-    url(r'^(?P<abbr>[a-z]{2})/(?P<session>.+)/(?P<id>.*)/$', 'bill',
-        name='bill'),
-    url(r'^(?P<abbr>[a-z]{2})/random_bill/$', 'random_bill',
+
+    # bills
+    url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/random/$', 'random_bill',
         name='random_bill'),
-    url(r'^(?P<abbr>[a-z]{2})/bill_list/$', 'bill_list', name='bill_list'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<openstates_id>\w+)/$', 'bill',
+        name='bill_by_id'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>.+)/(?P<id>.*)/$', 'bill',
+        name='bill'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/list/$', 'bill_list', name='bill_list'),
+
+    url(r'^(?P<abbr>[a-z]{2})/bad_vote_list/$', 'bad_vote_list', name='bad_vote_list'),
     url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='events'),
     url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$', 'event',
         name='event'),

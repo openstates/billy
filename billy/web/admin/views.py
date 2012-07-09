@@ -679,13 +679,6 @@ def duplicate_versions(request, abbr):
                   {'metadata': meta, 'report': report})
 
 
-@never_cache
-def random_bill(request, abbr):
-    meta = metadata(abbr)
-    if not meta:
-        raise Http404('No metadata found for abbreviation %r.' % abbr)
-
-
 def _bill_spec(meta, limit):
     abbr = meta['abbreviation']
     level = meta['level']
@@ -700,12 +693,7 @@ def _bill_spec(meta, limit):
         "no_actions": {'actions': []}
     }
 
-    # apply modifier flag
-    if limit == 'bad_vote_counts':
-        bad_vote_counts = db.reports.find_one({'_id': abbr}
-                                             )['bills']['bad_vote_counts']
-        spec = {'_id': {'$in': bad_vote_counts}}
-    elif limit in basic_specs:
+    if limit in basic_specs:
         spec.update(basic_specs[limit])
         spec.pop('session')     # all sessions
     elif limit == 'current_term':
@@ -714,7 +702,7 @@ def _bill_spec(meta, limit):
     elif limit == '':
         pass
     else:
-        raise ValueError('invalid limit: {0}'.format(modi_flag))
+        raise ValueError('invalid limit: {0}'.format(limit))
 
     return spec
 
@@ -770,11 +758,29 @@ def bill_list(request, abbr):
     return render(request, 'billy/bill_list.html', context)
 
 
-def bill(request, abbr, session, id):
+def bad_vote_list(request, abbr):
     meta = metadata(abbr)
-    level = meta['level']
-    bill = find_bill({'level': level, level: abbr,
-                      'session': session, 'bill_id': id.upper()})
+    if not meta:
+        raise Http404('No metadata found for abbreviation %r' % abbr)
+    report = db.reports.find_one({'_id': abbr})
+    bad_vote_ids = report['bills']['bad_vote_counts']
+    votes = db.votes.find({'_id': {'$in': bad_vote_ids}})
+    print votes.count()
+
+    context = {'metadata': meta, 'vote_ids': bad_vote_ids,
+               'votes': votes }
+    return render(request, 'billy/vote_list.html', context)
+
+
+def bill(request, abbr, session=None, id=None, openstates_id=None):
+    meta = metadata(abbr)
+
+    if openstates_id:
+        bill = db.bills.find_one({'_id': openstates_id})
+    else:
+        level = meta['level']
+        bill = find_bill({'level': level, level: abbr,
+                          'session': session, 'bill_id': id.upper()})
     if not bill:
         msg = 'No bill found in {meta[name]} session {session!r} with id {id!r}.'
         raise Http404(msg.format(meta=meta, session=session, id=id))
