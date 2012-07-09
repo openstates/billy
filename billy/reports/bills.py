@@ -149,15 +149,15 @@ def scan_bills(abbr):
                 if (len(vote['yes_votes']) != vote['yes_count'] and
                     vote['vote_id'] not in
                     quality_exceptions['votes:bad_yes_count']):
-                session_d['bad_vote_counts'].add(vote['vote_id'])
+                    session_d['bad_vote_counts'].add(vote['vote_id'])
                 if (len(vote['no_votes']) != vote['no_count'] and
                     vote['vote_id'] not in
                     quality_exceptions['votes:bad_no_count']):
-                session_d['bad_vote_counts'].add(vote['vote_id'])
+                    session_d['bad_vote_counts'].add(vote['vote_id'])
                 if (len(vote['other_votes']) != vote['other_count'] and
                     vote['vote_id'] not in
                     quality_exceptions['votes:bad_other_count']):
-                session_d['bad_vote_counts'].add(vote['vote_id'])
+                    session_d['bad_vote_counts'].add(vote['vote_id'])
 
         # subjects
         for subj in bill.get('scraped_subjects', []):
