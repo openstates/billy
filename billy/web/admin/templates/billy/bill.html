@@ -1,5 +1,6 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
+{% load customtags %}
 
 {% block title %}
 {{ bill.state|upper }} {{ bill.bill_id }}
@@ -22,6 +23,7 @@
 
 <div class="metadata">
     <dl>
+        <dt>Open States ID</dt><dd>{{id}}</dd>
         {% if bill.alternate_titles %}
         <dt>Alternate Titles</dt><dd><ul>{{bill.alternate_titles|unordered_list}}</ul></dd> 
         {% endif %}
@@ -79,6 +81,7 @@
   {% if bill.votes %}
   <table class="table">
       <tr>
+          <th>ID</th>
           <th>Motion</th>
           <th>Chamber</th>
           <th>Date</th>
@@ -89,6 +92,7 @@
       </tr>
     {% for vote in bill.votes %}
     <tr>
+        <td>{{vote.vote_id}}</td>
         <td>{{vote.motion}}</td>
         <td>{{vote.chamber}}</td>
         <td>{{vote.date|naturalday}}</td>
