@@ -843,7 +843,7 @@ def quality_exception_commit(request, abbr):
     error = []
 
     get = request.POST
-    objects = [ x.strip() for x in get['affected'].split(",") ]
+    objects = get['affected'].split()
     if "" in objects:
         objects.remove("")
     if len(objects) == 0:
