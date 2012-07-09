@@ -53,7 +53,6 @@
         <th>No Sponsors</th>
         <th>No Versions</th>
         <th>Dup. Versions</th>
-        <th>Bill Types</th>
         <th>w/ Subjects</th>
         <th>Actions w/ Types</th>
         <th>Sponsor leg_ids</th>
@@ -162,8 +161,6 @@
             {{row.bills.versionless_count}}</td>
         <td class="{{row.bills.duplicate_versions|length|yesno:"bad,good"}}">
             {{row.bills.duplicate_versions|length}}</td>
-        <td class="{{row.bills.bill_types|length_is:"1"|yesno:"bad,good"}}">
-            {{row.bills.bill_types|length}}</td>
         <td
             {% if not row.bills.have_subjects %}
             class="warning">---</td>
