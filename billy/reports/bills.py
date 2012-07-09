@@ -56,7 +56,7 @@ def scan_bills(abbr):
     # load exception data into sets of ids indexed by exception type
     quality_exceptions = defaultdict(set)
     for qe in db.quality_exceptions.find({'abbr': abbr}):
-        if qe['type'].startswith('bills:'):
+        if qe['type'].startswith(('bills:', 'votes:)):
             quality_exceptions[qe['type']].update(qe['ids'])
 
     for bill in db.bills.find({'level': level, level: abbr}):
@@ -145,10 +145,18 @@ def scan_bills(abbr):
                     )
 
             # check counts if any rollcalls are present
-            if (has_rollcalls and
-                (len(vote['yes_votes']) != vote['yes_count'] or
-                 len(vote['no_votes']) != vote['no_count'] or
-                 len(vote['other_votes']) != vote['other_count'])):
+            if has_rollcalls:
+                if (len(vote['yes_votes']) != vote['yes_count'] and
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_yes_count']):
+                session_d['bad_vote_counts'].add(vote['vote_id'])
+                if (len(vote['no_votes']) != vote['no_count'] and
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_no_count']):
+                session_d['bad_vote_counts'].add(vote['vote_id'])
+                if (len(vote['other_votes']) != vote['other_count'] and
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_other_count']):
                 session_d['bad_vote_counts'].add(vote['vote_id'])
 
         # subjects
