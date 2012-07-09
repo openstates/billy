@@ -5,7 +5,7 @@ from billy.reports.utils import update_common
 
 # semi-optional keys to check for on active legislators
 checked_keys = ('photo_url', 'url', 'email', 'votesmart_id',
-                'transparencydata_id')
+                'transparencydata_id', 'offices')
 
 
 def scan_legislators(abbr):
