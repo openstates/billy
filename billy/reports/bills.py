@@ -56,7 +56,7 @@ def scan_bills(abbr):
     # load exception data into sets of ids indexed by exception type
     quality_exceptions = defaultdict(set)
     for qe in db.quality_exceptions.find({'abbr': abbr}):
-        if qe['type'].startswith(('bills:', 'votes:)):
+        if qe['type'].startswith(('bills:', 'votes:')):
             quality_exceptions[qe['type']].update(qe['ids'])
 
     for bill in db.bills.find({'level': level, level: abbr}):
