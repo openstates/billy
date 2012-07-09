@@ -29,7 +29,6 @@ from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
-
 from billy.reports.utils import QUALITY_EXCEPTIONS
 
 
@@ -855,7 +854,7 @@ def quality_exception_commit(request, abbr):
     error = []
 
     get = request.POST
-    objects = [ x.strip() for x in get['affected'].split(",") ]
+    objects = get['affected'].split()
     if "" in objects:
         objects.remove("")
     if len(objects) == 0:
