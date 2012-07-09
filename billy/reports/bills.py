@@ -149,7 +149,7 @@ def scan_bills(abbr):
                 (len(vote['yes_votes']) != vote['yes_count'] or
                  len(vote['no_votes']) != vote['no_count'] or
                  len(vote['other_votes']) != vote['other_count'])):
-                session_d['bad_vote_counts'].add(bill['_id'])
+                session_d['bad_vote_counts'].add(vote['vote_id'])
 
         # subjects
         for subj in bill.get('scraped_subjects', []):
