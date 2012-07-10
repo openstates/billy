@@ -36,7 +36,6 @@ def _bill_report_dict():
             '_rollcalls_with_leg_id_count': 0,
             '_subjects_count': 0,
             'bills_per_subject': defaultdict(int),
-            'sourceless_count': 0,
             'versionless_count': 0,
             'version_count': 0,
             'unmatched_leg_ids': set(),

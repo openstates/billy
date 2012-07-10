@@ -363,10 +363,9 @@ def bills(request, abbr):
             }),
 
         ('Quality Issues',   {'rownames': [
-                                'sourceless_count', 'sponsorless_count',
-                                'actionless_count', 'actions_unsorted',
-                                'bad_vote_counts', 'version_count',
-                                'versionless_count',
+                                'sponsorless_count', 'actionless_count',
+                                'actions_unsorted', 'bad_vote_counts',
+                                'version_count', 'versionless_count',
 
                                 'sponsors_with_leg_id',
                                 'rollcalls_with_leg_id',

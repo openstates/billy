@@ -19,7 +19,6 @@ def scan_legislators(abbr):
               '_updated_today_count': 0,
               '_updated_this_month_count': 0,
               '_updated_this_year_count': 0,
-              'sourceless_count': 0,
              }
     for key in checked_keys:
         report[key] = 0

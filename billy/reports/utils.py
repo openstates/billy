@@ -6,7 +6,7 @@ last_year = datetime.datetime.utcnow() - datetime.timedelta(days=365)
 
 
 def update_common(obj, report):
-    """ do updated_at and sourceless checks """
+    """ do updated_at checks """
     # updated checks
     if obj['updated_at'] >= yesterday:
         report['_updated_today_count'] += 1
@@ -14,10 +14,6 @@ def update_common(obj, report):
             report['_updated_this_month_count'] += 1
             if obj['updated_at'] >= last_year:
                 report['_updated_this_year_count'] += 1
-
-    # sources
-    if not obj['sources']:
-        report['sourceless_count'] += 1
 
 
 QUALITY_EXCEPTIONS = {
