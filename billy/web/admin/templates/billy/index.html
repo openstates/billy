@@ -69,7 +69,7 @@
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
         <!-- legislators -->
-        <td class="{{row.legislators.vacant_seats|length|yesno:"bad,good"}}">
+        <td class="{{row.legislators.vacant_seats|length|yesno:"warning,good"}}">
             {{row.legislators.vacant_seats|length}}</td>
         <td class="{{row.legislators.overfilled_seats|length|yesno:"bad,good"}}">
             {{row.legislators.overfilled_seats|length}}</td>
@@ -121,13 +121,9 @@
 
         <td
             {% if row.legislators.email < 75 %}
-            class="bad"
-            {% else %}
-                {% if row.legislators.email < 95 %}
                 class="warning"
-                {% else %}
+            {% else %}
                 class="good"
-                {% endif %}
             {% endif %}
             >{{row.legislators.email|floatformat}}%</td>
 
