@@ -111,7 +111,7 @@ class NameMatcher(object):
         converting to lowercase and removing punctuation.
         """
         name = re.sub(
-            r'^(Senator|Representative|Assembly(member|man|woman)) ',
+            r'^(Senator|Representative|Sen|Rep|Assembly(member|man|woman)) ',
             '',
             name)
         return name.strip().lower().replace('.', '')
