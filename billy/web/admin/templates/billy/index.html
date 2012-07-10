@@ -147,8 +147,12 @@
             <td class="{{row.committees.lower_count|yesno:"good,bad"}}">
                 {{row.committees.lower_count}}</td>
         {% endif %}
-        <td class="{{row.committees.joint_count|yesno:"good,warning"}}">
-            {{row.committees.joint_count}}</td>
+        {% if row.unicameral %}
+            <td class="good">---</td>
+        {% else %}
+            <td class="{{row.committees.joint_count|yesno:"good,warning"}}">
+                {{row.committees.joint_count}}</td>
+        {% endif %}
         <td class="{{row.committees.empty_count|yesno:"bad,good"}}">
             {{row.committees.empty_count}}</td>
         <td
