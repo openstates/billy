@@ -33,8 +33,7 @@ of their data'''
             # check columns
             changed = {}
             keys = set(['first_name', 'middle_name', 'last_name', 'suffixes',
-                       'nickname', 'votesmart_id', 'transparencydata_id',
-                       'photo_url'])
+                       'nickname', 'transparencydata_id', 'photo_url'])
             keys.intersection_update(namefile.fieldnames)
             for key in keys:
                 row[key] = row[key]
