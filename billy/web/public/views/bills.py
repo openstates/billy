@@ -198,11 +198,14 @@ class SponsoredBillsList(RelatedBillsList):
     title_template = 'Bills sponsored by {{obj.display_name}} - OpenStates'
 
 
-def bill(request, abbr, bill_id):
-
-    bill = db.bills.find_one({'_id': bill_id})
+def bill(request, abbr, session, bill_id):
+    bill_id = bill_id.replace('-', ' ')
+    bill = db.bills.find_one({'state': abbr, 'session': session,
+                              'bill_id': bill_id})
+    #bill = db.bills.find_one({'_id': bill_id})
     if bill is None:
-        raise Http404
+        raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
+                                                         bill_id))
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
     if show_all_sponsors:
@@ -220,10 +223,10 @@ def bill(request, abbr, bill_id):
              statenav_active='bills'))
 
 
-def vote(request, abbr, _id):
-    vote = db.votes.find_one(_id)
+def vote(request, abbr, vote_id):
+    vote = db.votes.find_one(vote_id)
     if vote is None:
-        raise Http404
+        raise Http404('no such vote: {0}'.format(vote_id))
     bill = vote.bill()
 
     return render(request, templatename('vote'),
