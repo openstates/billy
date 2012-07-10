@@ -134,6 +134,7 @@ def _do_imports(abbrev, args):
     dist_filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR, 'districts',
                                  '%s.csv' % abbrev)
     if os.path.exists(dist_filename):
+        db.districts.remove({'abbr': abbrev})
         dist_csv = unicodecsv.DictReader(open(dist_filename))
         for dist in dist_csv:
             dist['_id'] = '%(abbr)s-%(chamber)s-%(name)s' % dist
