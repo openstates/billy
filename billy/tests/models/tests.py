@@ -1,7 +1,7 @@
 import unittest
 
-from billy.models import Bill, Metadata, Legislator
-from billy.models.base import _model_registry
+from billy.models import Metadata, Legislator   # , Bill
+#from billy.models.base import _model_registry
 from billy.models.committees import CommitteeMember
 from billy import db
 

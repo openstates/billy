@@ -88,7 +88,7 @@ def test_committees_from_legislators():
     assert db.committees.count() == 3
 
     ag_com = db.committees.find_one({'_id': 'EXC000001'})
-    assert ag_com['subcommittee'] == None
+    assert ag_com['subcommittee'] is None
     assert ag_com['members'][0]['leg_id'] == 'EXL000001'
     # Heisenberg isn't added (wrong term)
     assert len(ag_com['members']) == 2

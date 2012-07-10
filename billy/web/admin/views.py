@@ -755,7 +755,7 @@ def bill_list(request, abbr):
     bill_ids = [b['_id'] for b in bills]
 
     context = {'metadata': meta, 'query_text': query_text, 'bills': bills,
-               'bill_ids': bill_ids }
+               'bill_ids': bill_ids}
     return render(request, 'billy/bill_list.html', context)
 
 
@@ -769,7 +769,7 @@ def bad_vote_list(request, abbr):
     print votes.count()
 
     context = {'metadata': meta, 'vote_ids': bad_vote_ids,
-               'votes': votes }
+               'votes': votes}
     return render(request, 'billy/vote_list.html', context)
 
 
@@ -783,8 +783,8 @@ def bill(request, abbr, session=None, id=None, openstates_id=None):
         bill = find_bill({'level': level, level: abbr,
                           'session': session, 'bill_id': id.upper()})
     if not bill:
-        msg = 'No bill found in {meta[name]} session {session!r} with id {id!r}.'
-        raise Http404(msg.format(meta=meta, session=session, id=id))
+        msg = 'No bill found in {name} session {session!r} with id {id!r}.'
+        raise Http404(msg.format(name=meta['name'], session=session, id=id))
 
     return render(request, 'billy/bill.html',
                   {'bill': bill, 'metadata': meta, 'id': bill['_id']})
@@ -818,11 +818,10 @@ def legislators(request, abbr):
 
 def quality_exceptions(request, abbr):
     meta = metadata(abbr)
-    level = metadata(abbr)['level']
 
     exceptions = db.quality_exceptions.find({
         'abbr': abbr.lower()
-    }) #  Natural sort is fine
+    })  # Natural sort is fine
 
     extypes = QUALITY_EXCEPTIONS
 
@@ -834,6 +833,7 @@ def quality_exceptions(request, abbr):
 
 
 def quality_exception_remove(request, abbr, obj):
+    meta = metadata(abbr)
     errors = []
 
     db.quality_exceptions.remove({"_id": ObjectId(obj)})
@@ -861,7 +861,6 @@ def quality_exception_commit(request, abbr):
             return None
 
     meta = metadata(abbr)
-    level = metadata(abbr)['level']
     error = []
 
     get = request.POST
@@ -877,13 +876,13 @@ def quality_exception_commit(request, abbr):
             "_id": obj
         })
         if o.count() == 0:
-            error.append("Unknown %s object - %s" % ( classy, obj ))
+            error.append("Unknown %s object - %s" % (classy, obj))
         elif o.count() != 1:
-            error.append("Somehow %s matched more then one ID..." % ( obj ))
+            error.append("Somehow %s matched more then one ID..." % (obj))
         else:
             o = o[0]
             if o['state'] != abbr:
-                error.append("Object %s is not from this state." % ( obj ))
+                error.append("Object %s is not from this state." % (obj))
 
     type = get['extype'].strip()
     if type not in QUALITY_EXCEPTIONS:
@@ -1098,10 +1097,10 @@ def mom_merge(request):
     leg2_db = db.legislators.find_one({'_id': leg2})
 
     # XXX: break this out into its own error page
-    if leg1_db == None or leg2_db == None:
-        nonNull = leg1_db if leg1_db != None else leg2_db
-        if nonNull != None:
-            nonID = leg1    if nonNull['_id'] == leg1 else leg2
+    if leg1_db is None or leg2_db is None:
+        nonNull = leg1_db if leg1_db is None else leg2_db
+        if nonNull is not None:
+            nonID = leg1 if nonNull['_id'] == leg1 else leg2
         else:
             nonID = None
 

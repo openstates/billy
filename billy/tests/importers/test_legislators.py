@@ -59,7 +59,7 @@ def test_activate_legislators():
     assert 'party' not in leg1
 
     leg2 = db.legislators.find_one({'_id': id2})
-    assert leg2['active'] == True
+    assert leg2['active'] is True
     assert leg2['district'] == '2'
     assert leg2['chamber'] == 'upper'
     assert leg2['party'] == 'Democrat'
@@ -116,7 +116,7 @@ def test_deactivate_legislators():
     legislators.deactivate_legislators('2011-2012', 'ex', 'state')
 
     leg1 = db.legislators.find_one({'_id': id1})
-    assert leg1['active'] == False
+    assert leg1['active'] is False
     assert 'chamber' not in leg1
     assert 'district' not in leg1
     assert 'party' not in leg1
@@ -124,7 +124,7 @@ def test_deactivate_legislators():
     assert leg1['old_roles']['2009-2010'] == leg1_roles
 
     leg2 = db.legislators.find_one({'_id': id2})
-    assert leg2['active'] == True
+    assert leg2['active'] is True
     assert leg2['chamber'] == 'upper'
     assert leg2['district'] == '2'
     assert leg2['party'] == 'Democrat'
@@ -132,7 +132,7 @@ def test_deactivate_legislators():
     assert 'old_roles' not in leg2
 
     leg3 = db.legislators.find_one({'_id': id3})
-    assert leg3['active'] == False
+    assert leg3['active'] is False
     assert 'chamber' not in leg3
     assert 'district' not in leg3
     assert 'party' not in leg3

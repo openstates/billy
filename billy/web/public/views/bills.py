@@ -1,5 +1,4 @@
 import urllib
-from itertools import islice
 import pymongo
 
 from django.shortcuts import render
@@ -14,13 +13,7 @@ from .utils import templatename, RelatedObjectsList, ListViewBase
 from .search import search_by_bill_id
 
 
-def nth(iterable, n, default=None):
-    "Returns the nth item or a default value"
-    return next(islice(iterable, n, None), default)
-
-
 class BillsList(ListViewBase):
-
     use_table = True
     list_item_context_name = 'bill'
     paginator = CursorPaginator
