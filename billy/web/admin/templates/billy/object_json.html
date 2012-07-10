@@ -12,7 +12,9 @@
 </div>
 
 <div class="content" style="margin-left: 100px;">
-<a href="{{obj_url}}">remote</a>
+{% if not obj_url == None %}
+    <a href="{{obj_url}}">remote</a>
+{% endif %}
 {% if not forloop.last %} | {% endif %}
 {% if obj_isbill %}
     <a href="{% url bill obj.state obj.session obj.bill_id %}">billy</a>
