@@ -795,6 +795,8 @@ def legislators(request, abbr):
     meta = metadata(abbr)
     level = metadata(abbr)['level']
 
+    report = db.reports.find_one({'_id': abbr})['legislators']
+
     upper_legs = db.legislators.find({'level': level, level: abbr.lower(),
                                       'active': True, 'chamber': 'upper'})
     lower_legs = db.legislators.find({'level': level, level: abbr.lower(),
@@ -810,6 +812,8 @@ def legislators(request, abbr):
         'lower_legs': lower_legs,
         'inactive_legs': inactive_legs,
         'metadata': meta,
+        'overfilled': report['overfilled_seats'],
+        'vacant': report['vacant_seats'],
     })
 
 

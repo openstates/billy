@@ -5,6 +5,29 @@
 {% block content %}
 <h1>{{metadata.name}} legislators</h1>
 
+{% if overfilled %}
+<div class="alert alert-error">
+    <h4 class="alert-heading">Extra Legislators</h4>
+    <ul>
+        {% for seat in overfilled %}
+        <li>{{seat.2}} extra legislator{{seat.2|pluralize}} in {{seat.0}}-{{seat.1}}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if vacant %}
+<div class="alert">
+    <h4 class="alert-heading">Vacant Seats</h4>
+    <ul>
+        {% for seat in vacant %}
+        <li>{{seat.2}} empty seat{{seat.2|pluralize}} in {{seat.0}}-{{seat.1}}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
 <div class="span4">
 <h3> {{metadata.upper_chamber_title}}s </h3>
 <table class="table">
