@@ -44,8 +44,8 @@ def import_events(abbr, data_dir, import_actions=False):
             data = prepare_obj(json.load(f))
         for committee in data['participants']:
             cttyid = get_committee_id(data['level'], data['state'],
-                                      committee['participant'],
-                                      committee['chamber'])
+                                      committee['chamber'],
+                                      committee['participant'])
             if cttyid:
                 committee['committee_id'] = cttyid
 
