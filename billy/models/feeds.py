@@ -4,7 +4,7 @@ import datetime
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
 
-from .base import feeds_db, Document
+from .base import db, feeds_db, Document
 from .metadata import Metadata
 
 
@@ -15,7 +15,7 @@ class FeedEntry(Document):
         super(FeedEntry, self).__init__(*args, **kw)
         self._process()
 
-    def _process(self):
+    def _process(self, billy_db=db):
         '''Mutate the feed entry with hyperlinked entities. Add tagging
         data and other template context values, including source.
         '''
@@ -56,8 +56,7 @@ class FeedEntry(Document):
                 # other previously hyperlinked strings, like Fiona Ma and
                 # Mark Leno.
                 matches = re.finditer(entity_string, summary)
-                replacer = lambda m: '<a href="%s">%s</a>' % (url,
-                                                              entity_string)
+                replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
                 for match in matches:
 
                     # Only hyperlink if no previous hyperlink has been added
@@ -68,7 +67,19 @@ class FeedEntry(Document):
 
                     summary = re.sub(entity_string, replacer, summary)
                     hyperlinked_spans.append(match.span())
-            entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
+
+            # For entity_strings, us modelinstance.display_name strings.
+            _entity_display_names = []
+            for _id in _entity_ids:
+                collection_name = entity_types[_id[2]] + 's'
+                collection = getattr(billy_db, collection_name)
+                instance = collection.find_one(_id)
+                string = instance.display_name()
+                _entity_display_names.append(string)
+
+            entity_data = zip(_entity_strings, _entity_display_names,
+                              _entity_ids, _entity_urls)
+
             entry['summary'] = summary
             entry['entity_data'] = entity_data
 
@@ -76,6 +87,8 @@ class FeedEntry(Document):
         urldata = urlparse.urlparse(entry['link'])
         entry['source'] = urldata.scheme + urldata.netloc
         entry['host'] = urldata.netloc
+
+        # Prevent obfuscation of `published` method in template rendering.
         del entry['published']
 
     def published(self):
