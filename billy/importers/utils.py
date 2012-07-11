@@ -352,6 +352,57 @@ def merge_legislators(leg1, leg2):
         leg1[roles] = [leg2[roles][0]]
     return (leg1, leg2['_id'])
 
+__committee_ids = {}
+
+def get_committee_id(level, abbr, chamber, committee):
+    key = (level, abbr, chamber, committee)
+    if key in __committee_ids:
+        return __committee_ids[key]
+
+    spec = {'level': level, level: abbr, 'chamber': chamber,
+            'committee': committee, 'subcommittee': None}
+
+    comms = db.committees.find(spec)
+
+    if comms.count() != 1:
+        flag = 'Committee on'
+        if flag not in committee:
+            spec['committee'] = 'Committee on ' + committee
+        else:
+            spec['committee'] = committee.replace(flag, "").strip()
+        comms = db.committees.find(spec)
+
+    if comms and comms.count() == 1:
+        __committee_ids[key] = comms[0]['_id']
+    else:
+        # last resort :(
+        comm_id = get_committee_id_alt(level, abbr, committee, chamber)
+        __committee_ids[key] = comm_id
+
+    return __committee_ids[key]
+
+
+def get_committee_id_alt(level, abbr, name, chamber):
+    matched_committee = None
+    spec = {"state": abbr, "chamber": chamber}
+    if chamber is None:
+        del(spec['chamber'])
+    comms = db.committees.find(spec)
+    for committee in comms:
+        c = committee['committee']
+        if committee['subcommittee'] is not None:
+            c += " %s" % (committee['subcommittee'])
+
+        if compare_committee(name, c):
+            if not matched_committee is None:
+                return None  # In the event we match more then one committee.
+            matched_committee = committee['_id']
+
+    if matched_committee is None and not chamber is None:
+        matched_committee = get_committee_id_alt(level, abbr, name, None)
+
+    return matched_committee
+
 
 def oysterize(url, doc_class, id, **kwargs):
     if not kernel:
