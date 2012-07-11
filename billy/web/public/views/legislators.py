@@ -116,7 +116,7 @@ def legislator(request, abbr, _id, slug):
     # Note to self: Another slow query
     legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
-    feed_entries = legislator.feed_entries().sort('published_parsed')
+    feed_entries = legislator.feed_entries()
     return render(request, templatename('legislator'),
         dict(
             feed_entry_template=templatename('feed_entry'),
