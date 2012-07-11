@@ -42,24 +42,24 @@
 
                 {% if leg1_db == None %}
                     <b>Warning:</b>
-                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    <a href = '{% url admin_legislator leg1 %}' >{{ leg1 }}</a>
                     is removed from the Database or merged with another
                     Legislator. Check my link for more info.
                 {% else %}
                     I've found
-                    <a href = '{% url legislator leg1 %}' >{{ leg1 }}</a>
+                    <a href = '{% url admin_legislator leg1 %}' >{{ leg1 }}</a>
                     in the DB, and is a root legislator currently. This means I
                     am able to merge this Legislator with another.
                 {% endif %}
                 <br />
                 {% if leg2_db == None %}
                     <b>Warning:</b>
-                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    <a href = '{% url admin_legislator leg2 %}' >{{ leg2 }}</a>
                     is removed from the Database or merged with another
                     Legislator. Check my link for more info.
                 {% else %}
                     I've found
-                    <a href = '{% url legislator leg2 %}' >{{ leg2 }}</a>
+                    <a href = '{% url admin_legislator leg2 %}' >{{ leg2 }}</a>
                     in the DB, and is a root legislator currently. This means I
                     am able to merge this Legislator with another.
                 {% endif %}

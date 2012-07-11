@@ -14,7 +14,7 @@
     <a href="{% url object_json "bills" id %}">json dump</a>
 </div>
 
-<a href="{% url bill bill.state bill.session bill.bill_id %}">
+<a href="{% url admin_bill bill.state bill.session bill.bill_id %}">
   <h3>{{bill.state|upper}} {{bill.bill_id}}</h3>
 </a>
 

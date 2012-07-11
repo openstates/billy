@@ -18,7 +18,7 @@
         <tr>
             <td> {{bill.session}} </td>
             <td> {{bill.chamber}} </td>
-            <td> <a href="{% url bill bill.state bill.session bill.bill_id %}">{{bill.bill_id}}</a> </td>
+            <td> <a href="{% url admin_bill bill.state bill.session bill.bill_id %}">{{bill.bill_id}}</a> </td>
             <td> {{bill.title}} </td>
         </tr>
         {% endfor %}

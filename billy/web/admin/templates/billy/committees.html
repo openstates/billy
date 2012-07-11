@@ -25,7 +25,7 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="{% url legislator m.leg_id%}"> {%endif%}
+            <li>{% if m.leg_id %}<a href="{% url admin_legislator m.leg_id%}"> {%endif%}
                 {{ m.name }}
                 {% if m.leg_id %}</a> {%endif%}
             ({{m.role}})

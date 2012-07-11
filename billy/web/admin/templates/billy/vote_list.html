@@ -18,7 +18,7 @@
         {% for vote in votes %}
         <tr>
             <td> {{vote.chamber}} </td>
-            <td> <a href="{% url bill_by_id vote.state vote.bill_id %}">{{vote.bill_id}}</a> </td>
+            <td> <a href="{% url admin_bill_by_id vote.state vote.bill_id %}">{{vote.bill_id}}</a> </td>
             <td> {{vote|underscore_field:"id"}} </td>
             <td> {% if vote.yes_count != vote.yes_votes|length %} yes {% endif %}
                 {% if vote.no_count != vote.no_votes|length %} no {% endif %}
