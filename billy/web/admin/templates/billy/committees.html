@@ -30,6 +30,8 @@
                 {% if m.leg_id %}</a> {%endif%}
             ({{m.role}})
             </li>
+            {% empty %}
+            <li>EMPTY</li>
             {% endfor %}
         </ul> </td>
         <td> <ul>

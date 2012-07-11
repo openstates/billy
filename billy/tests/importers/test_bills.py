@@ -104,7 +104,7 @@ def test_import_bill():
     assert bill['action_dates']['last'] == 1334000000
     assert bill['action_dates']['passed_upper'] == 1333000000
     assert bill['action_dates']['signed'] == 1334000000
-    assert bill['action_dates']['passed_lower'] == None
+    assert bill['action_dates']['passed_lower'] is None
 
     # titles from alternate_titles & versions (not main title)
     assert 'main title' not in bill['alternate_titles']

@@ -30,7 +30,7 @@ def _check_results(one, two):
 def _test_logic(name):
     leg1, leg2, compare = _load_test_data(name)
     produced, to_del = merge_legislators(leg1, leg2)
-    assert _check_results(produced, compare) == True
+    assert _check_results(produced, compare)
 
 
 ##########

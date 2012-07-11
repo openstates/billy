@@ -13,7 +13,8 @@ class LegislatorScraper(Scraper):
                                    '../schemas/person.json')
         schema = json.load(open(schema_path))
         terms = [t['name'] for t in self.metadata['terms']]
-        schema['properties']['roles']['items']['properties']['term']['enum'] = terms
+        schema['properties']['roles']['items']['properties']['term']['enum'] =\
+                terms
         return schema
 
     def scrape(self, chamber, term):

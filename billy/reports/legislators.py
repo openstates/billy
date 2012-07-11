@@ -4,8 +4,7 @@ from billy import db
 from billy.reports.utils import update_common
 
 # semi-optional keys to check for on active legislators
-checked_keys = ('photo_url', 'url', 'email', 'votesmart_id',
-                'transparencydata_id')
+checked_keys = ('photo_url', 'url', 'email', 'transparencydata_id', 'offices')
 
 
 def scan_legislators(abbr):
@@ -19,11 +18,15 @@ def scan_legislators(abbr):
               '_updated_today_count': 0,
               '_updated_this_month_count': 0,
               '_updated_this_year_count': 0,
-              'sourceless_count': 0,
              }
-    seats_filled = {'upper': defaultdict(int), 'lower': defaultdict(int)}
     for key in checked_keys:
         report[key] = 0
+
+    # initialize seat counts
+    district_seats = {'upper': defaultdict(int), 'lower': defaultdict(int)}
+    for district in db.districts.find({'abbr': abbr}):
+        district_seats[district['chamber']][district['name']] = \
+                district['num_seats']
 
     for leg in db.legislators.find({'level': level, level: abbr}):
 
@@ -41,8 +44,8 @@ def scan_legislators(abbr):
                 # TODO: track these? (executives)
                 continue
 
-            seats_filled[chamber][leg['district']] += 1
-            # TODO: check seats_filled against districts
+            # decrement empty seats (if it goes negative, we have too many)
+            district_seats[chamber][leg['district']] -= 1
 
             for key in checked_keys:
                 if leg.get(key):
@@ -57,6 +60,16 @@ def scan_legislators(abbr):
     for url, n in duplicate_sources.iteritems():
         if n > 1:
             report['duplicate_sources'].append(url)
+
+    # copy over seat issues into report
+    report['overfilled_seats'] = []
+    report['vacant_seats'] = []
+    for chamber, chamber_seats in district_seats.iteritems():
+        for seat, count in chamber_seats.iteritems():
+            if count < 0:
+                report['overfilled_seats'].append((chamber, seat, -count))
+            elif count > 0:
+                report['vacant_seats'].append((chamber, seat, count))
 
     return report
 

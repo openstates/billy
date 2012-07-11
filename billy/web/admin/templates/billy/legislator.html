@@ -14,10 +14,6 @@
 </div>
 
 <dl>
-    {% if leg.votesmart_id %}
-        <dt>Votesmart ID</dt>
-        <dd><a href="http://www.votesmart.org/bio.php?can_id={{leg.votesmart_id}}">{{leg.votesmart_id}}</a></dd>
-    {% endif %}
     {% if leg.transparencydata_id %}
         <dt>TransparencyData ID</dt>
         <dd><a href="http://influenceexplorer.com/politician/id/{{leg.transparencydata_id}}?cycle=-1">{{leg.transparencydata_id}}</a></dd>

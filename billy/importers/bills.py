@@ -535,7 +535,7 @@ def get_committee_id_alt(level, abbr, name, chamber):
     comms = db.committees.find(spec)
     for committee in comms:
         c = committee['committee']
-        if committee['subcommittee'] != None:
+        if committee['subcommittee'] is not None:
             c += " %s" % (committee['subcommittee'])
 
         if compare_committee(name, c):

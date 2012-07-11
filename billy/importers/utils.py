@@ -16,7 +16,7 @@ if settings.ENABLE_OYSTER:
     try:
         from oyster.core import kernel
     except ImportError as e:
-        kernel = None
+        kernel = None               # noqa
         oyster_import_exception = e
 
 
