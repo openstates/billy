@@ -591,6 +591,7 @@ def object_json(request, collection, _id,
     obj = getattr(db, collection).find_one(_id)
     obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
     obj_isbill = (obj['_type'] == 'bill')
+    obj_url = None
     if obj_isbill:
         try:
             obj_url = obj['sources'][0]['url']
@@ -612,8 +613,7 @@ def object_json(request, collection, _id,
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
     return render(request, 'billy/object_json.html', dict(
-        obj=obj, obj_id=obj_id, obj_json=obj_json,
-        obj_url=obj_url))
+        obj=obj, obj_id=obj_id, obj_json=obj_json, obj_url=obj_url))
 
 
 def other_actions(request, abbr):
