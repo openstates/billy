@@ -36,7 +36,8 @@ class SponsorsManager(AttrManager):
             legislators = dict((obj['_id'], obj) for obj in legislators)
             self._legislators = legislators
         for sponsor in sponsors:
-            if sponsor['leg_id'] is not None:
+            leg_id = sponsor['leg_id']
+            if leg_id is not None and leg_id in legislators:
                 legislator = legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
                 yield legislator
@@ -159,7 +160,7 @@ class BillVote(Document):
 
     @CachedAttribute
     def _legislator_objects(self, fields=['first_name', 'last_name',
-                                          'party', 'district']):
+                                          'party', 'district', 'state']):
         '''A cache of dereferenced legislator objects.
         '''
         kwargs = {}
@@ -171,6 +172,7 @@ class BillVote(Document):
             ids.extend(map(id_getter, self[k + '_votes']))
         objs = db.legislators.find({'_id': {'$in': ids}}, **kwargs)
         objs = dict((obj['_id'], obj) for obj in objs)
+
         return objs
 
     @CachedAttribute
@@ -234,6 +236,9 @@ class Bill(Document):
         slug = slugify(self['bill_id'])
         url = '%s%s/' % (url, slug)
         return url
+
+    def display_name(self):
+        return self['bill_id']
 
     def get_admin_url(self):
         return urlresolvers.reverse('bill', args=[self['state'], self.id])
