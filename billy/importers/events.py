@@ -8,7 +8,7 @@ import json
 from billy import db
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.importers.utils import compare_committee
-from billy.importers.utils import fix_bill_id
+from billy.importers.utils import fix_bill_id, get_committee_id
 
 import pymongo
 
@@ -35,16 +35,6 @@ def _insert_with_id(event):
     return id
 
 
-def get_committee_id(level, abbr, name, chamber):
-    spec = {"state": abbr}
-    comms = db.committees.find(spec)
-    for committee in comms:
-        c = committee['committee']
-        if compare_committee(name, c):
-            return committee['_id']
-    return None
-
-
 def import_events(abbr, data_dir, import_actions=False):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'events', '*.json')
@@ -54,8 +44,8 @@ def import_events(abbr, data_dir, import_actions=False):
             data = prepare_obj(json.load(f))
         for committee in data['participants']:
             cttyid = get_committee_id(data['level'], data['state'],
-                                      committee['participant'],
-                                      committee['chamber'])
+                                      committee['chamber'],
+                                      committee['participant'])
             if cttyid:
                 committee['committee_id'] = cttyid
 
