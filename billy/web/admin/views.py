@@ -1015,11 +1015,15 @@ def delete_committees(request):
         return redirect('admin_committees', abbr)
 
 
-def mom_index(request):
-    return render(request, 'billy/mom_index.html')
+def mom_index(request, abbr):
+    legislators = list(db.legislators.find({"state": abbr}))
+    return render(request, 'billy/mom_index.html', {
+        "abbr": abbr,
+        "legs": legislators
+    })
 
 
-def mom_commit(request):
+def mom_commit(request, abbr):
     actions = []
 
     leg1 = request.POST['leg1']
@@ -1046,7 +1050,8 @@ def mom_commit(request):
 
     return render(request, 'billy/mom_commit.html', {
             "merged": merged,
-            "actions": actions
+            "actions": actions,
+            "abbr": abbr
         })
 
 
@@ -1085,7 +1090,7 @@ def _mom_mangle(attr):
     return attr
 
 
-def mom_merge(request):
+def mom_merge(request, abbr):
     leg1 = "leg1"
     leg2 = "leg2"
 
@@ -1108,7 +1113,8 @@ def mom_merge(request):
                                                         "leg1_db": leg1_db,
                                                         "leg2_db": leg2_db,
                                                         "same": nonNull,
-                                                        "sameid": nonID})
+                                                        "sameid": nonID,
+                                                        "abbr": abbr})
 
     leg1, leg2 = leg1_db, leg2_db
     merge, toRemove = merge_legislators(leg1, leg2)
@@ -1120,7 +1126,7 @@ def mom_merge(request):
 
     return render(request, 'billy/mom_merge.html', {
         'leg1': leg1, 'leg2': leg2, 'merge': merge, 'merge_view': mv,
-        'remove': toRemove, 'merge_view_info': mv_info})
+        'remove': toRemove, 'merge_view_info': mv_info, "abbr": abbr})
 
 
 def newsblogs(request):

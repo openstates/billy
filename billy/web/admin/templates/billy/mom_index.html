@@ -2,6 +2,43 @@
 {% load humanize %}
 {% load billy_utiltags %}
 
+{% block style %}
+<style>
+    /* Style the flag drop-down menu.*/
+    img.flag {
+        height: 10px;
+        width: 15px;
+        padding-right: 10px;
+        padding-left: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        border: 0;
+        clear: right;
+    }
+
+    #mainFilter .select2-container {
+        width: 200px;
+    }
+
+    #mainFilter li {
+        float: None;
+        margin-right: 0px;
+    }
+</style>
+{% endblock %}
+
+{% block script %}
+    <link rel="stylesheet" type="text/css" href="/media/select2-2.0/select2.css"/>
+    <script type="text/javascript" src="/media/select2-2.0/select2.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#leg1').select2({placeholder: 'Pick a Legislator'});
+            $('#leg2').select2({placeholder: 'Pick a Legislator'});
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
     <div class = 'container' >
         <div class="hero-unit">
@@ -14,18 +51,32 @@
             </p>
         </div>
 
-        <form action = '{% url mom_merge %}' action = 'GET' >
+        <form action = '{% url mom_merge abbr %}' action = 'GET' >
             <fieldset>
                 <div class = 'control-group' >
                     <label>Legislator 1</label>
                     <div class = 'controls' >
-                        <input type = 'text' name = 'leg1' />
+                        <select id = 'leg1' type = 'text' name = 'leg1' >
+                            {% for leg in legs %}
+                            <option value = '{{ leg.leg_id }}' >
+                            {{ leg.first_name }} {{ leg.last_name }}
+                            ({{ leg.leg_id }})
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 <div class = 'control-group' >
                     <label>Legislator 2</label>
                     <div class = 'controls'>
-                        <input type = 'text' name = 'leg2' />
+                        <select id = 'leg2' type = 'text' name = 'leg2' >
+                            {% for leg in legs %}
+                            <option value = '{{ leg.leg_id }}' >
+                            {{ leg.first_name }} {{ leg.last_name }}
+                            ({{ leg.leg_id }})
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 <div class = 'form-actions' >
