@@ -291,23 +291,7 @@ def import_bill(data, votes, categorizer):
     for action in data['actions']:
         adate = action['date']
 
-        def _match_committee(name):
-            return get_committee_id(level, abbr, action['actor'], name)
-
-        resolvers = {
-            "committee": _match_committee
-        }
-
-        for entity in action['related_entities']:
-            try:
-                resolver = resolvers[entity['type']]
-            except KeyError as e:
-                # We don't know how to deal.
-                logger.error("I don't know how to sort a %s" % ( e ))
-                continue
-
-            id = resolver(entity['name'])
-            entity['id'] = id
+        # XXX: Resolve related_entities here
 
         # first & last
         if not dates['first'] or adate < dates['first']:
