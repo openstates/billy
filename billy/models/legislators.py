@@ -150,4 +150,4 @@ class Legislator(Document):
                                 details = session_details[session]
                                 yield details['display_name']
                 else:
-                    details['display_name']
+                    yield details['display_name']

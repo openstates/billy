@@ -74,9 +74,9 @@ urlpatterns = patterns('billy.web.admin.views',
         name="run_detail-data"),
 
     # Merge-o-matic URLs.
-    url(r'^mom/$', 'mom_index', name="mom_index"),
-    url(r'^mom/merge/$', 'mom_merge', name="mom_merge"),
-    url(r'^mom/commit/$', 'mom_commit', name="mom_commit"),
+    url(r'^(?P<abbr>[a-z]{2})/mom/$', 'mom_index', name="mom_index"),
+    url(r'^(?P<abbr>[a-z]{2})/mom/merge/$', 'mom_merge', name="mom_merge"),
+    url(r'^(?P<abbr>[a-z]{2})/mom/commit/$', 'mom_commit', name="mom_commit"),
 
     # New feed URLs.
     url(r'^newsblogs/$', 'newsblogs', name='newsblogs'),

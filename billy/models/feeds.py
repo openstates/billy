@@ -44,12 +44,12 @@ class FeedEntry(Document):
                     _done.append(entity_string)
                     _entity_strings.append(entity_string)
                     _entity_ids.append(_id)
-                entity_type = entity_types[_id[2]]
-                if entity_type == 'legislator':
-                    url = urlresolvers.reverse(
-                        entity_type, args=[state, _id, slugify(entity_string)])
-                else:
-                    url = urlresolvers.reverse(entity_type, args=[state, _id])
+
+                # Get this entity's url.
+                collection_name = entity_types[_id[2]] + 's'
+                collection = getattr(billy_db, collection_name)
+                instance = collection.find_one(_id)
+                url = instance.get_absolute_url()
                 _entity_urls.append(url)
 
                 # This is tricky. Need to hyperlink the entity without mangling
@@ -80,8 +80,15 @@ class FeedEntry(Document):
             entity_data = zip(_entity_strings, _entity_display_names,
                               _entity_ids, _entity_urls)
 
+            _entity_data = []
+            seen_display_names = []
+            for string, display_name, _id, url in entity_data:
+                if display_name not in seen_display_names:
+                    _entity_data.append((string, display_name, _id, url))
+                    seen_display_names.append(display_name)
+
             entry['summary'] = summary
-            entry['entity_data'] = entity_data
+            entry['entity_data'] = _entity_data
 
         entry['id'] = entry['_id']
         urldata = urlparse.urlparse(entry['link'])
