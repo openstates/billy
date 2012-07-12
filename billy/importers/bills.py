@@ -342,7 +342,7 @@ def import_bill(data, votes, categorizer):
     else:
         git_add_bill(bill)
         update(bill, data, db.bills)
-        denormalize_votes(data, bill['_id'])
+        denormalize_votes(bill, bill['_id'])
         return "update"
 
 
