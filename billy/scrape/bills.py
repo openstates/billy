@@ -1,10 +1,8 @@
 import os
 import json
-import logging
 
 from billy.scrape import Scraper, SourcedObject
 
-logger = logging.getLogger('billy')
 
 class BillScraper(Scraper):
 
@@ -148,7 +146,6 @@ class Bill(SourcedObject):
 
     def add_action(self, actor, action, date,
                     type=None,
-                    committee=None,
                     committees=None,
                    **kwargs):
         """
@@ -178,20 +175,17 @@ class Bill(SourcedObject):
         type = _cleanup_list(type, ['other'])
         committees = _cleanup_list(committees, [])
 
-        if not committee is None:
-            logger.warning("Deprecation notice: Please move to committees.")
-            committees.append(committee)
-
         related_entities = [] # OK, let's work some magic.
         for committee in committees:
-            related_entities.append({
+            replated_entities.append({
                 "type": "committee",
-                "name": committee
+                "name": committee,
+                "id": None  # The importer will take care of this.
             })
 
         self['actions'].append(dict(actor=actor, action=action,
                                     date=date, type=type,
-                                    related_entities=related_entities,
+                                    related_entities=related_entities
                                     **kwargs))
 
     def add_vote(self, vote):
