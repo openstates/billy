@@ -17,7 +17,7 @@
 {% endif %}
 {% if not forloop.last %} | {% endif %}
 {% if obj_isbill %}
-    <a href="{% url bill obj.state obj.session obj.bill_id %}">billy</a>
+    <a href="{% url admin_bill obj.state obj.session obj.bill_id %}">billy</a>
 {% endif %}
 <h3>[{{collection}}] {{obj_id}}</h3>
 

@@ -25,7 +25,7 @@ urlpatterns = patterns('billy.web.admin.views',
     # legislator list
     url(r'^(?P<abbr>[a-z]{2})/legislators/$', 'legislators',
         name='admin_legislators'),
-    url(r'^legislators/(?P<id>\w+)/$', 'legislator', name='legislator'),
+    url(r'^legislators/(?P<id>\w+)/$', 'legislator', name='admin_legislator'),
     url(r'^legislators/(?P<id>\w+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
 
@@ -35,15 +35,15 @@ urlpatterns = patterns('billy.web.admin.views',
         name='random_bill'),
     url(r'^(?P<abbr>[a-z]{2})/bills/list/$', 'bill_list', name='bill_list'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<openstates_id>\w+)/$', 'bill',
-        name='bill_by_id'),
+        name='admin_bill_by_id'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>.+)/(?P<id>.*)/$', 'bill',
-        name='bill'),
+        name='admin_bill'),
 
     url(r'^(?P<abbr>[a-z]{2})/bad_vote_list/$', 'bad_vote_list',
         name='bad_vote_list'),
-    url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='events'),
+    url(r'^(?P<abbr>[a-z]{2})/events/$', 'events', name='admin_events'),
     url(r'^(?P<abbr>[a-z]{2})/event/(?P<event_id>.*)/$', 'event',
-        name='event'),
+        name='admin_event'),
 
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
