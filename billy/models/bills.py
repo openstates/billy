@@ -209,6 +209,26 @@ class BillVote(Document):
         url = urlresolvers.reverse('vote', args=[self['state'], self['_id']])
         return url
 
+    @CachedAttribute
+    def is_probably_a_voice_vote(self):
+        '''Guess whether this vote is a "voice vote".'''
+        if '+voice_vote' in self:
+            return True
+        if '+vote_type' in self:
+            if self['+vote_type'] == 'Voice':
+                return True
+        if 'voice vote' in self['motion'].lower():
+            return True
+        return False
+
+    @CachedAttribute
+    def has_votes(self):
+        return 0 < sum([self['yes_count'], self['no_count'], self['other_count']])
+
+    @CachedAttribute
+    def has_voters(self):
+        return any([self['yes_votes'], self['no_votes'], self['other_votes']])
+
 
 class Bill(Document):
 

@@ -1,4 +1,5 @@
 from decimal import Decimal
+import re
 
 from django import template
 from django.utils.html import strip_tags
@@ -60,4 +61,22 @@ class StrippedTagsNode(template.Node):
 
     def render(self, context):
         output = strip_tags(self.nodelist.render(context))
+        return output
+
+
+@register.tag
+def squish_whitespace(parser, token):
+    nodelist = parser.parse(('end_squish_whitespace',))
+    parser.delete_first_token()
+    return SquishedWhitespaceNode(nodelist)
+
+
+class SquishedWhitespaceNode(template.Node):
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        output = re.sub(u'\s+', ' ', self.nodelist.render(context))
+        output = re.sub(u'\n\s+', '', self.nodelist.render(context))
         return output
