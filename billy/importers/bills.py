@@ -298,16 +298,17 @@ def import_bill(data, votes, categorizer):
             "committee": _match_committee
         }
 
-        for entity in action['related_entities']:
-            try:
-                resolver = resolvers[entity['type']]
-            except KeyError as e:
-                # We don't know how to deal.
-                logger.error("I don't know how to sort a %s" % ( e ))
-                continue
+        if "related_entities" in action:
+            for entity in action['related_entities']:
+                try:
+                    resolver = resolvers[entity['type']]
+                except KeyError as e:
+                    # We don't know how to deal.
+                    logger.error("I don't know how to sort a %s" % ( e ))
+                    continue
 
-            id = resolver(entity['name'])
-            entity['id'] = id
+                id = resolver(entity['name'])
+                entity['id'] = id
 
         # first & last
         if not dates['first'] or adate < dates['first']:
