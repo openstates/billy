@@ -1,4 +1,7 @@
 import datetime
+from collections import defaultdict
+
+from billy import db
 
 yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1)
 last_month = datetime.datetime.utcnow() - datetime.timedelta(days=30)
@@ -24,3 +27,9 @@ QUALITY_EXCEPTIONS = {
     'votes:bad_no_count': 'Vote has a bad "no" count',
     'votes:bad_other_count': 'Vote has a bad "other" count',
 }
+
+def get_quality_exceptions(abbr):
+    quality_exceptions = defaultdict(set)
+    for qe in db.quality_exceptions.find({'abbr': abbr}):
+        quality_exceptions[qe['type']].update(qe['ids'])
+    return quality_exceptions

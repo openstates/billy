@@ -115,7 +115,7 @@ $(document).ready(function() {
             data loss. If you're not at all sure, this is your last chance to
             avoid the merge.
         </p>
-        <form action = '{% url mom_commit %}' method = 'POST' >
+        <form action = '{% url mom_commit abbr %}' method = 'POST' >
             <input name = 'leg1' type = 'hidden' value = '{{ leg1.leg_id }}' />
             <input name = 'leg2' type = 'hidden' value = '{{ leg2.leg_id }}' />
             {% csrf_token %}

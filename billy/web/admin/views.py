@@ -29,7 +29,7 @@ from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
-from billy.reports.utils import QUALITY_EXCEPTIONS
+from billy.reports.utils import get_quality_exceptions, QUALITY_EXCEPTIONS
 
 
 def _meta_and_report(abbr):
@@ -744,14 +744,19 @@ def bill_list(request, abbr):
     if 'version_url' in request.GET:
         version_url = request.GET.get('version_url')
         spec = {'versions.url': version_url}
+        exceptions = []
     else:
-        spec = _bill_spec(meta, request.GET.get('limit', ''))
-    print spec
+        limit = request.GET.get('limit', '')
+        exceptions = get_quality_exceptions(abbr)['bills:'+limit]
+        spec = _bill_spec(meta, limit)
 
-    bills = list(db.bills.find(spec))
     query_text = repr(spec)
+    if exceptions:
+        spec['_id'] = {'$nin': list(exceptions)}
+        query_text += ' (excluding {0} exceptions)'.format(len(exceptions))
+    bills = list(db.bills.find(spec))
 
-    bill_ids = [b['_id'] for b in bills]
+    bill_ids = [b['_id'] for b in bills if b['_id'] not in exceptions]
 
     context = {'metadata': meta, 'query_text': query_text, 'bills': bills,
                'bill_ids': bill_ids}
@@ -765,7 +770,6 @@ def bad_vote_list(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     bad_vote_ids = report['bills']['bad_vote_counts']
     votes = db.votes.find({'_id': {'$in': bad_vote_ids}})
-    print votes.count()
 
     context = {'metadata': meta, 'vote_ids': bad_vote_ids,
                'votes': votes}
@@ -1015,11 +1019,15 @@ def delete_committees(request):
         return redirect('admin_committees', abbr)
 
 
-def mom_index(request):
-    return render(request, 'billy/mom_index.html')
+def mom_index(request, abbr):
+    legislators = list(db.legislators.find({"state": abbr}))
+    return render(request, 'billy/mom_index.html', {
+        "abbr": abbr,
+        "legs": legislators
+    })
 
 
-def mom_commit(request):
+def mom_commit(request, abbr):
     actions = []
 
     leg1 = request.POST['leg1']
@@ -1046,7 +1054,8 @@ def mom_commit(request):
 
     return render(request, 'billy/mom_commit.html', {
             "merged": merged,
-            "actions": actions
+            "actions": actions,
+            "abbr": abbr
         })
 
 
@@ -1085,7 +1094,7 @@ def _mom_mangle(attr):
     return attr
 
 
-def mom_merge(request):
+def mom_merge(request, abbr):
     leg1 = "leg1"
     leg2 = "leg2"
 
@@ -1108,7 +1117,8 @@ def mom_merge(request):
                                                         "leg1_db": leg1_db,
                                                         "leg2_db": leg2_db,
                                                         "same": nonNull,
-                                                        "sameid": nonID})
+                                                        "sameid": nonID,
+                                                        "abbr": abbr})
 
     leg1, leg2 = leg1_db, leg2_db
     merge, toRemove = merge_legislators(leg1, leg2)
@@ -1120,7 +1130,7 @@ def mom_merge(request):
 
     return render(request, 'billy/mom_merge.html', {
         'leg1': leg1, 'leg2': leg2, 'merge': merge, 'merge_view': mv,
-        'remove': toRemove, 'merge_view_info': mv_info})
+        'remove': toRemove, 'merge_view_info': mv_info, "abbr": abbr})
 
 
 def newsblogs(request):

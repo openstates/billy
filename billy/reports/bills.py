@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from billy import db
 from billy.utils import term_for_session
-from billy.reports.utils import update_common
+from billy.reports.utils import update_common, get_quality_exceptions
 
 logger = logging.getLogger('billy')
 
@@ -53,10 +53,7 @@ def scan_bills(abbr):
     sessions = defaultdict(_bill_report_dict)
 
     # load exception data into sets of ids indexed by exception type
-    quality_exceptions = defaultdict(set)
-    for qe in db.quality_exceptions.find({'abbr': abbr}):
-        if qe['type'].startswith(('bills:', 'votes:')):
-            quality_exceptions[qe['type']].update(qe['ids'])
+    quality_exceptions = get_quality_exceptions(abbr)
 
     for bill in db.bills.find({'level': level, level: abbr}):
         session_d = sessions[bill['session']]
