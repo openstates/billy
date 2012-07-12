@@ -289,18 +289,9 @@ def import_bill(data, votes, categorizer):
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
     for action in data['actions']:
-
-        # We'll try to recover some Committee IDs here.
-        if "committee" in action:
-            cid = get_committee_id(level, abbr, data['chamber'],
-                                   action['committee'])
-            action['_scraped_committee_name'] = action['committee']
-            if cid is not None:
-                action['committee'] = cid
-            else:
-                del(action['committee'])
-
         adate = action['date']
+
+        # XXX: Resolve related_entities here
 
         # first & last
         if not dates['first'] or adate < dates['first']:

@@ -144,7 +144,10 @@ class Bill(SourcedObject):
             d['mimetype'] = mimetype
         self['versions'].append(d)
 
-    def add_action(self, actor, action, date, type=None, **kwargs):
+    def add_action(self, actor, action, date,
+                    type=None,
+                    committees=None,
+                   **kwargs):
         """
         Add an action that was performed on this bill.
 
@@ -157,17 +160,32 @@ class Bill(SourcedObject):
                        'Introduced', 'Signed by the Governor', 'Amended'
         :param date: the date/time this action was performed.
         :param type: a type classification for this action
+        ;param committee: a committee to associate with this action
         """
 
-        if not type:
-            type = ['other']
-        elif isinstance(type, basestring):
-            type = [type]
-        elif not isinstance(type, list):
-            type = list(type)
+        def _cleanup_list(obj, default):
+            if not obj:
+                obj = default
+            elif isinstance(obj, basestring):
+                obj = [obj]
+            elif not isinstance(obj, list):
+                obj = list(obj)
+            return obj
+
+        type = _cleanup_list(type, ['other'])
+        committees = _cleanup_list(committees, [])
+
+        related_entities = [] # OK, let's work some magic.
+        for committee in committees:
+            replated_entities.append({
+                "type": "committee",
+                "name": committee,
+                "id": None  # The importer will take care of this.
+            })
 
         self['actions'].append(dict(actor=actor, action=action,
                                     date=date, type=type,
+                                    related_entities=related_entities
                                     **kwargs))
 
     def add_vote(self, vote):
