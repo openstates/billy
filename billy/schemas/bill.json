@@ -16,9 +16,10 @@
                     "actor": {
                         "type": "string"
                     },
-                    "related_entities" : {
-                        "required": true,
-                        "type": "array",
+                    "date": {
+                        "type": "datetime"
+                    },
+                    "related_entities": {
                         "items": {
                             "properties": {
                                 "id": {
@@ -29,17 +30,17 @@
                                     "type": "string"
                                 },
                                 "type": {
-                                    "type": "string",
                                     "enum": [
-                                        "committee"
-                                    ]
+                                        "committee",
+                                        "legislator"
+                                    ],
+                                    "type": "string"
                                 }
                             },
                             "type": "object"
-                        }
-                    },
-                    "date": {
-                        "type": "datetime"
+                        },
+                        "required": true,
+                        "type": "array"
                     },
                     "type": {
                         "items": {
