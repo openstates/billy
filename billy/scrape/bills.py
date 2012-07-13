@@ -150,6 +150,7 @@ class Bill(SourcedObject):
                     type=None,
                     committee=None,
                     committees=None,
+                    legislators=None,
                    **kwargs):
         """
         Add an action that was performed on this bill.
@@ -177,6 +178,7 @@ class Bill(SourcedObject):
 
         type = _cleanup_list(type, ['other'])
         committees = _cleanup_list(committees, [])
+        legislators = _cleanup_list(legislators, [])
 
         if not committee is None:
             logger.warning("Deprecation notice: Please move to committees.")
@@ -187,6 +189,12 @@ class Bill(SourcedObject):
             related_entities.append({
                 "type": "committee",
                 "name": committee
+            })
+
+        for legislator in legislators:
+            related_entities.append({
+                "type": "legislator",
+                "name": legislator
             })
 
         self['actions'].append(dict(actor=actor, action=action,

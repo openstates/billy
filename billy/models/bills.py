@@ -43,17 +43,31 @@ class SponsorsManager(AttrManager):
             else:
                 yield sponsor
 
-    def primary_list(self):
-        'Return the first primary sponsor on the bill.'
+    def primary_sponsors(self):
+        'Return the primary sponsors on the bill.'
         for sponsor in self:
             if sponsor['type'] == 'primary':
                 yield sponsor
 
     def first_primary(self):
         try:
-            return next(self.primary_list())
+            return next(self.primary_sponsors())
         except StopIteration:
             return
+
+    def excluding_first_primary(self):
+        first = self.first_primary()
+        sponsors = list(self)
+        if '_id' in first:
+            first_id = first['_id']
+            for sp in sponsors:
+                print sp['_id']
+                if first_id == sp['_id']:
+                    sponsors.remove(sp)
+                    break
+        else:
+            return sponsors
+        return sponsors
 
     def first_fifteen(self):
         'views.bill'
@@ -315,7 +329,6 @@ class Bill(Document):
         return self['action_dates']['signed']
 
     def progress_data(self):
-
         data = [
             ('stage1', 'Introduced', 'date_introduced'),
 
