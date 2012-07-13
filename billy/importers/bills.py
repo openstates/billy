@@ -294,8 +294,15 @@ def import_bill(data, votes, categorizer):
         def _match_committee(name):
             return get_committee_id(level, abbr, action['actor'], name)
 
+        def _match_legislator(name):
+            return get_legislator_id(abbr,
+                                     data['session'],
+                                     action['actor'],
+                                     name)
+
         resolvers = {
-            "committee": _match_committee
+            "committee": _match_committee,
+            "legislator": _match_legislator
         }
 
         if "related_entities" in action:

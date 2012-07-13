@@ -84,7 +84,7 @@ def legislators(request, abbr):
                    statenav_active='legislators'))
 
 
-def legislator(request, abbr, _id, slug):
+def legislator(request, abbr, _id, slug=None):
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
