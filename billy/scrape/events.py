@@ -56,8 +56,16 @@ class Event(SourcedObject):
         kwargs.update({"bill_id": bill_id})
         self['related_bills'].append(kwargs)
 
-    def add_participant(self, type, participant, **kwargs):
-        kwargs.update({'type': type, 'participant': participant})
+    def add_participant(self,
+                        type,
+                        participant,
+                        participant_type,
+                        **kwargs):
+
+        kwargs.update({'type': type,
+                       'participant_type': participant_type,
+                       'participant': participant})
+
         self['participants'].append(kwargs)
 
     def get_filename(self):

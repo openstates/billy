@@ -1,135 +1,146 @@
 {
-    "description": "event data", 
+    "description": "event data",
     "properties": {
         "_type": {
             "enum": [
                 "event"
-            ], 
+            ],
             "type": "string"
-        }, 
+        },
         "all_day": {
-            "required": false, 
+            "required": false,
             "type": "boolean"
-        }, 
+        },
         "country": {
-            "maxLength": 2, 
-            "minLength": 2, 
+            "maxLength": 2,
+            "minLength": 2,
             "type": "string"
-        }, 
+        },
         "description": {
             "type": "string"
-        }, 
+        },
         "documents": {
             "items": {
                 "properties": {
                     "name": {
                         "type": "string"
-                    }, 
+                    },
                     "url": {
                         "type": "string"
                     }
-                }, 
+                },
                 "type": "object"
-            }, 
+            },
             "type": "array"
-        }, 
+        },
         "end": {
             "type": [
-                "datetime", 
+                "datetime",
                 "null"
             ]
-        }, 
+        },
         "level": {
             "enum": [
-                "country", 
+                "country",
                 "state"
-            ], 
+            ],
             "type": "string"
-        }, 
+        },
         "link": {
-            "required": false, 
+            "required": false,
             "type": [
-                "string", 
+                "string",
                 "null"
             ]
-        }, 
+        },
         "location": {
             "type": "string"
-        }, 
+        },
         "notes": {
-            "required": false, 
+            "required": false,
             "type": [
-                "string", 
+                "string",
                 "null"
             ]
-        }, 
+        },
         "participants": {
             "items": {
                 "properties": {
                     "chamber": {
-                        "required": false, 
+                        "required": false,
                         "type": "string"
-                    }, 
+                    },
                     "participant": {
                         "type": "string"
-                    }, 
+                    },
+                    "participant_type": {
+                        "enum": [
+                            "committee",
+                            "legislator"
+                        ],
+                        "type": "string"
+                    },
                     "type": {
+                        "enum": [
+                            "host",
+                            "chair",
+                            "participant"
+                        ],
                         "type": "string"
                     }
-                }, 
+                },
                 "type": "object"
-            }, 
+            },
             "type": "array"
-        }, 
+        },
         "related_bills": {
             "items": {
                 "properties": {
                     "bill_id": {
                         "type": "string"
-                    }, 
+                    },
                     "description": {
                         "type": "string"
                     },
                     "type": {
                         "type": "string"
                     }
-                }, 
+                },
                 "type": "object"
-            }, 
-            "minItems": 0, 
+            },
+            "minItems": 0,
             "type": "array"
-        }, 
+        },
         "session": {
             "type": "string"
-        }, 
+        },
         "sources": {
             "items": {
                 "properties": {
                     "url": {
                         "type": "string"
                     }
-                }, 
+                },
                 "type": "object"
-            }, 
-            "minItems": 1, 
+            },
+            "minItems": 1,
             "type": "array"
-        }, 
+        },
         "state": {
-            "maxLength": 2, 
-            "minLength": 2, 
+            "maxLength": 2,
+            "minLength": 2,
             "type": "string"
-        }, 
+        },
         "status": {
-            "required": false, 
+            "required": false,
             "type": "string"
-        }, 
+        },
         "type": {
             "type": "string"
-        }, 
+        },
         "when": {
             "type": "datetime"
         }
-    }, 
+    },
     "type": "object"
 }
-
