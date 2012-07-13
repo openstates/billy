@@ -113,7 +113,7 @@ class RelatedBillsList(RelatedObjectsList):
             if abbr != 'all':
                 spec['state'] = abbr
             cursor = db.bills.find(spec)
-            cursor.sort([('updated_at', pymongo.DESCENDING)])
+            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
             return self.paginator(cursor, page=page,
                       show_per_page=show_per_page)
 
@@ -171,7 +171,7 @@ class RelatedBillsList(RelatedObjectsList):
                 kwargs['session'] = session
 
             cursor = Bill.search(search_text, **kwargs)
-            cursor.sort([('updated_at', pymongo.DESCENDING)])
+            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
 
         else:
             # Elastic search not enabled--query mongo normally.
@@ -189,7 +189,7 @@ class RelatedBillsList(RelatedObjectsList):
                 spec['title'] = {'$regex': search_text, '$options': 'i'}
 
             cursor = db.bills.find(spec)
-            cursor.sort([('updated_at', pymongo.DESCENDING)])
+            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
 
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
