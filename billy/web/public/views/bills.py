@@ -44,8 +44,42 @@ class RelatedBillsList(RelatedObjectsList):
             search_text = form.data.get('search_text')
             context.update(search_text=search_text)
             context.update(form=FilterBillsForm(self.request.GET))
+
+            # human readable description of search
+            description = [metadata['name']]
+            long_description = []
+            chamber = form.data.getlist('chamber')
+            session = form.data.get('session')
+            type = form.data.get('type')
+            status = form.data.get('status')
+            sponsor = form.data.get('sponsor__leg_id')
+            if len(chamber) == 1:
+                description.append(metadata[chamber[0] + '_chamber_name'])
+            description.append((type or 'Bill') + 's')
+            if session:
+                description.append('(%s)' %
+                   metadata['session_details'][session]['display_name'])
+            if status == 'passed_lower':
+                long_description.append(('which have passed the ' +
+                                         metadata['lower_chamber_name']))
+            elif status == 'passed_upper':
+                long_description.append(('which have passed the ' +
+                                         metadata['upper_chamber_name']))
+            elif status == 'signed':
+                long_description.append('which have been signed into law')
+            if sponsor:
+                leg = db.legislators.find_one({'_id': sponsor},
+                                          fields=('full_name',))['full_name']
+                long_description.append('sponsored by ' + leg)
+            if search_text:
+                long_description.append('containing the term "{0}"'.format(
+                    search_text))
         else:
+            description = [metadata['name'], 'Bills']
             context.update(form=FilterBillsForm())
+
+        context.update(description=' '.join(description))
+        context.update(long_description=long_description)
 
         # Add the correct path to paginated links.
         params = dict(self.request.GET.items())
@@ -166,9 +200,7 @@ class StateBills(RelatedBillsList):
     collection_name = 'metadata'
     query_attr = 'bills'
     paginator = CursorPaginator
-    description_template = '''
-        <a href="{{metadata.get_absolute_url}}">{{metadata.name}}</a> Bills
-        '''
+    description_template = '''NOT USED'''
     title_template = '''
         Search and bills -
         {{ metadata.legislature_name }} - Open States'''

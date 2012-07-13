@@ -1,8 +1,10 @@
 import os
 import json
+import logging
 
 from billy.scrape import Scraper, SourcedObject
 
+logger = logging.getLogger('billy')
 
 class BillScraper(Scraper):
 
@@ -144,7 +146,12 @@ class Bill(SourcedObject):
             d['mimetype'] = mimetype
         self['versions'].append(d)
 
-    def add_action(self, actor, action, date, type=None, **kwargs):
+    def add_action(self, actor, action, date,
+                    type=None,
+                    committee=None,
+                    committees=None,
+                    legislators=None,
+                   **kwargs):
         """
         Add an action that was performed on this bill.
 
@@ -157,17 +164,42 @@ class Bill(SourcedObject):
                        'Introduced', 'Signed by the Governor', 'Amended'
         :param date: the date/time this action was performed.
         :param type: a type classification for this action
+        ;param committees: a committee or list of committees to associate with this action
         """
 
-        if not type:
-            type = ['other']
-        elif isinstance(type, basestring):
-            type = [type]
-        elif not isinstance(type, list):
-            type = list(type)
+        def _cleanup_list(obj, default):
+            if not obj:
+                obj = default
+            elif isinstance(obj, basestring):
+                obj = [obj]
+            elif not isinstance(obj, list):
+                obj = list(obj)
+            return obj
+
+        type = _cleanup_list(type, ['other'])
+        committees = _cleanup_list(committees, [])
+        legislators = _cleanup_list(legislators, [])
+
+        if not committee is None:
+            logger.warning("Deprecation notice: Please move to committees.")
+            committees.append(committee)
+
+        related_entities = [] # OK, let's work some magic.
+        for committee in committees:
+            related_entities.append({
+                "type": "committee",
+                "name": committee
+            })
+
+        for legislator in legislators:
+            related_entities.append({
+                "type": "legislator",
+                "name": legislator
+            })
 
         self['actions'].append(dict(actor=actor, action=action,
                                     date=date, type=type,
+                                    related_entities=related_entities,
                                     **kwargs))
 
     def add_vote(self, vote):

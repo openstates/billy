@@ -289,18 +289,33 @@ def import_bill(data, votes, categorizer):
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
     for action in data['actions']:
-
-        # We'll try to recover some Committee IDs here.
-        if "committee" in action:
-            cid = get_committee_id(level, abbr, data['chamber'],
-                                   action['committee'])
-            action['_scraped_committee_name'] = action['committee']
-            if cid is not None:
-                action['committee'] = cid
-            else:
-                del(action['committee'])
-
         adate = action['date']
+
+        def _match_committee(name):
+            return get_committee_id(level, abbr, action['actor'], name)
+
+        def _match_legislator(name):
+            return get_legislator_id(abbr,
+                                     data['session'],
+                                     action['actor'],
+                                     name)
+
+        resolvers = {
+            "committee": _match_committee,
+            "legislator": _match_legislator
+        }
+
+        if "related_entities" in action:
+            for entity in action['related_entities']:
+                try:
+                    resolver = resolvers[entity['type']]
+                except KeyError as e:
+                    # We don't know how to deal.
+                    logger.error("I don't know how to sort a %s" % ( e ))
+                    continue
+
+                id = resolver(entity['name'])
+                entity['id'] = id
 
         # first & last
         if not dates['first'] or adate < dates['first']:
