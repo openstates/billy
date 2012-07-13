@@ -42,16 +42,25 @@ def import_events(abbr, data_dir, import_actions=False):
     for path in glob.iglob(pattern):
         with open(path) as f:
             data = prepare_obj(json.load(f))
-        for committee in data['participants']:
-            cttyid = get_committee_id(data['level'], data['state'],
-                                      committee['chamber'],
-                                      committee['participant'])
-            if cttyid:
-                committee['committee_id'] = cttyid
 
-            # Move the chamber out.
-            committee['_chamber'] = committee['chamber']
-            del(committee['chamber'])
+        def _resolve_ctty(committee):
+            return get_committee_id(data['level'],
+                                    data['state'],
+                                    committee['chamber'],
+                                    committee['participant'])
+
+        resolvers = {
+            "committee": _resolve_ctty
+        }
+
+        for entity in data['participants']:
+            type = entity['participant_type']
+            id = None
+            if type in resolvers:
+                id = resolvers[type](entity)
+            else:
+                logger.warning("I don't know how to resolve a %s" % ( type ))
+            entity['id'] = id
 
         for bill in data['related_bills']:
             bill['_scraped_bill_id'] = bill['bill_id']
