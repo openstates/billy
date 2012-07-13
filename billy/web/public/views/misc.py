@@ -38,14 +38,6 @@ def find_your_legislator(request):
     context = {}
     template = 'find_your_legislator'
 
-    addrs = [
-        "50 Rice Street, Wellesley, MA",
-        "20700 North Park Blvd. University Heights, Ohio",
-        "1818 N Street NW, Washington, DC"
-    ]
-
-    context['address'] = random.choice(addrs)
-
     context['request'] = ""
     if "q" in get:
         context['request'] = get['q']
