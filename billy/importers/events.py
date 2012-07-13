@@ -6,6 +6,7 @@ import datetime
 import json
 
 from billy import db
+from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.importers.utils import compare_committee
 from billy.importers.utils import fix_bill_id, get_committee_id
@@ -49,8 +50,19 @@ def import_events(abbr, data_dir, import_actions=False):
                                     committee['chamber'],
                                     committee['participant'])
 
+        def _resolve_leg(leg):
+            chamber = leg['chamber'] if leg['chamber'] in ['upper', 'lower'] \
+                else None
+
+            return get_legislator_id(abbr,
+                                     data['session'],
+                                     chamber,
+                                     leg['participant'])
+
+
         resolvers = {
-            "committee": _resolve_ctty
+            "committee": _resolve_ctty,
+            "legislator": _resolve_leg
         }
 
         for entity in data['participants']:
