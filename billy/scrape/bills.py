@@ -163,7 +163,7 @@ class Bill(SourcedObject):
                        'Introduced', 'Signed by the Governor', 'Amended'
         :param date: the date/time this action was performed.
         :param type: a type classification for this action
-        ;param committee: a committee to associate with this action
+        ;param committees: a committee or list of committees to associate with this action
         """
 
         def _cleanup_list(obj, default):
