@@ -142,7 +142,7 @@ class Legislator(Document):
                                     'sponsors.leg_id': self.id})
 
     def display_name(self):
-        return '%s %s' % (self['first_name'], self['last_name'])
+        return self['full_name']
 
     def sessions_served(self):
         session_details = self.metadata['session_details']
