@@ -28,6 +28,16 @@ class Role(dict):
                 name = '%s - %s' % (name, sub)
         return name
 
+    def type_display(self):
+        ignored_role_types = [
+            'member',
+            'committee member',
+            ]
+        if self['type'] in ignored_role_types:
+            return ''
+        else:
+            return self['type'].title()
+
 
 class RolesManager(ListManager):
     wrapper = Role
