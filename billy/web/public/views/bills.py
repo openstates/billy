@@ -74,12 +74,12 @@ class RelatedBillsList(RelatedObjectsList):
             if search_text:
                 long_description.append('containing the term "{0}"'.format(
                     search_text))
+            context.update(long_description=long_description)
         else:
             description = [metadata['name'], 'Bills']
             context.update(form=FilterBillsForm())
 
         context.update(description=' '.join(description))
-        context.update(long_description=long_description)
 
         # Add the correct path to paginated links.
         params = dict(self.request.GET.items())
