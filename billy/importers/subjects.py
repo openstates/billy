@@ -40,7 +40,7 @@ class SubjectCategorizer(object):
 
     def categorize_bills(self, latest_term_only=False):
         meta = metadata(self.abbr)
-        spec = {meta['level']: self.abbr}
+        spec = {settings.LEVEL_FIELD: self.abbr}
 
         # process just the sessions from the latest term
         if latest_term_only:

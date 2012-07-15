@@ -22,22 +22,19 @@ def ensure_indexes():
                                 ('subcommittee', pymongo.ASCENDING)])
 
 
-def import_committees_from_legislators(current_term, level, abbr):
+def import_committees_from_legislators(current_term, abbr):
     """ create committees from legislators that have committee roles """
 
     # for all current legislators
-    for legislator in db.legislators.find({
-        'level': level,
-        'roles': {'$elemMatch': {'term': current_term,
-                                 level: abbr}}}):
+    for legislator in db.legislators.find({'roles': {'$elemMatch': {
+        'term': current_term, settings.LEVEL_FIELD: abbr}}}):
 
         # for all committee roles
         for role in legislator['roles']:
             if (role['type'] == 'committee member' and
                 'committee_id' not in role):
 
-                spec = {'level': level,
-                        level: abbr,
+                spec = {settings.LEVEL_FIELD: abbr,
                         'chamber': role['chamber'],
                         'committee': role['committee']}
                 if 'subcommittee' in role:
@@ -49,7 +46,8 @@ def import_committees_from_legislators(current_term, level, abbr):
                     committee = spec
                     committee['_type'] = 'committee'
                     # copy level field from legislator to committee
-                    committee[settings.LEVEL_FIELD] = legislator[settings.LEVEL_FIELD]
+                    committee[settings.LEVEL_FIELD] = \
+                            legislator[settings.LEVEL_FIELD]
                     committee['members'] = []
                     committee['sources'] = []
                     if 'subcommittee' not in committee:
@@ -75,10 +73,8 @@ def import_committees_from_legislators(current_term, level, abbr):
 
 
 def import_committee(data, current_session, current_term):
-    level = data['level']
-    abbr = data[level]
-    spec = {'level': level,
-            level: abbr,
+    abbr = data[settings.LEVEL_FIELD]
+    spec = {settings.LEVEL_FIELD: abbr,
             'chamber': data['chamber'],
             'committee': data['committee']}
     if 'subcommittee' in data:
@@ -132,7 +128,6 @@ def import_committee(data, current_session, current_term):
                         'term': current_term,
                         'chamber': committee['chamber'],
                         'committee_id': committee['_id'],
-                        'level': level,
                        }
             # copy over all necessary fields from committee
             new_role[settings.LEVEL_FIELD] = committee[settings.LEVEL_FIELD]
@@ -160,17 +155,16 @@ def import_committees(abbr, data_dir):
     meta = db.metadata.find_one({'_id': abbr})
     current_term = meta['terms'][-1]['name']
     current_session = meta['terms'][-1]['sessions'][-1]
-    level = meta['level']
 
     paths = glob.glob(pattern)
 
-    for committee in db.committees.find({'level': level, level: abbr}):
+    for committee in db.committees.find({settings.LEVEL_FIELD: abbr}):
         committee['members'] = []
         db.committees.save(committee, safe=True)
 
     # import committees from legislator roles, no standalone committees scraped
     if not paths:
-        import_committees_from_legislators(current_term, level, abbr)
+        import_committees_from_legislators(current_term, abbr)
 
     for path in paths:
         with open(path) as f:
@@ -182,20 +176,19 @@ def import_committees(abbr, data_dir):
 
     logger.info('imported %s committee files' % len(paths))
 
-    link_parents(level, abbr)
+    link_parents(abbr)
 
     ensure_indexes()
     return counts
 
 
-def link_parents(level, abbr):
-    for comm in db.committees.find({'level': level, level: abbr}):
+def link_parents(abbr):
+    for comm in db.committees.find({settings.LEVEL_FIELD: abbr}):
         sub = comm.get('subcommittee')
         if not sub:
             comm['parent_id'] = None
         else:
-            parent = db.committees.find_one({'level': level,
-                                             level: abbr,
+            parent = db.committees.find_one({settings.LEVEL_FIELD: abbr,
                                              'chamber': comm['chamber'],
                                              'committee': comm['committee']})
             if not parent:

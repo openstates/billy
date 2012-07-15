@@ -6,6 +6,7 @@ import json
 import logging
 
 from billy import db
+from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
 
 import pymongo
@@ -52,30 +53,23 @@ def import_legislators(abbr, data_dir):
 
     meta = db.metadata.find_one({'_id': abbr})
     current_term = meta['terms'][-1]['name']
-    level = meta['level']
 
-    activate_legislators(current_term, abbr, level)
-    deactivate_legislators(current_term, abbr, level)
+    activate_legislators(current_term, abbr)
+    deactivate_legislators(current_term, abbr)
 
     ensure_indexes()
 
     return counts
 
 
-def activate_legislators(current_term, abbr, level):
+def activate_legislators(current_term, abbr):
     """
     Sets the 'active' flag on legislators and populates top-level
     district/chamber/party fields for currently serving legislators.
     """
-    # to support multiple levels we adopt the pattern of
-    # 'level': level,  level: abbr
-    # this means that level must always be a key name that maps to the abbr
-
     for legislator in db.legislators.find({'roles': {'$elemMatch':
-                                                     {'level': level,
-                                                      level: abbr,
-                                                      'type': 'member',
-                                                      'term': current_term}}}):
+             {settings.LEVEL_FIELD: abbr, 'type': 'member',
+              'term': current_term}}}):
         active_role = legislator['roles'][0]
 
         if not active_role['end_date']:
@@ -88,7 +82,7 @@ def activate_legislators(current_term, abbr, level):
         db.legislators.save(legislator, safe=True)
 
 
-def deactivate_legislators(current_term, abbr, level):
+def deactivate_legislators(current_term, abbr):
 
     # legislators without a current term role or with an end_date
     for leg in db.legislators.find(
@@ -96,15 +90,13 @@ def deactivate_legislators(current_term, abbr, level):
             {'roles': {'$elemMatch':
                        {'term': {'$ne': current_term},
                         'type': 'member',
-                         'level': level,
-                          level: abbr,
+                          settings.LEVEL_FIELD: abbr,
                        }},
             },
             {'roles': {'$elemMatch':
                        {'term': current_term,
                         'type': 'member',
-                         'level': level,
-                          level: abbr,
+                          settings.LEVEL_FIELD: abbr,
                         'end_date': {'$ne':None}}},
             },
 
@@ -156,24 +148,19 @@ def import_legislator(data):
         if 'role' in role:
             role['type'] = role.pop('role')
 
-        # copy over country and/or state into role
-        # TODO: base this on all possible level fields
-        role['level'] = data['level']
-        if 'country' in data:
-            role['country'] = data['country']
-        if 'state' in data:
-            role['state'] = data['state']
+        # copy over state into role
+        if settings.LEVEL_FIELD in data:
+            role[settings.LEVEL_FIELD] = data[settings.LEVEL_FIELD]
 
     cur_role = data['roles'][0]
     term = cur_role['term']
 
-    level = data['level']
-    abbrev = data[level]
+    abbrev = data[settings.LEVEL_FIELD]
 
     prev_term = get_previous_term(abbrev, term)
     next_term = get_next_term(abbrev, term)
 
-    spec = {level: abbrev,
+    spec = {settings.LEVEL_FIELD: abbrev,
             'type': cur_role['type'],
             'term': {'$in': [term, prev_term, next_term]}}
     if 'district' in cur_role:
@@ -182,7 +169,7 @@ def import_legislator(data):
         spec['chamber'] = cur_role['chamber']
 
     leg = db.legislators.find_one(
-        {'level': level, level: abbrev,
+        {settings.LEVEL_FIELD: abbrev,
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 

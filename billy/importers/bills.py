@@ -206,8 +206,7 @@ def oysterize_version(bill, version):
 
 
 def import_bill(data, votes, categorizer):
-    level = data['level']
-    abbr = data[level]
+    abbr = data[settings.LEVEL_FIELD]
 
     # clean up bill_ids
     data['bill_id'] = fix_bill_id(data['bill_id'])
@@ -243,7 +242,7 @@ def import_bill(data, votes, categorizer):
 
     data['votes'].extend(bill_votes)
 
-    bill = db.bills.find_one({'level': level, level: abbr,
+    bill = db.bills.find_one({settings.LEVEL_FIELD: abbr,
                               'session': data['session'],
                               'chamber': data['chamber'],
                               'bill_id': data['bill_id']})
@@ -264,8 +263,7 @@ def import_bill(data, votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
-            cid = get_committee_id(level, abbr, data['chamber'],
-                                   sponsor['name'])
+            cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
             if not cid is None:
                 sponsor['committee_id'] = cid
 
@@ -274,7 +272,7 @@ def import_bill(data, votes, categorizer):
 
         # committee_ids
         if 'committee' in vote:
-            committee_id = get_committee_id(level, abbr, vote['chamber'],
+            committee_id = get_committee_id(abbr, vote['chamber'],
                                             vote['committee'])
             vote['committee_id'] = committee_id
 
@@ -295,7 +293,7 @@ def import_bill(data, votes, categorizer):
         adate = action['date']
 
         def _match_committee(name):
-            return get_committee_id(level, abbr, action['actor'], name)
+            return get_committee_id(abbr, action['actor'], name)
 
         def _match_legislator(name):
             return get_legislator_id(abbr,
@@ -407,9 +405,7 @@ def import_bills(abbr, data_dir):
         logger.debug('Failed to match vote %s %s %s' % tuple([
             r.encode('ascii', 'replace') for r in remaining]))
 
-    meta = db.metadata.find_one({'_id': abbr})
-    level = meta['level']
-    populate_current_fields(level, abbr)
+    populate_current_fields(abbr)
 
     git_commit("Import Update")
 
@@ -418,7 +414,7 @@ def import_bills(abbr, data_dir):
     return counts
 
 
-def populate_current_fields(level, abbr):
+def populate_current_fields(abbr):
     """
     Set/update _current_term and _current_session fields on all bills
     for a given location.
@@ -427,7 +423,7 @@ def populate_current_fields(level, abbr):
     current_term = meta['terms'][-1]
     current_session = current_term['sessions'][-1]
 
-    for bill in db.bills.find({'level': level, level: abbr}):
+    for bill in db.bills.find({settings.LEVEL_FIELD: abbr}):
         if bill['session'] == current_session:
             bill['_current_session'] = True
         else:

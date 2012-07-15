@@ -23,9 +23,6 @@ def import_metadata(abbr, data_dir):
         data['_type'] = 'metadata'
         data = prepare_obj(data)
 
-    if 'level' not in data:
-        data['level'] = 'state'
-
     data['_id'] = abbr
     data.update(preserved)
 

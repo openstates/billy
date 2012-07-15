@@ -72,8 +72,8 @@ def insert_with_id(obj):
     else:
         raise ValueError("unknown _type for object")
 
-    # get abbr from level
-    abbr = obj[obj['level']].upper()
+    # get abbr
+    abbr = obj[settings.LEVEL_FIELD].upper()
 
     id_reg = re.compile('^%s%s' % (abbr, id_type))
 
@@ -354,12 +354,13 @@ def merge_legislators(leg1, leg2):
 
 __committee_ids = {}
 
-def get_committee_id(level, abbr, chamber, committee):
-    key = (level, abbr, chamber, committee)
+
+def get_committee_id(abbr, chamber, committee):
+    key = (abbr, chamber, committee)
     if key in __committee_ids:
         return __committee_ids[key]
 
-    spec = {'level': level, level: abbr, 'chamber': chamber,
+    spec = {settings.LEVEL_FIELD: abbr, 'chamber': chamber,
             'committee': committee, 'subcommittee': None}
 
     comms = db.committees.find(spec)
@@ -376,15 +377,15 @@ def get_committee_id(level, abbr, chamber, committee):
         __committee_ids[key] = comms[0]['_id']
     else:
         # last resort :(
-        comm_id = get_committee_id_alt(level, abbr, committee, chamber)
+        comm_id = get_committee_id_alt(abbr, committee, chamber)
         __committee_ids[key] = comm_id
 
     return __committee_ids[key]
 
 
-def get_committee_id_alt(level, abbr, name, chamber):
+def get_committee_id_alt(abbr, name, chamber):
     matched_committee = None
-    spec = {"state": abbr, "chamber": chamber}
+    spec = {settings.LEVEL_FIELD: abbr, "chamber": chamber}
     if chamber is None:
         del(spec['chamber'])
     comms = db.committees.find(spec)
@@ -399,7 +400,7 @@ def get_committee_id_alt(level, abbr, name, chamber):
             matched_committee = committee['_id']
 
     if matched_committee is None and not chamber is None:
-        matched_committee = get_committee_id_alt(level, abbr, name, None)
+        matched_committee = get_committee_id_alt(abbr, name, None)
 
     return matched_committee
 

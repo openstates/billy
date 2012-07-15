@@ -11,65 +11,59 @@ def setup_func():
     db.committees.drop()
     names.__matchers = {}
 
-    db.metadata.insert({'level': 'state', '_id': 'ex',
+    db.metadata.insert({'_id': 'ex',
                         'terms': [{'name': 'T1', 'sessions': ['S1']}]})
 
     leg_a = {'full_name': 'Richard Feynman', 'leg_id': 'EXL000001',
-             '_id': 'EXL000001', 'level': 'state',
+             '_id': 'EXL000001',
              'state': 'ex',
              '_scraped_name': 'Richard Feynman', 'first_name': 'Richard',
              'last_name': 'Feynman',
              'roles': [
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'level': 'state', 'type': 'member'},
+                  'type': 'member'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member',  'committee': 'Agriculture'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member',  'committee': 'Agriculture',
                   'subcommittee': 'Tractors'},
               ],
              'sources': [{'url': 'http://example.com/feynman'}],
             }
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
-             '_id': 'EXL000002', 'level': 'state',
+             '_id': 'EXL000002',
              'state': 'ex',
              '_scraped_name': 'Albert Einstein', 'first_name': 'Albert',
              'last_name': 'Einstein',
              'roles': [
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'level': 'state', 'type': 'member'},
+                  'type': 'member'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'position': 'chairman', 'level': 'state',
+                  'position': 'chairman',
                   'type': 'committee member',  'committee': 'Agriculture'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
                  'type': 'committee member',  'committee': 'Agriculture',
-                  'level': 'state', 'subcommittee': 'Tractors'},
+                  'subcommittee': 'Tractors'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member',  'committee': 'Appropriations'},
               ],
              'sources': [{'url': 'http://example.com/einstein'}],
             }
     # in a different term
     leg_c = {'full_name': 'Werner Heisenberg', 'leg_id': 'EXL000003',
-             '_id': 'EXL000003', 'level': 'state',
+             '_id': 'EXL000003',
              'state': 'ex',
              '_scraped_name': 'Werner Heisenberg', 'first_name': 'Werner',
              'last_name': 'Heisenberg',
              'roles': [
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
-                  'level': 'state', 'type': 'member'},
+                  'type': 'member'},
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member', 'committee': 'Agriculture'},
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member', 'committee': 'Agriculture',
                   'subcommittee': 'Tractors'},
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
-                  'level': 'state',
                   'type': 'committee member', 'committee': 'Appropriations'},
               ],
              'sources': [{'url': 'http://example.com/einstein'}],
@@ -82,7 +76,7 @@ def setup_func():
 
 @with_setup(setup_func)
 def test_committees_from_legislators():
-    committees.import_committees_from_legislators('T1', 'state', 'ex')
+    committees.import_committees_from_legislators('T1', 'ex')
 
     # 3 overall
     assert db.committees.count() == 3
@@ -113,7 +107,7 @@ def test_committees_from_legislators():
 
 @with_setup(setup_func)
 def test_import_committee():
-    committee = {'_type': 'committee', 'level': 'state', 'state': 'ex',
+    committee = {'_type': 'committee', 'state': 'ex',
                  'chamber': 'joint', 'committee': 'Reptilian Task Force',
                  'members': [
                      {'name': 'Richard Feynman'},
@@ -132,7 +126,7 @@ def test_import_committee():
     assert com['members'][1]['name'] == 'A. Einstein'
 
     leg = db.legislators.find_one({'_id': 'EXL000001'})
-    assert leg['roles'][-1] == {'level': 'state', 'term': 'T1',
+    assert leg['roles'][-1] == {'term': 'T1',
                                 'committee_id': 'EXC000001',
                                 'chamber': 'joint',
                                 'state': 'ex',

@@ -6,9 +6,9 @@ import datetime
 import json
 
 from billy import db
+from billy.conf import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
-from billy.importers.utils import compare_committee
 from billy.importers.utils import fix_bill_id, get_committee_id
 
 import pymongo
@@ -26,7 +26,7 @@ def ensure_indexes():
 
 
 def _insert_with_id(event):
-    abbr = event[event['level']]
+    abbr = event[settings.LEVEL_FIELD]
     id = next_big_id(abbr, 'E', 'event_ids')
     logger.info("Saving as %s" % id)
 
@@ -45,8 +45,7 @@ def import_events(abbr, data_dir, import_actions=False):
             data = prepare_obj(json.load(f))
 
         def _resolve_ctty(committee):
-            return get_committee_id(data['level'],
-                                    data['state'],
+            return get_committee_id(data[settings.LEVEL_FIELD],
                                     committee['chamber'],
                                     committee['participant'])
 
@@ -58,7 +57,6 @@ def import_events(abbr, data_dir, import_actions=False):
                                      data['session'],
                                      chamber,
                                      leg['participant'])
-
 
         resolvers = {
             "committee": _resolve_ctty,
@@ -109,16 +107,15 @@ def import_events(abbr, data_dir, import_actions=False):
 
 def import_event(data):
     event = None
-    level = data['level']
 
     if '_guid' in data:
-        event = db.events.find_one({'level': level,
-                                    level: data[level],
+        event = db.events.find_one({settings.LEVEL_FIELD:
+                                    data[settings.LEVEL_FIELD],
                                     '_guid': data['_guid']})
 
     if not event:
-        event = db.events.find_one({'level': level,
-                                    level: data[level],
+        event = db.events.find_one({settings.LEVEL_FIELD:
+                                    data[settings.LEVEL_FIELD],
                                     'when': data['when'],
                                     'end': data['end'],
                                     'type': data['type'],
