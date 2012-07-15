@@ -63,7 +63,7 @@ class ScraperMeta(type):
         abbr = getattr(cls, settings.LEVEL_FIELD, None)
         scraper_type = getattr(cls, 'scraper_type', None)
 
-        if region and scraper_type:
+        if abbr and scraper_type:
             _scraper_registry[scraper_type] = cls
 
         return cls
