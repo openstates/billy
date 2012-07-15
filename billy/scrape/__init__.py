@@ -60,12 +60,7 @@ class ScraperMeta(type):
     def __new__(meta, classname, bases, classdict):
         cls = type.__new__(meta, classname, bases, classdict)
 
-        # default level to state to preserve old behavior
-        if not hasattr(cls, 'level'):
-            cls.level = 'state'
-            cls.country = 'us'
-
-        region = getattr(cls, cls.level, None)
+        abbr = getattr(cls, settings.LEVEL_FIELD, None)
         scraper_type = getattr(cls, 'scraper_type', None)
 
         if region and scraper_type:
@@ -184,7 +179,7 @@ class Scraper(scrapelib.Scraper):
         raise NoDataForPeriod(term)
 
     def save_object(self, obj):
-        # copy over level information
+        # copy over LEVEL_FIELD
         obj[settings.LEVEL_FIELD] = getattr(self, LEVEL_FIELD)
 
         filename = obj.get_filename()

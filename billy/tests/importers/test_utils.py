@@ -65,9 +65,8 @@ def test_insert_with_id_types():
 
 @with_setup(drop_everything)
 def test_update():
-    obj0 = {'_type': 'bill', 'level': 'state', 'state': 'ex',
-            'field1': 'stuff', 'field2': 'original',
-            '_locked_fields': ['field2']}
+    obj0 = {'_type': 'bill', 'state': 'ex', 'field1': 'stuff',
+            'field2': 'original', '_locked_fields': ['field2']}
 
     id1 = utils.insert_with_id(obj0)
     obj1 = db.bills.find_one(id1)
@@ -96,8 +95,8 @@ def test_update():
 
 @with_setup(drop_everything)
 def test_update_sneaky_filter():
-    obj = {'_type': 'bill', 'level': 'state', 'state': 'ex',
-            'normal_field': 1, 'set_field': [1, 2, 3]}
+    obj = {'_type': 'bill', 'state': 'ex', 'normal_field': 1,
+           'set_field': [1, 2, 3]}
 
     def _set_changed(old, new):
         return set(old) != set(new)

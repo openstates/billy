@@ -45,7 +45,7 @@ def import_committees_from_legislators(current_term, abbr):
                 if not committee:
                     committee = spec
                     committee['_type'] = 'committee'
-                    # copy level field from legislator to committee
+                    # copy LEVEL_FIELD from legislator to committee
                     committee[settings.LEVEL_FIELD] = \
                             legislator[settings.LEVEL_FIELD]
                     committee['members'] = []

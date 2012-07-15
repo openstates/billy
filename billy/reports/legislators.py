@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from billy import db
+from billy.conf import settings
 from billy.reports.utils import update_common
 
 # semi-optional keys to check for on active legislators
@@ -8,9 +9,6 @@ checked_keys = ('photo_url', 'url', 'email', 'transparencydata_id', 'offices')
 
 
 def scan_legislators(abbr):
-    metadata = db.metadata.find_one({'_id': abbr})
-    level = metadata['level']
-
     duplicate_sources = defaultdict(int)
     report = {'upper_active_count': 0,
               'lower_active_count': 0,
@@ -28,7 +26,7 @@ def scan_legislators(abbr):
         district_seats[district['chamber']][district['name']] = \
                 district['num_seats']
 
-    for leg in db.legislators.find({'level': level, level: abbr}):
+    for leg in db.legislators.find({settings.LEVEL_FIELD: abbr}):
 
         # do common details
         update_common(leg, report)

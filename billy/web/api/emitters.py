@@ -123,8 +123,8 @@ class ICalendarEmitter(Emitter):
 
                 chamber = part.get('chamber')
                 if chamber:
-                    comm = "%s %s" % (chamber_name(obj[obj['level']], chamber),
-                                      comm)
+                    comm = "%s %s" % (chamber_name(obj[settings.LEVEL_FIELD],
+                                                   chamber), comm)
 
                 summary = "%s Committee Meeting" % clean_for_ical(comm)
             elif obj['type'] == 'bill:action':
@@ -155,7 +155,7 @@ class ICalendarEmitter(Emitter):
                 chamber = clean_for_ical(participant.get('chamber'))
                 if chamber:
                     cn = clean_for_ical(
-                        chamber_name(obj[obj['level']], chamber) + " ")
+                        chamber_name(obj[settings.LEVEL_FIELD], chamber) + " ")
                 else:
                     cn = ""
 
