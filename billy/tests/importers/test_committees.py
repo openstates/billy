@@ -16,7 +16,7 @@ def setup_func():
 
     leg_a = {'full_name': 'Richard Feynman', 'leg_id': 'EXL000001',
              '_id': 'EXL000001', 'level': 'state',
-             'state': 'ex', 'country': 'zz',
+             'state': 'ex',
              '_scraped_name': 'Richard Feynman', 'first_name': 'Richard',
              'last_name': 'Feynman',
              'roles': [
@@ -34,7 +34,7 @@ def setup_func():
             }
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
              '_id': 'EXL000002', 'level': 'state',
-             'state': 'ex', 'country': 'zz',
+             'state': 'ex',
              '_scraped_name': 'Albert Einstein', 'first_name': 'Albert',
              'last_name': 'Einstein',
              'roles': [
@@ -55,7 +55,7 @@ def setup_func():
     # in a different term
     leg_c = {'full_name': 'Werner Heisenberg', 'leg_id': 'EXL000003',
              '_id': 'EXL000003', 'level': 'state',
-             'state': 'ex', 'country': 'zz',
+             'state': 'ex',
              '_scraped_name': 'Werner Heisenberg', 'first_name': 'Werner',
              'last_name': 'Heisenberg',
              'roles': [
@@ -98,10 +98,8 @@ def test_committees_from_legislators():
     # check that position is copied over
     assert ag_com['members'][1]['role'] == 'chairman'
 
-    # check that level, state, and country are copied over
-    assert ag_com['level'] == 'state'
+    # check that state is copied over
     assert ag_com['state'] == 'ex'
-    assert ag_com['country'] == 'zz'
 
     # subcommittee
     tractor_subcom = db.committees.find_one({'subcommittee': 'Tractors'})
@@ -116,7 +114,6 @@ def test_committees_from_legislators():
 @with_setup(setup_func)
 def test_import_committee():
     committee = {'_type': 'committee', 'level': 'state', 'state': 'ex',
-                 'country': 'zz',
                  'chamber': 'joint', 'committee': 'Reptilian Task Force',
                  'members': [
                      {'name': 'Richard Feynman'},
@@ -138,6 +135,6 @@ def test_import_committee():
     assert leg['roles'][-1] == {'level': 'state', 'term': 'T1',
                                 'committee_id': 'EXC000001',
                                 'chamber': 'joint',
-                                'state': 'ex', 'country': 'zz',
+                                'state': 'ex',
                                 'type': 'committee member',
                                 'committee': 'Reptilian Task Force'}

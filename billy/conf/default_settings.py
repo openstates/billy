@@ -65,10 +65,7 @@ BILLY_SUBJECTS = [
 
 ENABLE_OYSTER = False
 
-BILLY_LEVEL_FIELDS = {
-    'country': ('country',),
-    'state': ('state', 'country'),
-}
+LEVEL_FIELD = 'state'
 
 SCRAPELIB_RPM = 60
 SCRAPELIB_TIMEOUT = 60

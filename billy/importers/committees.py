@@ -48,9 +48,8 @@ def import_committees_from_legislators(current_term, level, abbr):
                 if not committee:
                     committee = spec
                     committee['_type'] = 'committee'
-                    # copy required fields from legislator to committee
-                    for f in settings.BILLY_LEVEL_FIELDS:
-                        committee[f] = legislator[f]
+                    # copy level field from legislator to committee
+                    committee[settings.LEVEL_FIELD] = legislator[settings.LEVEL_FIELD]
                     committee['members'] = []
                     committee['sources'] = []
                     if 'subcommittee' not in committee:
@@ -136,8 +135,7 @@ def import_committee(data, current_session, current_term):
                         'level': level,
                        }
             # copy over all necessary fields from committee
-            for f in settings.BILLY_LEVEL_FIELDS:
-                new_role[f] = committee[f]
+            new_role[settings.LEVEL_FIELD] = committee[settings.LEVEL_FIELD]
 
             if 'subcommittee' in committee:
                 new_role['subcommittee'] = committee['subcommittee']
