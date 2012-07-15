@@ -681,11 +681,10 @@ def duplicate_versions(request, abbr):
 
 def _bill_spec(meta, limit):
     abbr = meta['abbreviation']
-    level = meta['level']
 
     # basic spec
     latest_session = meta['terms'][-1]['sessions'][-1]
-    spec = {'level': level, level: abbr.lower(), 'session': latest_session}
+    spec = {settings.LEVEL_FIELD: abbr.lower(), 'session': latest_session}
 
     basic_specs = {
         "no_versions": {'versions': []},
@@ -782,9 +781,8 @@ def bill(request, abbr, session=None, id=None, openstates_id=None):
     if openstates_id:
         bill = db.bills.find_one({'_id': openstates_id})
     else:
-        level = meta['level']
-        bill = find_bill({'level': level, level: abbr,
-                          'session': session, 'bill_id': id.upper()})
+        bill = find_bill(settings.LEVEL_FIELD: abbr, 'session': session,
+                         'bill_id': id.upper()})
     if not bill:
         msg = 'No bill found in {name} session {session!r} with id {id!r}.'
         raise Http404(msg.format(name=meta['name'], session=session, id=id))
@@ -795,15 +793,14 @@ def bill(request, abbr, session=None, id=None, openstates_id=None):
 
 def legislators(request, abbr):
     meta = metadata(abbr)
-    level = metadata(abbr)['level']
 
     report = db.reports.find_one({'_id': abbr})['legislators']
 
-    upper_legs = db.legislators.find({'level': level, level: abbr.lower(),
+    upper_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
                                       'active': True, 'chamber': 'upper'})
-    lower_legs = db.legislators.find({'level': level, level: abbr.lower(),
+    lower_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
                                       'active': True, 'chamber': 'lower'})
-    inactive_legs = db.legislators.find({'level': level, level: abbr.lower(),
+    inactive_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
                                          'active': False})
     upper_legs = sorted(upper_legs, key=keyfunc)
     lower_legs = sorted(lower_legs, key=keyfunc)
@@ -917,12 +914,9 @@ def quality_exception_commit(request, abbr):
 
 def events(request, abbr):
     meta = metadata(abbr)
-    level = metadata(abbr)['level']
 
-    events = db.events.find({
-        'level': level,
-        level: abbr.lower()
-    }, sort=[('when', pymongo.DESCENDING)]).limit(20)
+    events = db.events.find({settings.LEVEL_FIELD: abbr.lower()},
+                            sort=[('when', pymongo.DESCENDING)]).limit(20)
 
     # sort and get rid of old events.
 
@@ -946,7 +940,7 @@ def legislator(request, id):
     if not leg:
         raise Http404('No legislators found for id %r.' % id)
 
-    meta = metadata(leg[leg['level']])
+    meta = metadata(leg[settings.LEVEL_FIELD])
 
     return render(request, 'billy/legislator.html', {'leg': leg,
                                                      'metadata': meta})
@@ -958,8 +952,7 @@ def retire_legislator(request, id):
         raise Http404('No legislators found for id %r.' % id)
 
     # retire a legislator
-    level = legislator['level']
-    abbr = legislator[level]
+    abbr = legislator[settings.LEVEL_FIELD]
     meta = metadata(abbr)
 
     term = meta['terms'][-1]['name']
@@ -974,7 +967,7 @@ def retire_legislator(request, id):
     else:
         cur_role['end_date'] = datetime.datetime.strptime(end_date, '%Y-%m-%d')
         db.legislators.save(legislator, safe=True)
-        deactivate_legislators(term, abbr, level)
+        deactivate_legislators(term, abbr)
         alert = dict(type='success', title='Retired Legislator',
                      message='{0} was successfully retired.'.format(
                          legislator['full_name']))
@@ -987,13 +980,12 @@ def retire_legislator(request, id):
 
 def committees(request, abbr):
     meta = metadata(abbr)
-    level = metadata(abbr)['level']
 
-    upper_coms = db.committees.find({'level': level, level: abbr.lower(),
+    upper_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
                                      'chamber': 'upper'})
-    lower_coms = db.committees.find({'level': level, level: abbr.lower(),
+    lower_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
                                       'chamber': 'lower'})
-    joint_coms = db.committees.find({'level': level, level: abbr.lower(),
+    joint_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
                                       'chamber': 'joint'})
     upper_coms = sorted(upper_coms)
     lower_coms = sorted(lower_coms)
@@ -1010,7 +1002,7 @@ def committees(request, abbr):
 def delete_committees(request):
     ids = request.POST.getlist('committees')
     committees = db.committees.find({'_id': {'$in': ids}})
-    abbr = committees[0][committees[0]['level']]
+    abbr = committees[0][settings.LEVEL_FIELD]
     if not request.POST.get('confirm'):
         return render(request, 'billy/delete_committees.html',
                       {'abbr': abbr, 'committees': committees})

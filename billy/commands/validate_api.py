@@ -55,8 +55,7 @@ def validate_api(abbr, schema_dir=None):
 
     bill_schema = get_json_schema("bill", schema_dir)
 
-    level = metadata(abbr)['level']
-    spec = {'level': level, level: abbr}
+    spec = {settings.LEVEL_FIELD: abbr}
     total_bills = db.bills.find(spec).count()
 
     for i in xrange(0, 100):

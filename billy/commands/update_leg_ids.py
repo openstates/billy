@@ -13,8 +13,7 @@ class UpdateLegIds(BaseCommand):
         self.add_argument('term', help='term to run matching for')
 
     def handle(self, args):
-        level = metadata(args.abbr)['level']
-        nm = NameMatcher(args.abbr, args.term, level)
+        nm = NameMatcher(args.abbr, args.term)
 
         for t in metadata(args.abbr)['terms']:
             if t['name'] == args.term:
@@ -25,7 +24,7 @@ class UpdateLegIds(BaseCommand):
             return
 
         for session in sessions:
-            bills = db.bills.find({'level': level, level: args.abbr,
+            bills = db.bills.find({settings.LEVEL_FIELD: args.abbr,
                                    'session': session})
 
             for bill in bills:

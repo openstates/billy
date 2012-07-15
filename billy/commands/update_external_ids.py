@@ -13,8 +13,7 @@ def update_transparencydata_legislators(meta):
     current_term = meta['terms'][-1]['name']
     query = {'roles': {'$elemMatch':
                        {'type': 'member',
-                        'level': meta['level'],
-                        meta['level']: meta['abbreviation'],
+                        settings.LEVEL_FIELD: meta['abbreviation'],
                         'term': current_term},
                       },
              'transparencydata_id': None,
