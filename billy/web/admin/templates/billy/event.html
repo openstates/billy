@@ -3,7 +3,7 @@
 
 {% block content %}
 <h2>{{event.description}}<h2>
-{{event.country}}{{event.level}}{{event.state}}
+{{event.state}}
 {% for data in event.related_bills %}
 <ul>
     <li><a href="{% url 'admin_bill' event.state bill.bill_id %}">{{bill.bill_id}}</a></li>
