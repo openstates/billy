@@ -1,5 +1,18 @@
 import collections
 
+from django.core import urlresolvers
+
+
+def mongoid_2_url(abbr, _id):
+    letter = _id[2]
+    viewname = {
+        'B': 'bill',
+        'C': 'committee',
+        'V': 'vote',
+        'L': 'legislator_noslug',
+        }[letter]
+    return urlresolvers.reverse(viewname, args=[abbr, _id])
+
 
 ## {{{ http://code.activestate.com/recipes/276643/ (r1)
 class CachedAttribute(object):
