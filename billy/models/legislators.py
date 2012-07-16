@@ -79,10 +79,7 @@ class Legislator(Document):
                                     sort=[('published_parsed', -1)])
     roles_manager = RolesManager()
     old_roles_manager = OldRolesManager()
-    votes_manager = RelatedDocuments('BillVote', model_keys=[
-        'yes_votes.leg_id',
-        'no_votes.leg_id',
-        'other_votes.leg_id'])
+    votes_manager = RelatedDocuments('BillVote', model_keys=['_voters'])
 
     @property
     def metadata(self):
