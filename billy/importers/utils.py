@@ -348,8 +348,10 @@ def merge_legislators(leg1, leg2):
                     # dear holy god this needs to be fixed.
                     leg1[old_roles] = {crole['term']: [crole]}
 
-        # OK. We've migrated the newly old roles to the old_roles entry.
-        leg1[roles] = [leg2[roles][0]]
+        if len(leg2[roles]) > 0:
+            # OK. We've migrated the newly old roles to the old_roles entry.
+            leg1[roles] = [leg2[roles][0]]
+
     return (leg1, leg2['_id'])
 
 __committee_ids = {}
