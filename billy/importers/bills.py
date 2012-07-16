@@ -38,8 +38,9 @@ def ensure_indexes():
     db.bills.ensure_index([('versions.doc_id', pymongo.ASCENDING),
                            ('created_at', pymongo.DESCENDING)])
     # used for search in conjunction with ElasticSearch
-    db.bills.ensure_index([('versions.doc_id', pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
+    db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
+                           ('versions.doc_id', pymongo.ASCENDING),
+                          ])
     # TODO: add a _current_term, _current_session index
     # TODO: re-evaluate if the below indices are needed
     db.bills.ensure_index([('state', pymongo.ASCENDING),
@@ -50,6 +51,8 @@ def ensure_indexes():
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
                            ('sponsors.leg_id', pymongo.ASCENDING)])
+    db.bills.ensure_index([('state', pymongo.ASCENDING),
+                           ('action_dates.last', pymongo.DESCENDING)])
 
     # votes index
     db.votes.ensure_index([('_voters', pymongo.ASCENDING),
