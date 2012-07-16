@@ -13,7 +13,7 @@ class FeedEntry(Document):
     def __init__(self, *args, **kw):
         super(FeedEntry, self).__init__(*args, **kw)
 
-    def _build(self, billy_db=db):
+    def build(self, billy_db=db):
         '''Mutate the feed entry with hyperlinked entities. Add tagging
         data and other template context values, including source.
         '''
@@ -101,9 +101,9 @@ class FeedEntry(Document):
 
         # Prevent obfuscation of `published` method in template rendering.
         del entry['published']
+        return ''
 
     def display(self):
-        self._build()
         return self['summary']
 
     def published(self):
