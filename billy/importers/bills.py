@@ -33,6 +33,7 @@ def ensure_indexes():
     # accomodates basic lookup / unique constraint on state/session/bill_id
     db.bills.ensure_index([('state', pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
+                           ('chamber', pymongo.ASCENDING),
                            ('bill_id', pymongo.ASCENDING)],
                           unique=True)
 
