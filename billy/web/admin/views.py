@@ -776,11 +776,11 @@ def bad_vote_list(request, abbr):
     return render(request, 'billy/vote_list.html', context)
 
 
-def bill(request, abbr, session=None, id=None, openstates_id=None):
+def bill(request, abbr, session=None, id=None, billy_id=None):
     meta = metadata(abbr)
 
-    if openstates_id:
-        bill = db.bills.find_one({'_id': openstates_id})
+    if billy_id:
+        bill = db.bills.find_one({'_id': billy_id})
     else:
         level = meta['level']
         bill = find_bill({'level': level, level: abbr,
