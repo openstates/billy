@@ -89,9 +89,17 @@ def legislator(request, abbr, _id, slug=None):
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
+
     legislator = db.legislators.find_one({'_id': _id})
     if legislator is None:
-        raise Http404('No legislator was found with led_id = %r' % _id)
+        spec = {'_all_ids': _id}
+        cursor = db.legislators.find(spec)
+        msg = 'Two legislators returned for spec %r' % spec
+        assert cursor.count() < 2, msg
+        try:
+            legislator = cursor.next()
+        except StopIteration:
+            raise Http404('No legislator was found with leg_id = %r' % _id)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
