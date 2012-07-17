@@ -16,7 +16,8 @@ logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.legislators.ensure_index('_all_ids', pymongo.ASCENDING)
-    db.legislators.ensure_index([('roles.state', pymongo.ASCENDING),
+    db.legislators.ensure_index([('roles.{0}'.format(settings.LEVEL_FIELD),
+                                  pymongo.ASCENDING),
                                  ('roles.type', pymongo.ASCENDING),
                                  ('roles.term', pymongo.ASCENDING),
                                  ('roles.chamber', pymongo.ASCENDING),
@@ -27,7 +28,7 @@ def ensure_indexes():
                                  ('suffixes', pymongo.ASCENDING)],
                                 name='role_and_name_parts')
     db.legislators.ensure_index([('active', pymongo.ASCENDING),
-                                 ('state', pymongo.ASCENDING),
+                                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
                                  ('chamber', pymongo.ASCENDING),
                                 ])
 
@@ -148,7 +149,7 @@ def import_legislator(data):
         if 'role' in role:
             role['type'] = role.pop('role')
 
-        # copy over state into role
+        # copy over LEVEL_FIELD into role
         if settings.LEVEL_FIELD in data:
             role[settings.LEVEL_FIELD] = data[settings.LEVEL_FIELD]
 

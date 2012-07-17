@@ -17,7 +17,7 @@ logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.committees.ensure_index([('_all_ids', pymongo.ASCENDING)])
-    db.committees.ensure_index([('state', pymongo.ASCENDING),
+    db.committees.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                                 ('committee', pymongo.ASCENDING),
                                 ('subcommittee', pymongo.ASCENDING)])
 
