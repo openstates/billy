@@ -103,10 +103,6 @@ class Scraper(scrapelib.Scraper):
 
         super(Scraper, self).__init__(**kwargs)
 
-        if not hasattr(self, settings.LEVEL_FIELD):
-            raise Exception('scrapers must have a %s attribute' %
-                            settings.LEVEL_FIELD)
-
         self.metadata = metadata
         self.output_dir = output_dir
 
