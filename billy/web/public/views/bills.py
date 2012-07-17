@@ -231,7 +231,7 @@ class SponsoredBillsList(RelatedBillsList):
 
 
 def bill(request, abbr, session, bill_id):
-    bill_id = bill_id.replace('-', ' ')
+    bill_id = bill_id.replace('_', ' ')
     bill = db.bills.find_one({'state': abbr, 'session': session,
                               'bill_id': bill_id})
     #bill = db.bills.find_one({'_id': bill_id})

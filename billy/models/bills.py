@@ -267,7 +267,7 @@ class Bill(Document):
     def get_absolute_url(self):
         url = urlresolvers.reverse('bill',
                                    args=[self['state'], self['session'],
-                                         self['bill_id'].replace(' ', '-')])
+                                         self['bill_id'].replace(' ', '_')])
         return url
 
     def display_name(self):
