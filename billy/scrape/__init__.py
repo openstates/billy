@@ -180,7 +180,7 @@ class Scraper(scrapelib.Scraper):
 
     def save_object(self, obj):
         # copy over LEVEL_FIELD
-        obj[settings.LEVEL_FIELD] = getattr(self, LEVEL_FIELD)
+        obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
 
         filename = obj.get_filename()
         with open(os.path.join(self.output_dir, self.scraper_type, filename),
