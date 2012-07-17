@@ -27,8 +27,8 @@ def ensure_indexes():
                                  ('middle_name', pymongo.ASCENDING),
                                  ('suffixes', pymongo.ASCENDING)],
                                 name='role_and_name_parts')
-    db.legislators.ensure_index([('active', pymongo.ASCENDING),
-                                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
+    db.legislators.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                                 ('active', pymongo.ASCENDING),
                                  ('chamber', pymongo.ASCENDING),
                                 ])
 

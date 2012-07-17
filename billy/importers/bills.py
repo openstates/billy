@@ -28,31 +28,41 @@ logger = logging.getLogger('billy')
 
 
 def ensure_indexes():
-    # accomodates basic search / unique constraint
+    # TODO: add a _current_term, _current_session index?
+
+    # accomodates basic lookup / unique constraint on abbr/session/bill_id
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
                            ('bill_id', pymongo.ASCENDING)],
                           unique=True)
-    # used for search in conjunction with ElasticSearch
-    db.bills.ensure_index([('versions.doc_id', pymongo.ASCENDING),
-                           ('created_at', pymongo.DESCENDING)])
-    # used for search in conjunction with ElasticSearch
+
+    # doc_id is used for search in conjunction with ElasticSearch
+    #  sort field (date) comes first, followed by field that we do an $in on
+    db.bills.ensure_index([('created_at', pymongo.DESCENDING),
+                           ('versions.doc_id', pymongo.ASCENDING) ])
+    db.bills.ensure_index([('updated_at', pymongo.DESCENDING),
+                           ('versions.doc_id', pymongo.ASCENDING) ])
     db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING),
-                          ])
-    # TODO: add a _current_term, _current_session index
-    # TODO: re-evaluate if the below indices are needed
+                           ('versions.doc_id', pymongo.ASCENDING) ])
+
+    # common search indices
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('subjects', pymongo.ASCENDING)])
+                           ('subjects', pymongo.ASCENDING),
+                           ('action_dates.last', pymongo.DESCENDING)])
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('sponsors.leg_id', pymongo.ASCENDING)])
+                           ('sponsors.leg_id', pymongo.ASCENDING),
+                           ('action_dates.last', pymongo.DESCENDING)])
+
+    # generic sort-assist indices on the action_dates
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                           ('action_dates.first', pymongo.DESCENDING)])
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                           ('action_dates.passed_upper', pymongo.DESCENDING)])
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                           ('action_dates.passed_lower', pymongo.DESCENDING)])
 
     # votes index
     db.votes.ensure_index([('_voters', pymongo.ASCENDING),
