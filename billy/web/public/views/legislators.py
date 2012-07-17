@@ -6,7 +6,7 @@ import json
 import operator
 import urllib2
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import Http404
 
 import pymongo
@@ -100,6 +100,8 @@ def legislator(request, abbr, _id, slug=None):
             legislator = cursor.next()
         except StopIteration:
             raise Http404('No legislator was found with leg_id = %r' % _id)
+        else:
+            return redirect(legislator.get_absolute_url(), permanent=True)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
