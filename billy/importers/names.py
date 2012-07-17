@@ -1,12 +1,14 @@
 import re
 import unicodecsv
 import os.path
+import logging
 
 from billy import db
 from billy.conf import settings
 
 __matchers = {}
 
+logger = logging.getLogger('billy')
 
 def get_legislator_id(abbr, session, chamber, name):
     try:
@@ -23,7 +25,7 @@ def get_legislator_id(abbr, session, chamber, name):
         matcher = NameMatcher(abbr, term['name'], metadata['level'])
         __matchers[(abbr, session)] = matcher
 
-    if chamber == 'both' or chamber == 'joint':
+    if chamber == 'both' or chamber == 'joint' or chamber == 'other':
         chamber = None
 
     return matcher.match(name, chamber)
@@ -218,6 +220,12 @@ class NameMatcher(object):
             return self._codes[chamber][name]
         except KeyError:
             pass
+
+        if chamber not in self._names:
+            logger.warning("Chamber %s is invalid for a legislator." % (
+                chamber
+            ))
+            return None  # XXX: Expected behavior?
 
         name = self._normalize(name)
         return self._names[chamber].get(name, None)
