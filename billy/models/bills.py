@@ -11,7 +11,7 @@ from billy.utils import parse_param_dt
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)
 from .metadata import Metadata
-from .utils import CachedAttribute
+from .utils import CachedAttribute, mongoid_2_url
 
 elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
                         settings.ELASTICSEARCH_TIMEOUT)
@@ -96,16 +96,21 @@ class Action(dict):
 
     def action_display(self):
         '''The action text, with any hyperlinked related entities.'''
-        if '+actor_collection' in self:
-            collection = getattr(db, self['+actor_collection'])
-            actor = collection.find_one(self['+actor_id'])
-            actor_url = actor.get_absolute_url()
-            actor_text = self['+actor_text']
-            action = self['action'].replace(actor_text,
-                '<a href=%s>%s</a>' % (actor_url, actor_text))
-            return action
-        else:
-            return self['action']
+        action = self['action']
+        annotations = []
+        state = self.bill['state']
+        if 'related_entities' in self:
+            for entity in self['related_entities']:
+                name = entity['name']
+                url = mongoid_2_url(state, entity['id'])
+                link = '<a href="%s">%s</a>' % (url, name)
+                if name in action:
+                    action = action.replace(entity['name'], link)
+                else:
+                    annotations.append(link)
+            if annotations:
+                action += ' (%s)' % ', '.join(annotations)
+        return action
 
 
 class ActionsManager(ListManager):
@@ -172,7 +177,7 @@ class BillVote(Document):
         return self._ratio('other_count')
 
     @CachedAttribute
-    def _legislator_objects(self, fields=['first_name', 'last_name',
+    def _legislator_objects(self, fields=['full_name',
                                           'party', 'district', 'state']):
         '''A cache of dereferenced legislator objects.
         '''

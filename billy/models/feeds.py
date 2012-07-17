@@ -1,8 +1,7 @@
 import re
 import urlparse
 import datetime
-from django.core import urlresolvers
-from django.template.defaultfilters import slugify, truncatewords
+from django.template.defaultfilters import truncatewords
 
 from .base import db, feeds_db, Document
 from .metadata import Metadata
@@ -13,12 +12,12 @@ class FeedEntry(Document):
 
     def __init__(self, *args, **kw):
         super(FeedEntry, self).__init__(*args, **kw)
-        self._process()
 
-    def _process(self, billy_db=db):
+    def build(self, billy_db=db):
         '''Mutate the feed entry with hyperlinked entities. Add tagging
         data and other template context values, including source.
         '''
+        self_legislator = self.legislator
         entity_types = {'L': 'legislator',
                         'C': 'committee',
                         'B': 'bill'}
@@ -27,7 +26,6 @@ class FeedEntry(Document):
         summary = truncatewords(entry['summary'], 50)
         entity_strings = entry['entity_strings']
         entity_ids = entry['entity_ids']
-        state = entry['state']
 
         _entity_strings = []
         _entity_ids = []
@@ -56,7 +54,13 @@ class FeedEntry(Document):
                 # other previously hyperlinked strings, like Fiona Ma and
                 # Mark Leno.
                 matches = re.finditer(entity_string, summary)
-                replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
+                if _id != self_legislator.id:
+                    # For other entities, add a hyperlink.
+                    replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
+                else:
+                    # If this id refers to the related legislator, bold it.
+                    replacer = lambda m: '<strong>%s</strong>' % (entity_string)
+
                 for match in matches:
 
                     # Only hyperlink if no previous hyperlink has been added
@@ -97,6 +101,10 @@ class FeedEntry(Document):
 
         # Prevent obfuscation of `published` method in template rendering.
         del entry['published']
+        return ''
+
+    def display(self):
+        return self['summary']
 
     def published(self):
         return datetime.datetime.fromtimestamp(self['published_parsed'])
