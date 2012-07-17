@@ -35,7 +35,7 @@ class CommitteeMemberManager(ListManager):
                 self._legislators = objs
         for member in members:
             _id = member['leg_id']
-            if _id is not None:
+            if _id is not None and _id in objs:
                 yield (member, objs[_id])
             else:
                 yield (member, None)
