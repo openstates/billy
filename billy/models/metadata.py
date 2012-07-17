@@ -167,7 +167,7 @@ class Metadata(Document):
         '''
         committees = list(self.committees(*args, **kwargs))
         legislators = self.legislators({'active': True},
-                    fields=['first_name', 'last_name', 'state'])
+                    fields=['full_name', 'state'])
         legislators = dict((obj['_id'], obj) for obj in legislators)
         for com in committees:
             com._legislators = legislators
