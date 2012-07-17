@@ -117,8 +117,8 @@ def deactivate_legislators(current_term, abbr):
         db.legislators.save(leg, safe=True)
 
 
-def get_previous_term(abbrev, term):
-    meta = db.metadata.find_one({'_id': abbrev})
+def get_previous_term(abbr, term):
+    meta = db.metadata.find_one({'_id': abbr})
     t1 = meta['terms'][0]
     for t2 in meta['terms'][1:]:
         if t2['name'] == term:
@@ -128,8 +128,8 @@ def get_previous_term(abbrev, term):
     return None
 
 
-def get_next_term(abbrev, term):
-    meta = db.metadata.find_one({'_id': abbrev})
+def get_next_term(abbr, term):
+    meta = db.metadata.find_one({'_id': abbr})
     t1 = meta['terms'][0]
     for t2 in meta['terms'][1:]:
         if t1['name'] == term:
@@ -155,12 +155,12 @@ def import_legislator(data):
     cur_role = data['roles'][0]
     term = cur_role['term']
 
-    abbrev = data[settings.LEVEL_FIELD]
+    abbr = data[settings.LEVEL_FIELD]
 
-    prev_term = get_previous_term(abbrev, term)
-    next_term = get_next_term(abbrev, term)
+    prev_term = get_previous_term(abbr, term)
+    next_term = get_next_term(abbr, term)
 
-    spec = {settings.LEVEL_FIELD: abbrev,
+    spec = {settings.LEVEL_FIELD: abbr,
             'type': cur_role['type'],
             'term': {'$in': [term, prev_term, next_term]}}
     if 'district' in cur_role:
@@ -169,7 +169,7 @@ def import_legislator(data):
         spec['chamber'] = cur_role['chamber']
 
     leg = db.legislators.find_one(
-        {settings.LEVEL_FIELD: abbrev,
+        {settings.LEVEL_FIELD: abbr,
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 
