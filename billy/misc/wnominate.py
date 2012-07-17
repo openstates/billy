@@ -6,15 +6,16 @@ import tempfile
 import subprocess
 
 from billy import db, utils
+from billy.conf import settings
 
 
-def vote_csv(state, session, chamber, out=sys.stdout):
-    term = utils.term_for_session(state, session)
+def vote_csv(abbr, session, chamber, out=sys.stdout):
+    term = utils.term_for_session(abbr, session)
 
     votes = {}
     legislators = {}
 
-    elemMatch = {'state': state, 'chamber': chamber,
+    elemMatch = {settings.LEVEL_FIELD: abbr, 'chamber': chamber,
                  'type': 'member', 'term': term}
 
     for leg in db.legislators.find({'$or':
@@ -24,7 +25,7 @@ def vote_csv(state, session, chamber, out=sys.stdout):
         votes[leg['leg_id']] = []
         legislators[leg['leg_id']] = leg
 
-    for bill in db.bills.find({'state': state, 'chamber': chamber,
+    for bill in db.bills.find({settings.LEVEL_FIELD: abbr, 'chamber': chamber,
                                'session': session}):
         for vote in bill['votes']:
             if 'committee' in vote and vote['committee']:
@@ -72,11 +73,11 @@ def vote_csv(state, session, chamber, out=sys.stdout):
         out.writerow(row)
 
 
-def wnominate(state, session, chamber, polarity, r_bin="R",
+def wnominate(abbr, session, chamber, polarity, r_bin="R",
               out_file=None):
     (fd, filename) = tempfile.mkstemp('.csv')
     with os.fdopen(fd, 'w') as out:
-        vote_csv(state, session, chamber, out)
+        vote_csv(abbr, session, chamber, out)
 
     if not out_file:
         (result_fd, out_file) = tempfile.mkstemp('.csv')
@@ -108,12 +109,12 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('state')
+    parser.add_argument('abbr')
     parser.add_argument('session')
     parser.add_argument('chamber')
     parser.add_argument('polarity')
     parser.add_argument('out_file')
     args = parser.parse_args()
 
-    wnominate(args.state, args.session, args.chamber, args.polarity,
+    wnominate(args.abbr, args.session, args.chamber, args.polarity,
               out_file=args.out_file)

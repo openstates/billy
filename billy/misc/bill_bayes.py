@@ -13,7 +13,6 @@ from nltk.probability import FreqDist, ConditionalFreqDist
 stopset = set(stopwords.words('english'))
 stopset.add('member')
 stopset.add('california')
-stopset.add('state')
 
 
 def most_informative_words(corpus, categories=['dem', 'rep'], count=2500):
