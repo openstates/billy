@@ -16,34 +16,6 @@ def get_state_select_form(data):
     return StateSelectForm(data)
 
 
-class ChamberSelectForm(forms.Form):
-
-    chamber = forms.ChoiceField(widget=forms.RadioSelect())
-    abbr = forms.CharField(widget=forms.HiddenInput())
-    order = forms.IntegerField(widget=forms.HiddenInput(), initial=1)
-    key = forms.CharField(widget=forms.HiddenInput(), initial='committee')
-
-    @classmethod
-    def unbound(cls, metadata, chamber='both', *args, **kwargs):
-
-        inst = cls(*args, **kwargs)
-
-        # Make the radio option names reflect this state's actual
-        # chamber names.
-        chamber_choices = [('upper', metadata['upper_chamber_name']),
-                           ('lower', metadata['lower_chamber_name']),
-                           ('both', 'All')]
-
-        _chamber = inst.fields['chamber']
-        _chamber.choices = chamber_choices
-        _chamber.initial = chamber
-
-        # Add in the state.
-        inst.fields['abbr'].initial = metadata['_id']
-
-        return inst
-
-
 class FindYourLegislatorForm(forms.Form):
     address = forms.CharField()
 

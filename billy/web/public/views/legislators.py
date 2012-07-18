@@ -15,7 +15,6 @@ from billy.models import db, Metadata, DoesNotExist
 from billy.conf import settings as billy_settings
 
 from .utils import templatename, mongo_fields
-from ..forms import ChamberSelectForm
 
 
 def legislators(request, abbr):
@@ -25,6 +24,9 @@ def legislators(request, abbr):
         raise Http404
 
     spec = {'active': True}
+
+    chambers = {'upper': meta['upper_chamber_title'],
+                'lower': meta['lower_chamber_title']}
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in ('upper', 'lower'):
@@ -65,16 +67,14 @@ def legislators(request, abbr):
 
     sort_order = {1: -1, -1: 1}[sort_order]
     legislators = list(legislators)
-    initial = {'key': 'district', 'chamber': chamber}
-    chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
 
     return render(request, templatename('legislators'),
                   dict(metadata=meta,
                    chamber=chamber,
                    chamber_title=chamber_title,
-                   chamber_select_form=chamber_select_form,
                    chamber_select_template=templatename('chamber_select_form'),
                    chamber_select_collection='legislators',
+                   chamber_select_chambers=chambers,
                    show_chamber_column=True,
                    abbr=abbr,
                    legislators=legislators,

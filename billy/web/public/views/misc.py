@@ -2,7 +2,6 @@
     views that are not state/object specific
 """
 import json
-import random
 import urllib2
 
 import pymongo
