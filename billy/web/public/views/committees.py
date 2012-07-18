@@ -30,8 +30,8 @@ def committees(request, abbr):
         show_chamber_column = True
         chamber_name = ''
 
-    chambers = {'upper': meta['upper_chamber_title'],
-                'lower': meta['lower_chamber_title'],
+    chambers = {'upper': meta['upper_chamber_name'],
+                'lower': meta['lower_chamber_name'],
                 'joint': 'Joint',
                }
 

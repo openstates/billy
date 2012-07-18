@@ -25,8 +25,8 @@ def legislators(request, abbr):
 
     spec = {'active': True}
 
-    chambers = {'upper': meta['upper_chamber_title'],
-                'lower': meta['lower_chamber_title']}
+    chambers = {'upper': meta['upper_chamber_name'],
+                'lower': meta['lower_chamber_name']}
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in ('upper', 'lower'):
