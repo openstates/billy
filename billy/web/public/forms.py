@@ -52,6 +52,8 @@ def get_filter_bills_form(metadata):
 
     class FilterBillsForm(forms.Form):
 
+        search_text = forms.CharField(required=False)
+
         # `metadata` will be None if the search is for all states.
         if metadata is not None:
             _bill_types = metadata.distinct_bill_types()
@@ -109,8 +111,6 @@ def get_filter_bills_form(metadata):
                             ('passed_upper', 'Passed upper'),
                             ('signed', 'Signed'),
                         ), required=False)
-
-        search_text = forms.CharField(required=False)
 
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 
