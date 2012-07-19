@@ -42,21 +42,30 @@ def get_filter_bills_form(metadata):
 
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
-            chamber = forms.MultipleChoiceField(
-                        choices=(('upper', metadata['upper_chamber_name']),
-                                 ('lower', metadata['lower_chamber_name'])),
-                        widget=forms.CheckboxSelectMultiple(),
-                        required=False)
+            if 'lower_chamber_name' in metadata:
+                chamber = forms.MultipleChoiceField(
+                            choices=(('upper', metadata['upper_chamber_name']),
+                                     ('lower', metadata['lower_chamber_name'])),
+                            widget=forms.CheckboxSelectMultiple(),
+                            required=False)
 
-            status = forms.ChoiceField(
-                        choices=(
-                            ('', ''),
-                            ('passed_lower',
-                             'Passed ' + metadata['lower_chamber_name']),
-                            ('passed_upper',
-                             'Passed ' + metadata['upper_chamber_name']),
-                            ('signed', 'Signed'),
-                        ), required=False)
+                status = forms.ChoiceField(
+                            choices=(
+                                ('', ''),
+                                ('passed_lower',
+                                 'Passed ' + metadata['lower_chamber_name']),
+                                ('passed_upper',
+                                 'Passed ' + metadata['upper_chamber_name']),
+                                ('signed', 'Signed'),
+                            ), required=False)
+            else:
+                status = forms.ChoiceField(
+                            choices=(
+                                ('', ''),
+                                ('passed_upper',
+                                 'Passed ' + metadata['upper_chamber_name']),
+                                ('signed', 'Signed'),
+                            ), required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,

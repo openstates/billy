@@ -343,13 +343,14 @@ class Bill(Document):
             ('stage2',
              'Passed ' + self.chamber_name,
              'date_passed_' + self['chamber']),
+        ]
 
-            ('stage3',
-             'Passed ' + self.other_chamber_name,
-             'date_passed_' + self.other_chamber),
+        if 'lower_chamber_name' in self.metadata:
+            data.append(('stage3',
+                         'Passed ' + self.other_chamber_name,
+                         'date_passed_' + self.other_chamber))
+        data.append(('stage4', 'Governor Signs', 'date_signed'))
 
-            ('stage4', 'Governor Signs', 'date_signed'),
-            ]
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
 
