@@ -55,6 +55,9 @@ class SponsorsManager(AttrManager):
         except StopIteration:
             return
 
+    def first(self):
+        return next(self)
+
     def excluding_first_primary(self):
         first = self.first_primary()
         sponsors = list(self)
