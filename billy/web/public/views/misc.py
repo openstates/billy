@@ -65,7 +65,7 @@ def find_your_legislator(request):
 
         if "boundary" in get:
             to_search = []
-            for leg in legs_resp:
+            for leg in leg_resp:
                 to_search.append(leg['boundary_id'])
             borders = set(to_search)
             ret = {}
