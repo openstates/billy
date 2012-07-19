@@ -3,12 +3,16 @@
 """
 from django.shortcuts import render
 from django.http import Http404
+from django.template.response import TemplateResponse
+
+from djpjax import pjax
 
 from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
 
 
+@pjax()
 def committees(request, abbr):
     try:
         meta = Metadata.get_object(abbr)
@@ -30,7 +34,6 @@ def committees(request, abbr):
         show_chamber_column = True
         chamber_name = ''
 
-
     chambers = {'upper': meta['upper_chamber_name'],
                 'joint': 'Joint',
                }
@@ -48,7 +51,7 @@ def committees(request, abbr):
 
     sort_order = -sort_order
 
-    return render(request, templatename('committees'),
+    return TemplateResponse(request, templatename('committees'),
                   dict(chamber=chamber, committees=committees, abbr=abbr,
                        metadata=meta, chamber_name=chamber_name,
                    chamber_select_template=templatename('chamber_select_form'),

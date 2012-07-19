@@ -8,7 +8,9 @@ import urllib2
 
 from django.shortcuts import render, redirect
 from django.http import Http404
+from django.template.response import TemplateResponse
 
+from djpjax import pjax
 import pymongo
 
 from billy.models import db, Metadata, DoesNotExist
@@ -17,6 +19,7 @@ from billy.conf import settings as billy_settings
 from .utils import templatename, mongo_fields
 
 
+@pjax()
 def legislators(request, abbr):
     try:
         meta = Metadata.get_object(abbr)
@@ -69,7 +72,7 @@ def legislators(request, abbr):
     sort_order = {1: -1, -1: 1}[sort_order]
     legislators = list(legislators)
 
-    return render(request, templatename('legislators'),
+    return TemplateResponse(request, templatename('legislators'),
                   dict(metadata=meta,
                    chamber=chamber,
                    chamber_title=chamber_title,

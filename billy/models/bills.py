@@ -56,7 +56,7 @@ class SponsorsManager(AttrManager):
             return
 
     def first(self):
-        return next(self)
+        return next(iter(self))
 
     def excluding_first_primary(self):
         first = self.first_primary()
