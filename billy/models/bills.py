@@ -56,7 +56,10 @@ class SponsorsManager(AttrManager):
             return
 
     def first(self):
-        return next(iter(self))
+        if self.bill['sponsors']:
+            return next(iter(self))
+        else:
+            return None
 
     def excluding_first_primary(self):
         first = self.first_primary()
