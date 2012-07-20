@@ -31,7 +31,6 @@ billy-util = billy.bin.util:main
         "boto",
         "django-piston",
         "icalendar",
-        "jellyfish>=0.1.2",
         "lxml>=2.2",
         "name_tools>=0.1.2",
         "nose",

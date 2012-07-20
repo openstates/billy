@@ -10,6 +10,7 @@ __matchers = {}
 
 logger = logging.getLogger('billy')
 
+
 def get_legislator_id(abbr, session, chamber, name):
     try:
         matcher = __matchers[(abbr, session)]
@@ -113,7 +114,8 @@ class NameMatcher(object):
         converting to lowercase and removing punctuation.
         """
         name = re.sub(
-            r'^(Senator|Representative|Sen\.?|Rep\.?|Assembly(member|man|woman)) ',
+            r'^(Senator|Representative|Sen\.?|Rep\.?|'
+            'Assembly(member|man|woman)) ',
             '',
             name)
         return name.strip().lower().replace('.', '')

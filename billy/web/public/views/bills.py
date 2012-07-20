@@ -1,12 +1,13 @@
 import urllib
 import pymongo
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import Http404
 from django.conf import settings
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
+from billy.importers.utils import fix_bill_id
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
@@ -231,10 +232,15 @@ class SponsoredBillsList(RelatedBillsList):
 
 
 def bill(request, abbr, session, bill_id):
-    bill_id = bill_id.replace('_', ' ')
+    # get fixed version
+    fixed_bill_id = fix_bill_id(bill_id)
+    # redirect if URL's id isn't fixed id without spaces
+    print fixed_bill_id, bill_id
+    if fixed_bill_id.replace(' ', '') != bill_id:
+        return redirect('bill', abbr=abbr, session=session,
+                        bill_id=fixed_bill_id.replace(' ', ''))
     bill = db.bills.find_one({'state': abbr, 'session': session,
-                              'bill_id': bill_id})
-    #bill = db.bills.find_one({'_id': bill_id})
+                              'bill_id': fixed_bill_id})
     if bill is None:
         raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))

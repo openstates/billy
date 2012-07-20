@@ -268,9 +268,10 @@ class Bill(Document):
         return Metadata.get_object(self['state'])
 
     def get_absolute_url(self):
+        # canonical URL doesn't have spaces
         url = urlresolvers.reverse('bill',
                                    args=[self['state'], self['session'],
-                                         self['bill_id'].replace(' ', '_')])
+                                         self['bill_id'].replace(' ', '')])
         return url
 
     def display_name(self):
