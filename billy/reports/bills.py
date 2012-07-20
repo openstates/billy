@@ -24,7 +24,7 @@ def _bill_report_dict():
             'actions_per_month': defaultdict(int),
             'sponsorless_count': 0,
             '_sponsor_count': 0,
-            '_sponsors_with_leg_id_count': 0,
+            '_sponsors_with_id_count': 0,
             'sponsors_per_type': defaultdict(int),
             'vote_count': 0,
             '_passed_vote_count': 0,
@@ -92,8 +92,8 @@ def scan_bills(abbr):
         # sponsors
         for sponsor in bill['sponsors']:
             session_d['_sponsor_count'] += 1
-            if sponsor.get('leg_id'):
-                session_d['_sponsors_with_leg_id_count'] += 1
+            if sponsor.get('leg_id') or sponsor.get('committee_id'):
+                session_d['_sponsors_with_id_count'] += 1
             else:
                 # keep missing leg_ids
                 session_d['unmatched_leg_ids'].add(
@@ -251,8 +251,8 @@ def calculate_percentages(report):
     # sponsors
     _sponsor_count = float(report.pop('_sponsor_count')) / 100
     if _sponsor_count:
-        report['sponsors_with_leg_id'] = (
-            report.pop('_sponsors_with_leg_id_count') / _sponsor_count)
+        report['sponsors_with_id'] = (
+            report.pop('_sponsors_with_id_count') / _sponsor_count)
         for k in report['sponsors_per_type'].iterkeys():
             report['sponsors_per_type'][k] /= _sponsor_count
 

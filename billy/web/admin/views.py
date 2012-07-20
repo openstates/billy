@@ -367,7 +367,7 @@ def bills(request, abbr):
                                 'actions_unsorted', 'bad_vote_counts',
                                 'version_count', 'versionless_count',
 
-                                'sponsors_with_leg_id',
+                                'sponsors_with_id',
                                 'rollcalls_with_leg_id',
                                 'have_subjects',
                                 'updated_this_year',
@@ -377,7 +377,7 @@ def bills(request, abbr):
         ]
 
     format_as_percent = [
-        'sponsors_with_leg_id',
+        'sponsors_with_id',
         'rollcalls_with_leg_id',
         'have_subjects',
         'updated_this_year',

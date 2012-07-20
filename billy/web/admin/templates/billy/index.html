@@ -198,10 +198,10 @@
             {% endif %}
             >{{row.bills.typed_actions|floatformat}}%</td>
         <td
-            {% if row.bills.sponsors_with_leg_id < 75 %}
+            {% if row.bills.sponsors_with_id < 75 %}
             class="bad"
             {% else %}
-                {% if row.bills.sponsors_with_leg_id < 95 %}
+                {% if row.bills.sponsors_with_id < 95 %}
                 class="warning"
                 {% else %}
                 class="good"
