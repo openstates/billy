@@ -1,4 +1,5 @@
 Django>=1.4
+django-pjax
 -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 argparse==1.1
 boto
