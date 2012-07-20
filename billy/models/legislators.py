@@ -141,6 +141,13 @@ class Legislator(Document):
     def display_name(self):
         return self['full_name']
 
+    def title(self):
+        chamber = self.get('chamber')
+        if chamber:
+            return self.metadata[chamber + '_chamber_title']
+        else:
+            return ''
+
     def sessions_served(self):
         session_details = self.metadata['session_details']
         terms = self.metadata['terms']
