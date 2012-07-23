@@ -35,8 +35,9 @@ def committees(request, abbr):
         chamber_name = ''
 
     chambers = {'upper': meta['upper_chamber_name'],
-                'joint': 'Joint',
                }
+    if meta.committees({'chamber': 'joint'}).count():
+        chambers['joint'] = 'Joint'
     if 'lower_chamber_name' in meta:
         chambers['lower'] = meta['lower_chamber_name']
 
