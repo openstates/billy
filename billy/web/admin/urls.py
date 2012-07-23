@@ -11,6 +11,10 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$',
         'quality_exception_remove', name='quality_exception_remove'),
 
+    # Subject stuff
+    url(r'^(?P<abbr>[a-z]{2})/subjects/$', 'subjects',
+        name='admin_subjects'),
+
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
     url(r'^(?P<abbr>[a-z]{2})/metadata/$', 'metadata_json',
@@ -28,6 +32,13 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^legislators/(?P<id>\w+)/$', 'legislator', name='admin_legislator'),
     url(r'^legislators/(?P<id>\w+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
+
+    # Edit stuff
+    url(r'^legislators-edit/(?P<id>\w+)/$', 'legislator_edit',
+            name='admin_legislator_edit'),
+    url(r'^legislators-edit-commit/$', 'legislator_edit_commit',
+            name='admin_legislator_edit_commit'),
+
 
     # bills
     url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),

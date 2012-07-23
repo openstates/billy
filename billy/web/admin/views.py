@@ -18,11 +18,12 @@ from operator import itemgetter
 from itertools import chain, imap
 from collections import defaultdict, OrderedDict
 
-from django.http import Http404, HttpResponse
 from django.core import urlresolvers
+from django.shortcuts import render, redirect
+from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
 
 from billy import db
 from billy.utils import metadata, find_bill
@@ -819,6 +820,19 @@ def legislators(request, abbr):
     })
 
 
+def subjects(request, abbr):
+    meta = metadata(abbr)
+
+    subjects = db.subjects.find({
+        'abbr': abbr.lower()
+    })
+
+    return render(request, 'billy/subjects.html', {
+        'metadata': meta,
+        'subjects': subjects
+    })
+
+
 def quality_exceptions(request, abbr):
     meta = metadata(abbr)
 
@@ -951,6 +965,62 @@ def legislator(request, id):
     return render(request, 'billy/legislator.html', {'leg': leg,
                                                      'metadata': meta})
 
+
+def legislator_edit(request, id):
+    leg = db.legislators.find_one({'_all_ids': id})
+    if not leg:
+        raise Http404('No legislators found for id %r.' % id)
+
+    meta = metadata(leg[leg['level']])
+    return render(request, 'billy/legislator_edit.html', {
+        'leg': leg,
+        'metadata': meta,
+        'locked': leg['_locked_fields'] if "_locked_fields" in leg else [],
+        'fields': [
+            "last_name",
+            "full_name",
+            "first_name",
+            "middle_name",
+            "nickname",
+            "suffixes",
+            "email",
+            "transparencydata_id",
+            "photo_url",
+            "url",
+        ]
+    })
+
+
+@require_http_methods(["POST"])
+def legislator_edit_commit(request):
+    payload = dict(request.POST)
+
+    leg_id = payload['leg_id']
+    del(payload['leg_id'])
+
+    legislator = db.legislators.find_one({'_all_ids': leg_id})
+    if not legislator:
+        raise Http404('No legislators found for id %r.' % leg_id)
+
+    update = {}
+    locked = []
+
+    for key in payload:
+        if "locked" in key:
+            locked.append(payload[key][0].split("-", 1)[0])
+            continue
+
+        update[key] = payload[key][0]
+
+    legislator.update(update)
+    legislator['_locked_fields'] = locked
+
+    db.legislators.update({"_id": legislator['_id']},
+                          legislator,
+                          False, # Upsert
+                          safe=True)
+
+    return redirect('admin_legislator_edit', legislator['leg_id'])
 
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})

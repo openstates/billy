@@ -1,0 +1,47 @@
+{% extends "billy/base.html" %}
+{% load billy_utiltags %}
+
+{% block title %}{{ leg.full_name }}{% endblock %}
+
+{% block content %}
+
+<a href = '{% url admin_legislator leg.leg_id %}' >admin</a>
+<a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
+
+<form action = '{% url admin_legislator_edit_commit %}' method = 'post' >
+    <input type = 'hidden' value = '{{ leg.leg_id }}' name = 'leg_id' />
+<table>
+{% for field in fields %}
+    <tr>
+        <td>
+            {{ field }}
+        </td>
+        <td>
+            <input type = 'text'
+                   name = '{{field}}'
+                  value = '{{ leg|key:field }}' />
+        </td>
+        <td>
+            is locked
+            <input type = 'checkbox'
+                   name = '{{field}}-locked'
+                  value = '{{field}}'
+{% if field in locked %}
+                checked
+{% endif %}
+            />
+        </td>
+    </tr>
+{% endfor %}
+    <tr>
+        <td></td>
+        <td><input type = 'submit'
+                   class = 'btn btn-primary'
+                   value = 'update legislator' /></td>
+        <td></td>
+    </tr>
+</table>
+</form>
+
+{% endblock %}
+
