@@ -29,6 +29,13 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^legislators/(?P<id>\w+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
 
+    # Edit stuff
+    url(r'^legislators-edit/(?P<id>\w+)/$', 'legislator_edit',
+            name='admin_legislator_edit'),
+    url(r'^legislators-edit-commit/$', 'legislator_edit_commit',
+            name='admin_legislator_edit_commit'),
+
+
     # bills
     url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/random/$', 'random_bill',
