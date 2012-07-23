@@ -5,6 +5,9 @@
 
 {% block content %}
 
+<a href = '{% url admin_legislator leg.leg_id %}' >admin</a>
+<a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
+
 <form action = '{% url admin_legislator_edit_commit %}' method = 'post' >
     <input type = 'hidden' value = '{{ leg.leg_id }}' name = 'leg_id' />
 <table>

@@ -820,6 +820,19 @@ def legislators(request, abbr):
     })
 
 
+def subjects(request, abbr):
+    meta = metadata(abbr)
+
+    subjects = db.subjects.find({
+        'abbr': abbr.lower()
+    })
+
+    return render(request, 'billy/subjects.html', {
+        'metadata': meta,
+        'subjects': subjects
+    })
+
+
 def quality_exceptions(request, abbr):
     meta = metadata(abbr)
 
@@ -968,15 +981,12 @@ def legislator_edit(request, id):
             "full_name",
             "first_name",
             "middle_name",
-            "district",
-            "votesmart_id",
-            "party",
+            "nickname",
             "suffixes",
             "email",
             "transparencydata_id",
             "photo_url",
             "url",
-            "chamber"
         ]
     })
 

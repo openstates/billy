@@ -11,6 +11,10 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$',
         'quality_exception_remove', name='quality_exception_remove'),
 
+    # Subject stuff
+    url(r'^(?P<abbr>[a-z]{2})/subjects/$', 'subjects',
+        name='admin_subjects'),
+
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
     url(r'^(?P<abbr>[a-z]{2})/metadata/$', 'metadata_json',
