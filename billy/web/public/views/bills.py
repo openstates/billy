@@ -6,7 +6,7 @@ from django.http import Http404, HttpResponse
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.views.generic import View
-from django.utils.feedgenerator import Atom1Feed
+from django.utils.feedgenerator import Rss201rev2Feed
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -224,17 +224,16 @@ class BillFeed(StateBills):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         queryset = self.get_queryset()
-        link = '?'.join((reverse('bills_atom', args=args, kwargs=kwargs),
+        link = '?'.join((reverse('bills_feed', args=args, kwargs=kwargs),
                          request.META['QUERY_STRING']))
-        print link
-        feed = Atom1Feed(title=context['description'], link=link,
+        feed = Rss201rev2Feed(title=context['description'], link=link,
                          description = context['description'] +
                          '\n'.join(context.get('long_description', '')))
         for item in queryset:
             feed.add_item(title=item['bill_id'],
                           link=item.get_absolute_url(),
                           description=item['title'])
-        return HttpResponse(feed.writeString('utf8'))
+        return HttpResponse(feed.writeString('utf-8'))
 
 
 def bill(request, abbr, session, bill_id):
