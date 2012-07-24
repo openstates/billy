@@ -1,4 +1,4 @@
-{"description": "metadata for a state",
+{"description": "metadata",
  "type": "object",
  "properties": {
     "name": {"type": "string"},

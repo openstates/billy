@@ -103,10 +103,6 @@ class Scraper(scrapelib.Scraper):
 
         super(Scraper, self).__init__(**kwargs)
 
-        if not hasattr(self, settings.LEVEL_FIELD):
-            raise Exception('scrapers must have a %s attribute' %
-                            settings.LEVEL_FIELD)
-
         self.metadata = metadata
         self.output_dir = output_dir
 
@@ -180,7 +176,7 @@ class Scraper(scrapelib.Scraper):
 
     def save_object(self, obj):
         # copy over LEVEL_FIELD
-        obj[settings.LEVEL_FIELD] = getattr(self, LEVEL_FIELD)
+        obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
 
         filename = obj.get_filename()
         with open(os.path.join(self.output_dir, self.scraper_type, filename),

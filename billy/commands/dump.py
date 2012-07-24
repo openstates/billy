@@ -76,18 +76,18 @@ def _make_csv(abbr, name, fields):
 def dump_legislator_csvs(abbr):
     leg_fields = ('leg_id', 'full_name', 'first_name', 'middle_name',
                   'last_name', 'suffixes', 'nickname', 'active',
-                  'state', 'chamber', 'district', 'party',
+                  settings.LEVEL_FIELD, 'chamber', 'district', 'party',
                    'transparencydata_id', 'photo_url', 'created_at',
                   'updated_at')
     leg_csv_fname, leg_csv = _make_csv(abbr, 'legislators.csv', leg_fields)
 
     role_fields = ('leg_id', 'type', 'term', 'district', 'chamber',
-                   'state', 'party', 'committee_id', 'committee',
+                   settings.LEVEL_FIELD, 'party', 'committee_id', 'committee',
                    'subcommittee', 'start_date', 'end_date')
     role_csv_fname, role_csv = _make_csv(abbr, 'legislator_roles.csv',
                                          role_fields)
 
-    com_fields = ('id', 'state', 'chamber', 'committee',
+    com_fields = ('id', settings.LEVEL_FIELD, 'chamber', 'committee',
                   'subcommittee', 'parent_id')
     com_csv_fname, com_csv = _make_csv(abbr, 'committees.csv', com_fields)
 
@@ -113,22 +113,22 @@ def dump_legislator_csvs(abbr):
 
 
 def dump_bill_csvs(abbr):
-    bill_fields = ('state', 'session', 'chamber',
+    bill_fields = (settings.LEVEL_FIELD, 'session', 'chamber',
                    'bill_id', 'title', 'created_at', 'updated_at', 'type',
                    'subjects')
     bill_csv_fname, bill_csv = _make_csv(abbr, 'bills.csv', bill_fields)
 
-    action_fields = ('state', 'session', 'chamber',
+    action_fields = (settings.LEVEL_FIELD, 'session', 'chamber',
                      'bill_id', 'date', 'action', 'actor', 'type')
     action_csv_fname, action_csv = _make_csv(abbr, 'bill_actions.csv',
                                              action_fields)
 
-    sponsor_fields = ('state', 'session', 'chamber',
+    sponsor_fields = (settings.LEVEL_FIELD, 'session', 'chamber',
                       'bill_id', 'type', 'name', 'leg_id')
     sponsor_csv_fname, sponsor_csv = _make_csv(abbr, 'bill_sponsors.csv',
                                                sponsor_fields)
 
-    vote_fields = ('state', 'session', 'chamber',
+    vote_fields = (settings.LEVEL_FIELD, 'session', 'chamber',
                    'bill_id', 'vote_id', 'vote_chamber', 'motion', 'date',
                    'type', 'yes_count', 'no_count', 'other_count')
     vote_csv_fname, vote_csv = _make_csv(abbr, 'bill_votes.csv', vote_fields)
@@ -142,7 +142,7 @@ def dump_bill_csvs(abbr):
         bill_csv.writerow(extract_fields(bill, bill_fields))
 
         bill_info = extract_fields(bill,
-                                   ('bill_id', 'state', 'session', 'chamber'))
+                   ('bill_id', settings.LEVEL_FIELD, 'session', 'chamber'))
 
         # basically same behavior for actions, sponsors and votes:
         #    extract fields, update with bill_info, write to csv

@@ -30,8 +30,8 @@ logger = logging.getLogger('billy')
 def ensure_indexes():
     # TODO: add a _current_term, _current_session index?
 
-    # accomodates basic lookup / unique constraint on state/session/bill_id
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    # accomodates basic lookup / unique constraint on abbr/session/bill_id
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
                            ('bill_id', pymongo.ASCENDING)],
@@ -47,21 +47,21 @@ def ensure_indexes():
                            ('versions.doc_id', pymongo.ASCENDING) ])
 
     # common search indices
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('subjects', pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('sponsors.leg_id', pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
 
     # generic sort-assist indices on the action_dates
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.first', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.passed_upper', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.passed_lower', pymongo.DESCENDING)])
 
     # votes index
@@ -203,7 +203,7 @@ def git_prelod(abbr):
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
     logger.info('{0} tracked in oyster'.format(version['doc_id']))
-    oysterize(version['url'], bill['state'] + ':billtext',
+    oysterize(version['url'], bill[settings.LEVEL_FIELD] + ':billtext',
               id=version['doc_id'],
               # metadata
               mimetype=version.get('mimetype', None),
@@ -236,10 +236,10 @@ def import_bill(data, votes, categorizer):
     if categorizer:
         categorizer.categorize_bill(data)
 
-    # this is a hack added for Rhode Island where we can't
+    # this is a hack initially added for Rhode Island where we can't
     # determine the full bill_id, if this key is in the metadata
     # we just use the numeric portion, not ideal as it won't work
-    # in states where HB/SBs overlap, but in RI they never do
+    # where HB/SBs overlap, but in RI they never do
     if metadata(abbr).get('_partial_vote_bill_id'):
         # pull off numeric portion of bill_id
         numeric_bill_id = data['bill_id'].split()[1]
@@ -456,7 +456,7 @@ def denormalize_votes(bill, bill_id):
         vote = vote.copy()
         vote['_id'] = vote['vote_id']
         vote['bill_id'] = bill_id
-        vote['state'] = bill['state']
+        vote[settings.LEVEL_FIELD] = bill[settings.LEVEL_FIELD]
         vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]

@@ -11,11 +11,6 @@
             "required": false,
             "type": "boolean"
         },
-        "country": {
-            "maxLength": 2,
-            "minLength": 2,
-            "type": "string"
-        },
         "description": {
             "type": "string"
         },
@@ -38,13 +33,6 @@
                 "datetime",
                 "null"
             ]
-        },
-        "level": {
-            "enum": [
-                "country",
-                "state"
-            ],
-            "type": "string"
         },
         "link": {
             "required": false,

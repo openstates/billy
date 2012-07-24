@@ -7,7 +7,6 @@ import piston.resource
 from piston.emitters import Emitter
 
 from billy.web.api import handlers
-from billy.web.api.views import legislator_preview
 from billy.web.api.emitters import BillyJSONEmitter
 from billy.web.api.emitters import ICalendarEmitter
 
@@ -70,8 +69,6 @@ events_handler = Resource(handlers.EventsHandler,
                           authentication=authorizer)
 subject_list_handler = Resource(handlers.SubjectListHandler,
                                 authentication=authorizer)
-reconciliation_handler = Resource(handlers.ReconciliationHandler,
-                                  authentication=authorizer)
 legislator_geo_handler = Resource(handlers.LegislatorGeoHandler,
                                       authentication=authorizer)
 district_handler = Resource(handlers.DistrictHandler,
@@ -106,11 +103,6 @@ urlpatterns = patterns('',
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z]{2,2})/(?P<session>.+)/',
         subject_list_handler),
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z]{2,2})/', subject_list_handler),
-
-    url(r'^v1/legislators/reconcile/$', reconciliation_handler),
-    url(r'^v1/legislators/preview/(?P<id>[A-Z]{2,2}L\d{6,6})/$',
-        legislator_preview),
-
     url(r'v1/legislators/geo/$', legislator_geo_handler),
 
     # districts & boundaries

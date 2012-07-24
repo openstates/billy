@@ -18,10 +18,10 @@ logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.events.ensure_index([('when', pymongo.ASCENDING),
-                            ('state', pymongo.ASCENDING),
+                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
                             ('type', pymongo.ASCENDING)])
     db.events.ensure_index([('when', pymongo.DESCENDING),
-                            ('state', pymongo.ASCENDING),
+                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
                             ('type', pymongo.ASCENDING)])
 
 
@@ -80,12 +80,12 @@ def import_events(abbr, data_dir, import_actions=False):
             db_bill = db.bills.find_one({
                 "$or": [
                     {
-                        "state": abbr,
+                        settings.LEVEL_FIELD: abbr,
                         'session': data['session'],
                         'bill_id': bill_id
                     },
                     {
-                        "state": abbr,
+                        settings.LEVEL_FIELD: abbr,
                         'session': data['session'],
                         'alternate_bill_ids': bill_id
                     }

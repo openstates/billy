@@ -16,7 +16,8 @@ logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.legislators.ensure_index('_all_ids', pymongo.ASCENDING)
-    db.legislators.ensure_index([('roles.state', pymongo.ASCENDING),
+    db.legislators.ensure_index([('roles.{0}'.format(settings.LEVEL_FIELD),
+                                  pymongo.ASCENDING),
                                  ('roles.type', pymongo.ASCENDING),
                                  ('roles.term', pymongo.ASCENDING),
                                  ('roles.chamber', pymongo.ASCENDING),
@@ -26,7 +27,7 @@ def ensure_indexes():
                                  ('middle_name', pymongo.ASCENDING),
                                  ('suffixes', pymongo.ASCENDING)],
                                 name='role_and_name_parts')
-    db.legislators.ensure_index([('state', pymongo.ASCENDING),
+    db.legislators.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                                  ('active', pymongo.ASCENDING),
                                  ('chamber', pymongo.ASCENDING),
                                 ])
@@ -117,8 +118,8 @@ def deactivate_legislators(current_term, abbr):
         db.legislators.save(leg, safe=True)
 
 
-def get_previous_term(abbrev, term):
-    meta = db.metadata.find_one({'_id': abbrev})
+def get_previous_term(abbr, term):
+    meta = db.metadata.find_one({'_id': abbr})
     t1 = meta['terms'][0]
     for t2 in meta['terms'][1:]:
         if t2['name'] == term:
@@ -128,8 +129,8 @@ def get_previous_term(abbrev, term):
     return None
 
 
-def get_next_term(abbrev, term):
-    meta = db.metadata.find_one({'_id': abbrev})
+def get_next_term(abbr, term):
+    meta = db.metadata.find_one({'_id': abbr})
     t1 = meta['terms'][0]
     for t2 in meta['terms'][1:]:
         if t1['name'] == term:
@@ -148,19 +149,19 @@ def import_legislator(data):
         if 'role' in role:
             role['type'] = role.pop('role')
 
-        # copy over state into role
+        # copy over LEVEL_FIELD into role
         if settings.LEVEL_FIELD in data:
             role[settings.LEVEL_FIELD] = data[settings.LEVEL_FIELD]
 
     cur_role = data['roles'][0]
     term = cur_role['term']
 
-    abbrev = data[settings.LEVEL_FIELD]
+    abbr = data[settings.LEVEL_FIELD]
 
-    prev_term = get_previous_term(abbrev, term)
-    next_term = get_next_term(abbrev, term)
+    prev_term = get_previous_term(abbr, term)
+    next_term = get_next_term(abbr, term)
 
-    spec = {settings.LEVEL_FIELD: abbrev,
+    spec = {settings.LEVEL_FIELD: abbr,
             'type': cur_role['type'],
             'term': {'$in': [term, prev_term, next_term]}}
     if 'district' in cur_role:
@@ -169,7 +170,7 @@ def import_legislator(data):
         spec['chamber'] = cur_role['chamber']
 
     leg = db.legislators.find_one(
-        {settings.LEVEL_FIELD: abbrev,
+        {settings.LEVEL_FIELD: abbr,
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 
