@@ -3,10 +3,19 @@
 
 {% block title %}{{ leg.full_name }}{% endblock %}
 
+{% block script %}
+    <script type = 'text/javascript' >
+$(document).ready(function() {
+    /* OK, so we need to attach to first name, last name, middle name,
+       suffixes to rebuild the full_name field */
+});
+    </script>
+{% endblock %}
+
 {% block content %}
 
 <a href = '{% url admin_legislator leg.leg_id %}' >admin</a>
-<a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
+| <a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
 
 <form action = '{% url admin_legislator_edit_commit %}' method = 'post' >
     <input type = 'hidden' value = '{{ leg.leg_id }}' name = 'leg_id' />
@@ -17,9 +26,11 @@
             {{ field }}
         </td>
         <td>
-            <input type = 'text'
-                   name = '{{field}}'
-                  value = '{{ leg|key:field }}' />
+            <input
+        type = 'text'
+        name = '{{field}}'
+       value = '{% if leg|key:field != None %}{{ leg|key:field }}{% endif %}'
+            />
         </td>
         <td>
             is locked
