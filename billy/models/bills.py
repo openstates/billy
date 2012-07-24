@@ -183,18 +183,21 @@ class BillVote(Document):
         return self._ratio('other_count')
 
     @CachedAttribute
-    def _legislator_objects(self, fields=['full_name',
-                                          'party', 'district', 'state']):
+    def _legislator_objects(self):
         '''A cache of dereferenced legislator objects.
         '''
         kwargs = {}
-        if fields is not None:
-            kwargs['fields'] = fields
+
         id_getter = operator.itemgetter('leg_id')
         ids = []
         for k in ('yes', 'no', 'other'):
             ids.extend(map(id_getter, self[k + '_votes']))
         objs = db.legislators.find({'_id': {'$in': ids}}, **kwargs)
+
+        # Handy to keep a reference to the vote on each legislator.
+        objs = list(objs)
+        for obj in objs:
+            obj.vote = self
         objs = dict((obj['_id'], obj) for obj in objs)
 
         return objs
