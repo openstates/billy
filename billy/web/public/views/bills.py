@@ -232,8 +232,9 @@ class BillFeed(StateBills):
                          '\n'.join(context.get('long_description', '')),
                               ttl=360)
         for item in queryset:
-            feed.add_item(title=item['bill_id'],
-                          link=item.get_absolute_url(),
+            link = 'http://%s%s' % (request.META['SERVER_NAME'],
+                                    item.get_absolute_url())
+            feed.add_item(title=item['bill_id'], link=link, guid=link,
                           description=item['title'])
         return HttpResponse(feed.writeString('utf-8'))
 
