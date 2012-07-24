@@ -14,6 +14,8 @@ urlpatterns = patterns('billy.web.admin.views',
     # Subject stuff
     url(r'^(?P<abbr>[a-z]{2})/subjects/$', 'subjects',
         name='admin_subjects'),
+    url(r'^(?P<abbr>[a-z]{2})/subjects-commit/$', 'subjects_commit',
+        name='admin_subjects_commit'),
 
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
