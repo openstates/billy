@@ -8,6 +8,43 @@
 $(document).ready(function() {
     /* OK, so we need to attach to first name, last name, middle name,
        suffixes to rebuild the full_name field */
+        var full_name  = $("#full_name")
+        ,   first_name = $("#first_name")
+        ,   last_name  = $("#last_name")
+        ,  middle_name = $("#middle_name")
+        ,   suffix     = $("#suffixes")
+        ,   watched    = [
+                full_name
+              , first_name
+              , middle_name
+              , last_name
+              , suffix
+            ];
+
+        for ( var i = 0; i < watched.length; ++i ) {
+            watched[i].keyup(function(e) {
+                /* On keyup, let's update the full name field. */
+                var new_full_name = first_name.val(),
+                            names = watched.slice(2, -1);
+
+                for ( var n = 0; n < names.length; ++n ) {
+                    var val = names[n].val();
+                    if ( val != "" ) {
+                        new_full_name += " " + val;
+                    }
+                }
+                /* This only updates the middle elements, not the first
+                   (full_name) or last (suffix). */
+
+                if ( suffix.val() != "" ) {
+                    new_full_name += ", " + suffix.val();
+                    /* Foo R. Bar, PhD
+                                 ^ we need that */
+                }
+
+                full_name.val(new_full_name);
+            });
+        }
 });
     </script>
 {% endblock %}
@@ -29,6 +66,7 @@ $(document).ready(function() {
             <input
         type = 'text'
         name = '{{field}}'
+          id = '{{field}}'
        value = '{% if leg|key:field != None %}{{ leg|key:field }}{% endif %}'
             />
         </td>
