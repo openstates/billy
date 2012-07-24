@@ -16,34 +16,6 @@ def get_state_select_form(data):
     return StateSelectForm(data)
 
 
-class ChamberSelectForm(forms.Form):
-
-    chamber = forms.ChoiceField(widget=forms.RadioSelect())
-    abbr = forms.CharField(widget=forms.HiddenInput())
-    order = forms.IntegerField(widget=forms.HiddenInput(), initial=1)
-    key = forms.CharField(widget=forms.HiddenInput(), initial='committee')
-
-    @classmethod
-    def unbound(cls, metadata, chamber='both', *args, **kwargs):
-
-        inst = cls(*args, **kwargs)
-
-        # Make the radio option names reflect this state's actual
-        # chamber names.
-        chamber_choices = [('upper', metadata['upper_chamber_name']),
-                           ('lower', metadata['lower_chamber_name']),
-                           ('both', 'All')]
-
-        _chamber = inst.fields['chamber']
-        _chamber.choices = chamber_choices
-        _chamber.initial = chamber
-
-        # Add in the state.
-        inst.fields['abbr'].initial = metadata['_id']
-
-        return inst
-
-
 class FindYourLegislatorForm(forms.Form):
     address = forms.CharField()
 
@@ -51,6 +23,8 @@ class FindYourLegislatorForm(forms.Form):
 def get_filter_bills_form(metadata):
 
     class FilterBillsForm(forms.Form):
+
+        search_text = forms.CharField(required=False)
 
         # `metadata` will be None if the search is for all states.
         if metadata is not None:
@@ -68,21 +42,30 @@ def get_filter_bills_form(metadata):
 
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
-            chamber = forms.MultipleChoiceField(
-                        choices=(('upper', metadata['upper_chamber_name']),
-                                 ('lower', metadata['lower_chamber_name'])),
-                        widget=forms.CheckboxSelectMultiple(),
-                        required=False)
+            if 'lower_chamber_name' in metadata:
+                chamber = forms.MultipleChoiceField(
+                            choices=(('upper', metadata['upper_chamber_name']),
+                                     ('lower', metadata['lower_chamber_name'])),
+                            widget=forms.CheckboxSelectMultiple(),
+                            required=False)
 
-            status = forms.ChoiceField(
-                        choices=(
-                            ('', ''),
-                            ('passed_lower',
-                             'Passed ' + metadata['lower_chamber_name']),
-                            ('passed_upper',
-                             'Passed ' + metadata['upper_chamber_name']),
-                            ('signed', 'Signed'),
-                        ), required=False)
+                status = forms.ChoiceField(
+                            choices=(
+                                ('', ''),
+                                ('passed_lower',
+                                 'Passed ' + metadata['lower_chamber_name']),
+                                ('passed_upper',
+                                 'Passed ' + metadata['upper_chamber_name']),
+                                ('signed', 'Signed'),
+                            ), required=False)
+            else:
+                status = forms.ChoiceField(
+                            choices=(
+                                ('', ''),
+                                ('passed_upper',
+                                 'Passed ' + metadata['upper_chamber_name']),
+                                ('signed', 'Signed'),
+                            ), required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
@@ -109,8 +92,6 @@ def get_filter_bills_form(metadata):
                             ('passed_upper', 'Passed upper'),
                             ('signed', 'Signed'),
                         ), required=False)
-
-        search_text = forms.CharField(required=False)
 
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 

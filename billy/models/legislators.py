@@ -95,12 +95,9 @@ class Legislator(Document):
         return urlresolvers.reverse('legislator', kwargs=kwargs)
 
     def get_sponsored_bills_url(self):
-        kwargs = dict(abbr=self.metadata['abbreviation'],
-                      _id=self.id,
-                      slug=self.slug(),
-                      collection_name='legislators')
-        return urlresolvers.reverse(
-            'legislator_sponsored_bills', kwargs=kwargs)
+        kwargs = dict(abbr=self.metadata['abbreviation'])
+        return ''.join(urlresolvers.reverse('bills', kwargs=kwargs),
+                       '?sponsor__leg_id=', self.id)
 
     def votes_5_sorted(self):
         _id = self['_id']
@@ -140,6 +137,13 @@ class Legislator(Document):
 
     def display_name(self):
         return self['full_name']
+
+    def title(self):
+        chamber = self.get('chamber')
+        if chamber:
+            return self.metadata[chamber + '_chamber_title']
+        else:
+            return ''
 
     def sessions_served(self):
         session_details = self.metadata['session_details']

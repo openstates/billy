@@ -17,8 +17,6 @@ import pymongo
 from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
-from jellyfish import levenshtein_distance
-
 
 _chamber_aliases = {
     'assembly': 'lower',

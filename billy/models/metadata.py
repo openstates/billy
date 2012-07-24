@@ -167,8 +167,19 @@ class Metadata(Document):
         '''
         committees = list(self.committees(*args, **kwargs))
         legislators = self.legislators({'active': True},
-                    fields=['first_name', 'last_name', 'state'])
-        legislators = dict((obj['_id'], obj) for obj in legislators)
+                    fields=['full_name', 'state'])
+        _legislators = {}
+
+        # This will be a cache of legislator objects used in
+        # the committees.html template. Includes ids in each
+        # legislator's _all_ids field (if it exists.)
+        for obj in legislators:
+            if 'all_ids' in obj:
+                for _id in obj['_all_ids']:
+                    _legislators[_id] = obj
+            else:
+                _legislators[obj['_id']] = obj
+        del legislators
         for com in committees:
-            com._legislators = legislators
+            com._legislators = _legislators
         return committees

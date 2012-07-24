@@ -1,0 +1,102 @@
+{% extends "billy/base.html" %}
+{% load billy_utiltags %}
+
+{% block title %}{{ leg.full_name }}{% endblock %}
+
+{% block script %}
+    <script type = 'text/javascript' >
+$(document).ready(function() {
+    /* OK, so we need to attach to first name, last name, middle name,
+       suffixes to rebuild the full_name field */
+        var full_name  = $("#full_name")
+        ,   first_name = $("#first_name")
+        ,    last_name = $("#last_name")
+        ,  middle_name = $("#middle_name")
+        ,       suffix = $("#suffixes")
+        ,    full_lock = $("#full_name-locked")
+        ,      watched = [
+                first_name
+              , middle_name
+              , last_name
+              , suffix
+            ];
+
+        for ( var i = 0; i < watched.length; ++i ) {
+            watched[i].keyup(function(e) {
+
+                if ( full_lock.is(':checked') ) {
+                    return; /* No need to update if we're locked. */
+                }
+
+                /* On keyup, let's update the full name field. */
+                var new_full_name = first_name.val(),
+                            names = watched.slice(1, -1);
+
+                for ( var n = 0; n < names.length; ++n ) {
+                    var val = names[n].val();
+                    if ( val != "" ) {
+                        new_full_name += " " + val;
+                    }
+                }
+                /* This only updates the middle elements, not the first
+                   (full_name) or last (suffix). */
+
+                if ( suffix.val() != "" ) {
+                    new_full_name += ", " + suffix.val();
+                    /* Foo R. Bar, PhD
+                                 ^ we need that */
+                }
+
+                full_name.val(new_full_name);
+            });
+        }
+});
+    </script>
+{% endblock %}
+
+{% block content %}
+
+<a href = '{% url admin_legislator leg.leg_id %}' >admin</a>
+| <a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
+
+<form action = '{% url admin_legislator_edit_commit %}' method = 'post' >
+    <input type = 'hidden' value = '{{ leg.leg_id }}' name = 'leg_id' />
+<table>
+{% for field in fields %}
+    <tr>
+        <td>
+            {{ field }}
+        </td>
+        <td>
+            <input
+        type = 'text'
+        name = '{{field}}'
+          id = '{{field}}'
+       value = '{% if leg|key:field != None %}{{ leg|key:field }}{% endif %}'
+            />
+        </td>
+        <td>
+            is locked
+            <input type = 'checkbox'
+                   name = '{{field}}-locked'
+                     id = '{{field}}-locked'
+                  value = '{{field}}'
+{% if field in locked %}
+                checked
+{% endif %}
+            />
+        </td>
+    </tr>
+{% endfor %}
+    <tr>
+        <td></td>
+        <td><input type = 'submit'
+                   class = 'btn btn-primary'
+                   value = 'update legislator' /></td>
+        <td></td>
+    </tr>
+</table>
+</form>
+
+{% endblock %}
+

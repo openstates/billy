@@ -1,11 +1,14 @@
 import re
 import unicodecsv
 import os.path
+import logging
 
 from billy import db
 from billy.conf import settings
 
 __matchers = {}
+
+logger = logging.getLogger('billy')
 
 
 def get_legislator_id(abbr, session, chamber, name):
@@ -23,7 +26,7 @@ def get_legislator_id(abbr, session, chamber, name):
         matcher = NameMatcher(abbr, term['name'])
         __matchers[(abbr, session)] = matcher
 
-    if chamber == 'both' or chamber == 'joint':
+    if chamber == 'both' or chamber == 'joint' or chamber == 'other':
         chamber = None
 
     return matcher.match(name, chamber)
@@ -110,7 +113,8 @@ class NameMatcher(object):
         converting to lowercase and removing punctuation.
         """
         name = re.sub(
-            r'^(Senator|Representative|Sen|Rep|Assembly(member|man|woman)) ',
+            r'^(Senator|Representative|Sen\.?|Rep\.?|'
+            'Assembly(member|man|woman)) ',
             '',
             name)
         return name.strip().lower().replace('.', '')
@@ -217,6 +221,12 @@ class NameMatcher(object):
             return self._codes[chamber][name]
         except KeyError:
             pass
+
+        if chamber not in self._names:
+            logger.warning("Chamber %s is invalid for a legislator." % (
+                chamber
+            ))
+            return None  # XXX: Expected behavior?
 
         name = self._normalize(name)
         return self._names[chamber].get(name, None)

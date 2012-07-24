@@ -55,6 +55,12 @@ class SponsorsManager(AttrManager):
         except StopIteration:
             return
 
+    def first(self):
+        if self.bill['sponsors']:
+            return next(iter(self))
+        else:
+            return None
+
     def excluding_first_primary(self):
         first = self.first_primary()
         sponsors = list(self)
@@ -265,9 +271,10 @@ class Bill(Document):
         return Metadata.get_object(self['state'])
 
     def get_absolute_url(self):
+        # canonical URL doesn't have spaces
         url = urlresolvers.reverse('bill',
                                    args=[self['state'], self['session'],
-                                         self['bill_id'].replace(' ', '-')])
+                                         self['bill_id'].replace(' ', '')])
         return url
 
     def display_name(self):
@@ -340,13 +347,14 @@ class Bill(Document):
             ('stage2',
              'Passed ' + self.chamber_name,
              'date_passed_' + self['chamber']),
+        ]
 
-            ('stage3',
-             'Passed ' + self.other_chamber_name,
-             'date_passed_' + self.other_chamber),
+        if 'lower_chamber_name' in self.metadata:
+            data.append(('stage3',
+                         'Passed ' + self.other_chamber_name,
+                         'date_passed_' + self.other_chamber))
+        data.append(('stage4', 'Governor Signs', 'date_signed'))
 
-            ('stage4', 'Governor Signs', 'date_signed'),
-            ]
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
 

@@ -2,7 +2,6 @@
     views that are not state/object specific
 """
 import json
-import random
 import urllib2
 
 import pymongo
@@ -57,12 +56,16 @@ def find_your_legislator(request):
             lat,
             billy_settings.API_KEY
         )
-        f = urllib2.urlopen(qurl)
+        leg_resp = json.load(urllib2.urlopen(qurl))
+        # allow limiting lookup to state for state map views
+        if 'state' in get:
+            leg_resp = [leg for leg in leg_resp
+                        if leg['state'] == get['state']]
+            context['state'] = get['state']
 
         if "boundary" in get:
-            legs = json.load(f)
             to_search = []
-            for leg in legs:
+            for leg in leg_resp:
                 to_search.append(leg['boundary_id'])
             borders = set(to_search)
             ret = {}
@@ -72,12 +75,11 @@ def find_your_legislator(request):
                     border,
                     billy_settings.API_KEY
                 )
-                f = urllib2.urlopen(qurl)
-                resp = json.load(f)
+                resp = json.load(urllib2.urlopen(qurl))
                 ret[border] = resp
             return HttpResponse(json.dumps(ret))
 
-        context['legislators'] = map(Legislator, json.load(f))
+        context['legislators'] = map(Legislator, leg_resp)
         template = 'find_your_legislator_table'
 
     return render(request, templatename(template), context)

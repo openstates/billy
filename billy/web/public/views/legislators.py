@@ -6,18 +6,20 @@ import json
 import operator
 import urllib2
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import Http404
+from django.template.response import TemplateResponse
 
+from djpjax import pjax
 import pymongo
 
 from billy.models import db, Metadata, DoesNotExist
 from billy.conf import settings as billy_settings
 
 from .utils import templatename, mongo_fields
-from ..forms import ChamberSelectForm
 
 
+@pjax()
 def legislators(request, abbr):
     try:
         meta = Metadata.get_object(abbr)
@@ -25,6 +27,10 @@ def legislators(request, abbr):
         raise Http404
 
     spec = {'active': True}
+
+    chambers = {'upper': meta['upper_chamber_name']}
+    if 'lower_chamber_name' in meta:
+        chambers['lower'] = meta['lower_chamber_name']
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in ('upper', 'lower'):
@@ -65,16 +71,14 @@ def legislators(request, abbr):
 
     sort_order = {1: -1, -1: 1}[sort_order]
     legislators = list(legislators)
-    initial = {'key': 'district', 'chamber': chamber}
-    chamber_select_form = ChamberSelectForm.unbound(meta, initial=initial)
 
-    return render(request, templatename('legislators'),
+    return TemplateResponse(request, templatename('legislators'),
                   dict(metadata=meta,
                    chamber=chamber,
                    chamber_title=chamber_title,
-                   chamber_select_form=chamber_select_form,
                    chamber_select_template=templatename('chamber_select_form'),
                    chamber_select_collection='legislators',
+                   chamber_select_chambers=chambers,
                    show_chamber_column=True,
                    abbr=abbr,
                    legislators=legislators,
@@ -89,9 +93,19 @@ def legislator(request, abbr, _id, slug=None):
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
+
     legislator = db.legislators.find_one({'_id': _id})
     if legislator is None:
-        raise Http404('No legislator was found with led_id = %r' % _id)
+        spec = {'_all_ids': _id}
+        cursor = db.legislators.find(spec)
+        msg = 'Two legislators returned for spec %r' % spec
+        assert cursor.count() < 2, msg
+        try:
+            legislator = cursor.next()
+        except StopIteration:
+            raise Http404('No legislator was found with leg_id = %r' % _id)
+        else:
+            return redirect(legislator.get_absolute_url(), permanent=True)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)

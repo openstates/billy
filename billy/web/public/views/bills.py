@@ -1,12 +1,13 @@
 import urllib
 import pymongo
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import Http404
 from django.conf import settings
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
+from billy.importers.utils import fix_bill_id
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
@@ -46,7 +47,11 @@ class RelatedBillsList(RelatedObjectsList):
             context.update(form=FilterBillsForm(self.request.GET))
 
             # human readable description of search
-            description = [metadata['name']]
+            description = []
+            if metadata:
+                description.append(metadata['name'])
+            else:
+                description = ['Search All']
             long_description = []
             chamber = form.data.getlist('chamber')
             session = form.data.get('session')
@@ -202,7 +207,7 @@ class StateBills(RelatedBillsList):
     paginator = CursorPaginator
     description_template = '''NOT USED'''
     title_template = '''
-        Search and bills -
+        Search bills -
         {{ metadata.legislature_name }} - Open States'''
 
 
@@ -214,27 +219,20 @@ class AllStateBills(RelatedBillsList):
     use_table = True
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
-    description_template = 'Bills from all 50 States'
-    title_template = ('Search and filter bills for all '
-                      '50 States - OpenStates')
-
-
-class SponsoredBillsList(RelatedBillsList):
-    collection_name = 'legislators'
-    query_attr = 'sponsored_bills'
-    description_template = '''
-        bills sponsored by
-        <a href="{% url legislator abbr obj.id obj.slug %}">
-        {{obj.display_name}}</a>
-        '''
-    title_template = 'Bills sponsored by {{obj.display_name}} - OpenStates'
+    description_template = 'Bills from all 50 states'
+    title_template = ('Search bills from all 50 states - Open States')
 
 
 def bill(request, abbr, session, bill_id):
-    bill_id = bill_id.replace('-', ' ')
+    # get fixed version
+    fixed_bill_id = fix_bill_id(bill_id)
+    # redirect if URL's id isn't fixed id without spaces
+    print fixed_bill_id, bill_id
+    if fixed_bill_id.replace(' ', '') != bill_id:
+        return redirect('bill', abbr=abbr, session=session,
+                        bill_id=fixed_bill_id.replace(' ', ''))
     bill = db.bills.find_one({'state': abbr, 'session': session,
-                              'bill_id': bill_id})
-    #bill = db.bills.find_one({'_id': bill_id})
+                              'bill_id': fixed_bill_id})
     if bill is None:
         raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))

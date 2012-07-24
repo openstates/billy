@@ -46,7 +46,12 @@ class FeedEntry(Document):
                 # Get this entity's url.
                 collection_name = entity_types[_id[2]] + 's'
                 collection = getattr(billy_db, collection_name)
-                instance = collection.find_one(_id)
+                if collection_name == 'legislators':
+                    cursor = collection.find({'_all_ids': _id})
+                    assert cursor.count() == 1
+                    instance = cursor.next()
+                else:
+                    instance = collection.find_one(_id)
                 url = instance.get_absolute_url()
                 _entity_urls.append(url)
 
@@ -77,7 +82,12 @@ class FeedEntry(Document):
             for _id in _entity_ids:
                 collection_name = entity_types[_id[2]] + 's'
                 collection = getattr(billy_db, collection_name)
-                instance = collection.find_one(_id)
+                if collection_name == 'legislators':
+                    cursor = collection.find({'_all_ids': _id})
+                    assert cursor.count() == 1
+                    instance = cursor.next()
+                else:
+                    instance = collection.find_one(_id)
                 string = instance.display_name()
                 _entity_display_names.append(string)
 

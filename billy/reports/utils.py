@@ -28,6 +28,7 @@ QUALITY_EXCEPTIONS = {
     'votes:bad_other_count': 'Vote has a bad "other" count',
 }
 
+
 def get_quality_exceptions(abbr):
     quality_exceptions = defaultdict(set)
     for qe in db.quality_exceptions.find({'abbr': abbr}):
