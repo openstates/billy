@@ -239,7 +239,8 @@ class BillFeed(StateBills):
                                     item.get_absolute_url())
             feed.add_item(title=item['bill_id'], link=link, unique_id=link,
                           description=item['title'])
-        return HttpResponse(feed.writeString('utf-8'))
+        return HttpResponse(feed.writeString('utf-8'),
+                            content_type='application/xml')
 
 
 def bill(request, abbr, session, bill_id):
