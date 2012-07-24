@@ -1050,6 +1050,7 @@ def legislator_edit_commit(request):
 
     return redirect('admin_legislator_edit', legislator['leg_id'])
 
+
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})
     if not legislator:
