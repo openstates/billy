@@ -356,6 +356,7 @@ def merge_legislators(leg1, leg2):
 
 __committee_ids = {}
 
+
 def get_committee_id(level, abbr, chamber, committee):
     key = (level, abbr, chamber, committee)
     if key in __committee_ids:

@@ -8,7 +8,6 @@ import json
 from billy import db
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
-from billy.importers.utils import compare_committee
 from billy.importers.utils import fix_bill_id, get_committee_id
 
 import pymongo
@@ -59,7 +58,6 @@ def import_events(abbr, data_dir, import_actions=False):
                                      chamber,
                                      leg['participant'])
 
-
         resolvers = {
             "committee": _resolve_ctty,
             "legislator": _resolve_leg
@@ -71,7 +69,7 @@ def import_events(abbr, data_dir, import_actions=False):
             if type in resolvers:
                 id = resolvers[type](entity)
             else:
-                logger.warning("I don't know how to resolve a %s" % ( type ))
+                logger.warning("I don't know how to resolve a %s" % type)
             entity['id'] = id
 
         for bill in data['related_bills']:

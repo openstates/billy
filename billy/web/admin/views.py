@@ -749,7 +749,7 @@ def bill_list(request, abbr):
         exceptions = []
     else:
         limit = request.GET.get('limit', '')
-        exceptions = get_quality_exceptions(abbr)['bills:'+limit]
+        exceptions = get_quality_exceptions(abbr)['bills:' + limit]
         spec = _bill_spec(meta, limit)
 
     query_text = repr(spec)
@@ -1045,8 +1045,7 @@ def legislator_edit_commit(request):
 
     db.legislators.update({"_id": legislator['_id']},
                           legislator,
-                          False, # Upsert
-                          safe=True)
+                          upsert=False, safe=True)
 
     return redirect('admin_legislator_edit', legislator['leg_id'])
 
