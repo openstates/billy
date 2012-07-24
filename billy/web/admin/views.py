@@ -26,6 +26,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from billy import db
+from billy.conf import settings
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
@@ -829,7 +830,8 @@ def subjects(request, abbr):
 
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
-        'subjects': subjects
+        'subjects': subjects,
+        'normalized_subjects': settings.BILLY_SUBJECTS
     })
 
 

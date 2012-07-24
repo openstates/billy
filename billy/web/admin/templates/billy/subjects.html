@@ -11,6 +11,21 @@
         <th>"Foreign" subject</th>
         <th>Billy subject</th>
     </tr>
+    <tr>
+        <td><input
+                   type = 'text'
+                  value = ''
+            placeholder = 'State Subject'
+        /></td>
+        <td>
+<select>
+{% for sub in normalized_subjects %}
+    <option value = '{{sub}}' >{{sub}}</option>
+{% endfor %}
+</select>
+<input class = 'btn btn-primary' type = 'submit' value = 'update' />
+        </td>
+    </tr>
 {% for subject in subjects %}
     <tr>
         <td>{{ subject.remote }}</td>
