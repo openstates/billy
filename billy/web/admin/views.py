@@ -748,7 +748,7 @@ def bill_list(request, abbr):
         exceptions = []
     else:
         limit = request.GET.get('limit', '')
-        exceptions = get_quality_exceptions(abbr)['bills:'+limit]
+        exceptions = get_quality_exceptions(abbr)['bills:' + limit]
         spec = _bill_spec(meta, limit)
 
     query_text = repr(spec)
@@ -783,7 +783,7 @@ def bill(request, abbr, session=None, id=None, billy_id=None):
     if billy_id:
         bill = db.bills.find_one({'_id': billy_id})
     else:
-        bill = find_bill(settings.LEVEL_FIELD: abbr, 'session': session,
+        bill = find_bill({settings.LEVEL_FIELD: abbr, 'session': session,
                          'bill_id': id.upper()})
     if not bill:
         msg = 'No bill found in {name} session {session!r} with id {id!r}.'
@@ -830,6 +830,13 @@ def subjects(request, abbr):
         'subjects': subjects,
         'normalized_subjects': settings.BILLY_SUBJECTS
     })
+
+
+def subjects_remove(request, abbr=None, id=None):
+    meta = metadata(abbr)
+    obj = db.subjects.remove({"_id": id})
+
+    return redirect('admin_subjects', abbr)
 
 
 @require_http_methods(["POST"])
@@ -1039,10 +1046,10 @@ def legislator_edit_commit(request):
 
     db.legislators.update({"_id": legislator['_id']},
                           legislator,
-                          False, # Upsert
-                          safe=True)
+                          upsert=False, safe=True)
 
     return redirect('admin_legislator_edit', legislator['leg_id'])
+
 
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})

@@ -69,7 +69,7 @@ def import_events(abbr, data_dir, import_actions=False):
             if type in resolvers:
                 id = resolvers[type](entity)
             else:
-                logger.warning("I don't know how to resolve a %s" % ( type ))
+                logger.warning("I don't know how to resolve a %s" % type)
             entity['id'] = id
 
         for bill in data['related_bills']:

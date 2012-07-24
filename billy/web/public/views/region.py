@@ -44,10 +44,8 @@ def state(request, abbr):
             party_counts[leg['chamber']][leg['party']] += 1
 
     if 'lower_chamber_name' not in meta:
-        unicameral = True
         chambers_to_use = ('upper',)
     else:
-        unicameral = False
         chambers_to_use = ('upper', 'lower')
 
     chambers = []

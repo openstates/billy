@@ -61,10 +61,11 @@ class FeedEntry(Document):
                 matches = re.finditer(entity_string, summary)
                 if _id != self_legislator.id:
                     # For other entities, add a hyperlink.
-                    replacer = lambda m: '<a href="%s">%s</a>' % (url, entity_string)
+                    replacer = lambda m: '<a href="%s">%s</a>' % (
+                        url, entity_string)
                 else:
                     # If this id refers to the related legislator, bold it.
-                    replacer = lambda m: '<strong>%s</strong>' % (entity_string)
+                    replacer = lambda m: '<strong>%s</strong>' % entity_string
 
                 for match in matches:
 

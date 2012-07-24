@@ -40,11 +40,11 @@ def ensure_indexes():
     # doc_id is used for search in conjunction with ElasticSearch
     #  sort field (date) comes first, followed by field that we do an $in on
     db.bills.ensure_index([('created_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING) ])
+                           ('versions.doc_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('updated_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING) ])
+                           ('versions.doc_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING) ])
+                           ('versions.doc_id', pymongo.ASCENDING)])
 
     # common search indices
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
@@ -322,7 +322,7 @@ def import_bill(data, votes, categorizer):
                     resolver = resolvers[entity['type']]
                 except KeyError as e:
                     # We don't know how to deal.
-                    logger.error("I don't know how to sort a %s" % ( e ))
+                    logger.error("I don't know how to sort a %s" % e)
                     continue
 
                 id = resolver(entity['name'])
