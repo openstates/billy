@@ -835,6 +835,13 @@ def subjects(request, abbr):
     })
 
 
+def subjects_remove(request, abbr=None, id=None):
+    meta = metadata(abbr)
+    obj = db.subjects.remove({"_id": id})
+
+    return redirect('admin_subjects', abbr)
+
+
 @require_http_methods(["POST"])
 def subjects_commit(request, abbr):
     meta = metadata(abbr)
