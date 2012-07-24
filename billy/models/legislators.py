@@ -7,6 +7,7 @@ from django.template.defaultfilters import slugify
 
 from .base import (db, Document, RelatedDocuments, ListManager, DictManager)
 from .metadata import Metadata
+from .utils import CachedAttribute
 
 
 class Role(dict):
@@ -52,9 +53,15 @@ class OldRole(DictManager):
         return dict_[self['term']]
 
 
-class OldRolesManager(DictManager):
-    keyname = 'old_roles'
+class OldRolesList(DictManager):
     wrapper = OldRole
+    keyname = 'old_roles'
+    methods_only = True
+
+
+class OldRolesManager(DictManager):
+    wrapper = OldRolesList
+    keyname = 'old_roles'
 
     def __iter__(self):
         wrapper = self._wrapper
@@ -165,3 +172,30 @@ class Legislator(Document):
                                 yield details['display_name']
                 else:
                     yield details['display_name']
+
+    @CachedAttribute
+    def vote_role(self):
+        # If this is an active legislator, access party and district
+        # directly on the legislator.
+        if self['active']:
+            return self
+
+        # Else, get them from the old_roles dict, with the term
+        # defined by the term of the bill this legislator was
+        # ultimately retrieved in relation to.
+        bill = self.vote.bill()
+        term = bill['_term']
+        roles = self.old_roles_manager[term]
+
+        # ...and use the bill's chamber too.
+        chamber = bill['chamber']
+        roles = filter(lambda role: role['chamber'] == chamber, roles)
+
+        # ...and the specific date defined by the date of the vote.
+        if len(roles) == 1:
+            return roles.pop()
+        else:
+            vote_date = self.vote['date']
+            for role in roles:
+                if role['start_date'] < vote_date < role['end_date']:
+                    return role
