@@ -227,14 +227,17 @@ class BillFeed(StateBills):
         link = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
                             reverse('bills', args=args, kwargs=kwargs),
                             request.META['QUERY_STRING'])
+        feed_url = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+                            reverse('bills_feed', args=args, kwargs=kwargs),
+                            request.META['QUERY_STRING'])
         feed = Rss201rev2Feed(title=context['description'], link=link,
-                         description = context['description'] +
-                         '\n'.join(context.get('long_description', '')),
-                              ttl=360)
+                              feed_url=feed_url, ttl=360,
+                              description = context['description'] +
+                              '\n'.join(context.get('long_description', '')))
         for item in queryset:
             link = 'http://%s%s' % (request.META['SERVER_NAME'],
                                     item.get_absolute_url())
-            feed.add_item(title=item['bill_id'], link=link, guid=link,
+            feed.add_item(title=item['bill_id'], link=link, unique_id=link,
                           description=item['title'])
         return HttpResponse(feed.writeString('utf-8'))
 
