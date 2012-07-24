@@ -47,7 +47,9 @@ class RelatedBillsList(RelatedObjectsList):
             context.update(form=FilterBillsForm(self.request.GET))
 
             # human readable description of search
-            description = [metadata['name']]
+            description = []
+            if metadata:
+                description.append(metadata['name'])
             long_description = []
             chamber = form.data.getlist('chamber')
             session = form.data.get('session')
@@ -203,7 +205,7 @@ class StateBills(RelatedBillsList):
     paginator = CursorPaginator
     description_template = '''NOT USED'''
     title_template = '''
-        Search and bills -
+        Search bills -
         {{ metadata.legislature_name }} - Open States'''
 
 
