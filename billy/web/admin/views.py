@@ -26,6 +26,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from billy import db
+from billy.conf import settings
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
@@ -829,8 +830,35 @@ def subjects(request, abbr):
 
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
-        'subjects': subjects
+        'subjects': subjects,
+        'normalized_subjects': settings.BILLY_SUBJECTS
     })
+
+
+@require_http_methods(["POST"])
+def subjects_commit(request, abbr):
+    meta = metadata(abbr)
+    def _gen_id(abbr, subject):
+        return "%s-%s" % (abbr, subject)
+
+    payload = request.POST
+    subject = payload['r_subject']
+    n_subject = payload['n_subject']
+    eyedee = _gen_id(abbr, subject)
+
+    sub = {
+        "_id": eyedee,
+        "remote": subject,
+        "normal": n_subject,
+        "abbr": abbr
+    }
+
+    db.subjects.update({"_id": eyedee},
+                       sub,
+                       True,  # Upsert
+                       safe=True)
+
+    return redirect('admin_subjects', abbr)
 
 
 def quality_exceptions(request, abbr):
