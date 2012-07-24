@@ -50,6 +50,8 @@ class RelatedBillsList(RelatedObjectsList):
             description = []
             if metadata:
                 description.append(metadata['name'])
+            else:
+                description = ['Search All']
             long_description = []
             chamber = form.data.getlist('chamber')
             session = form.data.get('session')
@@ -217,20 +219,8 @@ class AllStateBills(RelatedBillsList):
     use_table = True
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
-    description_template = 'Bills from all 50 States'
-    title_template = ('Search and filter bills for all '
-                      '50 States - OpenStates')
-
-
-class SponsoredBillsList(RelatedBillsList):
-    collection_name = 'legislators'
-    query_attr = 'sponsored_bills'
-    description_template = '''
-        bills sponsored by
-        <a href="{% url legislator abbr obj.id obj.slug %}">
-        {{obj.display_name}}</a>
-        '''
-    title_template = 'Bills sponsored by {{obj.display_name}} - OpenStates'
+    description_template = 'Bills from all 50 states'
+    title_template = ('Search bills from all 50 states - Open States')
 
 
 def bill(request, abbr, session, bill_id):
