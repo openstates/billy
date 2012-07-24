@@ -2,8 +2,11 @@ import urllib
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.generic import View
+from django.utils.feedgenerator import Atom1Feed
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -12,16 +15,6 @@ from billy.importers.utils import fix_bill_id
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
 from .search import search_by_bill_id
-
-
-class BillsList(ListViewBase):
-    use_table = True
-    list_item_context_name = 'bill'
-    paginator = CursorPaginator
-    rowtemplate_name = templatename('bills_list_row')
-    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
-    statenav_active = 'bills'
-    show_per_page = 10
 
 
 class RelatedBillsList(RelatedObjectsList):
@@ -219,8 +212,29 @@ class AllStateBills(RelatedBillsList):
     use_table = True
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
-    description_template = 'Bills from all 50 states'
+    description_template = '''NOT USED'''
     title_template = ('Search bills from all 50 states - Open States')
+
+
+class BillFeed(StateBills):
+    """ does everything StateBills does but outputs as RSS """
+
+    show_per_page = 100
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        queryset = self.get_queryset()
+        link = '?'.join((reverse('bills_atom', args=args, kwargs=kwargs),
+                         request.META['QUERY_STRING']))
+        print link
+        feed = Atom1Feed(title=context['description'], link=link,
+                         description = context['description'] +
+                         '\n'.join(context.get('long_description', '')))
+        for item in queryset:
+            feed.add_item(title=item['bill_id'],
+                          link=item.get_absolute_url(),
+                          description=item['title'])
+        return HttpResponse(feed.writeString('utf8'))
 
 
 def bill(request, abbr, session, bill_id):
