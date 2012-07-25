@@ -257,6 +257,11 @@ class BillVote(Document):
     def has_voters(self):
         return any([self['yes_votes'], self['no_votes'], self['other_votes']])
 
+    def chamber_name(self):
+        metadata = self.bill().metadata
+        name = metadata['%s_chamber_name' % self['chamber']]
+        return name
+
 
 class Bill(Document):
 
