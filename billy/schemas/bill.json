@@ -169,7 +169,7 @@
                     },
                     "official_type": {
                         "type": "string",
-                        "required": false,
+                        "required": false
                     }
                 },
                 "type": "object"
