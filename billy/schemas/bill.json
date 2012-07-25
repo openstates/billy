@@ -166,6 +166,10 @@
                     },
                     "type": {
                         "type": "string"
+                    },
+                    "official_type": {
+                        "type": "string",
+                        "required": false,
                     }
                 },
                 "type": "object"
