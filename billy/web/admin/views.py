@@ -26,6 +26,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from billy import db
+from billy.conf import settings
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
@@ -748,7 +749,7 @@ def bill_list(request, abbr):
         exceptions = []
     else:
         limit = request.GET.get('limit', '')
-        exceptions = get_quality_exceptions(abbr)['bills:'+limit]
+        exceptions = get_quality_exceptions(abbr)['bills:' + limit]
         spec = _bill_spec(meta, limit)
 
     query_text = repr(spec)
@@ -829,8 +830,42 @@ def subjects(request, abbr):
 
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
-        'subjects': subjects
+        'subjects': subjects,
+        'normalized_subjects': settings.BILLY_SUBJECTS
     })
+
+
+def subjects_remove(request, abbr=None, id=None):
+    meta = metadata(abbr)
+    obj = db.subjects.remove({"_id": id})
+
+    return redirect('admin_subjects', abbr)
+
+
+@require_http_methods(["POST"])
+def subjects_commit(request, abbr):
+    meta = metadata(abbr)
+    def _gen_id(abbr, subject):
+        return "%s-%s" % (abbr, subject)
+
+    payload = request.POST
+    subject = payload['r_subject']
+    n_subject = payload['n_subject']
+    eyedee = _gen_id(abbr, subject)
+
+    sub = {
+        "_id": eyedee,
+        "remote": subject,
+        "normal": n_subject,
+        "abbr": abbr
+    }
+
+    db.subjects.update({"_id": eyedee},
+                       sub,
+                       True,  # Upsert
+                       safe=True)
+
+    return redirect('admin_subjects', abbr)
 
 
 def quality_exceptions(request, abbr):
@@ -1017,10 +1052,10 @@ def legislator_edit_commit(request):
 
     db.legislators.update({"_id": legislator['_id']},
                           legislator,
-                          False, # Upsert
-                          safe=True)
+                          upsert=False, safe=True)
 
     return redirect('admin_legislator_edit', legislator['leg_id'])
+
 
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})

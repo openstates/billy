@@ -27,7 +27,7 @@ def get_filter_bills_form(metadata):
         search_text = forms.CharField(required=False)
 
         # `metadata` will be None if the search is for all states.
-        if metadata is not None:
+        if metadata:
             _bill_types = metadata.distinct_bill_types()
             _bill_subjects = metadata.distinct_bill_subjects()
             _bill_sponsors = [(leg['_id'], leg.display_name()) for leg in
@@ -44,8 +44,10 @@ def get_filter_bills_form(metadata):
 
             if 'lower_chamber_name' in metadata:
                 chamber = forms.MultipleChoiceField(
-                            choices=(('upper', metadata['upper_chamber_name']),
-                                     ('lower', metadata['lower_chamber_name'])),
+                            choices=(
+                                ('upper', metadata['upper_chamber_name']),
+                                ('lower', metadata['lower_chamber_name'])
+                            ),
                             widget=forms.CheckboxSelectMultiple(),
                             required=False)
 

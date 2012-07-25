@@ -2,8 +2,11 @@ import urllib
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.generic import View
+from django.utils.feedgenerator import Rss201rev2Feed
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -12,16 +15,6 @@ from billy.importers.utils import fix_bill_id
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
 from .search import search_by_bill_id
-
-
-class BillsList(ListViewBase):
-    use_table = True
-    list_item_context_name = 'bill'
-    paginator = CursorPaginator
-    rowtemplate_name = templatename('bills_list_row')
-    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
-    statenav_active = 'bills'
-    show_per_page = 10
 
 
 class RelatedBillsList(RelatedObjectsList):
@@ -47,7 +40,11 @@ class RelatedBillsList(RelatedObjectsList):
             context.update(form=FilterBillsForm(self.request.GET))
 
             # human readable description of search
-            description = [metadata['name']]
+            description = []
+            if metadata:
+                description.append(metadata['name'])
+            else:
+                description = ['Search All']
             long_description = []
             chamber = form.data.getlist('chamber')
             session = form.data.get('session')
@@ -203,7 +200,7 @@ class StateBills(RelatedBillsList):
     paginator = CursorPaginator
     description_template = '''NOT USED'''
     title_template = '''
-        Search and bills -
+        Search bills -
         {{ metadata.legislature_name }} - Open States'''
 
 
@@ -215,20 +212,35 @@ class AllStateBills(RelatedBillsList):
     use_table = True
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
-    description_template = 'Bills from all 50 States'
-    title_template = ('Search and filter bills for all '
-                      '50 States - OpenStates')
+    description_template = '''NOT USED'''
+    title_template = ('Search bills from all 50 states - Open States')
 
 
-class SponsoredBillsList(RelatedBillsList):
-    collection_name = 'legislators'
-    query_attr = 'sponsored_bills'
-    description_template = '''
-        bills sponsored by
-        <a href="{% url legislator abbr obj.id obj.slug %}">
-        {{obj.display_name}}</a>
-        '''
-    title_template = 'Bills sponsored by {{obj.display_name}} - OpenStates'
+class BillFeed(StateBills):
+    """ does everything StateBills does but outputs as RSS """
+
+    show_per_page = 100
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        queryset = self.get_queryset()
+        link = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+                            reverse('bills', args=args, kwargs=kwargs),
+                            request.META['QUERY_STRING'])
+        feed_url = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+                            reverse('bills_feed', args=args, kwargs=kwargs),
+                            request.META['QUERY_STRING'])
+        feed = Rss201rev2Feed(title=context['description'], link=link,
+                              feed_url=feed_url, ttl=360,
+                              description = context['description'] +
+                              '\n'.join(context.get('long_description', '')))
+        for item in queryset:
+            link = 'http://%s%s' % (request.META['SERVER_NAME'],
+                                    item.get_absolute_url())
+            feed.add_item(title=item['bill_id'], link=link, unique_id=link,
+                          description=item['title'])
+        return HttpResponse(feed.writeString('utf-8'),
+                            content_type='application/xml')
 
 
 def bill(request, abbr, session, bill_id):

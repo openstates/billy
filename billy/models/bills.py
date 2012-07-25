@@ -251,7 +251,8 @@ class BillVote(Document):
 
     @CachedAttribute
     def has_votes(self):
-        return 0 < sum([self['yes_count'], self['no_count'], self['other_count']])
+        return 0 < sum([self['yes_count'], self['no_count'],
+                        self['other_count']])
 
     @CachedAttribute
     def has_voters(self):
