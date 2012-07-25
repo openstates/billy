@@ -7,6 +7,7 @@ from django.template.defaultfilters import slugify
 
 from .base import (db, Document, RelatedDocuments, ListManager, DictManager)
 from .metadata import Metadata
+from .utils import CachedAttribute
 
 
 class Role(dict):
@@ -52,9 +53,15 @@ class OldRole(DictManager):
         return dict_[self['term']]
 
 
-class OldRolesManager(DictManager):
-    keyname = 'old_roles'
+class OldRolesList(ListManager):
     wrapper = OldRole
+    keyname = 'old_roles'
+    methods_only = True
+
+
+class OldRolesManager(dict):
+    wrapper = OldRolesList
+    keyname = 'old_roles'
 
     def __iter__(self):
         wrapper = self._wrapper
@@ -62,11 +69,22 @@ class OldRolesManager(DictManager):
             inst = wrapper(role)
             yield inst
 
-    def sessions_served(self):
+    def _sessions_served(self):
         sessions = collections.defaultdict(set)
-        for role in self:
-            sessions[role['term']] |= set(list(role.termdata.session_names()))
+        for term, oldroles_list in self.items():
+            for role in oldroles_list:
+                sessions = set(list(role.termdata.session_names()))
+                sessions[role['term']] |= sessions
         return dict(sessions)
+
+    def sessions_served(self):
+        term_dict = self.legislator.metadata.term_dict
+        for term, oldroles_list in self.items():
+            for role in oldroles_list:
+                termdata = term_dict[term]
+                import pdb;pdb.set_trace()
+
+        import pdb;pdb.set_trace()
 
 
 class Legislator(Document):
@@ -162,3 +180,50 @@ class Legislator(Document):
                                 yield details['display_name']
                 else:
                     yield details['display_name']
+
+    @CachedAttribute
+    def vote_role(self):
+        # If this is an active legislator, access party and district
+        # directly on the legislator.
+        if self['active']:
+            return self
+
+        # Else, get them from the old_roles dict, with the term
+        # defined by the term of the bill this legislator was
+        # ultimately retrieved in relation to.
+        vote = self.vote
+        bill = vote.bill()
+        term = bill['_term']
+        roles = self['old_roles'][term]
+        chamber = vote['chamber']
+
+        # ...and use the bill's chamber too.
+        roles = filter(lambda role: role['chamber'] == chamber, roles)
+
+        # ...and the specific date defined by the date of the vote.
+        if len(roles) == 1:
+            return roles.pop()
+        else:
+            vote_date = self.vote['date']
+            for role in roles:
+                start_date = role['start_date']
+                end_date = role['end_date']
+                if start_date and end_date:
+                    if start_date < vote_date < end_date:
+                        return role
+
+    def old_sessions_served(self):
+        '''Returns the sessions served info from
+        old_roles.'''
+        term_dict = self.metadata.term_dict
+        session_details = self.metadata['session_details']
+        for term, oldroles_list in self['old_roles'].items():
+            for role in oldroles_list:
+                termdata = term_dict[term]
+                for term in termdata:
+                    for session in term['sessions']:
+                        yield session_details[session]
+
+    def old_roles_manager(self):
+        return self['old_roles']
+
