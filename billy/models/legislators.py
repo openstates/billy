@@ -224,6 +224,5 @@ class Legislator(Document):
                     for session in term['sessions']:
                         yield session_details[session]
 
-    def old_roles_manager(self):
-        return self['old_roles']
+
 
