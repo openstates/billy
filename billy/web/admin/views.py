@@ -875,7 +875,7 @@ def subjects_commit(request, abbr):
 
     for idex in payload:
         key, val = idex.split("-", 1)
-        if val == 'remote':
+        if val == 'remote' and not 'normal' in catd_subjects[key]:
             catd_subjects[key]['normal'] = []
         catd_subjects[key][val] = payload[idex]
 
@@ -884,6 +884,8 @@ def subjects_commit(request, abbr):
 
         remote = sub['remote'][0].strip()
         normal = [x.strip() for x in sub['normal']]
+
+        print normal
 
         if normal == []:
             continue
