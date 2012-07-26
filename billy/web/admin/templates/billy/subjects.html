@@ -55,7 +55,11 @@
 {% for subject in subjects %}
     <tr>
         <td>{{ subject.remote }}</td>
-        <td>{{ subject.normal }}</td>
+        <td>
+{% for n in subject.normal %}
+<span class="label label-info">{{ n }}</span>
+{% endfor %}
+        </td>
         <td><a href = '{% url admin_subjects_remove metadata.abbreviation subject|key:"_id" %}' >remove</a></td>
     </tr>
 {% endfor %}
