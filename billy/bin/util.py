@@ -12,7 +12,6 @@ COMMAND_MODULES = (
     # lots of these commands can go away as billy matures
     'billy.commands.serve',             # useful for development
     'billy.commands.textextract',       # useful for development
-    'billy.commands.load_legislators',  # allow editing legislators in admin
     'billy.commands.download_photos',
     'billy.commands.dump',
     'billy.commands.update_external_ids',

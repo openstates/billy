@@ -97,86 +97,61 @@ class RelatedBillsList(RelatedObjectsList):
             metadata = None
         FilterBillsForm = get_filter_bills_form(metadata)
 
+        # start with the spec
+        spec = {}
+        if abbr != 'all':
+            spec['state'] = abbr
+
         # Setup the paginator.
         get = self.request.GET.get
         show_per_page = getattr(self, 'show_per_page', 10)
         show_per_page = int(get('show_per_page', show_per_page))
         page = int(get('page', 1))
-        if 100 < show_per_page:
+        if show_per_page > 100:
             show_per_page = 100
-
-        # If the request is for /xy/bills/ without search params:
-        if not self.request.GET:
-            spec = {}
-            if abbr != 'all':
-                spec['state'] = abbr
-            cursor = db.bills.find(spec)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
-            return self.paginator(cursor, page=page,
-                      show_per_page=show_per_page)
 
         # If search params are given:
         form = FilterBillsForm(self.request.GET)
 
         # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        if search_text is None:
-            pass
-        else:
+        if search_text:
             found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
                                                  search_text)
             if found_by_bill_id:
                 return IteratorPaginator(found_by_bill_id)
 
-        # Then fall back to search form use.
-        params = [
-            'chamber',
-            'subjects',
-            'sponsor__leg_id',
-            'actions__type',
-            'type',
-            'status',
-            'session']
-
         if settings.ENABLE_ELASTICSEARCH:
-            kwargs = {}
-
-            if abbr != 'all':
-                kwargs['state'] = abbr
-
             chamber = form.data.get('chamber')
             if chamber:
-                kwargs['chamber'] = chamber
+                spec['chamber'] = chamber
 
-            subjects = form.data.getlist('subjects')
+            subjects = form.data.get('subjects')
             if subjects:
-                kwargs['subjects'] = {'$all': filter(None, subjects)}
+                spec['subjects'] = {'$all': filter(None, subjects)}
 
             sponsor_id = form.data.get('sponsor__leg_id')
             if sponsor_id:
-                kwargs['sponsor_id'] = sponsor_id
+                spec['sponsor_id'] = sponsor_id
 
             status = form.data.get('status')
             if status:
-                kwargs['status'] = {'action_dates.%s' % status: {'$ne': None}}
+                spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
 
             type_ = form.data.get('type')
             if type_:
-                kwargs['type_'] = type_
+                spec['type_'] = type_
 
             session = form.data.get('session')
             if session:
-                kwargs['session'] = session
+                spec['session'] = session
 
-            cursor = Bill.search(search_text, **kwargs)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
-
+            cursor = Bill.search(search_text, **spec)
         else:
             # Elastic search not enabled--query mongo normally.
             # Mainly here for local work on search views.
-            spec = {}
-            if abbr != 'all':
-                spec['state'] = metadata['abbreviation']
+            params = ['chamber', 'subjects', 'sponsor__leg_id', 'actions__type',
+                      'type', 'status', 'session']
             for key in params:
                 val = form.data.get(key)
                 if val:
@@ -187,7 +162,15 @@ class RelatedBillsList(RelatedObjectsList):
                 spec['title'] = {'$regex': search_text, '$options': 'i'}
 
             cursor = db.bills.find(spec)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
+
+        sort = self.request.GET.get('sort', 'last')
+        if sort not in ('first', 'last', 'signed', 'passed_upper',
+                        'passed_lower'):
+            sort = 'last'
+        sort_key = 'action_dates.{0}'.format(sort)
+
+        # do sorting on the cursor
+        cursor.sort([(sort_key, pymongo.DESCENDING)])
 
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
