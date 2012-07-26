@@ -832,8 +832,11 @@ def subjects(request, abbr):
     uc_s = report['bills']['uncategorized_subjects']
     uc_subjects = []
     c_subjects = {}
+
     for sub in subjects:
         c_subjects[sub['remote']] = sub
+
+    subjects.rewind()
 
     uniqid = 0
 
