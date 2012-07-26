@@ -1,4 +1,4 @@
-import re
+i mport re
 import json
 import time
 import types
@@ -885,8 +885,6 @@ def subjects_commit(request, abbr):
         remote = sub['remote'][0].strip()
         normal = [x.strip() for x in sub['normal']]
 
-        print normal
-
         if normal == []:
             continue
 
@@ -1343,7 +1341,7 @@ def newsblogs(request):
                     'C': 'committees',
                     'B': 'bills'}
 
-    print tab_range_len, tab, previous, next_, tab_index - 4
+    # print tab_range_len, tab, previous, next_, tab_index - 4
 
     for entry in entries:
         summary = entry['summary']
