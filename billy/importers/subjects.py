@@ -2,7 +2,8 @@ import os
 import unicodecsv
 from collections import defaultdict
 
-from billy import db from billy.conf import settings
+from billy import db
+from billy.conf import settings
 from billy.utils import metadata
 
 
