@@ -200,7 +200,7 @@ class AttrManager(object):
 class ListManager(list, AttrManager):
     def __iter__(self):
         wrapper = self._wrapper
-        for obj in self.document[self.keyname]:
+        for obj in self.document[self._keyname]:
             yield wrapper(obj)
 
     def __getitem__(self, int_or_slice):
