@@ -154,23 +154,14 @@
             "items": {
                 "properties": {
                     "chamber": {
-                        "enum": [
-                            "upper",
-                            "lower"
-                        ],
-                        "required": false,
-                        "type": "string"
+                        "enum": ["upper", "lower"],
+                        "required": false, "type": "string"
                     },
-                    "name": {
-                        "type": "string"
-                    },
+                    "name": { "type": "string" },
                     "type": {
-                        "type": "string"
+                        "type": "string", "enum": ["primary", "cosponsor"]
                     },
-                    "official_type": {
-                        "type": "string",
-                        "required": false
-                    }
+                    "official_type": { "type": "string", "required": false }
                 },
                 "type": "object"
             },
