@@ -875,15 +875,17 @@ def subjects_commit(request, abbr):
 
     for idex in payload:
         key, val = idex.split("-", 1)
+        if val == 'remote' and not 'normal' in catd_subjects[key]:
+            catd_subjects[key]['normal'] = []
         catd_subjects[key][val] = payload[idex]
 
     for idex in catd_subjects:
         sub = catd_subjects[idex]
 
         remote = sub['remote'][0].strip()
-        normal = sub['normal'][0].strip()
+        normal = [x.strip() for x in sub['normal']]
 
-        if normal == "":
+        if normal == []:
             continue
 
         eyedee = _gen_id(abbr, remote)
@@ -1339,7 +1341,7 @@ def newsblogs(request):
                     'C': 'committees',
                     'B': 'bills'}
 
-    print tab_range_len, tab, previous, next_, tab_index - 4
+    # print tab_range_len, tab, previous, next_, tab_index - 4
 
     for entry in entries:
         summary = entry['summary']
