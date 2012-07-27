@@ -206,8 +206,8 @@ class Legislator(Document):
         else:
             vote_date = self.vote['date']
             for role in roles:
-                start_date = role['start_date']
-                end_date = role['end_date']
+                start_date = role.get('start_date')
+                end_date = role.get('end_date')
                 if start_date and end_date:
                     if start_date < vote_date < end_date:
                         return role
