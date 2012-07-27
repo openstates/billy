@@ -26,7 +26,7 @@ def legislators(request, abbr):
     except DoesNotExist:
         raise Http404
 
-    spec = {'active': True}
+    spec = {'active': True, 'district': {'$exists': True}}
 
     chambers = {'upper': meta['upper_chamber_name']}
     if 'lower_chamber_name' in meta:
@@ -54,11 +54,11 @@ def legislators(request, abbr):
     legislators = meta.legislators(extra_spec=spec, fields=fields)
 
     def sort_by_district(obj):
-        matchobj = re.search(r'\d+', obj['district'])
+        matchobj = re.search(r'\d+', obj.get('district', ''))
         if matchobj:
             return int(matchobj.group())
         else:
-            return obj['district']
+            return obj.get('district', '')
 
     legislators = sorted(legislators, key=sort_by_district)
 
