@@ -825,10 +825,29 @@ def subjects(request, abbr):
         'abbr': abbr.lower()
     })
 
+    report = db.reports.find_one({'_id': abbr})
+    uc_s = report['bills']['uncategorized_subjects']
+    uc_subjects = []
+    c_subjects = {}
+
+    for sub in subjects:
+        c_subjects[sub['remote']] = sub
+
+    subjects.rewind()
+
+    uniqid = 0
+
+    for sub in uc_s:
+        if not sub[0] in c_subjects:
+            sub.append(uniqid)
+            uniqid += 1
+            uc_subjects.append(sub)
+
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
         'subjects': subjects,
-        'normalized_subjects': settings.BILLY_SUBJECTS
+        'normalized_subjects': settings.BILLY_SUBJECTS,
+        'uncat_subjects': uc_subjects
     })
 
 
@@ -845,22 +864,41 @@ def subjects_commit(request, abbr):
     def _gen_id(abbr, subject):
         return "%s-%s" % (abbr, subject)
 
-    payload = request.POST
-    subject = payload['r_subject']
-    n_subject = payload['n_subject']
-    eyedee = _gen_id(abbr, subject)
+    payload = dict(request.POST)
+    if 'sub' in payload:
+        del(payload['sub'])
 
-    sub = {
-        "_id": eyedee,
-        "remote": subject,
-        "normal": n_subject,
-        "abbr": abbr
-    }
+    catd_subjects = defaultdict(dict)
 
-    db.subjects.update({"_id": eyedee},
-                       sub,
-                       True,  # Upsert
-                       safe=True)
+    for idex in payload:
+        key, val = idex.split("-", 1)
+        if val == 'remote' and not 'normal' in catd_subjects[key]:
+            catd_subjects[key]['normal'] = []
+        catd_subjects[key][val] = payload[idex]
+
+    for idex in catd_subjects:
+        sub = catd_subjects[idex]
+
+        remote = sub['remote'][0].strip()
+        normal = [x.strip() for x in sub['normal']]
+
+        if normal == []:
+            continue
+
+        eyedee = _gen_id(abbr, remote)
+
+        obj = {
+            "_id": eyedee,
+            "abbr": abbr,
+            "remote": remote,
+            "normal": normal
+        }
+#        print obj
+
+        db.subjects.update({"_id": eyedee},
+                           obj,
+                           True,  # Upsert
+                           safe=True)
 
     return redirect('admin_subjects', abbr)
 
@@ -1024,12 +1062,13 @@ def legislator_edit(request, id):
 def legislator_edit_commit(request):
     payload = dict(request.POST)
 
-    leg_id = payload['leg_id']
-    del(payload['leg_id'])
+    leg_id = payload['leg_id'][0]
 
     legislator = db.legislators.find_one({'_all_ids': leg_id})
     if not legislator:
         raise Http404('No legislators found for id %r.' % leg_id)
+
+    del(payload['leg_id'])
 
     update = {}
     locked = []
@@ -1294,7 +1333,7 @@ def newsblogs(request):
                     'C': 'committees',
                     'B': 'bills'}
 
-    print tab_range_len, tab, previous, next_, tab_index - 4
+    # print tab_range_len, tab, previous, next_, tab_index - 4
 
     for entry in entries:
         summary = entry['summary']

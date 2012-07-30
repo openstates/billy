@@ -1,12 +1,51 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
+{% load staticfiles %}
 {% load billy_utiltags %}
 
 {% block title %}Data Quality{% endblock %}
 
+{% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
+<script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".mselect").select2();
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
-<h1>Subjects of the {{metadata.legislature_name}}</h1>
+<h2>Subjects needing sorting</h2>
+
 <form action = '{% url admin_subjects_commit metadata.abbreviation %}' method = 'POST' >
+<table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>"Foreign" subject</th>
+        <th>Billy subject</th>
+    </tr>
+{% for sub in uncat_subjects %}
+    <tr>
+        <td>{{sub.0}}<input
+                        type = 'hidden'
+                        value = '{{sub.0}}'
+                        name = '{{sub.2}}-remote'
+        /></td>
+        <td>
+<select name = '{{sub.2}}-normal' multiple class = 'mselect' >
+{% for sub in normalized_subjects %}
+    <option value = '{{sub}}' >{{sub}}</option>
+{% endfor %}
+        </td>
+</select>
+    </tr>
+{% endfor %}
+</table>
+<input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
+</form>
+
+<h2>Existing subjects</h2>
+
 <table class="table table-striped table-bordered table-condensed">
     <tr>
         <th>"Foreign" subject</th>
@@ -16,28 +55,13 @@
 {% for subject in subjects %}
     <tr>
         <td>{{ subject.remote }}</td>
-        <td>{{ subject.normal }}</td>
+        <td>
+{% for n in subject.normal %}
+<span class="label label-info">{{ n }}</span>
+{% endfor %}
+        </td>
         <td><a href = '{% url admin_subjects_remove metadata.abbreviation subject|key:"_id" %}' >remove</a></td>
     </tr>
 {% endfor %}
-    <tr>
-        <td><input
-                   type = 'text'
-                  value = ''
-                   name = 'r_subject'
-            placeholder = 'State Subject'
-        /></td>
-        <td>
-<select name = 'n_subject' >
-{% for sub in normalized_subjects %}
-    <option value = '{{sub}}' >{{sub}}</option>
-{% endfor %}
-</select>
-        </td>
-        <td>
-<input class = 'btn btn-primary' type = 'submit' value = 'update' />
-        </td>
-    </tr>
 </table>
-</form>
 {% endblock %}

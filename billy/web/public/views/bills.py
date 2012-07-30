@@ -2,8 +2,11 @@ import urllib
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.generic import View
+from django.utils.feedgenerator import Rss201rev2Feed
 
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -12,16 +15,6 @@ from billy.importers.utils import fix_bill_id
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList, ListViewBase
 from .search import search_by_bill_id
-
-
-class BillsList(ListViewBase):
-    use_table = True
-    list_item_context_name = 'bill'
-    paginator = CursorPaginator
-    rowtemplate_name = templatename('bills_list_row')
-    column_headers = ('Title', 'Introduced', 'Recent Action', 'Votes')
-    statenav_active = 'bills'
-    show_per_page = 10
 
 
 class RelatedBillsList(RelatedObjectsList):
@@ -59,7 +52,10 @@ class RelatedBillsList(RelatedObjectsList):
             status = form.data.get('status')
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
-                description.append(metadata[chamber[0] + '_chamber_name'])
+                if metadata:
+                    description.append(metadata[chamber[0] + '_chamber_name'])
+                else:
+                    description.extend([chamber[0].title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
                 description.append('(%s)' %
@@ -104,86 +100,61 @@ class RelatedBillsList(RelatedObjectsList):
             metadata = None
         FilterBillsForm = get_filter_bills_form(metadata)
 
+        # start with the spec
+        spec = {}
+        if abbr != 'all':
+            spec['state'] = abbr
+
         # Setup the paginator.
         get = self.request.GET.get
         show_per_page = getattr(self, 'show_per_page', 10)
         show_per_page = int(get('show_per_page', show_per_page))
         page = int(get('page', 1))
-        if 100 < show_per_page:
+        if show_per_page > 100:
             show_per_page = 100
-
-        # If the request is for /xy/bills/ without search params:
-        if not self.request.GET:
-            spec = {}
-            if abbr != 'all':
-                spec['state'] = abbr
-            cursor = db.bills.find(spec)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
-            return self.paginator(cursor, page=page,
-                      show_per_page=show_per_page)
 
         # If search params are given:
         form = FilterBillsForm(self.request.GET)
 
         # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        if search_text is None:
-            pass
-        else:
+        if search_text:
             found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
                                                  search_text)
             if found_by_bill_id:
                 return IteratorPaginator(found_by_bill_id)
 
-        # Then fall back to search form use.
-        params = [
-            'chamber',
-            'subjects',
-            'sponsor__leg_id',
-            'actions__type',
-            'type',
-            'status',
-            'session']
-
         if settings.ENABLE_ELASTICSEARCH:
-            kwargs = {}
-
-            if abbr != 'all':
-                kwargs['state'] = abbr
-
             chamber = form.data.get('chamber')
             if chamber:
-                kwargs['chamber'] = chamber
+                spec['chamber'] = chamber
 
-            subjects = form.data.getlist('subjects')
+            subjects = form.data.get('subjects')
             if subjects:
-                kwargs['subjects'] = {'$all': filter(None, subjects)}
+                spec['subjects'] = {'$all': [filter(None, subjects)]}
 
             sponsor_id = form.data.get('sponsor__leg_id')
             if sponsor_id:
-                kwargs['sponsor_id'] = sponsor_id
+                spec['sponsor_id'] = sponsor_id
 
             status = form.data.get('status')
             if status:
-                kwargs['status'] = {'action_dates.%s' % status: {'$ne': None}}
+                spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
 
             type_ = form.data.get('type')
             if type_:
-                kwargs['type_'] = type_
+                spec['type_'] = type_
 
             session = form.data.get('session')
             if session:
-                kwargs['session'] = session
+                spec['session'] = session
 
-            cursor = Bill.search(search_text, **kwargs)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
-
+            cursor = Bill.search(search_text, **spec)
         else:
             # Elastic search not enabled--query mongo normally.
             # Mainly here for local work on search views.
-            spec = {}
-            if abbr != 'all':
-                spec['state'] = metadata['abbreviation']
+            params = ['chamber', 'subjects', 'sponsor__leg_id', 'actions__type',
+                      'type', 'status', 'session']
             for key in params:
                 val = form.data.get(key)
                 if val:
@@ -194,7 +165,15 @@ class RelatedBillsList(RelatedObjectsList):
                 spec['title'] = {'$regex': search_text, '$options': 'i'}
 
             cursor = db.bills.find(spec)
-            cursor.sort([('action_dates.last', pymongo.DESCENDING)])
+
+        sort = self.request.GET.get('sort', 'last')
+        if sort not in ('first', 'last', 'signed', 'passed_upper',
+                        'passed_lower'):
+            sort = 'last'
+        sort_key = 'action_dates.{0}'.format(sort)
+
+        # do sorting on the cursor
+        cursor.sort([(sort_key, pymongo.DESCENDING)])
 
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
@@ -219,8 +198,35 @@ class AllStateBills(RelatedBillsList):
     use_table = True
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
-    description_template = 'Bills from all 50 states'
+    description_template = '''NOT USED'''
     title_template = ('Search bills from all 50 states - Open States')
+
+
+class BillFeed(StateBills):
+    """ does everything StateBills does but outputs as RSS """
+
+    show_per_page = 100
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        queryset = self.get_queryset()
+        link = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+                            reverse('bills', args=args, kwargs=kwargs),
+                            request.META['QUERY_STRING'])
+        feed_url = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+                            reverse('bills_feed', args=args, kwargs=kwargs),
+                            request.META['QUERY_STRING'])
+        feed = Rss201rev2Feed(title=context['description'], link=link,
+                              feed_url=feed_url, ttl=360,
+                              description = context['description'] +
+                              '\n'.join(context.get('long_description', '')))
+        for item in queryset:
+            link = 'http://%s%s' % (request.META['SERVER_NAME'],
+                                    item.get_absolute_url())
+            feed.add_item(title=item['bill_id'], link=link, unique_id=link,
+                          description=item['title'])
+        return HttpResponse(feed.writeString('utf-8'),
+                            content_type='application/xml')
 
 
 def bill(request, abbr, session, bill_id):

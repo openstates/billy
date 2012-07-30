@@ -184,13 +184,13 @@ class AttrManager(object):
             return newclass(self)
         else:
             # Else wrap the instance data in the new class.
-            inst = newclass(inst[self.keyname])
+            inst = newclass(inst[self._keyname])
             return inst
 
     @property
-    def keyname(self):
+    def _keyname(self):
         try:
-            return self._keyname
+            return self.keyname
         except AttributeError:
             pass
         keyname = self.__class__.__name__
@@ -200,7 +200,7 @@ class AttrManager(object):
 class ListManager(list, AttrManager):
     def __iter__(self):
         wrapper = self._wrapper
-        for obj in self.document[self.keyname]:
+        for obj in self.document[self._keyname]:
             yield wrapper(obj)
 
     def __getitem__(self, int_or_slice):
@@ -223,7 +223,13 @@ class DictManager(dict, AttrManager):
         return [(k, self._wrapper(v)) for (k, v) in dict.items(self)]
 
     def __getitem__(self, key):
-        return self._wrapper(dict.__getitem__(self, key))
+        data = dict.__getitem__(self, key)
+        if isinstance(data, dict):
+            return self._wrapper(data)
+        elif isinstance(data, list):
+            return map(self._wrapper, data)
+        else:
+            return data
 
 
 class RelatedDocument(object):
