@@ -1035,7 +1035,7 @@ def legislator_edit(request, id):
     if not leg:
         raise Http404('No legislators found for id %r.' % id)
 
-    meta = metadata(leg[leg['level']])
+    meta = metadata(leg[settings.LEVEL_FIELD])
     return render(request, 'billy/legislator_edit.html', {
         'leg': leg,
         'metadata': meta,
