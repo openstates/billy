@@ -52,7 +52,10 @@ class RelatedBillsList(RelatedObjectsList):
             status = form.data.get('status')
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
-                description.append(metadata[chamber[0] + '_chamber_name'])
+                if metadata:
+                    description.append(metadata[chamber[0] + '_chamber_name'])
+                else:
+                    description.extend([chamber[0].title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
                 description.append('(%s)' %
