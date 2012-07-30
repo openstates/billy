@@ -852,15 +852,13 @@ def subjects(request, abbr):
 
 
 def subjects_remove(request, abbr=None, id=None):
-    meta = metadata(abbr)
-    obj = db.subjects.remove({"_id": id})
-
+    db.subjects.remove({"_id": id}, safe=True)
     return redirect('admin_subjects', abbr)
 
 
 @require_http_methods(["POST"])
 def subjects_commit(request, abbr):
-    meta = metadata(abbr)
+
     def _gen_id(abbr, subject):
         return "%s-%s" % (abbr, subject)
 
@@ -893,7 +891,6 @@ def subjects_commit(request, abbr):
             "remote": remote,
             "normal": normal
         }
-#        print obj
 
         db.subjects.update({"_id": eyedee},
                            obj,

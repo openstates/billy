@@ -4,7 +4,7 @@ import random
 
 from billy import db
 from billy.commands import BaseCommand
-from billy.utils import metadata
+from billy.conf import settings
 
 from billy.commands.dump import APIValidator, api_url
 

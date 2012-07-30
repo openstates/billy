@@ -2,6 +2,7 @@ import json
 import datetime
 
 from billy.utils import chamber_name
+from billy.conf import settings
 
 from django.template import defaultfilters
 from piston.emitters import Emitter, JSONEmitter
