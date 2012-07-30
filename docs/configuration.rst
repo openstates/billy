@@ -35,12 +35,6 @@ Default Settings
     Directory where manual data files for matched ids/subjects are stored.  (default: "<cwd>/manual_data")
 :data:`BILLY_SUBJECTS`
     List of valid subject names
-:data:`BILLY_LEVEL_FIELDS`
-    Mapping of level names to required fields for the level in question.
-    Default::
-        {'country': ('country',),
-         'state': ('state', 'country'),
-        }
 :data:`SCRAPELIB_TIMEOUT`
     Value (in seconds) for url retrieval timeout.  (default: 600)
 :data:`SCRAPELIB_RETRY_ATTEMPTS`
