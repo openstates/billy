@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict
 
 from billy import db
+from billy.conf import settings
 from billy.utils import term_for_session
 from billy.reports.utils import update_common, get_quality_exceptions
 
@@ -43,9 +44,6 @@ def _bill_report_dict():
 
 
 def scan_bills(abbr):
-    metadata = db.metadata.find_one({'_id': abbr})
-    level = metadata['level']
-
     duplicate_sources = defaultdict(int)
     duplicate_versions = defaultdict(int)
     other_actions = defaultdict(int)
@@ -55,7 +53,7 @@ def scan_bills(abbr):
     # load exception data into sets of ids indexed by exception type
     quality_exceptions = get_quality_exceptions(abbr)
 
-    for bill in db.bills.find({'level': level, level: abbr}):
+    for bill in db.bills.find({settings.LEVEL_FIELD: abbr}):
         session_d = sessions[bill['session']]
 
         # chamber count & bill_types

@@ -1,4 +1,4 @@
-__version__ = '1.3-dev'
+__version__ = '1.3.0'
 
 from billy.conf import settings
 

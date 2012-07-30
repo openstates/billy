@@ -5,7 +5,6 @@ from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.views.generic import View
 from django.utils.feedgenerator import Rss201rev2Feed
 
 from billy.models import db, Metadata, Bill
@@ -13,7 +12,7 @@ from billy.models.pagination import CursorPaginator, IteratorPaginator
 from billy.importers.utils import fix_bill_id
 
 from ..forms import get_filter_bills_form
-from .utils import templatename, RelatedObjectsList, ListViewBase
+from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
 
 
@@ -52,7 +51,10 @@ class RelatedBillsList(RelatedObjectsList):
             status = form.data.get('status')
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
-                description.append(metadata[chamber[0] + '_chamber_name'])
+                if metadata:
+                    description.append(metadata[chamber[0] + '_chamber_name'])
+                else:
+                    description.extend([chamber[0].title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
                 description.append('(%s)' %
@@ -128,7 +130,7 @@ class RelatedBillsList(RelatedObjectsList):
 
             subjects = form.data.get('subjects')
             if subjects:
-                spec['subjects'] = {'$all': filter(None, subjects)}
+                spec['subjects'] = {'$all': [filter(None, subjects)]}
 
             sponsor_id = form.data.get('sponsor__leg_id')
             if sponsor_id:
@@ -150,8 +152,8 @@ class RelatedBillsList(RelatedObjectsList):
         else:
             # Elastic search not enabled--query mongo normally.
             # Mainly here for local work on search views.
-            params = ['chamber', 'subjects', 'sponsor__leg_id', 'actions__type',
-                      'type', 'status', 'session']
+            params = ['chamber', 'subjects', 'sponsor__leg_id',
+                      'actions__type', 'type', 'status', 'session']
             for key in params:
                 val = form.data.get(key)
                 if val:
@@ -215,7 +217,7 @@ class BillFeed(StateBills):
                             request.META['QUERY_STRING'])
         feed = Rss201rev2Feed(title=context['description'], link=link,
                               feed_url=feed_url, ttl=360,
-                              description = context['description'] +
+                              description=context['description'] +
                               '\n'.join(context.get('long_description', '')))
         for item in queryset:
             link = 'http://%s%s' % (request.META['SERVER_NAME'],

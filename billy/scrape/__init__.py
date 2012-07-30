@@ -60,15 +60,10 @@ class ScraperMeta(type):
     def __new__(meta, classname, bases, classdict):
         cls = type.__new__(meta, classname, bases, classdict)
 
-        # default level to state to preserve old behavior
-        if not hasattr(cls, 'level'):
-            cls.level = 'state'
-            cls.country = 'us'
-
-        region = getattr(cls, cls.level, None)
+        abbr = getattr(cls, settings.LEVEL_FIELD, None)
         scraper_type = getattr(cls, 'scraper_type', None)
 
-        if region and scraper_type:
+        if abbr and scraper_type:
             _scraper_registry[scraper_type] = cls
 
         return cls
@@ -107,11 +102,6 @@ class Scraper(scrapelib.Scraper):
             kwargs['cache_write_only'] = False
 
         super(Scraper, self).__init__(**kwargs)
-
-        for f in settings.BILLY_LEVEL_FIELDS[self.level]:
-            if not hasattr(self, f):
-                raise Exception('%s scrapers must have a %s attribute' % (
-                    self.level, f))
 
         self.metadata = metadata
         self.output_dir = output_dir
@@ -185,10 +175,8 @@ class Scraper(scrapelib.Scraper):
         raise NoDataForPeriod(term)
 
     def save_object(self, obj):
-        # copy over level information
-        obj['level'] = self.level
-        for f in settings.BILLY_LEVEL_FIELDS[self.level]:
-            obj[f] = getattr(self, f)
+        # copy over LEVEL_FIELD
+        obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
 
         filename = obj.get_filename()
         with open(os.path.join(self.output_dir, self.scraper_type, filename),

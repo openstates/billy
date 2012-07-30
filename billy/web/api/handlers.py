@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from billy import db
 from billy.models import Bill
 from billy.conf import settings
-from billy.utils import metadata, find_bill, parse_param_dt
+from billy.utils import find_bill, parse_param_dt
 
 import pymongo
 
@@ -117,8 +117,8 @@ class BillyHandler(BaseHandler):
 
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
-        data = db.metadata.find(fields={'level': 1, 'abbreviation': 1,
-                                        'name': 1, 'feature_flags': 1,
+        data = db.metadata.find(fields={'abbreviation': 1, 'name': 1,
+                                        'feature_flags': 1,
                                         '_id': 0}).sort('name')
         return list(data)
 
@@ -139,8 +139,8 @@ class BillHandler(BillyHandler):
             query = {'_id': billy_bill_id}
         else:
             abbr = abbr.lower()
-            level = metadata(abbr)['level']
-            query = {level: abbr, 'session': session, 'bill_id': bill_id}
+            query = {settings.LEVEL_FIELD: abbr, 'session': session,
+                     'bill_id': bill_id}
             if chamber:
                 query['chamber'] = chamber.lower()
         return find_bill(query, fields=_build_field_list(request))
@@ -150,9 +150,9 @@ class BillSearchHandler(BillyHandler):
     def read(self, request):
 
         bill_fields = {'title': 1, 'created_at': 1, 'updated_at': 1,
-                       'bill_id': 1, 'type': 1, 'state': 1, 'level': 1,
-                       'country': 1, 'session': 1, 'chamber': 1, 'subjects': 1,
-                       '_type': 1, 'id': 1}
+                       'bill_id': 1, 'type': 1, settings.LEVEL_FIELD: 1,
+                       'session': 1, 'chamber': 1, 'subjects': 1, '_type': 1,
+                       'id': 1}
         # replace with request's fields if they exist
         bill_fields = _build_field_list(request, bill_fields)
 
@@ -311,8 +311,7 @@ class EventsHandler(BillyHandler):
 class SubjectListHandler(BillyHandler):
     def read(self, request, abbr, session=None, chamber=None):
         abbr = abbr.lower()
-        level = metadata(abbr)['level']
-        spec = {level: abbr}
+        spec = {settings.LEVEL_FIELD: abbr}
         if session:
             spec['session'] = session
         if chamber:

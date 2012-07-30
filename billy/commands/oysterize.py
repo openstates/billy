@@ -1,4 +1,5 @@
 from billy import db
+from billy.conf import settings
 from billy.commands import BaseCommand
 from oyster.core import kernel
 from billy.importers.bills import oysterize_version
@@ -9,13 +10,13 @@ class Oysterize(BaseCommand):
     help = 'send bill versions to oyster'
 
     def add_args(self):
-        self.add_argument('state', help='state to oysterize')
+        self.add_argument('abbr', help='abbr of data to oysterize')
 
     def handle(self, args):
-        state = args.state
-        known_ids = kernel.db.tracked.find({'metadata.state': state}
+        abbr = args.abbr
+        known_ids = kernel.db.tracked.find({'metadata.state': abbr}
                                           ).distinct('_id')
-        bills = db.bills.find({'state': state,
+        bills = db.bills.find({settings.LEVEL_FIELD: abbr,
                                'versions.url': {'$exists': True}
                               }, timeout=False)
         print '%s bills with versions to oysterize' % bills.count()

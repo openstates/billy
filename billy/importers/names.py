@@ -23,7 +23,7 @@ def get_legislator_id(abbr, session, chamber, name):
         else:
             raise Exception("bad session: " + session)
 
-        matcher = NameMatcher(abbr, term['name'], metadata['level'])
+        matcher = NameMatcher(abbr, term['name'])
         __matchers[(abbr, session)] = matcher
 
     if chamber == 'both' or chamber == 'joint' or chamber == 'other':
@@ -66,18 +66,17 @@ class NameMatcher(object):
     are no longer unique and will not be matched with either legislator.
     """
 
-    def __init__(self, abbr, term, level):
+    def __init__(self, abbr, term):
         self._names = {'upper': {}, 'lower': {}, None: {}}
         self._codes = {'upper': {}, 'lower': {}, None: {}}
         self._manual = {'upper': {}, 'lower': {}, None: {}}
         self._abbr = abbr
         self._term = term
 
-        roles_elemMatch = {'level': level, level: abbr, 'type': 'member',
+        roles_elemMatch = {settings.LEVEL_FIELD: abbr, 'type': 'member',
                            'term': term}
         old_roles_query = {'old_roles.%s' % term: {'$elemMatch':
-                                                   {'level': level,
-                                                    level: abbr,
+                                                   {settings.LEVEL_FIELD: abbr,
                                                     'type': 'member'}}}
 
         for legislator in db.legislators.find({

@@ -1,11 +1,12 @@
 from billy import db, utils
+from billy.conf import settings
 
 import numpy
 
 
-def generate_leg_indexes(state, term, chamber):
+def generate_leg_indexes(abbr, term, chamber):
     leg_indexes = {}
-    elemMatch = {'state': state, 'chamber': chamber,
+    elemMatch = {settings.LEVEL_FIELD: abbr, 'chamber': chamber,
                  'type': 'member', 'term': term}
     i = 0
     for leg in db.legislators.find({'$or':
@@ -17,12 +18,12 @@ def generate_leg_indexes(state, term, chamber):
     return leg_indexes
 
 
-def generate_adjacency_matrix(state, session, chamber, leg_indexes,
+def generate_adjacency_matrix(abbr, session, chamber, leg_indexes,
                               primary_sponsor_type='LEAD_AUTHOR'):
     size = len(leg_indexes)
     matrix = numpy.zeros((size, size))
 
-    for bill in db.bills.find({'state': state, 'session': session,
+    for bill in db.bills.find({settings.LEVEL_FIELD: abbr, 'session': session,
                                'chamber': chamber}):
         try:
             for author in bill['sponsors']:
@@ -88,11 +89,11 @@ def pagerank(matrix, d_factor=0.85):
     return result
 
 
-def legislator_pagerank(state, session, chamber, d_factor=0.85):
-    term = utils.term_for_session(state, session)
-    leg_indexes = generate_leg_indexes(state, term, chamber)
-    adjacency_matrix = generate_adjacency_matrix(state, session,
-                                                 chamber, leg_indexes)
+def legislator_pagerank(abbr, session, chamber, d_factor=0.85):
+    term = utils.term_for_session(abbr, session)
+    leg_indexes = generate_leg_indexes(abbr, term, chamber)
+    adjacency_matrix = generate_adjacency_matrix(abbr, session, chamber,
+                                                 leg_indexes)
     result = pagerank(adjacency_matrix, d_factor)
 
     for leg_id in leg_indexes.keys():
@@ -107,12 +108,12 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('state')
+    parser.add_argument('abbr')
     parser.add_argument('session')
     parser.add_argument('chamber')
     args = parser.parse_args()
 
-    pr = legislator_pagerank(args.state, args.session, args.chamber)
+    pr = legislator_pagerank(args.abbr, args.session, args.chamber)
     out = csv.writer(sys.stdout)
 
     for (leg_id, value) in pr.iteritems():

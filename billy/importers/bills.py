@@ -30,8 +30,8 @@ logger = logging.getLogger('billy')
 def ensure_indexes():
     # TODO: add a _current_term, _current_session index?
 
-    # accomodates basic lookup / unique constraint on state/session/bill_id
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    # accomodates basic lookup / unique constraint on abbr/session/bill_id
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('session', pymongo.ASCENDING),
                            ('chamber', pymongo.ASCENDING),
                            ('bill_id', pymongo.ASCENDING)],
@@ -47,21 +47,21 @@ def ensure_indexes():
                            ('versions.doc_id', pymongo.ASCENDING)])
 
     # common search indices
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('subjects', pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('sponsors.leg_id', pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
 
     # generic sort-assist indices on the action_dates
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.first', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.passed_upper', pymongo.DESCENDING)])
-    db.bills.ensure_index([('state', pymongo.ASCENDING),
+    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                            ('action_dates.passed_lower', pymongo.DESCENDING)])
 
     # votes index
@@ -203,7 +203,7 @@ def git_prelod(abbr):
 def oysterize_version(bill, version):
     titles = [bill['title']] + bill.get('alternate_titles', [])
     logger.info('{0} tracked in oyster'.format(version['doc_id']))
-    oysterize(version['url'], bill['state'] + ':billtext',
+    oysterize(version['url'], bill[settings.LEVEL_FIELD] + ':billtext',
               id=version['doc_id'],
               # metadata
               mimetype=version.get('mimetype', None),
@@ -216,8 +216,7 @@ def oysterize_version(bill, version):
 
 
 def import_bill(data, votes, categorizer):
-    level = data['level']
-    abbr = data[level]
+    abbr = data[settings.LEVEL_FIELD]
 
     # clean up bill_ids
     data['bill_id'] = fix_bill_id(data['bill_id'])
@@ -237,10 +236,10 @@ def import_bill(data, votes, categorizer):
     if categorizer:
         categorizer.categorize_bill(data)
 
-    # this is a hack added for Rhode Island where we can't
+    # this is a hack initially added for Rhode Island where we can't
     # determine the full bill_id, if this key is in the metadata
     # we just use the numeric portion, not ideal as it won't work
-    # in states where HB/SBs overlap, but in RI they never do
+    # where HB/SBs overlap, but in RI they never do
     if metadata(abbr).get('_partial_vote_bill_id'):
         # pull off numeric portion of bill_id
         numeric_bill_id = data['bill_id'].split()[1]
@@ -253,7 +252,7 @@ def import_bill(data, votes, categorizer):
 
     data['votes'].extend(bill_votes)
 
-    bill = db.bills.find_one({'level': level, level: abbr,
+    bill = db.bills.find_one({settings.LEVEL_FIELD: abbr,
                               'session': data['session'],
                               'chamber': data['chamber'],
                               'bill_id': data['bill_id']})
@@ -274,8 +273,7 @@ def import_bill(data, votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
-            cid = get_committee_id(level, abbr, data['chamber'],
-                                   sponsor['name'])
+            cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
             if not cid is None:
                 sponsor['committee_id'] = cid
 
@@ -284,7 +282,7 @@ def import_bill(data, votes, categorizer):
 
         # committee_ids
         if 'committee' in vote:
-            committee_id = get_committee_id(level, abbr, vote['chamber'],
+            committee_id = get_committee_id(abbr, vote['chamber'],
                                             vote['committee'])
             vote['committee_id'] = committee_id
 
@@ -305,7 +303,7 @@ def import_bill(data, votes, categorizer):
         adate = action['date']
 
         def _match_committee(name):
-            return get_committee_id(level, abbr, action['actor'], name)
+            return get_committee_id(abbr, action['actor'], name)
 
         def _match_legislator(name):
             return get_legislator_id(abbr,
@@ -417,9 +415,7 @@ def import_bills(abbr, data_dir):
         logger.debug('Failed to match vote %s %s %s' % tuple([
             r.encode('ascii', 'replace') for r in remaining]))
 
-    meta = db.metadata.find_one({'_id': abbr})
-    level = meta['level']
-    populate_current_fields(level, abbr)
+    populate_current_fields(abbr)
 
     git_commit("Import Update")
 
@@ -428,7 +424,7 @@ def import_bills(abbr, data_dir):
     return counts
 
 
-def populate_current_fields(level, abbr):
+def populate_current_fields(abbr):
     """
     Set/update _current_term and _current_session fields on all bills
     for a given location.
@@ -437,7 +433,7 @@ def populate_current_fields(level, abbr):
     current_term = meta['terms'][-1]
     current_session = current_term['sessions'][-1]
 
-    for bill in db.bills.find({'level': level, level: abbr}):
+    for bill in db.bills.find({settings.LEVEL_FIELD: abbr}):
         if bill['session'] == current_session:
             bill['_current_session'] = True
         else:
@@ -460,7 +456,7 @@ def denormalize_votes(bill, bill_id):
         vote = vote.copy()
         vote['_id'] = vote['vote_id']
         vote['bill_id'] = bill_id
-        vote['state'] = bill['state']
+        vote[settings.LEVEL_FIELD] = bill[settings.LEVEL_FIELD]
         vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]

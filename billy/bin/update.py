@@ -244,7 +244,7 @@ def main(old_scrape_compat=False):
         module_settings = getattr(module, 'settings', {})
         abbrev = metadata['abbreviation']
 
-        # load state settings, then command line settings
+        # load module settings, then command line settings
         settings.update(module_settings)
         settings.update(args)
 

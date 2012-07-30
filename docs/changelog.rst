@@ -3,9 +3,10 @@ billy changelog
 
 1.3-dev
 -------
-**in development**
+**30 July 2012**
     * first truly usable version of billy.web.public
-    * remove retire & prune_committees commands in favor of admin
+    * remove retire, load_legislators, and prune_committees commands in favor of admin
+    * more admin improvements including subject support and cleaned up reporting
     * refactor of billy.models
     * db: denormalize votes into own collection on bill import
     * db: add action_dates to bills

@@ -45,7 +45,7 @@ class DownloadPhotos(BaseCommand):
                 if not os.path.exists(d):
                     os.makedirs(d)
 
-            for leg in db.legislators.find({meta['level']: abbr,
+            for leg in db.legislators.find({settings.LEVEL_FIELD: abbr,
                                             'photo_url': {'$exists': True}}):
 
                 fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))

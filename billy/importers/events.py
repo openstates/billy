@@ -6,6 +6,7 @@ import datetime
 import json
 
 from billy import db
+from billy.conf import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.importers.utils import fix_bill_id, get_committee_id
@@ -17,15 +18,15 @@ logger = logging.getLogger('billy')
 
 def ensure_indexes():
     db.events.ensure_index([('when', pymongo.ASCENDING),
-                            ('state', pymongo.ASCENDING),
+                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
                             ('type', pymongo.ASCENDING)])
     db.events.ensure_index([('when', pymongo.DESCENDING),
-                            ('state', pymongo.ASCENDING),
+                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
                             ('type', pymongo.ASCENDING)])
 
 
 def _insert_with_id(event):
-    abbr = event[event['level']]
+    abbr = event[settings.LEVEL_FIELD]
     id = next_big_id(abbr, 'E', 'event_ids')
     logger.info("Saving as %s" % id)
 
@@ -44,8 +45,7 @@ def import_events(abbr, data_dir, import_actions=False):
             data = prepare_obj(json.load(f))
 
         def _resolve_ctty(committee):
-            return get_committee_id(data['level'],
-                                    data['state'],
+            return get_committee_id(data[settings.LEVEL_FIELD],
                                     committee['chamber'],
                                     committee['participant'])
 
@@ -80,12 +80,12 @@ def import_events(abbr, data_dir, import_actions=False):
             db_bill = db.bills.find_one({
                 "$or": [
                     {
-                        "state": abbr,
+                        settings.LEVEL_FIELD: abbr,
                         'session': data['session'],
                         'bill_id': bill_id
                     },
                     {
-                        "state": abbr,
+                        settings.LEVEL_FIELD: abbr,
                         'session': data['session'],
                         'alternate_bill_ids': bill_id
                     }
@@ -107,16 +107,15 @@ def import_events(abbr, data_dir, import_actions=False):
 
 def import_event(data):
     event = None
-    level = data['level']
 
     if '_guid' in data:
-        event = db.events.find_one({'level': level,
-                                    level: data[level],
+        event = db.events.find_one({settings.LEVEL_FIELD:
+                                    data[settings.LEVEL_FIELD],
                                     '_guid': data['_guid']})
 
     if not event:
-        event = db.events.find_one({'level': level,
-                                    level: data[level],
+        event = db.events.find_one({settings.LEVEL_FIELD:
+                                    data[settings.LEVEL_FIELD],
                                     'when': data['when'],
                                     'end': data['end'],
                                     'type': data['type'],

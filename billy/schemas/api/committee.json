@@ -2,12 +2,11 @@
  "type": "object",
  "properties": {
     "id": {"type": "string", "pattern": "^[A-Z]{2}C\\d{6}$"},
+    "state": {"type": "string", "minLength": 2, "maxLength": 2},
     "committee": {"type": "string"},
     "subcommittee": {"type": ["null", "string"]},
-    "level": {"type": "string", "enum":["country", "state"]},
-    "country": {"type": "string", "minLength": 2, "maxLength": 2},
-    "state": {"type": "string", "minLength": 2, "maxLength": 2},
     "chamber": {"type": "string", "enum": ["upper", "lower", "joint"]},
+    "type": {"type": "string", "required": false},
     "parent_id": {"type": ["string", "null"],
       "pattern": "^[A-Z]{2}C\\d{6}$", "required": false},
     "members": {"type": "array", "items": {"type": "object", "properties": {
@@ -18,6 +17,6 @@
     }}},
     "sources": {"type": "array", "items": {"type": "object", "properties": {
         "url": {"type": "string"}
-    }}}
+    }}, "minItems": 1}
  }
 }
