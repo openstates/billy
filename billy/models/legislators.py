@@ -1,11 +1,12 @@
 import itertools
-import collections
+import operator
+from collections import defaultdict
 
 import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
-from .base import (db, Document, RelatedDocuments, ListManager, DictManager)
+from .base import (db, Document, RelatedDocuments, ListManager)
 from .metadata import Metadata
 from .utils import CachedAttribute
 
@@ -44,47 +45,36 @@ class RolesManager(ListManager):
     wrapper = Role
 
 
-class OldRole(DictManager):
-    methods_only = True
+class OldRole(dict):
+    '''The `OldRolesManager` has been taken out behind the barn and
+    shot on account of its confusingness. To replace it, this wrapper
+    class defines a few helpful methods for templates to use, and
+    each Legislator object dynamically gets its own OldRole class
+    created as a subclass of this class, with an extra attr `document`
+    pointing back to the related legislator object. The method that
+    creates the new OldRole class is Legislator._old_role_wrapper.
+    '''
 
     @property
     def termdata(self):
         dict_ = self.document.metadata.terms_manager.dict_
         return dict_[self['term']]
 
+    def chamber_name(self):
+        chamber = self['chamber']
+        if chamber == 'joint':
+            return 'Joint'
+        return self.document.metadata['%s_chamber_name' % self['chamber']]
 
-class OldRolesList(ListManager):
-    wrapper = OldRole
-    keyname = 'old_roles'
-    methods_only = True
-
-
-class OldRolesManager(dict):
-    wrapper = OldRolesList
-    keyname = 'old_roles'
-
-    def __iter__(self):
-        wrapper = self._wrapper
-        for role in itertools.chain.from_iterable(self.values()):
-            inst = wrapper(role)
-            yield inst
-
-    def _sessions_served(self):
-        sessions = collections.defaultdict(set)
-        for term, oldroles_list in self.items():
-            for role in oldroles_list:
-                sessions = set(list(role.termdata.session_names()))
-                sessions[role['term']] |= sessions
-        return dict(sessions)
-
-    def sessions_served(self):
-        term_dict = self.legislator.metadata.term_dict
-        for term, oldroles_list in self.items():
-            for role in oldroles_list:
-                termdata = term_dict[term]
-                import pdb;pdb.set_trace()
-
-        import pdb;pdb.set_trace()
+    def committee_object(self):
+        '''If the committee id no longer exists in mongo for some reason,
+        this function returns None.
+        '''
+        if 'committee_id' in self:
+            _id = self['committee_id']
+            return self.document._old_roles_committees.get(_id)
+        else:
+            return self
 
 
 class Legislator(Document):
@@ -96,7 +86,6 @@ class Legislator(Document):
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'],
                                     sort=[('published_parsed', -1)])
     roles_manager = RolesManager()
-    old_roles_manager = OldRolesManager()
     votes_manager = RelatedDocuments('BillVote', model_keys=['_voters'])
 
     @property
@@ -215,14 +204,45 @@ class Legislator(Document):
     def old_sessions_served(self):
         '''Returns the sessions served info from
         old_roles.'''
+        display_names = set()
         term_dict = self.metadata.term_dict
         session_details = self.metadata['session_details']
         for term, oldroles_list in self['old_roles'].items():
             for role in oldroles_list:
                 termdata = term_dict[term]
-                for term in termdata:
-                    for session in term['sessions']:
-                        yield session_details[session]
+                for term_ in termdata:
+                    for session in term_['sessions']:
+                        name = session_details[session]['display_name']
+                        display_names.add(name)
+        return display_names
 
+    @CachedAttribute
+    def _old_roles_committees(self):
+        ids = []
+        for term, roles in self['old_roles'].items():
+            _ids = [role.get('committee_id') for role in roles]
+            _ids = filter(None, _ids)
+            ids.extend(_ids)
+        objs = list(db.committees.find({'_id': {'$in': ids}}))
+        objs = dict((objs['_id'], objs) for objs in objs)
+        return objs
 
+    @CachedAttribute
+    def _old_role_wrapper(self):
+        cls = type('OldRole', (OldRole,), dict(document=self))
+        return cls
+
+    def old_roles_manager(self):
+        '''Return old roles, grouped first by term, then by chamber,
+        then by type.'''
+        wrapper = self._old_role_wrapper
+        chamber_getter = operator.itemgetter('chamber')
+        for term, roles in self['old_roles'].items():
+            chamber_roles = defaultdict(lambda: defaultdict(list))
+            for chamber, roles in itertools.groupby(roles, chamber_getter):
+                for role in roles:
+                    role = wrapper(role)
+                    typeslug = role['type'].lower().replace(' ', '_')
+                    chamber_roles[chamber][typeslug].append(role)
+            yield term, chamber_roles
 
