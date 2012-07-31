@@ -269,3 +269,34 @@ def vote(request, abbr, vote_id):
                        bill=bill,
                        vote=vote,
                        statenav_active='bills'))
+
+
+def bill_by_mongoid(request, id_):
+    bill = db.bills.find_one(id_)
+    return redirect(bill.get_absolute_url())
+
+
+def show_all(key):
+    def func(request, abbr, session, bill_id, key):
+        # get fixed version
+        fixed_bill_id = fix_bill_id(bill_id)
+        # redirect if URL's id isn't fixed id without spaces
+        print fixed_bill_id, bill_id
+        if fixed_bill_id.replace(' ', '') != bill_id:
+            return redirect('bill', abbr=abbr, session=session,
+                            bill_id=fixed_bill_id.replace(' ', ''))
+        bill = db.bills.find_one({'state': abbr, 'session': session,
+                                  'bill_id': fixed_bill_id})
+        if bill is None:
+            raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
+                                                             bill_id))
+        return render(request, templatename('bill_all_%s' % key),
+        dict(abbr=abbr,
+             metadata=Metadata.get_object(abbr),
+             bill=bill,
+             sources=bill['sources'],
+             statenav_active='bills'))
+    return func
+
+all_documents = show_all('documents')
+all_versions = show_all('versions')
