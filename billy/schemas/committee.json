@@ -1,7 +1,6 @@
 {"description": "committee data",
  "type": "object",
  "properties": {
-    "id": {"type": "string", "pattern": "^[A-Z]{2}C\\d{6}$"},
     "state": {"type": "string", "minLength": 2, "maxLength": 2},
     "committee": {"type": "string"},
     "subcommittee": {"type": ["null", "string"]},
