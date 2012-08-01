@@ -699,7 +699,6 @@ def duplicate_versions(request, abbr):
                   {'metadata': meta, 'report': report})
 
 
-@login_required
 def _bill_spec(meta, limit):
     abbr = meta['abbreviation']
 
@@ -1232,7 +1231,6 @@ def mom_commit(request, abbr):
         })
 
 
-@login_required
 def _mom_attr_diff(merge, leg1, leg2):
     mv_info = {
         "1": "Root Legislator",
@@ -1259,7 +1257,6 @@ def _mom_attr_diff(merge, leg1, leg2):
     return (mv, mv_info)
 
 
-@login_required
 def _mom_mangle(attr):
     args = {"sort_keys": True, "indent": 4, "cls": JSONDateEncoder}
     if isinstance(attr, types.ListType):
