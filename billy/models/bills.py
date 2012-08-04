@@ -367,6 +367,21 @@ class Bill(Document):
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
 
+    def _split_list(n, key):
+        def first5(self):
+            return self[key][:n]
+
+        def remainder(self):
+            if n < len(self[key]):
+                remainder = self[key][n:]
+            else:
+                remainder = []
+            return remainder
+        return first5, remainder
+
+    documents_preview, documents_remainder = _split_list(5, 'documents')
+    versions_preview, versions_remainder = _split_list(12, 'versions')
+
     @staticmethod
     def search(query=None, state=None, chamber=None, subjects=None,
                bill_id=None, bill_id__in=None, search_window=None,

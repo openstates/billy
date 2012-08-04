@@ -32,6 +32,16 @@ urlpatterns = patterns('billy.web.public.views.misc',
 
 )
 
+urlpatterns += patterns('',
+    (
+        r'^login/$',
+        'django.contrib.auth.views.login',
+        {
+            'template_name': 'billy/web/public/login.html'
+        }
+    ),
+)
+
 # region/state specific
 urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
