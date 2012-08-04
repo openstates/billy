@@ -183,6 +183,9 @@ class Legislator(Document):
         vote = self.vote
         bill = vote.bill()
         term = bill['_term']
+        # shouldn't happen, but avoids an error this way
+        if term not in self['old_roles']:
+            return None
         roles = self['old_roles'][term]
         chamber = vote['chamber']
 
