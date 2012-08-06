@@ -4,6 +4,7 @@ import collections
 
 from django.core import urlresolvers
 import pyes
+import pymongo
 
 from billy.conf import settings
 from billy.utils import parse_param_dt
@@ -271,7 +272,8 @@ class Bill(Document):
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
-    votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'])
+    votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'],
+                                     sort=[('date', pymongo.DESCENDING)])
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
