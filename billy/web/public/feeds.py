@@ -87,9 +87,12 @@ class NewsListFeed(GenericListFeed):
         return truncatewords(strip_tags(item['summary']), 100)
 
     def item_title(self, item):
-        return '%s (%s)' % (
-            item['title'],
-            item.published().strftime('%B %d, %Y'))
+        published = item.published()
+        if published is not None:
+            published = published.strftime('%B %d, %Y')
+        else:
+            published = ''
+        return '%s (%s)' % (item['title'], published)
 
 
 class StateEventsFeed(GenericListFeed):
