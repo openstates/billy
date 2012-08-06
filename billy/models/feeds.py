@@ -111,7 +111,9 @@ class FeedEntry(Document):
         entry['host'] = urldata.netloc
 
         # Prevent obfuscation of `published` method in template rendering.
-        del entry['published']
+        if 'published' in entry:
+            del entry['published']
+
         return ''
 
     def display(self):
