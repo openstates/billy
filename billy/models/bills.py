@@ -260,7 +260,14 @@ class BillVote(Document):
         return any([self['yes_votes'], self['no_votes'], self['other_votes']])
 
     def chamber_name(self):
-        metadata = self.bill().metadata
+        # Hack to accomodate bill-as-related-document and
+        # inherited reverse lookup 'bill' attribute that exists
+        # on vote objects returned from ListManager class.
+        if callable(self.bill):
+            bill = self.bill()
+        else:
+            bill = self.bill
+        metadata = bill.metadata
         name = metadata['%s_chamber_name' % self['chamber']]
         return name
 
