@@ -846,6 +846,23 @@ def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
+
+    leg_ids = db.leg_ids.find({"abbr": abbr})
+    sorted_ids = {}
+
+    def _id(term, chamber, name):
+        return "%s-%s-%s" % (
+            term, chamber, name
+        )
+
+    for thing in leg_ids:
+        key = _id(
+            thing['session'],
+            thing['chamber'],
+            thing['name']
+        )
+        sorted_ids[key] = thing
+
     if not report:
         raise Http404('No reports found for abbreviation %r.' % abbr)
     bill_unmatched = set(tuple(i) for i in
@@ -853,10 +870,23 @@ def leg_ids(request, abbr):
     com_unmatched = set(tuple(i) for i in
                          report['committees']['unmatched_leg_ids'])
     combined_sets = bill_unmatched | com_unmatched
+    eyedees = []
+
+    for thing in combined_sets:
+        session, chamber, name = thing
+        key = _id(
+            session,
+            chamber,
+            name
+        )
+        if key in sorted_ids:
+            continue
+
+        eyedees.append(thing)
 
     return render(request, 'billy/leg_ids.html', {
         "metadata": meta,
-        "leg_ids": combined_sets,
+        "leg_ids": eyedees,
         "legs": legs
     })
 
