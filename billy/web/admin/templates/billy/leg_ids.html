@@ -1,0 +1,28 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load staticfiles %}
+{% load billy_utiltags %}
+
+{% block title %}Data Quality{% endblock %}
+
+{% block script %}
+<link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
+<script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".mselect").select2();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+<table>
+{% for term, chamber, name in leg_ids %}
+    <tr>
+        <td>{{term}} {{chamber}}</td>
+        <td>{{name}}</td>
+        <td>Foo</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}
