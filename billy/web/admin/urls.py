@@ -22,6 +22,8 @@ urlpatterns = patterns('billy.web.admin.views',
     # Leg ID stuff
     url(r'^(?P<abbr>[a-z]{2})/leg_ids/$', 'leg_ids',
         name='admin_leg_ids'),
+    url(r'^(?P<abbr>[a-z]{2})/leg_ids-commit/$', 'leg_ids_commit',
+        name='admin_leg_ids_commit'),
 
 
     # admin overview pages

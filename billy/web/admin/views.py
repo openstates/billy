@@ -843,6 +843,7 @@ def legislators(request, abbr):
 
 @login_required
 def leg_ids(request, abbr):
+    meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
     if not report:
@@ -854,9 +855,43 @@ def leg_ids(request, abbr):
     combined_sets = bill_unmatched | com_unmatched
 
     return render(request, 'billy/leg_ids.html', {
+        "metadata": meta,
         "leg_ids": combined_sets,
         "legs": legs
     })
+
+
+@login_required
+@require_http_methods(["POST"])
+def leg_ids_commit(request, abbr):
+    ids = dict(request.POST)
+    for eyedee in ids:
+        term, chamber, name = eyedee.split(",", 2)
+        value = ids[eyedee][0]
+        if value == "Unknown":
+            continue
+
+        thing = "%s-%s-%s-%s" % (
+            value,
+            name,
+            chamber,
+            term
+        )
+
+        db.leg_ids.update({"_id": thing},
+                         {
+                             "_id": thing,
+                             "name": name,
+                             "session": term,
+                             "abbr": abbr,
+                             "leg_id": value,
+                             "chamber": chamber,
+                         },
+                         True,  # Upsert
+                         safe=True)
+
+    return redirect('admin_leg_ids', abbr)
+
 
 
 @login_required
