@@ -16,13 +16,30 @@
 {% endblock %}
 
 {% block content %}
+<form method = 'post' >
 <table>
 {% for term, chamber, name in leg_ids %}
     <tr>
         <td>{{term}} {{chamber}}</td>
         <td>{{name}}</td>
-        <td>Foo</td>
+        <td>
+            <select class = 'mselect' name = '{{term}},{{chamber}},{{name}}' type = 'text' >
+                <option value = 'Unknown' >Unknown</option>
+                {% for leg in legs %}
+                <option value = '{{ leg.leg_id }}' >
+                {{ leg.first_name }} {{ leg.last_name }}
+                ({{ leg.leg_id }})
+                </option>
+                {% endfor %}
+            </select>
+        </td>
     </tr>
 {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td><input class = 'btn btn-primary' type = 'submit' value = 'Make it so' /></td>
+    </tr>
 </table>
+</form>
 {% endblock %}

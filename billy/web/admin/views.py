@@ -844,6 +844,7 @@ def legislators(request, abbr):
 @login_required
 def leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})
+    legs = list(db.legislators.find({"state": abbr}))
     if not report:
         raise Http404('No reports found for abbreviation %r.' % abbr)
     bill_unmatched = set(tuple(i) for i in
@@ -853,7 +854,8 @@ def leg_ids(request, abbr):
     combined_sets = bill_unmatched | com_unmatched
 
     return render(request, 'billy/leg_ids.html', {
-        "leg_ids": combined_sets
+        "leg_ids": combined_sets,
+        "legs": legs
     })
 
 
