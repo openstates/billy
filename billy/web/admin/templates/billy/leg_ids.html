@@ -18,6 +18,11 @@
 {% block content %}
 <form action = '{% url admin_leg_ids_commit metadata.abbreviation %}' method = 'POST' >
 <table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>Term / Chamber</th>
+        <th>Scraped Name</th>
+        <th>Legislator</th>
+    </tr>
 {% for term, chamber, name in leg_ids %}
     <tr>
         <td>{{term}} {{chamber}}</td>
@@ -35,15 +40,17 @@
         </td>
     </tr>
 {% endfor %}
-    <tr>
-        <td></td>
-        <td></td>
-        <td><input class = 'btn btn-primary' type = 'submit' value = 'Make it so' /></td>
-    </tr>
 </table>
+<input class = 'btn btn-primary' type = 'submit' value = 'Make it so' />
 </form>
 
 <table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>Scraped Name</th>
+        <th>Term</th>
+        <th>Chamber</th>
+        <th>Legislator ID</th>
+    </tr>
 {% for id in all_ids %}
     <tr>
         <td>{{all_ids|key:id|key:'name'}}</td>
