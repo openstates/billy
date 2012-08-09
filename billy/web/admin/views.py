@@ -887,6 +887,7 @@ def leg_ids(request, abbr):
     return render(request, 'billy/leg_ids.html', {
         "metadata": meta,
         "leg_ids": eyedees,
+        "all_ids": sorted_ids,
         "legs": legs
     })
 
