@@ -50,6 +50,7 @@
         <th>Term</th>
         <th>Chamber</th>
         <th>Legislator ID</th>
+        <th>Danger Zone</th>
     </tr>
 {% for id in all_ids %}
     <tr>
@@ -57,6 +58,7 @@
         <td>{{all_ids|key:id|key:'session'}}</td>
         <td>{{all_ids|key:id|key:'chamber'}}</td>
         <td>{{all_ids|key:id|key:'leg_id'}}</td>
+        <td><a href = '{% url admin_leg_ids_remove metadata.abbreviation all_ids|key:id|key:'_id' %}' >remove</a></td>
     </tr>
 {% endfor %}
 </table>

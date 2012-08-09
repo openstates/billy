@@ -893,6 +893,12 @@ def leg_ids(request, abbr):
 
 
 @login_required
+def leg_ids_remove(request, abbr=None, id=None):
+    db.leg_ids.remove({"_id": id}, safe=True)
+    return redirect('admin_leg_ids', abbr)
+
+
+@login_required
 @require_http_methods(["POST"])
 def leg_ids_commit(request, abbr):
     ids = dict(request.POST)
