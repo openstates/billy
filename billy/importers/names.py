@@ -24,6 +24,7 @@ def get_legislator_id(abbr, session, chamber, name):
             raise Exception("bad session: " + session)
 
         matcher = NameMatcher(abbr, term['name'])
+
         __matchers[(abbr, session)] = matcher
 
     if chamber == 'both' or chamber == 'joint' or chamber == 'other':
@@ -32,7 +33,7 @@ def get_legislator_id(abbr, session, chamber, name):
     return matcher.match(name, chamber)
 
 
-class NameMatcher(object):
+class CSVNameMatcher(object):
     """
     Match various forms of a name, provided they uniquely identify
     a person from everyone else we've seen.
@@ -230,3 +231,29 @@ class NameMatcher(object):
 
         name = self._normalize(name)
         return self._names[chamber].get(name, None)
+
+
+class MongoNameMatcher(CSVNameMatcher):
+    def __init__(self, *args, **kwargs):
+        CSVNameMatcher.__init__(self, *args, **kwargs)
+
+    def _learn_manual_matches(self):
+        rows = db.leg_ids.find({"abbr": self._abbr})
+
+        for row in rows:
+            (term, chamber, name, leg_id) = (
+                    row['session'],
+                    row['chamber'],
+                    row['name'],
+                    row['leg_id'] )
+
+            if term == self._term and leg_id:
+                self._manual[chamber][name] = leg_id
+                if name in self._manual[None]:
+                    self._manual[None][name] = None
+                else:
+                    self._manual[None][name] = leg_id
+
+
+# NameMatcher = MongoNameMatcher
+NameMatcher = CSVNameMatcher
