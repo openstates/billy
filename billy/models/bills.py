@@ -1,6 +1,7 @@
 import math
 import operator
 import collections
+import itertools
 
 from django.core import urlresolvers
 import pyes
@@ -83,7 +84,7 @@ class SponsorsManager(AttrManager):
     def first_fifteen_remainder(self):
         len_ = len(self.document['sponsors'])
         if 15 < len_:
-            return len_ - 15
+            return list(itertools.islice(self, 15))
 
 
 class Action(dict):
