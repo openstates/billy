@@ -190,7 +190,7 @@ class Legislator(Document):
         chamber = vote['chamber']
 
         # ...and use the bill's chamber too.
-        roles = filter(lambda role: role['chamber'] == chamber, roles)
+        roles = [role for role in roles if role.get('chamber') == chamber]
 
         # ...and the specific date defined by the date of the vote.
         if len(roles) == 1:
