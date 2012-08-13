@@ -39,9 +39,10 @@ class DownloadPhotos(BaseCommand):
                 print("Updating ids for {0}".format(abbr))
 
             orig_dir = 'photos/original'
+            xsmall_dir = 'photos/xsmall'
             small_dir = 'photos/small'
             large_dir = 'photos/large'
-            for d in (orig_dir, small_dir, large_dir):
+            for d in (orig_dir, xsmall_dir, small_dir, large_dir):
                 if not os.path.exists(d):
                     os.makedirs(d)
 
@@ -70,10 +71,18 @@ class DownloadPhotos(BaseCommand):
                 k.set_contents_from_filename(fname)
                 k.set_acl('public-read')
 
+                # xsmall - 50x70
+                fname = os.path.join(xsmall_dir, '{0}.jpg'.format(leg['_id']))
+                subprocess.check_call(['convert', tmpname, '-resize',
+                                       '50x75', fname])
+                subprocess.check_call(['jpegoptim',  '--strip-all', fname])
+
                 # small - 150x200
                 fname = os.path.join(small_dir, '{0}.jpg'.format(leg['_id']))
                 subprocess.check_call(['convert', tmpname, '-resize',
                                        '150x200', fname])
+                subprocess.check_call(['jpegoptim',  '--strip-all', fname])
+
                 k = Key(bucket)
                 k.key = fname
                 k.set_contents_from_filename(fname)
