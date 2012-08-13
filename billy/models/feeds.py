@@ -111,14 +111,33 @@ class FeedEntry(Document):
         entry['host'] = urldata.netloc
 
         # Prevent obfuscation of `published` method in template rendering.
-        del entry['published']
+        if 'published' in entry:
+            del entry['published']
+
         return ''
 
     def display(self):
         return self['summary']
 
     def published(self):
-        return datetime.datetime.fromtimestamp(self['published_parsed'])
+        if 'published_parsed' in self:
+            published_parsed = self['published_parsed']
+            if published_parsed is not None:
+                return datetime.datetime.fromtimestamp(self['published_parsed'])
+
+            # Try alternative format.
+            published = self['published']
+            try:
+                datetime.datetime.strptime(published, '%b %d %H:%M:%S %Y')
+            except ValueError:
+                pass
+
+        elif 'updated_parsed' in self:
+            # Fall back to `updated` date.
+            return datetime.datetime.fromtimestamp(self['updated_parsed'])
+        else:
+            # Let this field be blank.
+            return
 
     @property
     def metadata(self):

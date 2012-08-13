@@ -842,6 +842,96 @@ def legislators(request, abbr):
 
 
 @login_required
+def leg_ids(request, abbr):
+    meta = metadata(abbr)
+    report = db.reports.find_one({'_id': abbr})
+    legs = list(db.legislators.find({"state": abbr}))
+
+    leg_ids = db.leg_ids.find({"abbr": abbr})
+    sorted_ids = {}
+
+    def _id(term, chamber, name):
+        return "%s-%s-%s" % (
+            term, chamber, name
+        )
+
+    for thing in leg_ids:
+        key = _id(
+            thing['session'],
+            thing['chamber'],
+            thing['name']
+        )
+        sorted_ids[key] = thing
+
+    if not report:
+        raise Http404('No reports found for abbreviation %r.' % abbr)
+    bill_unmatched = set(tuple(i) for i in
+                         report['bills']['unmatched_leg_ids'])
+    com_unmatched = set(tuple(i) for i in
+                         report['committees']['unmatched_leg_ids'])
+    combined_sets = bill_unmatched | com_unmatched
+    eyedees = []
+
+    for thing in combined_sets:
+        session, chamber, name = thing
+        key = _id(
+            session,
+            chamber,
+            name
+        )
+        if key in sorted_ids:
+            continue
+
+        eyedees.append(thing)
+
+    return render(request, 'billy/leg_ids.html', {
+        "metadata": meta,
+        "leg_ids": eyedees,
+        "all_ids": sorted_ids,
+        "legs": legs
+    })
+
+
+@login_required
+def leg_ids_remove(request, abbr=None, id=None):
+    db.leg_ids.remove({"_id": id}, safe=True)
+    return redirect('admin_leg_ids', abbr)
+
+
+@login_required
+@require_http_methods(["POST"])
+def leg_ids_commit(request, abbr):
+    ids = dict(request.POST)
+    for eyedee in ids:
+        term, chamber, name = eyedee.split(",", 2)
+        value = ids[eyedee][0]
+        if value == "Unknown":
+            continue
+
+        thing = "%s-%s-%s-%s" % (
+            value,
+            name,
+            chamber,
+            term
+        )
+
+        db.leg_ids.update({"_id": thing},
+                         {
+                             "_id": thing,
+                             "name": name,
+                             "session": term,
+                             "abbr": abbr,
+                             "leg_id": value,
+                             "chamber": chamber,
+                         },
+                         True,  # Upsert
+                         safe=True)
+
+    return redirect('admin_leg_ids', abbr)
+
+
+
+@login_required
 def subjects(request, abbr):
     meta = metadata(abbr)
 

@@ -1,9 +1,11 @@
 import math
 import operator
 import collections
+import itertools
 
 from django.core import urlresolvers
 import pyes
+import pymongo
 
 from billy.conf import settings
 from billy.utils import parse_param_dt
@@ -82,7 +84,7 @@ class SponsorsManager(AttrManager):
     def first_fifteen_remainder(self):
         len_ = len(self.document['sponsors'])
         if 15 < len_:
-            return len_ - 15
+            return list(itertools.islice(self, 15))
 
 
 class Action(dict):
@@ -259,7 +261,14 @@ class BillVote(Document):
         return any([self['yes_votes'], self['no_votes'], self['other_votes']])
 
     def chamber_name(self):
-        metadata = self.bill().metadata
+        # Hack to accomodate bill-as-related-document and
+        # inherited reverse lookup 'bill' attribute that exists
+        # on vote objects returned from ListManager class.
+        if callable(self.bill):
+            bill = self.bill()
+        else:
+            bill = self.bill
+        metadata = bill.metadata
         name = metadata['%s_chamber_name' % self['chamber']]
         return name
 
@@ -271,7 +280,8 @@ class Bill(Document):
 
     sponsors_manager = SponsorsManager()
     actions_manager = ActionsManager()
-    votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'])
+    votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'],
+                                     sort=[('date', pymongo.DESCENDING)])
 
     feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 

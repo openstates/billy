@@ -86,5 +86,9 @@ urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>all)/bills/$', AllStateBills.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/(?P<bill_id>[^/]+)/$',
         'bill', name='bill'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/'
+        r'(?P<bill_id>[^/]+)/(?P<key>documents)/$', 'all_documents', name='bill_all_documents'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/'
+        r'(?P<bill_id>[^/]+)/(P?<key>versions)/$', 'all_versions', name='bill_all_versions'),
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<vote_id>\w+)/$', 'vote', name='vote'),
 )
