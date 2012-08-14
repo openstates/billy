@@ -245,7 +245,7 @@ class MongoNameMatcher(CSVNameMatcher):
                     row['session'],
                     row['chamber'],
                     row['name'],
-                    row['leg_id'] )
+                    row['leg_id'])
 
             if term == self._term and leg_id:
                 self._manual[chamber][name] = leg_id

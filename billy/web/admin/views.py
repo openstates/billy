@@ -930,7 +930,6 @@ def leg_ids_commit(request, abbr):
     return redirect('admin_leg_ids', abbr)
 
 
-
 @login_required
 def subjects(request, abbr):
     meta = metadata(abbr)

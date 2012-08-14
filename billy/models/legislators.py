@@ -248,4 +248,3 @@ class Legislator(Document):
                     typeslug = role['type'].lower().replace(' ', '_')
                     chamber_roles[chamber][typeslug].append(role)
             yield term, chamber_roles
-
