@@ -14,7 +14,7 @@ scraper = scrapelib.Scraper(follow_robots=False)
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
-
+log = logging.getLogger('billy')
 
 def _upload(fname, bucket):
     # create cache_headers - 30 days
@@ -45,10 +45,10 @@ class DownloadPhotos(BaseCommand):
 
             meta = db.metadata.find_one({'_id': abbr.lower()})
             if not meta:
-                print("'{0}' does not exist in the database.".format(abbr))
+                log.critical("'{0}' does not exist in the database.".format(abbr))
                 sys.exit(1)
             else:
-                print("Updating ids for {0}".format(abbr))
+                log.info("Downloading photos for {0}".format(abbr))
 
             orig_dir = 'photos/original'
             xsmall_dir = 'photos/xsmall'
