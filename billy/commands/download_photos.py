@@ -16,6 +16,18 @@ import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 
 
+def _upload(fname, bucket):
+    # create cache_headers - 30 days
+    headers = {'Cache-Control': 'max-age=2592000'}
+
+    # optimize JPEG
+    subprocess.check_call(['jpegoptim',  '--strip-all', fname])
+
+    k = Key(bucket)
+    k.key = fname
+    k.set_contents_from_filename(fname, policy='public-read', headers=headers)
+
+
 class DownloadPhotos(BaseCommand):
 
     name = 'download-photos'
@@ -39,9 +51,10 @@ class DownloadPhotos(BaseCommand):
                 print("Updating ids for {0}".format(abbr))
 
             orig_dir = 'photos/original'
+            xsmall_dir = 'photos/xsmall'
             small_dir = 'photos/small'
             large_dir = 'photos/large'
-            for d in (orig_dir, small_dir, large_dir):
+            for d in (orig_dir, xsmall_dir, small_dir, large_dir):
                 if not os.path.exists(d):
                     os.makedirs(d)
 
@@ -65,16 +78,16 @@ class DownloadPhotos(BaseCommand):
                 # original size, standardized filenames
                 fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))
                 subprocess.check_call(['convert', tmpname, fname])
-                k = Key(bucket)
-                k.key = fname
-                k.set_contents_from_filename(fname)
-                k.set_acl('public-read')
+                _upload(fname, bucket)
+
+                # xsmall - 50x70
+                fname = os.path.join(xsmall_dir, '{0}.jpg'.format(leg['_id']))
+                subprocess.check_call(['convert', tmpname, '-resize',
+                                       '50x75', fname])
+                _upload(fname, bucket)
 
                 # small - 150x200
                 fname = os.path.join(small_dir, '{0}.jpg'.format(leg['_id']))
                 subprocess.check_call(['convert', tmpname, '-resize',
                                        '150x200', fname])
-                k = Key(bucket)
-                k.key = fname
-                k.set_contents_from_filename(fname)
-                k.set_acl('public-read')
+                _upload(fname, bucket)
