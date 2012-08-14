@@ -232,7 +232,6 @@ def bill(request, abbr, session, bill_id):
     # get fixed version
     fixed_bill_id = fix_bill_id(bill_id)
     # redirect if URL's id isn't fixed id without spaces
-    print fixed_bill_id, bill_id
     if fixed_bill_id.replace(' ', '') != bill_id:
         return redirect('bill', abbr=abbr, session=session,
                         bill_id=fixed_bill_id.replace(' ', ''))
@@ -281,7 +280,6 @@ def show_all(key):
         # get fixed version
         fixed_bill_id = fix_bill_id(bill_id)
         # redirect if URL's id isn't fixed id without spaces
-        print fixed_bill_id, bill_id
         if fixed_bill_id.replace(' ', '') != bill_id:
             return redirect('bill', abbr=abbr, session=session,
                             bill_id=fixed_bill_id.replace(' ', ''))

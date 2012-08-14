@@ -69,7 +69,6 @@ class SponsorsManager(AttrManager):
         if '_id' in first:
             first_id = first['_id']
             for sp in sponsors:
-                print sp['_id']
                 if first_id == sp['_id']:
                     sponsors.remove(sp)
                     break
