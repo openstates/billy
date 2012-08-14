@@ -2,7 +2,7 @@ import urllib
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.utils.feedgenerator import Rss201rev2Feed
@@ -68,8 +68,9 @@ class RelatedBillsList(RelatedObjectsList):
             elif status == 'signed':
                 long_description.append('which have been signed into law')
             if sponsor:
-                leg = db.legislators.find_one({'_id': sponsor},
-                                          fields=('full_name',))['full_name']
+                leg = db.legislators.find_one({'_all_ids': sponsor},
+                                          fields=('full_name','_id'))
+                leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
             if search_text:
                 long_description.append('containing the term "{0}"'.format(
@@ -177,6 +178,18 @@ class RelatedBillsList(RelatedObjectsList):
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
 
+    def get(self, request, *args, **kwargs):
+        # hack to redirect to proper legislator if sponsor_id is an alias
+        if 'sponsor__leg_id' in request.GET:
+            _id = request.GET.get('sponsor__leg_id')
+            leg = db.legislators.find_one({'_all_ids': _id})
+            if leg and leg['_id'] != _id:
+                new_get = request.GET.copy()
+                new_get['sponsor__leg_id'] = leg['_id']
+                return HttpResponseRedirect('?'.join(
+                    (reverse('bills', args=args, kwargs=kwargs),
+                     new_get.urlencode())))
+        return super(RelatedBillsList, self).get(request, *args, **kwargs)
 
 class StateBills(RelatedBillsList):
     template_name = templatename('bills_list')
