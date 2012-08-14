@@ -6,7 +6,7 @@ import urllib2
 
 import pymongo
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import HttpResponse
 
@@ -122,6 +122,15 @@ class VotesList(RelatedObjectsList):
             {{metadata.legislature_name}} - OpenStates
         {% endif %}
         '''
+
+    def get(self, request, abbr, collection_name, _id):
+        # hack to redirect to proper legislator on legislators/_id_/votes
+        if collection_name == 'legislators':
+            leg = db.legislators.find_one({'_all_ids': _id})
+            if leg and leg['_id'] != _id:
+                return redirect('votes_list', abbr, collection_name,
+                                leg['_id'])
+        return super(VotesList, self).get(request, abbr, collection_name, _id)
 
 
 class NewsList(RelatedObjectsList):
