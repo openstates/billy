@@ -68,6 +68,9 @@ def ensure_indexes():
     db.votes.ensure_index([('_voters', pymongo.ASCENDING),
                            ('date', pymongo.ASCENDING)])
 
+    # subjects index
+    db.subjects.ensure_index('abbr')
+
 
 def import_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
