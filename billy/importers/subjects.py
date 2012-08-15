@@ -59,7 +59,7 @@ class MongoSubjectCategorizer(object):
         self.categorizer = defaultdict(set)
         subs = db.subjects.find({"abbr": abbr})
         for sub in subs:
-            self.categorizer[sub['remote']].add(sub['normal'])
+            self.categorizer[sub['remote']] = sub['normal']
 
     def categorize_bill(self, bill):
         subjects = set()
