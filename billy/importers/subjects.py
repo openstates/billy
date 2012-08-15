@@ -81,6 +81,4 @@ class MongoSubjectCategorizer(object):
             self.categorize_bill(bill)
             db.bills.save(bill, safe=True)
 
-
-SubjectCategorizer = CSVSubjectCategorizer
-# SubjectCategorizer = MongoSubjectCategorizer
+SubjectCategorizer = MongoSubjectCategorizer
