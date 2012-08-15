@@ -29,17 +29,19 @@ class SponsorsManager(AttrManager):
         '''Lazily fetch all legislator objects from the db.
         '''
         sponsors = self.bill['sponsors']
-        try:
-            legislators = self._legislators
-        except AttributeError:
+
+        if not hasattr(self, '_legislators'):
+            # build a mapping from all _ids to legislators
+            self._legislators = {}
             ids = filter(None, map(operator.itemgetter('leg_id'), sponsors))
-            legislators = db.legislators.find({'_id': {'$in': ids}})
-            legislators = dict((obj['_id'], obj) for obj in legislators)
-            self._legislators = legislators
+            legislators = db.legislators.find({'_all_ids': {'$in': ids}})
+            for obj in legislators:
+                for _id in obj['_all_ids']:
+                    self._legislators[_id] = obj
         for sponsor in sponsors:
             leg_id = sponsor['leg_id']
-            if leg_id is not None and leg_id in legislators:
-                legislator = legislators[sponsor['leg_id']]
+            if leg_id is not None and leg_id in self._legislators:
+                legislator = self._legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
                 yield legislator
             else:
