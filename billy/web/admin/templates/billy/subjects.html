@@ -10,16 +10,40 @@
     <script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
     <script type="text/javascript">
 
-    var uncat_subjects = [
+    var uncat_subjects = {
 {% for sub in uncat_subjects %}
-        "{{sub.0}}",{% endfor %}
-    ];
+            "{{sub.0}}": "{{sub.2}}",{% endfor %}
+        },
+        subjects = [
+{% for sub in normalized_subjects %}
+            "{{sub}}",{% endfor %}
+        ];
+
 
         $(document).ready(function() {
-            for ( var i = 0; i < (10 < uncat_subjects.length) ? 10 : uncat_subjects.length; ++i ) {
+            var count = 0,
+                max = 50;
+
+            for ( var i in uncat_subjects ) {
+                if ( count >= max ) {
+                    break;
+                }
+                count++;
+
                 var obj = uncat_subjects[i];
-                $("#target").append("<tr><td>" + obj + "</td><td></td></tr>")
-                // .select2();
+                    buf = "<tr><td>" + i;
+                    buf += "<input type = 'hidden' value = '" + i;
+                    buf += "' name = '" + obj + "-remote' />";
+
+                    buf += "</td><td><select name = '" + obj + "-normal' id='" + obj + "-normal' multiple >";
+
+                for ( var i in subjects ) {
+                    var subject = subjects[i];
+                    buf += "<option value='" + subject + "' >" + subject + "</option>";
+                }
+                buf += "</select></td></tr>";
+                $("#target").append(buf);
+                $("#" + obj + "-normal").select2();
             }
         });
     </script>
