@@ -948,7 +948,7 @@ def subjects(request, abbr):
 
     subjects.rewind()
 
-    uniqid = 0
+    uniqid = 1
 
     for sub in uc_s:
         if not sub[0] in c_subjects:
@@ -992,11 +992,13 @@ def subjects_commit(request, abbr):
     for idex in catd_subjects:
         sub = catd_subjects[idex]
 
-        remote = sub['remote'][0].strip()
+        remote = sub['remote'][0]
         normal = [x.strip() for x in sub['normal']]
 
         if normal == []:
             continue
+
+        print remote, normal
 
         eyedee = _gen_id(abbr, remote)
 
