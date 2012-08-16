@@ -6,11 +6,21 @@
 {% block title %}Data Quality{% endblock %}
 
 {% block script %}
-<link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
-<script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
+    <script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
     <script type="text/javascript">
+
+    var uncat_subjects = [
+{% for sub in uncat_subjects %}
+        "{{sub.0}}",{% endfor %}
+    ];
+
         $(document).ready(function() {
-            $(".mselect").select2();
+            for ( var i = 0; i < (10 < uncat_subjects.length) ? 10 : uncat_subjects.length; ++i ) {
+                var obj = uncat_subjects[i];
+                $("#target").append("<tr><td>" + obj + "</td><td></td></tr>")
+                // .select2();
+            }
         });
     </script>
 {% endblock %}
@@ -19,74 +29,18 @@
 <h2>Subjects needing sorting</h2>
 
 <form action = '{% url admin_subjects_commit metadata.abbreviation %}' method = 'POST' >
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered table-condensed" id = 'target'>
     <tr>
         <th>"Foreign" subject</th>
         <th>Billy subject</th>
     </tr>
-{% for sub in uncat_subjects %}
-    <tr>
-        <td>{{sub.0}}<input
-                        type = 'hidden'
-                        value = '{{sub.0}}'
-                        name = '{{sub.2}}-remote'
-        /></td>
-        <td>
-<select name = '{{sub.2}}-normal' multiple class = 'mselect' >
-    <option value = 'Agriculture and Food' >Agriculture and Food</option>
-    <option value = 'Animal Rights and Wildlife Issues' >Animal Rights and Wildlife Issues</option>
-    <option value = 'Arts and Humanities' >Arts and Humanities</option>
-    <option value = 'Budget, Spending, and Taxes' >Budget, Spending, and Taxes</option>
-    <option value = 'Business and Consumers' >Business and Consumers</option>
-    <option value = 'Campaign Finance and Election Issues' >Campaign Finance and Election Issues</option>
-    <option value = 'Civil Liberties and Civil Rights' >Civil Liberties and Civil Rights</option>
-    <option value = 'Commerce' >Commerce</option>
-    <option value = 'Crime' >Crime</option>
-    <option value = 'Drugs' >Drugs</option>
-    <option value = 'Education' >Education</option>
-    <option value = 'Energy' >Energy</option>
-    <option value = 'Environmental' >Environmental</option>
-    <option value = 'Executive Branch' >Executive Branch</option>
-    <option value = 'Family and Children Issues' >Family and Children Issues</option>
-    <option value = 'Federal, State, and Local Relations' >Federal, State, and Local Relations</option>
-    <option value = 'Gambling and Gaming' >Gambling and Gaming</option>
-    <option value = 'Government Reform' >Government Reform</option>
-    <option value = 'Guns' >Guns</option>
-    <option value = 'Health' >Health</option>
-    <option value = 'Housing and Property' >Housing and Property</option>
-    <option value = 'Immigration' >Immigration</option>
-    <option value = 'Indigenous Peoples' >Indigenous Peoples</option>
-    <option value = 'Insurance' >Insurance</option>
-    <option value = 'Judiciary' >Judiciary</option>
-    <option value = 'Labor and Employment' >Labor and Employment</option>
-    <option value = 'Legal Issues' >Legal Issues</option>
-    <option value = 'Legislative Affairs' >Legislative Affairs</option>
-    <option value = 'Military' >Military</option>
-    <option value = 'Municipal and County Issues' >Municipal and County Issues</option>
-    <option value = 'Nominations' >Nominations</option>
-    <option value = 'Other' >Other</option>
-    <option value = 'Public Services' >Public Services</option>
-    <option value = 'Recreation' >Recreation</option>
-    <option value = 'Reproductive Issues' >Reproductive Issues</option>
-    <option value = 'Resolutions' >Resolutions</option>
-    <option value = 'Science and Medical Research' >Science and Medical Research</option>
-    <option value = 'Senior Issues' >Senior Issues</option>
-    <option value = 'Sexual Orientation and Gender Issues' >Sexual Orientation and Gender Issues</option>
-    <option value = 'Social Issues' >Social Issues</option>
-    <option value = 'State Agencies' >State Agencies</option>
-    <option value = 'Technology and Communication' >Technology and Communication</option>
-    <option value = 'Trade' >Trade</option>
-    <option value = 'Transportation' >Transportation</option>
-    <option value = 'Welfare and Poverty' >Welfare and Poverty</option>
-</select>
-        </td>
-    </tr>
-{% endfor %}
 </table>
 <input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
 </form>
 
 <h2>Existing subjects</h2>
+
+{% comment %}
 
 <table class="table table-striped table-bordered table-condensed">
     <tr>
@@ -106,4 +60,6 @@
     </tr>
 {% endfor %}
 </table>
+
+{% endcomment %}
 {% endblock %}
