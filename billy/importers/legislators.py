@@ -179,8 +179,8 @@ def import_legislator(data):
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 
-    for flt in filters:
-        data = flt.filter(data)
+    #for flt in filters:
+    #    data = flt.filter(data)
 
     if leg:
         if 'old_roles' not in leg:
