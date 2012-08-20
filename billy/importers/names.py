@@ -242,10 +242,7 @@ class MongoNameMatcher(CSVNameMatcher):
 
         for row in rows:
             (term, chamber, name, leg_id) = (
-                    row['session'],
-                    row['chamber'],
-                    row['name'],
-                    row['leg_id'])
+                    row['term'], row['chamber'], row['name'], row['leg_id'])
 
             if term == self._term and leg_id:
                 self._manual[chamber][name] = leg_id
