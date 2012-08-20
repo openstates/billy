@@ -35,3 +35,9 @@ def test_barebones_filter():
     ]
     for num in numbers:
         assert phone_filter(num) == number
+
+
+def test_garbage():
+    number_prist = "krufty this and. that"
+    number = "krufty this and. that"
+    assert number == phone_filter(number_prist)

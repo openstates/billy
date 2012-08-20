@@ -15,7 +15,8 @@ def _phone_formatter(obj):
     return "-".join(objs)
 
 
-def phone_filter(number, formatter=_phone_formatter):
+def phone_filter(original_number, formatter=_phone_formatter):
+    number = original_number
     breakers = "+-()."
     for b in breakers:
         number = number.replace(b, " ")
@@ -32,6 +33,22 @@ def phone_filter(number, formatter=_phone_formatter):
     for blob in blobs:
         obj[order[len(obj)]] = blob
 
+    reqs = {
+        "prefix": 3,
+        "area": 3,
+        "line_number": 4
+    }
+
+    for req in reqs:
+        if req in obj:
+            try:
+                int(obj[req])
+            except ValueError:
+                return original_number
+
+            if len(obj[req]) != reqs[req]:
+                return original_number
+
     number = formatter(obj)
     return number
 
@@ -41,5 +58,6 @@ class LegislatorPhoneFilter(Filter):
         if "offices" in obj:
             for i in range(0, len(obj['offices'])):
                 if "phone" in obj['offices'][i]:
-                    obj['offices'][i]['phone'] = phone_filter(obj['offices'][i]['phone'])
+                    obj['offices'][i]['phone'] = \
+                            phone_filter(obj['offices'][i]['phone'])
         return obj
