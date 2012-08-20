@@ -1,17 +1,8 @@
 from billy.conf import settings
+settings.MONGO_DATABASE += '_test'
 from billy import db
 from billy.models import base
 import pymongo
-
-
-def setup():
-    host = settings.MONGO_HOST
-    port = settings.MONGO_PORT
-    settings.MONGO_DATABASE += '_test'
-    db_name = settings.MONGO_DATABASE
-
-    db._db = pymongo.Connection(host, port)[db_name]
-    base.db = db._db
 
 
 def teardown():
