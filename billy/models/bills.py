@@ -28,7 +28,12 @@ class SponsorsManager(AttrManager):
     def __iter__(self):
         '''Lazily fetch all legislator objects from the db.
         '''
-        sponsors = self.bill['sponsors']
+        bill = self.bill
+        sponsors = bill['sponsors']
+
+        # Need to be able to set attributes on sponsor, a dict.
+        dictwrapper = type('Sponsor', (dict,), {})
+
         try:
             legislators = self._legislators
         except AttributeError:
@@ -41,9 +46,12 @@ class SponsorsManager(AttrManager):
             if leg_id is not None and leg_id in legislators:
                 legislator = legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
+                legislator.bill = self.bill
                 yield legislator
             else:
-                yield sponsor
+                spons = dictwrapper(sponsor)
+                spons.bill = bill
+                yield spons
 
     def primary_sponsors(self):
         'Return the primary sponsors on the bill.'
