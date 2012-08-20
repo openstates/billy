@@ -1,4 +1,5 @@
 from billy import utils
+from billy.utils import popularity
 from billy import db
 
 from nose.tools import with_setup
@@ -28,3 +29,22 @@ def test_find_bill():
     assert utils.find_bill({'bill_id': 'HB 4'})['bill_id'] == 'HB 4'
 
     # TODO: also test fields parameter
+
+
+def test_popularity_counter():
+    c = popularity.counter
+    c.counts.drop()
+
+    c.inc('bill', 'LAB00000001', abbr='la', session='2011')
+    c.inc('bill', 'LAB00000001', abbr='la', session='2011')
+    c.inc('bill', 'LAB00000001', abbr='la', session='2011')
+    c.inc('bill', 'GAB00000001', abbr='ga', session='2012')
+
+    # test basic top()
+    assert c.top('bill')[0] == 'LAB00000001'
+    # test with_counts=True
+    assert c.top('bill', with_counts=True)[0] == ('LAB00000001', 3)
+    # test n=2
+    assert c.top('bill', n=2)[1] == 'GAB00000001'
+    # test filtering on attributes
+    assert c.top('bill', abbr='ga')[0] == 'GAB00000001'
