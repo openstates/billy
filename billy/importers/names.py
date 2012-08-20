@@ -255,5 +255,4 @@ class MongoNameMatcher(CSVNameMatcher):
                     self._manual[None][name] = leg_id
 
 
-# NameMatcher = MongoNameMatcher
-NameMatcher = CSVNameMatcher
+NameMatcher = MongoNameMatcher
