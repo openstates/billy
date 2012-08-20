@@ -14,38 +14,47 @@
 {% for sub in uncat_subjects %}
             "{{sub.0}}": "{{sub.2}}",{% endfor %}
         },
+        subject_order = [
+{% for sub in uncat_subjects %}
+            "{{sub.0}}",{% endfor %}
+        ],
         subjects = [
 {% for sub in normalized_subjects %}
             "{{sub}}",{% endfor %}
-        ];
+        ],
+        count = 0,
+        max = 50;
 
+    function load_block() {
+        var rMax = count + max;
+        if ( subject_order.length < rMax ) {
+            rMax = subject_order.length;
+        }
 
-        $(document).ready(function() {
-            var count = 0,
-                max = 50;
+        for ( ; count < rMax; ++count ) {
+            var i = subject_order[count],
+                obj = uncat_subjects[i];
+                buf = "<tr><td>" + i;
+                buf += "<input type = 'hidden' value = '" + i;
+                buf += "' name = '" + obj + "-remote' />";
 
-            for ( var i in uncat_subjects ) {
-                if ( count >= max ) {
-                    break;
-                }
-                count++;
+                buf += "</td><td><select name = '" + obj + "-normal' id='"
+                       + obj + "-normal' multiple >";
 
-                var obj = uncat_subjects[i];
-                    buf = "<tr><td>" + i;
-                    buf += "<input type = 'hidden' value = '" + i;
-                    buf += "' name = '" + obj + "-remote' />";
-
-                    buf += "</td><td><select name = '" + obj + "-normal' id='" + obj + "-normal' multiple >";
-
-                for ( var i in subjects ) {
-                    var subject = subjects[i];
-                    buf += "<option value='" + subject + "' >" + subject + "</option>";
-                }
-                buf += "</select></td></tr>";
-                $("#target").append(buf);
-                $("#" + obj + "-normal").select2();
+            for ( var i in subjects ) {
+                var subject = subjects[i];
+                buf += "<option value='" + subject + "' >" + subject +
+                       "</option>";
             }
-        });
+            buf += "</select></td></tr>";
+            $("#target").append(buf);
+            $("#" + obj + "-normal").select2();
+        }
+    }
+
+    $(document).ready(function() {
+        load_block();
+    });
     </script>
 {% endblock %}
 
@@ -59,6 +68,8 @@
         <th>Billy subject</th>
     </tr>
 </table>
+<button type = 'button' onclick = 'load_block();'
+        class = 'btn btn-info' >Load more</button>
 <input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
 </form>
 
