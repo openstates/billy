@@ -8,10 +8,15 @@ import logging
 from billy import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
+from billy.importers.filters import LegislatorPhoneFilter
 
 import pymongo
 
 logger = logging.getLogger('billy')
+
+filters = [
+    LegislatorPhoneFilter()
+]
 
 
 def ensure_indexes():
@@ -173,6 +178,9 @@ def import_legislator(data):
         {settings.LEVEL_FIELD: abbr,
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
+
+    #for flt in filters:
+    #    data = flt.filter(data)
 
     if leg:
         if 'old_roles' not in leg:
