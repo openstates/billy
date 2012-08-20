@@ -29,6 +29,7 @@
         var rMax = count + max;
         if ( subject_order.length < rMax ) {
             rMax = subject_order.length;
+            $("#load-more").hide();
         }
 
         for ( ; count < rMax; ++count ) {
@@ -69,6 +70,7 @@
     </tr>
 </table>
 <button type = 'button' onclick = 'load_block();'
+        id = 'load-more'
         class = 'btn btn-info' >Load more</button>
 <input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
 </form>
