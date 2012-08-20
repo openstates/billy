@@ -7,6 +7,7 @@ from django.template.response import TemplateResponse
 
 from djpjax import pjax
 
+from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
@@ -67,6 +68,8 @@ def committee(request, abbr, committee_id):
     committee = db.committees.find_one({'_id': committee_id})
     if committee is None:
         raise Http404
+
+    popularity.counter.inc('committees', committee_id, abbr=abbr)
 
     return render(request, templatename('committee'),
                   dict(committee=committee, abbr=abbr,
