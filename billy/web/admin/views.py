@@ -641,31 +641,6 @@ def other_actions(request, abbr):
 
 
 @login_required
-def unmatched_leg_ids(request, abbr):
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404('No reports found for abbreviation %r.' % abbr)
-    bill_unmatched = set(tuple(i) for i in
-                         report['bills']['unmatched_leg_ids'])
-    com_unmatched = set(tuple(i) for i in
-                         report['committees']['unmatched_leg_ids'])
-    combined_sets = bill_unmatched | com_unmatched
-    return _csv_response(request, 'leg_ids', ('term', 'chamber', 'name'),
-                         sorted(combined_sets), abbr)
-
-
-@login_required
-def uncategorized_subjects(request, abbr):
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404('No reports found for abbreviation %r.' % abbr)
-    subjects = sorted(report['bills']['uncategorized_subjects'],
-                      key=lambda t: (t[1], t[0]), reverse=True)
-    return _csv_response(request, 'uncategorized_subjects', ('subject', '#'),
-                         subjects, abbr)
-
-
-@login_required
 def district_stub(request, abbr):
     def keyfunc(x):
         try:

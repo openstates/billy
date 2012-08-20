@@ -70,12 +70,8 @@ urlpatterns = patterns('billy.web.admin.views',
         name='admin_event'),
 
     # missing data
-    url(r'^(?P<abbr>[a-z]{2})/uncategorized_subjects/$',
-        'uncategorized_subjects', name='uncategorized_subjects'),
     url(r'^(?P<abbr>[a-z]{2})/other_actions/$', 'other_actions',
         name='other_actions'),
-    url(r'^(?P<abbr>[a-z]{2})/unmatched_leg_ids/$', 'unmatched_leg_ids',
-        name='unmatched_leg_ids'),
     url(r'^(?P<abbr>[a-z]{2})/district_stub/$', 'district_stub',
         name='district_stub'),
     url(r'^(?P<abbr>[a-z]{2})/duplicate_versions/$', 'duplicate_versions',
