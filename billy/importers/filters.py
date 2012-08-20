@@ -31,6 +31,9 @@ def phone_filter(original_number, formatter=_phone_formatter):
     ]
     obj = {}
     for blob in blobs:
+        if len(obj) >= len(order):
+            return original_number
+
         obj[order[len(obj)]] = blob
 
     reqs = {

@@ -38,6 +38,11 @@ def test_barebones_filter():
 
 
 def test_garbage():
-    number_prist = "krufty this and. that"
-    number = "krufty this and. that"
-    assert number == phone_filter(number_prist)
+    numbers = [
+        "this krufty string.  is a test",
+        "abc abc abcd",
+        "1-5fo-2cds",
+        "1-800-foo-paul"
+    ]
+    for number in numbers:
+        assert number == phone_filter(number)
