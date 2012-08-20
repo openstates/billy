@@ -16,6 +16,7 @@ import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 log = logging.getLogger('billy')
 
+
 def _upload(fname, bucket):
     # create cache_headers - 30 days
     headers = {'Cache-Control': 'max-age=2592000'}
@@ -45,7 +46,8 @@ class DownloadPhotos(BaseCommand):
 
             meta = db.metadata.find_one({'_id': abbr.lower()})
             if not meta:
-                log.critical("'{0}' does not exist in the database.".format(abbr))
+                log.critical("'{0}' does not exist in the database.".format(
+                    abbr))
                 sys.exit(1)
             else:
                 log.info("Downloading photos for {0}".format(abbr))

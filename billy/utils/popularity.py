@@ -1,22 +1,23 @@
 import datetime
 from billy import db
 
+
 class Counter(object):
 
     def __init__(self, db, collection_name='popularity_counts'):
         self.counts = getattr(db, collection_name)
 
     def inc(self, type_name, obj_id, **kwargs):
-        res = self.counts.update({'type': type_name, 'obj_id': obj_id,
-                      'date': datetime.datetime.utcnow().date().toordinal() },
-                                    {'$inc': {'count': 1}, '$set': kwargs},
-                                    upsert=True, safe=False)
+        self.counts.update({'type': type_name, 'obj_id': obj_id,
+                  'date': datetime.datetime.utcnow().date().toordinal()},
+                                {'$inc': {'count': 1}, '$set': kwargs},
+                                 upsert=True, safe=False)
 
     def top(self, type_name, n=1, days=None, with_counts=False, **kwargs):
         kwargs['type'] = type_name
         if days:
             kwargs['date'] = {
-                '$gt': datetime.datetime.utcnow().date().toordinal()-days}
+                '$gt': datetime.datetime.utcnow().date().toordinal() - days}
 
         if with_counts:
             extract = lambda o: (o['obj_id'], o['count'])
