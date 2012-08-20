@@ -956,10 +956,13 @@ def subjects(request, abbr):
             uniqid += 1
             uc_subjects.append(sub)
 
+    normalized_subjects = settings.BILLY_SUBJECTS[:]
+    normalized_subjects.append("IGNORED")
+
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
         'subjects': subjects,
-        'normalized_subjects': settings.BILLY_SUBJECTS,
+        'normalized_subjects': normalized_subjects,
         'uncat_subjects': uc_subjects
     })
 
@@ -998,7 +1001,8 @@ def subjects_commit(request, abbr):
         if normal == []:
             continue
 
-        print remote, normal
+        if "IGNORED" in normal:
+            normal = []
 
         eyedee = _gen_id(abbr, remote)
 
