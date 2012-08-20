@@ -6,8 +6,11 @@ import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
+from billy.utils import term_for_session
+
 from .base import (db, Document, RelatedDocuments, ListManager)
 from .metadata import Metadata
+from .bills import BillVote
 from .utils import CachedAttribute
 
 
@@ -170,39 +173,95 @@ class Legislator(Document):
                 else:
                     yield details['display_name']
 
-    @CachedAttribute
-    def vote_role(self):
-        # If this is an active legislator, access party and district
-        # directly on the legislator.
-        if self['active']:
-            return self
+    def context_role(self, bill=None, vote=None, session=None, term=None):
+        '''Tell this legislator object which session to use when calculating
+        the legisator's context_role for a given bill or vote.
+        '''
+        # If no hints were given about the context, look for a related bill,
+        # then for a related vote.
+        if not any([bill, vote, session, term]):
+            try:
+                bill = self.bill
+            except AttributeError:
+                # A vote?
+                try:
+                    vote = self.vote
+                except AttributeError:
+                    # If we're here, this method was called on a
+                    # Legislator was that doesn't have a related bill or vote.
+                    return
 
-        # Else, get them from the old_roles dict, with the term
-        # defined by the term of the bill this legislator was
-        # ultimately retrieved in relation to.
-        vote = self.vote
-        bill = vote.bill()
-        term = bill['_term']
-        # shouldn't happen, but avoids an error this way
-        if term not in self['old_roles']:
-            return None
-        roles = self['old_roles'][term]
-        chamber = vote['chamber']
+        # First figure out the term.
+        if bill is not None:
+            term = bill['_term']
 
-        # ...and use the bill's chamber too.
-        roles = [role for role in roles if role.get('chamber') == chamber]
+        elif vote is not None:
+            try:
+                _bill = vote.bill
+            except AttributeError:
+                _bill = BillVote(vote).bill
+            if callable(_bill):
+                _bill = _bill()
+            term = _bill['_term']
 
-        # ...and the specific date defined by the date of the vote.
+        if term is not None:
+            pass
+
+        elif session is not None:
+            term = term_for_session(self['state'], session)
+
+        # Use the term to get the related roles. First look in the current
+        # roles list, then fail over to the old_roles list.
+        roles = [r for r in self['roles']
+                 if r['type'] == 'member' and r['term'] == term]
+
+        if not roles:
+            roles = [r for r in self['old_roles'][term]
+                     if r['type'] == 'member']
+
+        if not roles:
+            # Legislator had no roles for this term. If there is a related
+            # bill ro vote, this shouldn't happen, but could if the
+            # legislator's roles got deleted.
+            return
+
+        # If there's only one applicable role, we're done.
         if len(roles) == 1:
-            return roles.pop()
+            role = roles.pop()
+            self['context_role'] = role
+            return role
+
+        # Below, use the date of the related bill or vote to determine
+        # which (of multiple) roles applies.
+        if not bill or vote:
+            return ''
+
+        # Get the context date.
+        if vote is not None:
+            date = vote['date']
+        if bill is not None:
+            date = bill['actions'][0]['date']
+
+        dates_exist = False
+        for role in roles:
+            start_date = role.get('start_date')
+            end_date = role.get('end_date')
+            if start_date and end_date:
+                dates_exist = True
+                if start_date < date < end_date:
+                    self['context_role'] = role
+                    return role
+
+        if dates_exist:
+            # If we're here, the context date didn't fall into any of the
+            # legislator's role date ranges.
+            return ''
+
         else:
-            vote_date = self.vote['date']
-            for role in roles:
-                start_date = role.get('start_date')
-                end_date = role.get('end_date')
-                if start_date and end_date:
-                    if start_date < vote_date < end_date:
-                        return role
+            # Here the roles didn't have date ranges. Return the last one?
+            role = roles.pop()
+            self['context_role'] = role
+            return role
 
     def old_sessions_served(self):
         '''Returns the sessions served info from
