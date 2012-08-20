@@ -822,7 +822,7 @@ def leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
 
-    leg_ids = db.leg_ids.find({"abbr": abbr})
+    leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
 
     def _id(term, chamber, name):
@@ -869,7 +869,7 @@ def leg_ids(request, abbr):
 
 @login_required
 def leg_ids_remove(request, abbr=None, id=None):
-    db.leg_ids.remove({"_id": id}, safe=True)
+    db.manual.leg_ids.remove({"_id": id}, safe=True)
     return redirect('admin_leg_ids', abbr)
 
 
@@ -890,7 +890,7 @@ def leg_ids_commit(request, abbr):
             term
         )
 
-        db.leg_ids.update({"_id": thing},
+        db.manual.leg_ids.update({"_id": thing},
                          {
                              "_id": thing,
                              "name": name,
