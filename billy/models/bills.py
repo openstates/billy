@@ -48,6 +48,7 @@ class SponsorsManager(AttrManager):
             if leg_id is not None and leg_id in self._legislators:
                 legislator = self._legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
+                legislator.bill = bill
                 yield legislator
             else:
                 spons = dictwrapper(sponsor)
