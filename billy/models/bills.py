@@ -185,6 +185,14 @@ class BillVote(Document):
     def other_ratio(self):
         return self._ratio('other_count')
 
+    @property
+    def quality_exceptions(self):
+        exceptions = getattr(self, '_exceptions', None)
+        if exceptions is None:
+            self._exceptions = list(db.quality_exceptions.find({'ids':
+                                                                self['_id']}))
+        return self._exceptions
+
     @CachedAttribute
     def _legislator_objects(self):
         '''A cache of dereferenced legislator objects.
