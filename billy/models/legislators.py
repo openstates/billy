@@ -189,7 +189,7 @@ class Legislator(Document):
                 except AttributeError:
                     # If we're here, this method was called on a
                     # Legislator was that doesn't have a related bill or vote.
-                    return
+                    return ''
 
         # If we still have to historical point of reference, figuring
         # out the context role is impossible. Return emtpy string.
@@ -230,7 +230,7 @@ class Legislator(Document):
             # Legislator had no roles for this term. If there is a related
             # bill ro vote, this shouldn't happen, but could if the
             # legislator's roles got deleted.
-            return
+            return ''
 
         # If there's only one applicable role, we're done.
         if len(roles) == 1:
@@ -300,6 +300,8 @@ class Legislator(Document):
             role = roles.pop()
             self['context_role'] = role
             return role
+
+        return ''
 
     def old_sessions_served(self):
         '''Returns the sessions served info from
