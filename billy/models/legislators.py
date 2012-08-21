@@ -191,6 +191,11 @@ class Legislator(Document):
                     # Legislator was that doesn't have a related bill or vote.
                     return
 
+        # If we still have to historical point of reference, figuring
+        # out the context role is impossible. Return emtpy string.
+        if not any([bill, vote, session, term]):
+            return ''
+
         # First figure out the term.
         if bill is not None:
             term = bill['_term']
@@ -213,11 +218,13 @@ class Legislator(Document):
         # Use the term to get the related roles. First look in the current
         # roles list, then fail over to the old_roles list.
         roles = [r for r in self['roles']
-                 if r['type'] == 'member' and r['term'] == term]
+                 if r.get('type') == 'member' and r.get('term') == term]
+        roles = filter(None, roles)
 
         if not roles:
-            roles = [r for r in self['old_roles'][term]
-                     if r['type'] == 'member']
+            roles = [r for r in self['old_roles'].get(term, [])
+                     if r.get('type') == 'member']
+        roles = filter(None, roles)
 
         if not roles:
             # Legislator had no roles for this term. If there is a related
@@ -231,16 +238,47 @@ class Legislator(Document):
             self['context_role'] = role
             return role
 
-        # Below, use the date of the related bill or vote to determine
-        # which (of multiple) roles applies.
-        if not bill or vote:
-            return ''
+        # If only one of term or session is given and there are multiple roles:
+        if not filter(None, [bill, vote]):
+            if term is not None:
+                role = roles[0]
+                self['context_role'] = role
+                return role
 
-        # Get the context date.
+            # Below, use the date of the related bill or vote to determine
+            # which (of multiple) roles applies.
+            # Get the context date.
+            if session is not None:
+                # If we're here, we have multiple roles for a single session.
+                # Try to find the correct one in self.metadata,
+                # else give up.
+                session_data = self.metadata['session_details'][session]
+                for role in roles:
+                    role_start = role.get('start_date')
+                    role_end = role.get('end_date')
+
+                    # Return the first role that overlaps at all with the
+                    # session.
+                    session_start = session_data.get('start_date')
+                    session_end = session_data.get('end_date')
+                    if session_start and session_end:
+                        started_during = (role_start < session_start < role_end)
+                        ended_during = (role_start < session_end < role_end)
+                        if started_during or ended_during:
+                            self['context_role'] = role
+                            return role
+                    else:
+                        continue
+
+                # Return first role from the session?
+                role = roles[0]
+                self['context_role'] = role
+                return role
+
         if vote is not None:
             date = vote['date']
         if bill is not None:
-            date = bill['actions'][0]['date']
+            date = bill['action_dates']['first']
 
         dates_exist = False
         for role in roles:
