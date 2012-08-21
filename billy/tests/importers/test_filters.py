@@ -1,4 +1,4 @@
-from billy.importers.filters import phone_filter
+from billy.importers.filters import phone_filter, email_filter
 
 
 def test_phone_filter():
@@ -59,3 +59,26 @@ def test_extention():
     for n in numbers:
         num = phone_filter(n)
         assert number == num
+
+
+def test_email_basics():
+    email = "foo@example.com"
+    emails = [
+        "foo@example.com",
+        "mailto:foo@example.com",
+        "<foo@example.com>",
+        '"John Q. Public" <foo@example.com>'
+    ]
+    for e in emails:
+        assert email_filter(e) == email
+
+
+def test_invalid_emails():
+    emails = [
+        "foo@example.com>",
+        "<foo@example.com",
+        "Contact Me!",
+        ""
+    ]
+    for e in emails:
+        assert email_filter(e) == e
