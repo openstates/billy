@@ -92,6 +92,11 @@ def email_filter(email):
     return email
 
 
+def strip_filter(entry):
+    entry = entry.strip()
+    return entry
+
+
 class LegislatorPhoneFilter(Filter):
     def filter(self, obj):
         if "offices" in obj:
@@ -105,4 +110,18 @@ class LegislatorEmailFilter(Filter):
     def filter(self, obj):
         if "email" in obj:
             obj['email'] = email_filter(obj['email'])
+        return obj
+
+
+class StripFilter(Filter):
+    def filter(self, obj):
+        if isinstance(obj, basestring):
+            return strip_filter(obj)
+        elif isinstance(obj, list):
+            newl = []
+            for x in obj:
+                newl.append(self.filter(x))
+            return newl
+        for x in obj:
+            obj[x] = self.filter(obj[x])
         return obj
