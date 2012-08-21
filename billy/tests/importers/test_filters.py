@@ -66,7 +66,19 @@ def test_email_basics():
     emails = [
         "foo@example.com",
         "mailto:foo@example.com",
+        "<foo@example.com>",
         '"John Q. Public" <foo@example.com>'
     ]
     for e in emails:
         assert email_filter(e) == email
+
+
+def test_invalid_emails():
+    emails = [
+        "foo@example.com>",
+        "<foo@example.com",
+        "Contact Me!",
+        ""
+    ]
+    for e in emails:
+        assert email_filter(e) == e
