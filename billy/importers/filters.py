@@ -7,17 +7,34 @@ class Filter(object):
         pass
 
 
-def _phone_formatter(obj):
+def _phone_formatter(obj, extention):
     objs = []
     for thing in ["country", "area", "prefix", "line_number"]:
         if thing in obj:
             objs.append(obj[thing])
-    return "-".join(objs)
+    number = "-".join(objs)
+    if extention is not None:
+        number += " x%s" % (extention)
+    return number
 
 
 def phone_filter(original_number, formatter=_phone_formatter):
     number = original_number
-    breakers = "+-()."
+
+    extentions = [
+        "extension",
+        "ext.",
+        "x"
+    ]
+    extention = None
+
+    for x in extentions:
+        if x in number.lower():
+            number, extention = number.lower().split(x, 1)
+            extention = extention.strip()
+            break
+
+    breakers = "+-().,"
     for b in breakers:
         number = number.replace(b, " ")
     number = re.sub("\s+", " ", number).strip()
@@ -52,7 +69,7 @@ def phone_filter(original_number, formatter=_phone_formatter):
             if len(obj[req]) != reqs[req]:
                 return original_number
 
-    number = formatter(obj)
+    number = formatter(obj, extention)
     return number
 
 
