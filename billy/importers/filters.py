@@ -100,3 +100,9 @@ class LegislatorPhoneFilter(Filter):
                     obj['offices'][i]['phone'] = \
                             phone_filter(obj['offices'][i]['phone'])
         return obj
+
+class LegislatorEmailFilter(Filter):
+    def filter(self, obj):
+        if "email" in obj:
+            obj['email'] = email_filter(obj['email'])
+        return obj
