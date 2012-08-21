@@ -13,6 +13,8 @@ from django.template.response import TemplateResponse
 from djpjax import pjax
 import pymongo
 
+
+from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 from billy.conf import settings as billy_settings
 
@@ -106,6 +108,8 @@ def legislator(request, abbr, _id, slug=None):
             raise Http404('No legislator was found with leg_id = %r' % _id)
         else:
             return redirect(legislator.get_absolute_url(), permanent=True)
+
+    popularity.counter.inc('legislators', _id, abbr=abbr)
 
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)

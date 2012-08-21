@@ -641,31 +641,6 @@ def other_actions(request, abbr):
 
 
 @login_required
-def unmatched_leg_ids(request, abbr):
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404('No reports found for abbreviation %r.' % abbr)
-    bill_unmatched = set(tuple(i) for i in
-                         report['bills']['unmatched_leg_ids'])
-    com_unmatched = set(tuple(i) for i in
-                         report['committees']['unmatched_leg_ids'])
-    combined_sets = bill_unmatched | com_unmatched
-    return _csv_response(request, 'leg_ids', ('term', 'chamber', 'name'),
-                         sorted(combined_sets), abbr)
-
-
-@login_required
-def uncategorized_subjects(request, abbr):
-    report = db.reports.find_one({'_id': abbr})
-    if not report:
-        raise Http404('No reports found for abbreviation %r.' % abbr)
-    subjects = sorted(report['bills']['uncategorized_subjects'],
-                      key=lambda t: (t[1], t[0]), reverse=True)
-    return _csv_response(request, 'uncategorized_subjects', ('subject', '#'),
-                         subjects, abbr)
-
-
-@login_required
 def district_stub(request, abbr):
     def keyfunc(x):
         try:
@@ -847,7 +822,7 @@ def leg_ids(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
 
-    leg_ids = db.leg_ids.find({"abbr": abbr})
+    leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
 
     def _id(term, chamber, name):
@@ -894,7 +869,7 @@ def leg_ids(request, abbr):
 
 @login_required
 def leg_ids_remove(request, abbr=None, id=None):
-    db.leg_ids.remove({"_id": id}, safe=True)
+    db.manual.leg_ids.remove({"_id": id}, safe=True)
     return redirect('admin_leg_ids', abbr)
 
 
@@ -915,7 +890,7 @@ def leg_ids_commit(request, abbr):
             term
         )
 
-        db.leg_ids.update({"_id": thing},
+        db.manual.leg_ids.update({"_id": thing},
                          {
                              "_id": thing,
                              "name": name,
@@ -928,7 +903,6 @@ def leg_ids_commit(request, abbr):
                          safe=True)
 
     return redirect('admin_leg_ids', abbr)
-
 
 
 @login_required
@@ -949,7 +923,7 @@ def subjects(request, abbr):
 
     subjects.rewind()
 
-    uniqid = 0
+    uniqid = 1
 
     for sub in uc_s:
         if not sub[0] in c_subjects:
@@ -957,10 +931,13 @@ def subjects(request, abbr):
             uniqid += 1
             uc_subjects.append(sub)
 
+    normalized_subjects = settings.BILLY_SUBJECTS[:]
+    normalized_subjects.append("IGNORED")
+
     return render(request, 'billy/subjects.html', {
         'metadata': meta,
         'subjects': subjects,
-        'normalized_subjects': settings.BILLY_SUBJECTS,
+        'normalized_subjects': normalized_subjects,
         'uncat_subjects': uc_subjects
     })
 
@@ -993,11 +970,14 @@ def subjects_commit(request, abbr):
     for idex in catd_subjects:
         sub = catd_subjects[idex]
 
-        remote = sub['remote'][0].strip()
+        remote = sub['remote'][0]
         normal = [x.strip() for x in sub['normal']]
 
         if normal == []:
             continue
+
+        if "IGNORED" in normal:
+            normal = []
 
         eyedee = _gen_id(abbr, remote)
 

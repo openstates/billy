@@ -238,14 +238,14 @@ class MongoNameMatcher(CSVNameMatcher):
         CSVNameMatcher.__init__(self, *args, **kwargs)
 
     def _learn_manual_matches(self):
-        rows = db.leg_ids.find({"abbr": self._abbr})
+        rows = db.manual.leg_ids.find({"abbr": self._abbr})
 
         for row in rows:
             (term, chamber, name, leg_id) = (
                     row['session'],
                     row['chamber'],
                     row['name'],
-                    row['leg_id'] )
+                    row['leg_id'])
 
             if term == self._term and leg_id:
                 self._manual[chamber][name] = leg_id

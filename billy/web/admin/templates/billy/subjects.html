@@ -6,12 +6,56 @@
 {% block title %}Data Quality{% endblock %}
 
 {% block script %}
-<link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
-<script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
+    <script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
     <script type="text/javascript">
-        $(document).ready(function() {
-            $(".mselect").select2();
-        });
+
+    var uncat_subjects = {
+{% for sub in uncat_subjects %}
+            "{{sub.0}}": "{{sub.2}}",{% endfor %}
+        },
+        subject_order = [
+{% for sub in uncat_subjects %}
+            "{{sub.0}}",{% endfor %}
+        ],
+        subjects = [
+{% for sub in normalized_subjects %}
+            "{{sub}}",{% endfor %}
+        ],
+        count = 0,
+        max = 50;
+
+    function load_block() {
+        var rMax = count + max;
+        if ( subject_order.length < rMax ) {
+            rMax = subject_order.length;
+            $("#load-more").hide();
+        }
+
+        for ( ; count < rMax; ++count ) {
+            var i = subject_order[count],
+                obj = uncat_subjects[i];
+                buf = "<tr><td>" + i;
+                buf += "<input type = 'hidden' value = '" + i;
+                buf += "' name = '" + obj + "-remote' />";
+
+                buf += "</td><td><select name = '" + obj + "-normal' id='"
+                       + obj + "-normal' multiple >";
+
+            for ( var i in subjects ) {
+                var subject = subjects[i];
+                buf += "<option value='" + subject + "' >" + subject +
+                       "</option>";
+            }
+            buf += "</select></td></tr>";
+            $("#target").append(buf);
+            $("#" + obj + "-normal").select2();
+        }
+    }
+
+    $(document).ready(function() {
+        load_block();
+    });
     </script>
 {% endblock %}
 
@@ -19,28 +63,15 @@
 <h2>Subjects needing sorting</h2>
 
 <form action = '{% url admin_subjects_commit metadata.abbreviation %}' method = 'POST' >
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered table-condensed" id = 'target'>
     <tr>
         <th>"Foreign" subject</th>
         <th>Billy subject</th>
     </tr>
-{% for sub in uncat_subjects %}
-    <tr>
-        <td>{{sub.0}}<input
-                        type = 'hidden'
-                        value = '{{sub.0}}'
-                        name = '{{sub.2}}-remote'
-        /></td>
-        <td>
-<select name = '{{sub.2}}-normal' multiple class = 'mselect' >
-{% for sub in normalized_subjects %}
-    <option value = '{{sub}}' >{{sub}}</option>
-{% endfor %}
-        </td>
-</select>
-    </tr>
-{% endfor %}
 </table>
+<button type = 'button' onclick = 'load_block();'
+        id = 'load-more'
+        class = 'btn btn-info' >Load more</button>
 <input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
 </form>
 

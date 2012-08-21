@@ -34,19 +34,20 @@ class SponsorsManager(AttrManager):
         # Need to be able to set attributes on sponsor, a dict.
         dictwrapper = type('Sponsor', (dict,), {})
 
-        try:
-            legislators = self._legislators
-        except AttributeError:
+        if not hasattr(self, '_legislators'):
+            # build a mapping from all _ids to legislators
+            self._legislators = {}
             ids = filter(None, map(operator.itemgetter('leg_id'), sponsors))
-            legislators = db.legislators.find({'_id': {'$in': ids}})
-            legislators = dict((obj['_id'], obj) for obj in legislators)
-            self._legislators = legislators
+            legislators = db.legislators.find({'_all_ids': {'$in': ids}})
+            for obj in legislators:
+                for _id in obj['_all_ids']:
+                    self._legislators[_id] = obj
+
         for sponsor in sponsors:
             leg_id = sponsor['leg_id']
-            if leg_id is not None and leg_id in legislators:
-                legislator = legislators[sponsor['leg_id']]
+            if leg_id is not None and leg_id in self._legislators:
+                legislator = self._legislators[sponsor['leg_id']]
                 legislator.update(sponsor)
-                legislator.bill = self.bill
                 yield legislator
             else:
                 spons = dictwrapper(sponsor)
@@ -77,7 +78,6 @@ class SponsorsManager(AttrManager):
         if '_id' in first:
             first_id = first['_id']
             for sp in sponsors:
-                print sp['_id']
                 if first_id == sp['_id']:
                     sponsors.remove(sp)
                     break

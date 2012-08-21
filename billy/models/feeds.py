@@ -123,7 +123,8 @@ class FeedEntry(Document):
         if 'published_parsed' in self:
             published_parsed = self['published_parsed']
             if published_parsed is not None:
-                return datetime.datetime.fromtimestamp(self['published_parsed'])
+                return datetime.datetime.fromtimestamp(
+                    self['published_parsed'])
 
             # Try alternative format.
             published = self['published']
