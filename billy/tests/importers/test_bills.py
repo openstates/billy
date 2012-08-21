@@ -30,6 +30,16 @@ def setup_func():
 
 @with_setup(setup_func)
 def test_import_bill():
+    companion_data = {'_type': 'bill', 'state': 'ex', 'bill_id': 'A1',
+            'chamber': 'upper', 'session': 'S1',
+            'title': 'companion',
+            'sponsors': [],
+            'versions': [],
+            'documents': [],
+            'votes': [],
+            'actions': [],
+            'companions': [],
+           }
     data = {'_type': 'bill', 'state': 'ex', 'bill_id': 'S1',
             'chamber': 'upper', 'session': 'S1',
             'subjects': ['Pigs', 'Sheep', 'Horses'],
@@ -37,7 +47,8 @@ def test_import_bill():
                          {'name': 'Jackson', 'type': 'cosponsor'}],
             'title': 'main title',
             'alternate_titles': ['second title'],
-            'companions': [],
+            'companions': [{'bill_id': 'A1', 'session': 'S1', 'chamber': None}
+                          ],
             'versions': [{'title': 'old title',
                           'url': 'http://example.com/old'},
                          {'title': 'main title',
@@ -76,13 +87,17 @@ def test_import_bill():
         ]
     }
 
-    # deepcopy both so we can reinsert same data without modification
+    # deepcopy here so we can reinsert same data without modification
+    bills.import_bill(copy.deepcopy(companion_data), {}, None)
     bills.import_bill(copy.deepcopy(data), copy.deepcopy(standalone_votes),
                       None)
 
+    a1 = db.bills.find_one({'bill_id': 'A 1'})
+    assert a1['_id'] == 'EXB00000001'
+
     # test that basics work
-    bill = db.bills.find_one()
-    assert bill['_id'] == 'EXB00000001'
+    bill = db.bills.find_one({'bill_id': 'S 1'})
+    assert bill['_id'] == 'EXB00000002'
     assert bill['bill_id'] == 'S 1'
     assert bill['chamber'] == 'upper'
     assert bill['scraped_subjects'] == data['subjects']
@@ -117,15 +132,18 @@ def test_import_bill():
     assert bill['versions'][1]['doc_id'] == 'EXD00000002'
     assert bill['documents'][0]['doc_id'] == 'EXD00000003'
 
+    # test companions
+    bill['companions'][0]['internal_id'] == 'EXB000000001'
+
     # now test an update
     data['versions'].append({'title': 'third title',
                              'url': 'http://example.com/3rd'})
     data['sponsors'].pop()
     bills.import_bill(data, standalone_votes, None)
 
-    # still only one bill
-    assert db.bills.count() == 1
-    bill = db.bills.find_one()
+    # still only two bills
+    assert db.bills.count() == 2
+    bill = db.bills.find_one('EXB00000002')
 
     # votes haven't changed, versions, titles, and sponsors have
     assert len(bill['votes']) == 3
