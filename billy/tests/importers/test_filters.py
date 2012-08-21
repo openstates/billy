@@ -46,3 +46,16 @@ def test_garbage():
     ]
     for number in numbers:
         assert number == phone_filter(number)
+
+def test_extention():
+    number = "555-606-0842 x505"
+    numbers = [
+        "555-606-0842, x505",
+        "555-606-0842 x505",
+        "555-606-0842 Ext. 505",
+        "555-606-0842 Ext. 505",
+        "555-606-0842 Extension 505"
+    ]
+    for n in numbers:
+        num = phone_filter(n)
+        assert number == num
