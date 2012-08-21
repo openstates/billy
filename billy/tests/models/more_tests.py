@@ -320,7 +320,6 @@ def test_current_using_vote():
     correct_role = leg['roles'][0]
     bill = db.bills.find_one({'_term': '20112012'})
     vote = next(bill.votes_manager())
-    nose.tools.set_trace()
     nose.tools.eq_(correct_role, leg.context_role(vote=vote))
 
 
@@ -423,7 +422,6 @@ def test_old_using_session_multiple_roles():
 def test_old_using_session_single_role():
     leg = db.legislators.find_one('CAL000104')
     correct_role = leg['old_roles']['fake-session'][0]
-    nose.tools.set_trace()
     nose.tools.eq_(correct_role, leg.context_role(session='fake-session'))
 
 
