@@ -76,6 +76,7 @@ class Bill(SourcedObject):
         self['actions'] = []
         self['documents'] = []
         self['alternate_titles'] = []
+        self['companions'] = []
 
         if not 'type' in kwargs or not kwargs['type']:
             self['type'] = ['bill']
@@ -216,6 +217,17 @@ class Bill(SourcedObject):
         Associate an alternate title with this bill.
         """
         self['alternate_titles'].append(title)
+
+    def add_companion(self, bill_id, session=None, chamber=None):
+        """
+        Associate another bill with this one.
+
+        If session isn't set it will be set to self['session'].
+        """
+        companion = {'bill_id': bill_id,
+                     'session': session or self['session'],
+                     'chamber': chamber}
+        self['companions'].append(companion)
 
     def get_filename(self):
         filename = "%s_%s_%s.json" % (self['session'], self['chamber'],

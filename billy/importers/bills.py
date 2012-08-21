@@ -255,6 +255,21 @@ def import_bill(data, votes, categorizer):
 
     data['votes'].extend(bill_votes)
 
+    # companions
+    for companion in data['companions']:
+        companion['bill_id'] = fix_bill_id(companion['bill_id'])
+        # query based on companion
+        spec = companion.copy()
+        spec[settings.LEVEL_FIELD] = abbr
+        if not spec['chamber']:
+            spec.pop('chamber')
+        companion_obj = db.bills.find_one(spec)
+        if companion_obj:
+            companion['internal_id'] = companion_obj['_id']
+        else:
+            logger.warning('Unknown companion: {chamber} {session} {bill_id}'
+                           .format(**companion))
+
     bill = db.bills.find_one({settings.LEVEL_FIELD: abbr,
                               'session': data['session'],
                               'chamber': data['chamber'],
