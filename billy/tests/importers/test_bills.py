@@ -37,6 +37,7 @@ def test_import_bill():
                          {'name': 'Jackson', 'type': 'cosponsor'}],
             'title': 'main title',
             'alternate_titles': ['second title'],
+            'companions': [],
             'versions': [{'title': 'old title',
                           'url': 'http://example.com/old'},
                          {'title': 'main title',
@@ -155,6 +156,7 @@ def test_import_bill_with_partial_bill_vote_id():
             'documents': [],
             'votes': [],
             'actions': [],
+            'companions': [],
            }
     standalone_votes = {
         # chamber, session, bill id -> vote list
