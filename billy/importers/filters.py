@@ -97,6 +97,11 @@ def strip_filter(entry):
     return entry
 
 
+def single_space_filter(entry):
+    entry = re.sub("\s+", " ", entry)
+    return strip_filter(entry)
+
+
 class LegislatorPhoneFilter(Filter):
     def filter(self, obj):
         if "offices" in obj:

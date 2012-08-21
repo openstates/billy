@@ -1,4 +1,5 @@
-from billy.importers.filters import phone_filter, email_filter
+from billy.importers.filters import (phone_filter, email_filter,
+                                     single_space_filter, strip_filter)
 
 
 def test_phone_filter():
@@ -82,3 +83,25 @@ def test_invalid_emails():
     ]
     for e in emails:
         assert email_filter(e) == e
+
+
+def test_single_space_filter():
+    line = "Hello, this is a test"
+    lines = [
+        "  Hello,    this  is     a    test",
+        "Hello,      this is   a    test   "
+    ]
+    for l in lines:
+        assert line == single_space_filter(l)
+
+
+def test_strip_filter():
+    line = "Hello, this is a test"
+    lines = [
+        "Hello, this is a test ",
+        " Hello, this is a test ",
+        " Hello, this is a test",
+        "Hello, this is a test"
+    ]
+    for l in lines:
+        assert line == single_space_filter(l)
