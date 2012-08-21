@@ -826,17 +826,11 @@ def leg_ids(request, abbr):
     sorted_ids = {}
 
     def _id(term, chamber, name):
-        return "%s-%s-%s" % (
-            term, chamber, name
-        )
+        return "%s-%s-%s" % (term, chamber, name)
 
-    for thing in leg_ids:
-        key = _id(
-            thing['session'],
-            thing['chamber'],
-            thing['name']
-        )
-        sorted_ids[key] = thing
+    for item in leg_ids:
+        key = _id(item['term'], item['chamber'], item['name'])
+        sorted_ids[key] = item
 
     if not report:
         raise Http404('No reports found for abbreviation %r.' % abbr)
@@ -847,17 +841,12 @@ def leg_ids(request, abbr):
     combined_sets = bill_unmatched | com_unmatched
     eyedees = []
 
-    for thing in combined_sets:
-        session, chamber, name = thing
-        key = _id(
-            session,
-            chamber,
-            name
-        )
+    for term, chamber, name in combined_sets:
+        key = _id(term, chamber, name)
         if key in sorted_ids:
             continue
 
-        eyedees.append(thing)
+        eyedees.append((term, chamber, name))
 
     return render(request, 'billy/leg_ids.html', {
         "metadata": meta,
@@ -894,7 +883,7 @@ def leg_ids_commit(request, abbr):
                          {
                              "_id": thing,
                              "name": name,
-                             "session": term,
+                             "term": term,
                              "abbr": abbr,
                              "leg_id": value,
                              "chamber": chamber,
