@@ -378,6 +378,14 @@ class Bill(Document):
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
 
+    @property
+    def quality_exceptions(self):
+        exceptions = getattr(self, '_exceptions', None)
+        if exceptions is None:
+            self._exceptions = list(db.quality_exceptions.find({'ids':
+                                                                self['_id']}))
+        return self._exceptions
+
     def _split_list(n, key):
         def first5(self):
             return self[key][:n]
