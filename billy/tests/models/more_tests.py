@@ -55,6 +55,7 @@ def setup_func():
 
     # Insert some test records.
     db.legislators.insert({
+        "_all_ids": ["CAL000104"],
         "_id": "CAL000104",
         "_type": "person",
         "active": True,
@@ -89,29 +90,55 @@ def setup_func():
                     "term": "20092010",
                     "type": "member"
                 },
-            ]
-        },
-        "party": "Democratic",
-        "roles": [
-            {
-                "chamber": "lower",
+            ],
+            'fake-session': [{
+                "state": "ca",
+                "chamber": "joint",
                 "district": "13",
                 "end_date": None,
                 "party": "Democratic",
                 "start_date": None,
+                "term": "fake-term",
+                "type": "member"
+            }]
+
+        },
+        "party": "Democratic",
+        "roles": [
+
+            # Earlier role from 2011 to 2012.
+            {
+                "chamber": "lower",
+                "district": "13",
+                "start_date": datetime.datetime(2011, 1, 1, 0, 0),
+                "party": "Democratic",
+                "end_date": datetime.datetime(2012, 1, 1, 0, 0),
+                "state": "ca",
+                "term": "20112012",
+                "type": "member"
+            },
+
+            # Later role from 2012-2013.
+            {
+                "chamber": "lower",
+                "district": "14",
+                "start_date": datetime.datetime(2012, 1, 2, 0, 0),
+                "party": "Democratic",
+                "end_date": datetime.datetime(2012, 12, 1, 0, 0),
                 "state": "ca",
                 "term": "20112012",
                 "type": "member"
             },
             {
-                "chamber": "joint",
-                "committee": "Joint Committee on Arts",
-                "committee_id": "CAC000356",
                 "state": "ca",
-                "subcommittee": None,
-                "term": "20112012",
-                "type": "committee member"
-            },
+                "chamber": "joint",
+                "district": "13",
+                "end_date": None,
+                "party": "Democratic",
+                "start_date": None,
+                "term": "fake-term",
+                "type": "member"
+            }
         ],
         "state": "ca",
         })
@@ -158,6 +185,14 @@ def setup_func():
                 u'display_name': u'2011-2012 Regular Session',
                 u'start_date': datetime.datetime(2010, 12, 6, 0, 0),
                 u'type': u'primary'},
+            u'fake-session': {
+                u'display_name': u'2011-2012 Regular Session',
+                u'start_date': datetime.datetime(2010, 12, 6, 0, 0),
+                u'type': u'primary'},
+            u'fake-session2': {
+                u'display_name': u'2011-2012 Regular Session',
+                u'start_date': datetime.datetime(2010, 12, 6, 0, 0),
+                u'type': u'primary'},
             u'20112012 Special Session 1': {
                 u'display_name': u'2011-2012, 1st Special Session',
                 u'type': u'special'}},
@@ -177,15 +212,29 @@ def setup_func():
                 u'20092010 Special Session 7',
                 u'20092010 Special Session 8'],
            u'start_year': 2009},
+
           {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
            u'end_year': 2012,
            u'name': u'20112012',
            u'sessions': [u'20112012 Special Session 1', u'20112012'],
-           u'start_year': 2011}],
+           u'start_year': 2011},
+
+          {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
+           u'end_year': 2012,
+           u'name': u'fake-term',
+           u'sessions': [u'fake-session'],
+           u'start_year': 2011},
+
+          {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
+           u'end_year': 2012,
+           u'name': u'fake-term2',
+           u'sessions': [u'fake-session2'],
+           u'start_year': 2011},
+
+        ],
          u'upper_chamber_name': u'Senate',
          u'upper_chamber_term': 4,
-         u'upper_chamber_title': u'Senator',
-        })
+         u'upper_chamber_title': u'Senator'})
 
     # A current session bill, where current session is 20112012.
     db.bills.insert({
@@ -224,15 +273,12 @@ def setup_func():
         u'_id': u'CAB00005131',
         u'_term': u'20092010',
         u'_type': u'bill',
-        u'actions': [
-            {u'action': u'Introduced. To print.',
-            u'actor': u'lower (Desk)',
-            u'date': datetime.datetime(2009, 7, 24, 0, 0),
-            u'type': [u'bill:introduced']},
-            {u'action': u'From printer.',
-            u'actor': u'lower (Desk)',
-            u'date': datetime.datetime(2009, 7, 27, 0, 0),
-            u'type': [u'other']}],
+        u'action_dates': {
+            u'first': datetime.datetime(2009, 2, 17, 0, 0),
+            u'last': datetime.datetime(2009, 8, 25, 0, 0),
+            u'passed_lower': datetime.datetime(2009, 6, 2, 0, 0),
+            u'passed_upper': None,
+            u'signed': None},
         u'chamber': u'lower',
         u'country': u'us',
         u'session': u'20092010 Special Session 4',
@@ -256,30 +302,102 @@ Need to test context_role with:
 '''
 
 
-# @with_setup(setup_func)
-# def test_current_role():
-#     leg = db.legislators.find_one()
-#     correct_role = leg['roles'][0]
-#     bill = db.bills.find_one({'_term': '20112012'})
-
-#     # With bill as the argument.
-#     nose.tools.set_trace()
-#     nose.tools.eq_(correct_role, leg.context_role(bill=bill))
-
-#     # With vote as the argument.
-#     vote = next(bill.votes_manager())
-#     nose.tools.eq_(correct_role, leg.context_role(vote=vote))
-
-#     # With session as the argument.
-#     nose.tools.eq_(correct_role, leg.context_role(session='20112012'))
-
-#     # With term as the argument.
-#     nose.tools.eq_(correct_role, leg.context_role(term='20112012'))
+# Test context_role for current term, session, bill, vote.
+@with_setup(setup_func)
+def test_current_using_bill():
+    '''The bill's first action was in 2011, so the correct role
+    is the first one in leg['roles'], which lasts from 2011 to 2012.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][0]
+    bill = db.bills.find_one({'_term': '20112012'})
+    nose.tools.eq_(correct_role, leg.context_role(bill=bill))
 
 
 @with_setup(setup_func)
-def test_old_using_bill():
+def test_current_using_vote():
     leg = db.legislators.find_one()
+    correct_role = leg['roles'][0]
+    bill = db.bills.find_one({'_term': '20112012'})
+    vote = next(bill.votes_manager())
+    nose.tools.set_trace()
+    nose.tools.eq_(correct_role, leg.context_role(vote=vote))
+
+
+@with_setup(setup_func)
+def test_current_using_session_multiple_roles():
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][0]
+    nose.tools.eq_(correct_role, leg.context_role(session='20112012'))
+
+
+@with_setup(setup_func)
+def test_current_using_session_single_role():
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][2]
+    nose.tools.eq_(correct_role, leg.context_role(session='fake-session'))
+
+
+@with_setup(setup_func)
+def test_current_using_term_multiple_roles():
+    '''If there're multiple roles for a term, return the
+    first role in the list.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][0]
+    nose.tools.eq_(correct_role, leg.context_role(term='20112012'))
+
+
+@with_setup(setup_func)
+def test_current_using_term_single_role():
+    '''If there'only one role for a term, return it.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][2]
+    nose.tools.eq_(correct_role, leg.context_role(term='fake-term'))
+
+
+@with_setup(setup_func)
+def test_current_using_related_bill():
+    bill = db.bills.find_one({'_term': '20112012'})
+    leg = next(iter(bill.sponsors_manager))
+    correct_role = leg['roles'][0]
+    nose.tools.eq_(correct_role, leg.context_role(bill=bill))
+
+
+@with_setup(setup_func)
+def test_current_using_related_vote():
+    bill = db.bills.find_one({'_term': '20112012'})
+    vote = next(bill.votes_manager())
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['roles'][0]
+    nose.tools.eq_(correct_role, leg.context_role(vote=vote))
+
+
+@with_setup(setup_func)
+def test_current_using_term_no_matching_roles():
+    '''If there're multiple roles for a term, return the
+    first role in the list.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = ''
+    nose.tools.eq_(correct_role, leg.context_role(term='fake-term2'))
+
+
+@with_setup(setup_func)
+def test_current_using_session_no_matching_roles():
+    '''If there're multiple roles for a term, return the
+    first role in the list.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = ''
+    nose.tools.eq_(correct_role, leg.context_role(session='fake-session2'))
+
+
+# Test context_role with for old term, session, bill, vote.
+@with_setup(setup_func)
+def test_old_using_bill():
+    leg = db.legislators.find_one('CAL000104')
     correct_role = leg['old_roles']['20092010'][0]
     bill = db.bills.find_one({'_term': '20092010'})
     nose.tools.eq_(correct_role, leg.context_role(bill=bill))
@@ -290,38 +408,56 @@ def test_old_using_vote():
     leg = db.legislators.find_one()
     correct_role = leg['old_roles']['20092010'][0]
     bill = db.bills.find_one({'_term': '20092010'})
-    nose.tools.set_trace()
     vote = next(bill.votes_manager())
     nose.tools.eq_(correct_role, leg.context_role(vote=vote))
 
 
 @with_setup(setup_func)
-def test_old_using_session():
-    leg = db.legislators.find_one()
+def test_old_using_session_multiple_roles():
+    leg = db.legislators.find_one('CAL000104')
     correct_role = leg['old_roles']['20092010'][0]
     nose.tools.eq_(correct_role, leg.context_role(session='20092010'))
 
 
 @with_setup(setup_func)
-def test_old_using_term():
-    leg = db.legislators.find_one()
+def test_old_using_session_single_role():
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['old_roles']['fake-session'][0]
+    nose.tools.set_trace()
+    nose.tools.eq_(correct_role, leg.context_role(session='fake-session'))
+
+
+@with_setup(setup_func)
+def test_old_using_term_multiple_roles():
+    '''If there're multiple roles for a term, return the
+    first role in the list.
+    '''
+    leg = db.legislators.find_one('CAL000104')
     correct_role = leg['old_roles']['20092010'][0]
     nose.tools.eq_(correct_role, leg.context_role(term='20092010'))
 
 
 @with_setup(setup_func)
+def test_old_using_term_single_role():
+    '''If there'only one role for a term, return it.
+    '''
+    leg = db.legislators.find_one('CAL000104')
+    correct_role = leg['old_roles']['fake-session'][0]
+    nose.tools.eq_(correct_role, leg.context_role(term='fake-term'))
+
+
+@with_setup(setup_func)
 def test_old_using_related_bill():
     bill = db.bills.find_one({'_term': '20092010'})
-    leg = next(bill.sponsors_manager)
+    leg = next(iter(bill.sponsors_manager))
     correct_role = leg['old_roles']['20092010'][0]
-    nose.tools.eq_(correct_role, leg.context_role())
+    nose.tools.eq_(correct_role, leg.context_role(bill=bill))
 
 
 @with_setup(setup_func)
 def test_old_using_related_vote():
     bill = db.bills.find_one({'_term': '20092010'})
-    vote = next(bill.votes_manager)
-    nose.tools.set_trace()
-    leg = db.legislators.find_one()
+    vote = next(bill.votes_manager())
+    leg = db.legislators.find_one('CAL000104')
     correct_role = leg['old_roles']['20092010'][0]
-    nose.tools.eq_(correct_role, leg.context_role(bill=bill))
+    nose.tools.eq_(correct_role, leg.context_role(vote=vote))
