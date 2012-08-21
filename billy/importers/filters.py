@@ -73,6 +73,25 @@ def phone_filter(original_number, formatter=_phone_formatter):
     return number
 
 
+def email_filter(email):
+    original_email = email
+
+    leaders = [
+        "mailto:"
+    ]
+
+    for leader in leaders:
+        if email.startswith(leader):
+            email = email[len(leader):]
+
+    if ">" in email and "<" in email:
+        # we likely have a nested email.
+        emails = re.findall("\<(.*)\>", email)
+        if len(emails) == 1:
+            email = emails[0]
+    return email
+
+
 class LegislatorPhoneFilter(Filter):
     def filter(self, obj):
         if "offices" in obj:
