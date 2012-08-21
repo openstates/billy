@@ -95,6 +95,17 @@
             },
             "type": "array"
         },
+        "companions": {
+            "items": {
+                "properties": {
+                    "bill_id": { "type": "string" },
+                    "session": { "type": "string" },
+                    "chamber": { "enum": [ "upper", "lower" ], "type": ["string", "null"] }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
         "bill_id": {
             "type": "string"
         },

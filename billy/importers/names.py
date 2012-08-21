@@ -1,6 +1,4 @@
 import re
-import unicodecsv
-import os.path
 import logging
 
 from billy import db
@@ -33,7 +31,7 @@ def get_legislator_id(abbr, session, chamber, name):
     return matcher.match(name, chamber)
 
 
-class CSVNameMatcher(object):
+class NameMatcher(object):
     """
     Match various forms of a name, provided they uniquely identify
     a person from everyone else we've seen.
@@ -92,21 +90,18 @@ class CSVNameMatcher(object):
         self._learn_manual_matches()
 
     def _learn_manual_matches(self):
-        path = os.path.join(settings.BILLY_MANUAL_DATA_DIR,
-                            "leg_ids/%s.csv" % self._abbr)
-        try:
-            with open(path) as f:
-                reader = unicodecsv.reader(f)
+        rows = db.manual.leg_ids.find({"abbr": self._abbr})
 
-                for (term, chamber, name, leg_id) in reader:
-                    if term == self._term and leg_id:
-                        self._manual[chamber][name] = leg_id
-                        if name in self._manual[None]:
-                            self._manual[None][name] = None
-                        else:
-                            self._manual[None][name] = leg_id
-        except IOError:
-            pass
+        for row in rows:
+            (term, chamber, name, leg_id) = (
+                    row['term'], row['chamber'], row['name'], row['leg_id'])
+
+            if term == self._term and leg_id:
+                self._manual[chamber][name] = leg_id
+                if name in self._manual[None]:
+                    self._manual[None][name] = None
+                else:
+                    self._manual[None][name] = leg_id
 
     def _normalize(self, name):
         """
@@ -231,25 +226,3 @@ class CSVNameMatcher(object):
 
         name = self._normalize(name)
         return self._names[chamber].get(name, None)
-
-
-class MongoNameMatcher(CSVNameMatcher):
-    def __init__(self, *args, **kwargs):
-        CSVNameMatcher.__init__(self, *args, **kwargs)
-
-    def _learn_manual_matches(self):
-        rows = db.manual.leg_ids.find({"abbr": self._abbr})
-
-        for row in rows:
-            (term, chamber, name, leg_id) = (
-                    row['term'], row['chamber'], row['name'], row['leg_id'])
-
-            if term == self._term and leg_id:
-                self._manual[chamber][name] = leg_id
-                if name in self._manual[None]:
-                    self._manual[None][name] = None
-                else:
-                    self._manual[None][name] = leg_id
-
-
-NameMatcher = MongoNameMatcher

@@ -7,17 +7,34 @@ class Filter(object):
         pass
 
 
-def _phone_formatter(obj):
+def _phone_formatter(obj, extention):
     objs = []
     for thing in ["country", "area", "prefix", "line_number"]:
         if thing in obj:
             objs.append(obj[thing])
-    return "-".join(objs)
+    number = "-".join(objs)
+    if extention is not None:
+        number += " x%s" % (extention)
+    return number
 
 
 def phone_filter(original_number, formatter=_phone_formatter):
     number = original_number
-    breakers = "+-()."
+
+    extentions = [
+        "extension",
+        "ext.",
+        "x"
+    ]
+    extention = None
+
+    for x in extentions:
+        if x in number.lower():
+            number, extention = number.lower().split(x, 1)
+            extention = extention.strip()
+            break
+
+    breakers = "+-().,"
     for b in breakers:
         number = number.replace(b, " ")
     number = re.sub("\s+", " ", number).strip()
@@ -52,8 +69,37 @@ def phone_filter(original_number, formatter=_phone_formatter):
             if len(obj[req]) != reqs[req]:
                 return original_number
 
-    number = formatter(obj)
+    number = formatter(obj, extention)
     return number
+
+
+def email_filter(email):
+    original_email = email
+
+    leaders = [
+        "mailto:"
+    ]
+
+    for leader in leaders:
+        if email.startswith(leader):
+            email = email[len(leader):]
+
+    if ">" in email and "<" in email:
+        # we likely have a nested email.
+        emails = re.findall("\<(.*)\>", email)
+        if len(emails) == 1:
+            email = emails[0]
+    return email
+
+
+def strip_filter(entry):
+    entry = entry.strip()
+    return entry
+
+
+def single_space_filter(entry):
+    entry = re.sub("\s+", " ", entry)
+    return strip_filter(entry)
 
 
 class LegislatorPhoneFilter(Filter):
@@ -63,4 +109,24 @@ class LegislatorPhoneFilter(Filter):
                 if "phone" in obj['offices'][i]:
                     obj['offices'][i]['phone'] = \
                             phone_filter(obj['offices'][i]['phone'])
+        return obj
+
+class LegislatorEmailFilter(Filter):
+    def filter(self, obj):
+        if "email" in obj:
+            obj['email'] = email_filter(obj['email'])
+        return obj
+
+
+class StripFilter(Filter):
+    def filter(self, obj):
+        if isinstance(obj, basestring):
+            return strip_filter(obj)
+        elif isinstance(obj, list):
+            newl = []
+            for x in obj:
+                newl.append(self.filter(x))
+            return newl
+        for x in obj:
+            obj[x] = self.filter(obj[x])
         return obj

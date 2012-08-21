@@ -8,14 +8,16 @@ import logging
 from billy import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
-from billy.importers.filters import LegislatorPhoneFilter
+from billy.importers.filters import (LegislatorPhoneFilter,
+                                     LegislatorEmailFilter)
 
 import pymongo
 
 logger = logging.getLogger('billy')
 
 filters = [
-    LegislatorPhoneFilter()
+    LegislatorPhoneFilter(),
+    LegislatorEmailFilter()
 ]
 
 

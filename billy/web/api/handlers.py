@@ -117,9 +117,12 @@ class BillyHandler(BaseHandler):
 
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
-        data = db.metadata.find(fields={'abbreviation': 1, 'name': 1,
-                                        'feature_flags': 1,
-                                        '_id': 0}).sort('name')
+        fields = _build_field_list(request, {'abbreviation': 1,
+                                             'name': 1,
+                                             'feature_flags': 1,
+                                             '_id': 0
+                                            })
+        data = db.metadata.find(fields=fields).sort('name')
         return list(data)
 
 
@@ -304,8 +307,9 @@ class EventsHandler(BillyHandler):
                        " Please supply a date in YYYY-MM-DD format.")
             return resp
 
-        return list(db.events.find(spec).sort(
-            'when', pymongo.ASCENDING).limit(1000))
+        return list(db.events.find(spec, fields=_build_field_list(request)
+                                  ).sort('when', pymongo.ASCENDING).limit(1000)
+                   )
 
 
 class SubjectListHandler(BillyHandler):

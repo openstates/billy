@@ -1,4 +1,5 @@
-from billy.importers.filters import phone_filter
+from billy.importers.filters import (phone_filter, email_filter,
+                                     single_space_filter, strip_filter)
 
 
 def test_phone_filter():
@@ -46,3 +47,61 @@ def test_garbage():
     ]
     for number in numbers:
         assert number == phone_filter(number)
+
+def test_extention():
+    number = "555-606-0842 x505"
+    numbers = [
+        "555-606-0842, x505",
+        "555-606-0842 x505",
+        "555-606-0842 Ext. 505",
+        "555-606-0842 Ext. 505",
+        "555-606-0842 Extension 505"
+    ]
+    for n in numbers:
+        num = phone_filter(n)
+        assert number == num
+
+
+def test_email_basics():
+    email = "foo@example.com"
+    emails = [
+        "foo@example.com",
+        "mailto:foo@example.com",
+        "<foo@example.com>",
+        '"John Q. Public" <foo@example.com>'
+    ]
+    for e in emails:
+        assert email_filter(e) == email
+
+
+def test_invalid_emails():
+    emails = [
+        "foo@example.com>",
+        "<foo@example.com",
+        "Contact Me!",
+        ""
+    ]
+    for e in emails:
+        assert email_filter(e) == e
+
+
+def test_single_space_filter():
+    line = "Hello, this is a test"
+    lines = [
+        "  Hello,    this  is     a    test",
+        "Hello,      this is   a    test   "
+    ]
+    for l in lines:
+        assert line == single_space_filter(l)
+
+
+def test_strip_filter():
+    line = "Hello, this is a test"
+    lines = [
+        "Hello, this is a test ",
+        " Hello, this is a test ",
+        " Hello, this is a test",
+        "Hello, this is a test"
+    ]
+    for l in lines:
+        assert line == single_space_filter(l)
