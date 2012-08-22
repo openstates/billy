@@ -824,6 +824,9 @@ def leg_ids(request, abbr):
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
+    known_legs = {}
+    for leg in legs:
+        known_legs[leg['leg_id']] = leg
 
     def _id(term, chamber, name):
         return "%s-%s-%s" % (term, chamber, name)
@@ -852,6 +855,7 @@ def leg_ids(request, abbr):
         "metadata": meta,
         "leg_ids": eyedees,
         "all_ids": sorted_ids,
+        "known_legs": known_legs,
         "legs": legs
     })
 
