@@ -25,9 +25,6 @@ def get_legislator_id(abbr, session, chamber, name):
 
         __matchers[(abbr, session)] = matcher
 
-    if chamber == 'both' or chamber == 'joint' or chamber == 'other':
-        chamber = None
-
     return matcher.match(name, chamber)
 
 
@@ -68,7 +65,7 @@ class NameMatcher(object):
     def __init__(self, abbr, term):
         self._names = {'upper': {}, 'lower': {}, None: {}}
         self._codes = {'upper': {}, 'lower': {}, None: {}}
-        self._manual = {'upper': {}, 'lower': {}, None: {}}
+        self._manual = {'upper': {}, 'lower': {}, None: {}, 'joint': {}}
         self._abbr = abbr
         self._term = term
 
@@ -96,7 +93,7 @@ class NameMatcher(object):
             (term, chamber, name, leg_id) = (
                     row['term'], row['chamber'], row['name'], row['leg_id'])
 
-            if term == self._term and leg_id:
+            if (term == self._term or not term) and leg_id:
                 self._manual[chamber][name] = leg_id
                 if name in self._manual[None]:
                     self._manual[None][name] = None
@@ -212,6 +209,9 @@ class NameMatcher(object):
             return self._manual[chamber][name]
         except KeyError:
             pass
+
+        if chamber == 'joint':
+            chamber = None
 
         try:
             return self._codes[chamber][name]

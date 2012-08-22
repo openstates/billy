@@ -1,5 +1,4 @@
 import re
-from collections import defaultdict
 
 
 class Filter(object):
@@ -74,8 +73,6 @@ def phone_filter(original_number, formatter=_phone_formatter):
 
 
 def email_filter(email):
-    original_email = email
-
     leaders = [
         "mailto:"
     ]
@@ -98,6 +95,9 @@ def strip_filter(entry):
 
 
 def single_space_filter(entry):
+    if not isinstance(entry, basestring):
+        return entry
+
     entry = re.sub("\s+", " ", entry)
     return strip_filter(entry)
 
@@ -110,6 +110,7 @@ class LegislatorPhoneFilter(Filter):
                     obj['offices'][i]['phone'] = \
                             phone_filter(obj['offices'][i]['phone'])
         return obj
+
 
 class LegislatorEmailFilter(Filter):
     def filter(self, obj):
@@ -129,4 +130,17 @@ class StripFilter(Filter):
             return newl
         for x in obj:
             obj[x] = self.filter(obj[x])
+        return obj
+
+
+class BillStringsFilter(Filter):
+    def filter(self, obj):
+        keys = [
+            "title",
+            "description",
+            "summary"
+        ]
+        for key in keys:
+            if key in obj:
+                obj[key] = single_space_filter(obj)
         return obj
