@@ -98,6 +98,9 @@ def strip_filter(entry):
 
 
 def single_space_filter(entry):
+    if not isinstance(entry, basestring):
+        return entry
+
     entry = re.sub("\s+", " ", entry)
     return strip_filter(entry)
 
