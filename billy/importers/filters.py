@@ -1,5 +1,4 @@
 import re
-from collections import defaultdict
 
 
 class Filter(object):
@@ -74,8 +73,6 @@ def phone_filter(original_number, formatter=_phone_formatter):
 
 
 def email_filter(email):
-    original_email = email
-
     leaders = [
         "mailto:"
     ]
@@ -113,6 +110,7 @@ class LegislatorPhoneFilter(Filter):
                     obj['offices'][i]['phone'] = \
                             phone_filter(obj['offices'][i]['phone'])
         return obj
+
 
 class LegislatorEmailFilter(Filter):
     def filter(self, obj):
