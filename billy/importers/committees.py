@@ -98,8 +98,7 @@ def import_committee(data, current_session, current_term):
         if not member['name']:
             continue
 
-        leg_id = get_legislator_id(abbr, current_session,
-                                   data['chamber'],
+        leg_id = get_legislator_id(abbr, current_session, data['chamber'],
                                    member['name'])
 
         if not leg_id:
@@ -108,14 +107,14 @@ def import_committee(data, current_session, current_term):
             member['leg_id'] = None
             continue
 
-        legislator = db.legislators.find_one({'_id': leg_id})
+        legislator = db.legislators.find_one({'_all_ids': leg_id})
 
         if not legislator:
             logger.warning('No legislator with ID %s' % leg_id)
             member['leg_id'] = None
             continue
 
-        member['leg_id'] = leg_id
+        member['leg_id'] = legislator['_id']
 
         for role in legislator['roles']:
             if (role['type'] == 'committee member' and
