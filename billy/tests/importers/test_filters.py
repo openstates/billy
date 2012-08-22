@@ -1,5 +1,5 @@
 from billy.importers.filters import (phone_filter, email_filter,
-                                     single_space_filter, strip_filter)
+                                     single_space_filter)
 
 
 def test_phone_filter():
@@ -47,6 +47,7 @@ def test_garbage():
     ]
     for number in numbers:
         assert number == phone_filter(number)
+
 
 def test_extention():
     number = "555-606-0842 x505"
