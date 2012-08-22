@@ -16,6 +16,7 @@ def setup_func():
 
     leg_a = {'full_name': 'Richard Feynman', 'leg_id': 'EXL000001',
              '_id': 'EXL000001',
+             '_all_ids': ['EXL000001'],
              'state': 'ex',
              '_scraped_name': 'Richard Feynman', 'first_name': 'Richard',
              'last_name': 'Feynman',
@@ -32,6 +33,7 @@ def setup_func():
             }
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
              '_id': 'EXL000002',
+             '_all_ids': ['EXL000002'],
              'state': 'ex',
              '_scraped_name': 'Albert Einstein', 'first_name': 'Albert',
              'last_name': 'Einstein',
@@ -52,6 +54,7 @@ def setup_func():
     # in a different term
     leg_c = {'full_name': 'Werner Heisenberg', 'leg_id': 'EXL000003',
              '_id': 'EXL000003',
+             '_all_ids': ['EXL000003'],
              'state': 'ex',
              '_scraped_name': 'Werner Heisenberg', 'first_name': 'Werner',
              'last_name': 'Heisenberg',
