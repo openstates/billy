@@ -130,3 +130,16 @@ class StripFilter(Filter):
         for x in obj:
             obj[x] = self.filter(obj[x])
         return obj
+
+
+class BillStringsFilter(Filter):
+    def filter(self, obj):
+        keys = [
+            "title",
+            "description",
+            "summary"
+        ]
+        for key in keys:
+            if key in obj:
+                obj[key] = single_space_filter(obj)
+        return obj
