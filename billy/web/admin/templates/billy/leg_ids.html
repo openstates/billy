@@ -50,16 +50,24 @@
         <th>Term</th>
         <th>Chamber</th>
         <th>Legislator ID</th>
+        <th>Legislator Name</th>
         <th>Danger Zone</th>
     </tr>
 {% for id in all_ids %}
+    {% with leg=all_ids|key:id %}
     <tr>
-        <td>{{all_ids|key:id|key:'name'}}</td>
-        <td>{{all_ids|key:id|key:'term'}}</td>
-        <td>{{all_ids|key:id|key:'chamber'}}</td>
-        <td>{{all_ids|key:id|key:'leg_id'}}</td>
+        <td>{{leg.name}}</td>
+        <td>{{leg.term}}</td>
+        <td>{{leg.chamber}}</td>
+        <td>{{leg.leg_id}}</td>
+        {% if known_legs|key:leg.leg_id %}
+        <td>{{known_legs|key:leg.leg_id|key:'full_name'}}</td>
+        {% else %}
+        <td></td>
+        {% endif %}
         <td><a href = '{% url admin_leg_ids_remove metadata.abbreviation all_ids|key:id|key:'_id' %}' >remove</a></td>
     </tr>
+    {% endwith %}
 {% endfor %}
 </table>
 

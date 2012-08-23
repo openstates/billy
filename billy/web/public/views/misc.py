@@ -151,3 +151,13 @@ class NewsList(RelatedObjectsList):
         New and blogs mentioning {{obj.display_name}} -
         {{metadata.legislature_name}} - OpenStates
         '''
+
+    def get(self, request, abbr, collection_name, _id, slug):
+        # hack to redirect to proper legislator on legislators/_id_/news
+        if collection_name == 'legislators':
+            leg = db.legislators.find_one({'_all_ids': _id})
+            if leg and leg['_id'] != _id:
+                return redirect('news_list', abbr, collection_name,
+                                leg['_id'], slug)
+        return super(NewsList, self).get(request, abbr, collection_name, _id,
+                                          slug)
