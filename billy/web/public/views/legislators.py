@@ -135,6 +135,7 @@ def legislator(request, abbr, _id, slug=None):
     legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
     feed_entries = legislator.feed_entries()
+    feed_entries_list = list(feed_entries.limit(5))
     return render(request, templatename('legislator'),
         dict(
             feed_entry_template=templatename('feed_entry'),
@@ -147,7 +148,9 @@ def legislator(request, abbr, _id, slug=None):
             sources=legislator['sources'],
             sponsored_bills=sponsored_bills,
             legislator_votes=legislator_votes,
-            feed_entries=feed_entries.limit(5),
+            has_feed_entries=bool(feed_entries_list),
+            feed_entries_left=feed_entries_list[:2],
+            feed_entries_right=feed_entries_list[2:4],
             feed_entries_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
             statenav_active='legislators'))
