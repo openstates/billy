@@ -51,9 +51,11 @@
             $("#target").append(buf);
             $("#" + obj + "-normal").select2();
         }
+        $("#showing").html(count);
     }
 
     $(document).ready(function() {
+        $("#total").html(subject_order.length);
         load_block();
     });
     </script>
@@ -61,6 +63,10 @@
 
 {% block content %}
 <h2>Subjects needing sorting</h2>
+
+<h3>Currently showing <span id = 'showing' >0</span> out
+    of <span id = 'total' >Unknown (wait a second)</span></h3>
+<br />
 
 <form action = '{% url admin_subjects_commit metadata.abbreviation %}' method = 'POST' >
 <table class="table table-striped table-bordered table-condensed" id = 'target'>
