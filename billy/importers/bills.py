@@ -2,6 +2,7 @@ import os
 import glob
 import json
 import logging
+import datetime as dt
 from time import time
 from collections import defaultdict
 
@@ -366,6 +367,33 @@ def import_bill(data, votes, categorizer):
             dates['passed_lower'] = adate
         elif (not dates['signed'] and 'governor:signed' in action['type']):
             dates['signed'] = adate
+
+        flags = [
+            "bill:passed",
+            "bill:failed",
+            "bill:veto_override:passed",
+            "bill:veto_override:failed",
+            "amendment:passed",
+            "amendment:failed",
+            "committee:passed",
+            "committee:passed:favorable",
+            "committee:passed:unfavorable",
+            "committee:passed:failed"
+        ]
+        attached = False
+        for flag in flags:
+            if flag in action['type']:
+                for vote in data['votes']:
+                    delta = (vote['date'] - action['date'])
+                    if delta < dt.timedelta(hours=8):
+                        if attached:
+                            if "related_vote" in action:
+                                del(action['related_vote'])  # We can't guess
+                                #                              offhand.
+                        else:
+                            related_vote = vote['vote_id']
+                            action['related_vote'] = [related_vote]
+                            attached = True
 
     # save action dates to data
     data['action_dates'] = dates
