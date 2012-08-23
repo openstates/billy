@@ -385,14 +385,14 @@ def import_bill(data, votes, categorizer):
             if flag in action['type']:
                 for vote in data['votes']:
                     delta = (vote['date'] - action['date'])
-                    if delta < dt.timedelta(hours=8):
+                    if delta < dt.timedelta(hours=2):
                         if attached:
-                            if "related_vote" in action:
-                                del(action['related_vote'])  # We can't guess
+                            if "related_votes" in action:
+                                del(action['related_votes'])  # We can't guess
                                 #                              offhand.
                         else:
                             related_vote = vote['vote_id']
-                            action['related_vote'] = [related_vote]
+                            action['related_votes'] = [related_vote]
                             attached = True
 
     # save action dates to data
