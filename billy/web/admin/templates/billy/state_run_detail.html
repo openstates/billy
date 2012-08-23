@@ -205,11 +205,11 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 </p>
 <p>
 <h3>Percent of Exceptions Thrown</h3>
-<div id = 'chart-area-pie' ></div>
+<div id="chart-area-pie" ></div>
 <br />
 <br />
 <h3>Time of each scrape, by Scraper Type</h3>
-<div id = 'chart-area-stack' ></div>
+<div id="chart-area-stack" ></div>
 {% for key in runlog.scraped.run_record %}
     {% if key.exception %}
         <b>Exception Recieved</b>
@@ -218,20 +218,20 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
     {% endif %}
     <br />
 {% endfor %}
-<table class='table table-bordered'>
+<table class="table table-bordered">
     <tr>
         <th>State</th>
         <th>Outcome</th>
         <th>Time</th>
     </tr>
 {% for run in allruns %}
-    <tr class='{% if run.failure %}error{% else %}success{% endif %}'>
-        <td><a href = '/admin/run-detail/{{ run|private:'id' }}/' >{{ run.scraped.state }}</a></td>
+    <tr class="{% if run.failure %}error{% else %}success{% endif %}">
+        <td><a href = "/admin/run-detail/{{ run|private:'id' }}/" >{{ run.scraped.state }}</a></td>
         <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
         <td>{{ run.scraped.started|date_display }}</td>
     </tr>
 {% endfor %}
 </table>
-<div id = 'chart-area-line' ></div>
+<div id="chart-area-line" ></div>
 </p>
 {% endblock %}

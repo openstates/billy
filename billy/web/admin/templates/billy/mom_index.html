@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class = 'container' >
+    <div class="container" >
         <div class="hero-unit">
             <h1>Merge-o-matic <small>(but you can call me mom)</small></h1>
             <p>
@@ -52,14 +52,14 @@
             </p>
         </div>
 
-        <form action = '{% url mom_merge abbr %}' action = 'GET' >
+        <form action="{% url mom_merge abbr %}" action="GET" >
             <fieldset>
-                <div class = 'control-group' >
+                <div class="control-group" >
                     <label>Legislator 1</label>
-                    <div class = 'controls' >
-                        <select id = 'leg1' type = 'text' name = 'leg1' >
+                    <div class="controls" >
+                        <select id="leg1" type="text" name="leg1" >
                             {% for leg in legs %}
-                            <option value = '{{ leg.leg_id }}' >
+                            <option value="{{ leg.leg_id }}" >
                             {{ leg.first_name }} {{ leg.last_name }}
                             ({{ leg.leg_id }})
                             </option>
@@ -67,12 +67,12 @@
                         </select>
                     </div>
                 </div>
-                <div class = 'control-group' >
+                <div class="control-group" >
                     <label>Legislator 2</label>
-                    <div class = 'controls'>
-                        <select id = 'leg2' type = 'text' name = 'leg2' >
+                    <div class="controls">
+                        <select id="leg2" type="text" name="leg2">
                             {% for leg in legs %}
-                            <option value = '{{ leg.leg_id }}' >
+                            <option value ="{{ leg.leg_id }}" >
                             {{ leg.first_name }} {{ leg.last_name }}
                             ({{ leg.leg_id }})
                             </option>
@@ -80,8 +80,8 @@
                         </select>
                     </div>
                 </div>
-                <div class = 'form-actions' >
-                    <input type = 'submit' class = 'btn-primary' />
+                <div class="form-actions" >
+                    <input type="submit" class="btn-primary" />
                 </div>
             </fieldset>
         </form>
