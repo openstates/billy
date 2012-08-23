@@ -406,7 +406,7 @@ def main(old_scrape_compat=False):
             _do_reports(abbrev, args)
 
     except ScrapeError as e:
-        logging.getLogger('billy').critical('Error:', e)
+        logging.getLogger('billy').critical('Error: %s', e)
         sys.exit(1)
 
 
