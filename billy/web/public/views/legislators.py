@@ -151,7 +151,8 @@ def legislator(request, abbr, _id, slug=None):
             has_feed_entries=bool(feed_entries_list),
             feed_entries_left=feed_entries_list[:2],
             feed_entries_right=feed_entries_list[2:4],
-            feed_entries_count=max([0, feed_entries.count() - 5]),
+            feed_entries_count=len(feed_entries_list),
+            feed_entries_more_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
             statenav_active='legislators'))
 
