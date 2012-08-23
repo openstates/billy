@@ -181,6 +181,10 @@
         "title": {
             "type": "string"
         },
+        "summary": {
+            "type": "string",
+            "required": false
+        },
         "type": {
             "items": {
                 "type": "string"
