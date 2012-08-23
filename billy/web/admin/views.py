@@ -1156,11 +1156,20 @@ def legislator_edit(request, id):
 def legislator_edit_commit(request):
     payload = dict(request.POST)
 
+    sources = payload['change_source']
+    del(payload['change_source'])
+
     leg_id = payload['leg_id'][0]
 
     legislator = db.legislators.find_one({'_all_ids': leg_id})
     if not legislator:
         raise Http404('No legislators found for id %r.' % leg_id)
+
+    for source in sources:
+        if source and source.strip() != "":
+            legislator['sources'].append({
+                "url": source
+            })
 
     del(payload['leg_id'])
 
