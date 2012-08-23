@@ -183,6 +183,7 @@
         },
         "summary": {
             "type": "string",
+            "blank": true,
             "required": false
         },
         "type": {
