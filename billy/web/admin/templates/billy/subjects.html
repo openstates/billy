@@ -51,9 +51,11 @@
             $("#target").append(buf);
             $("#" + obj + "-normal").select2();
         }
+        $("#showing").html(count);
     }
 
     $(document).ready(function() {
+        $("#total").html(subject_order.length);
         load_block();
     });
     </script>
@@ -62,17 +64,21 @@
 {% block content %}
 <h2>Subjects needing sorting</h2>
 
-<form action = '{% url admin_subjects_commit metadata.abbreviation %}' method = 'POST' >
-<table class="table table-striped table-bordered table-condensed" id = 'target'>
+<h3>Currently showing <span id="showing" >0</span> out
+    of <span id="total">Unknown (wait a second)</span></h3>
+<br />
+
+<form action="{% url admin_subjects_commit metadata.abbreviation %}" method = "POST" >
+<table class="table table-striped table-bordered table-condensed" id="target">
     <tr>
         <th>"Foreign" subject</th>
         <th>Billy subject</th>
     </tr>
 </table>
-<button type = 'button' onclick = 'load_block();'
-        id = 'load-more'
-        class = 'btn btn-info' >Load more</button>
-<input type = 'submit' class = 'btn btn-primary' name = 'sub' value = 'Make it so' />
+<button type="button" onclick="load_block();"
+        id="load-more"
+        class="btn btn-info" >Load more</button>
+<input type="submit" class="btn btn-primary" name="sub" value="Make it so" />
 </form>
 
 <h2>Existing subjects</h2>
@@ -91,7 +97,7 @@
 <span class="label label-info">{{ n }}</span>
 {% endfor %}
         </td>
-        <td><a href = '{% url admin_subjects_remove metadata.abbreviation subject|key:"_id" %}' >remove</a></td>
+        <td><a href="{% url admin_subjects_remove metadata.abbreviation subject|key:"_id" %}" >remove</a></td>
     </tr>
 {% endfor %}
 </table>
