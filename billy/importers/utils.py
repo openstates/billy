@@ -2,6 +2,7 @@ import os
 import re
 import time
 import json
+import copy
 import datetime
 
 from bson.son import SON
@@ -295,8 +296,9 @@ def merge_legislators(leg1, leg2):
     if leg1['_id'] > leg2['_id']:
         leg1, leg2 = leg2, leg1
 
-    leg1 = leg1.copy()
-    leg2 = leg2.copy()
+    # use deep copy for roles
+    leg1 = copy.deepcopy(leg1)
+    leg2 = copy.deepcopy(leg2)
 
     roles = 'roles'
     old_roles = 'old_roles'
@@ -351,6 +353,11 @@ def merge_legislators(leg1, leg2):
         if len(leg2[roles]) > 0:
             # OK. We've migrated the newly old roles to the old_roles entry.
             leg1[roles] = [leg2[roles][0]]
+
+    # copy over old_roles from other terms
+    for term in leg2.get('old_roles', {}):
+        if term not in leg1['old_roles']:
+            leg1['old_roles'][term] = leg2['old_roles'][term]
 
     return (leg1, leg2['_id'])
 
