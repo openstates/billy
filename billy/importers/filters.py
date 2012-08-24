@@ -1,11 +1,6 @@
 import re
 
 
-class Filter(object):
-    def filter(self, obj):
-        pass
-
-
 def _phone_formatter(obj, extention):
     objs = []
     for thing in ["country", "area", "prefix", "line_number"]:
@@ -100,47 +95,3 @@ def single_space_filter(entry):
 
     entry = re.sub("\s+", " ", entry)
     return strip_filter(entry)
-
-
-class LegislatorPhoneFilter(Filter):
-    def filter(self, obj):
-        if "offices" in obj:
-            for i in range(0, len(obj['offices'])):
-                if "phone" in obj['offices'][i]:
-                    obj['offices'][i]['phone'] = \
-                            phone_filter(obj['offices'][i]['phone'])
-        return obj
-
-
-class LegislatorEmailFilter(Filter):
-    def filter(self, obj):
-        if "email" in obj:
-            obj['email'] = email_filter(obj['email'])
-        return obj
-
-
-class StripFilter(Filter):
-    def filter(self, obj):
-        if isinstance(obj, basestring):
-            return strip_filter(obj)
-        elif isinstance(obj, list):
-            newl = []
-            for x in obj:
-                newl.append(self.filter(x))
-            return newl
-        for x in obj:
-            obj[x] = self.filter(obj[x])
-        return obj
-
-
-class BillStringsFilter(Filter):
-    def filter(self, obj):
-        keys = [
-            "title",
-            "description",
-            "summary"
-        ]
-        for key in keys:
-            if key in obj:
-                obj[key] = single_space_filter(obj)
-        return obj
