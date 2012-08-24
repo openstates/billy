@@ -384,13 +384,16 @@ def import_bill(data, votes, categorizer):
         if set(action['type']).intersection(flags):
             for vote in data['votes']:
                 delta = (vote['date'] - action['date'])
-                if delta < dt.timedelta(hours=20):
+                if delta < dt.timedelta(hours=20) and \
+                   delta > dt.timedelta(hours=-20):
+
                     if attached:
                         if "related_votes" in action:
                             del(action['related_votes'])  # We can't guess
                             #                              offhand.
                     else:
-                        print data['bill_id'], vote['vote_id'], vote, action
+                        print data['bill_id'], vote['vote_id'], vote
+                        print data['bill_id'], vote['vote_id'], action
                         if vote['chamber'] != action['actor']:
                             continue
 
