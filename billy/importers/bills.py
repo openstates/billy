@@ -368,7 +368,7 @@ def import_bill(data, votes, categorizer):
         elif (not dates['signed'] and 'governor:signed' in action['type']):
             dates['signed'] = adate
 
-        flags = [
+        flags = set([
             "bill:passed",
             "bill:failed",
             "bill:veto_override:passed",
@@ -379,21 +379,25 @@ def import_bill(data, votes, categorizer):
             "committee:passed:favorable",
             "committee:passed:unfavorable",
             "committee:passed:failed"
-        ]
+        ])
         attached = False
-        for flag in flags:
-            if flag in action['type']:
-                for vote in data['votes']:
-                    delta = (vote['date'] - action['date'])
-                    if delta < dt.timedelta(hours=2):
-                        if attached:
-                            if "related_votes" in action:
-                                del(action['related_votes'])  # We can't guess
-                                #                              offhand.
-                        else:
-                            related_vote = vote['vote_id']
-                            action['related_votes'] = [related_vote]
-                            attached = True
+        if set(action['type']).intersection(flags):
+            for vote in data['votes']:
+                delta = (vote['date'] - action['date'])
+                if delta < dt.timedelta(hours=20):
+                    if attached:
+                        if "related_votes" in action:
+                            del(action['related_votes'])  # We can't guess
+                            #                              offhand.
+                    else:
+                        print data['bill_id'], vote['vote_id'], vote, action
+                        if vote['chamber'] != action['actor']:
+                            continue
+
+                        related_vote = vote['vote_id']
+                        action['related_votes'] = [related_vote]
+                        attached = True
+
 
     # save action dates to data
     data['action_dates'] = dates
