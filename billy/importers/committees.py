@@ -6,7 +6,7 @@ import datetime
 import logging
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, insert_with_id
 

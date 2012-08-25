@@ -6,7 +6,7 @@ import json
 
 from billy.scrape.validator import DatetimeValidator
 
-from billy.conf import settings
+from billy.core import settings
 
 import scrapelib
 

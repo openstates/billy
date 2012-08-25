@@ -7,7 +7,7 @@ from django.core import urlresolvers
 import pyes
 import pymongo
 
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import parse_param_dt
 
 from .base import (db, Document, RelatedDocument, RelatedDocuments,

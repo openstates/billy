@@ -14,7 +14,7 @@ import nose.tools
 from nose.tools import with_setup
 from billy.models.base import db
 from pymongo import Connection
-from billy.conf import settings
+from billy.core import settings
 from billy.models import Transformer
 from billy.models import base
 

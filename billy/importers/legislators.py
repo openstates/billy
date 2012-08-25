@@ -6,7 +6,7 @@ import json
 import logging
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
 
 import pymongo

@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import term_for_session
 from billy.reports.utils import update_common, get_quality_exceptions
 

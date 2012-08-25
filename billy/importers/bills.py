@@ -5,7 +5,7 @@ import logging
 from time import time
 from collections import defaultdict
 
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import metadata, term_for_session
 from billy.scrape import JSONDateEncoder
 from billy.core import db

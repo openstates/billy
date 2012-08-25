@@ -27,7 +27,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators

@@ -8,7 +8,7 @@ import urllib
 import zipfile
 import unicodecsv
 
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import metadata, extract_fields
 from billy.commands import BaseCommand
 from billy.core import db

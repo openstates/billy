@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 from billy.core import db
 from billy.models import Bill
-from billy.conf import settings
+from billy.core import settings
 from billy.utils import find_bill, parse_param_dt
 
 import pymongo

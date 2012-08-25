@@ -10,7 +10,7 @@ import pymongo.errors
 import name_tools
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 
 if settings.ENABLE_OYSTER:
     oyster_import_exception = None

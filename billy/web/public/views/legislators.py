@@ -16,7 +16,7 @@ import pymongo
 
 from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
-from billy.conf import settings as billy_settings
+from billy.core import settings as billy_settings
 
 from .utils import templatename, mongo_fields
 

@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from billy.conf import settings, base_arg_parser
+from billy.core import settings, base_arg_parser
 from billy.utils import configure_logging
 from billy.commands import BaseCommand
 

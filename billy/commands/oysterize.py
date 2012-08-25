@@ -1,5 +1,5 @@
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 from billy.commands import BaseCommand
 from oyster.core import kernel
 from billy.importers.bills import oysterize_version

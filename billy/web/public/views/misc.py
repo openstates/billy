@@ -12,7 +12,7 @@ from django.http import HttpResponse
 
 from billy.models import db, Metadata, Legislator
 from billy.models.pagination import CursorPaginator
-from billy.conf import settings as billy_settings
+from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
 
 

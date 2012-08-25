@@ -6,7 +6,7 @@ from pymongo import Connection
 
 from django.core import urlresolvers
 
-from billy.conf import settings as billy_settings
+from billy.core import settings as billy_settings
 from billy.web.admin import urls as admin_urls
 
 

@@ -2,7 +2,7 @@ import re
 import logging
 
 from billy.core import db
-from billy.conf import settings
+from billy.core import settings
 
 __matchers = {}
 

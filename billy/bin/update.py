@@ -12,7 +12,7 @@ import unicodecsv
 import datetime as dt
 
 from billy.core import db
-from billy.conf import settings, base_arg_parser
+from billy.core import settings, base_arg_parser
 from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
                           check_sessions)
 from billy.utils import configure_logging, term_for_session
