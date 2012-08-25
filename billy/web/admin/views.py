@@ -26,7 +26,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.utils import metadata, find_bill
 from billy.scrape import JSONDateEncoder

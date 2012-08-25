@@ -6,7 +6,7 @@ import boto
 from boto.s3.key import Key
 import scrapelib
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.commands import BaseCommand
 

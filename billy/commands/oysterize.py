@@ -1,4 +1,4 @@
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.commands import BaseCommand
 from oyster.core import kernel

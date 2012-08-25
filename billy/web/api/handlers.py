@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from django.http import HttpResponse
 
-from billy import db
+from billy.core import db
 from billy.models import Bill
 from billy.conf import settings
 from billy.utils import find_bill, parse_param_dt

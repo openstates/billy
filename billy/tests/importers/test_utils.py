@@ -4,7 +4,7 @@ import datetime
 
 from nose.tools import with_setup, assert_raises
 
-from billy import db
+from billy.core import db
 from billy.importers import utils
 
 

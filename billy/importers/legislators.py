@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
 

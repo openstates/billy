@@ -1,5 +1,5 @@
 import os
-from billy import db
+from billy.core import db
 from billy.importers.metadata import import_metadata, PRESERVED_FIELDS
 
 from nose.tools import with_setup

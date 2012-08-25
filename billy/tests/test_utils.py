@@ -1,6 +1,6 @@
 from billy import utils
 from billy.utils import popularity
-from billy import db
+from billy.core import db
 
 from nose.tools import with_setup
 

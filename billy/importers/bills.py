@@ -8,7 +8,7 @@ from collections import defaultdict
 from billy.conf import settings
 from billy.utils import metadata, term_for_session
 from billy.scrape import JSONDateEncoder
-from billy import db
+from billy.core import db
 from billy.importers.names import get_legislator_id
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,

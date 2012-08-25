@@ -1,7 +1,7 @@
 import re
 import logging
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 
 __matchers = {}

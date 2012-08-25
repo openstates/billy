@@ -11,7 +11,7 @@ import unicodecsv
 from billy.conf import settings
 from billy.utils import metadata, extract_fields
 from billy.commands import BaseCommand
-from billy import db
+from billy.core import db
 
 import scrapelib
 import validictory

@@ -4,7 +4,7 @@ import urllib2
 import time
 import sys
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.commands import BaseCommand
 

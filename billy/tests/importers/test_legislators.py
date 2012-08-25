@@ -2,7 +2,7 @@ import datetime
 
 from nose.tools import with_setup
 
-from billy import db
+from billy.core import db
 from billy.importers import legislators, utils
 
 

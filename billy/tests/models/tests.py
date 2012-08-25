@@ -3,7 +3,7 @@ import unittest
 from billy.models import Metadata, Legislator   # , Bill
 #from billy.models.base import _model_registry
 from billy.models.committees import CommitteeMember
-from billy import db
+from billy.core import db
 
 
 #class TestNoConflict(unittest.TestCase):

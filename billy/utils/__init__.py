@@ -3,7 +3,7 @@ import urlparse
 import logging
 import datetime
 
-from billy import db
+from billy.core import db
 import difflib
 
 

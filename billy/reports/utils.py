@@ -1,7 +1,7 @@
 import datetime
 from collections import defaultdict
 
-from billy import db
+from billy.core import db
 
 yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1)
 last_month = datetime.datetime.utcnow() - datetime.timedelta(days=30)

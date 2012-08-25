@@ -1,4 +1,4 @@
-from billy import db
+from billy.core import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
 from billy.importers.names import NameMatcher

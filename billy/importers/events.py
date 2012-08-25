@@ -5,7 +5,7 @@ import logging
 import datetime
 import json
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id

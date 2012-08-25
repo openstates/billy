@@ -9,7 +9,7 @@ from bson.son import SON
 import pymongo.errors
 import name_tools
 
-from billy import db
+from billy.core import db
 from billy.conf import settings
 
 if settings.ENABLE_OYSTER:

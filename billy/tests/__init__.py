@@ -1,6 +1,8 @@
 from billy.conf import settings
 settings.MONGO_DATABASE += '_test'
-from billy import db
+from billy.core import db, _configure_db
+_configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
+              settings.MONGO_DATABASE)
 from billy.models import base
 import pymongo
 

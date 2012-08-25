@@ -3,7 +3,7 @@ import os
 import datetime
 import json
 
-from billy import db
+from billy.core import db
 from billy.importers.utils import prepare_obj
 
 PRESERVED_FIELDS = ('latest_json_url', 'latest_json_date',

@@ -11,7 +11,7 @@ import unicodecsv
 
 import datetime as dt
 
-from billy import db
+from billy.core import db
 from billy.conf import settings, base_arg_parser
 from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
                           check_sessions)
@@ -166,7 +166,7 @@ def _do_imports(abbrev, args):
 
 
 def _do_reports(abbrev, args):
-    from billy import db
+    from billy.core import db
     from billy.reports.bills import bill_report
     from billy.reports.legislators import legislator_report
     from billy.reports.committees import committee_report

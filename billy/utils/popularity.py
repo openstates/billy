@@ -1,5 +1,5 @@
 import datetime
-from billy import db
+from billy.core import db
 
 
 class Counter(object):
