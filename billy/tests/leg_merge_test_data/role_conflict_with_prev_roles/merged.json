@@ -6,6 +6,12 @@
     "_id": "LOL100", 
     "_locked_fields": [], 
     "old_roles": {
+        "20072008" : [
+            {
+                "chamber" : "upper",
+                "term"    : "20072008"
+            }
+        ],
         "20092010" : [
             {
                 "chamber" : "upper",

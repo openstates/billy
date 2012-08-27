@@ -4,7 +4,14 @@
     ], 
     "_id": "LOL200", 
     "_locked_fields": [], 
-    "old_roles" : {},
+    "old_roles" : {
+        "20072008" : [
+            {
+                "chamber" : "upper",
+                "term"    : "20072008"
+            }
+        ]
+    },
     "roles": [
         {
             "chamber": "upper", 

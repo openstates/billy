@@ -8,17 +8,10 @@ import logging
 from billy import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
-from billy.importers.filters import (LegislatorPhoneFilter,
-                                     LegislatorEmailFilter)
 
 import pymongo
 
 logger = logging.getLogger('billy')
-
-filters = [
-    LegislatorPhoneFilter(),
-    LegislatorEmailFilter()
-]
 
 
 def ensure_indexes():
@@ -125,26 +118,10 @@ def deactivate_legislators(current_term, abbr):
         db.legislators.save(leg, safe=True)
 
 
-def get_previous_term(abbr, term):
+def term_older_than(abbr, terma, termb):
     meta = db.metadata.find_one({'_id': abbr})
-    t1 = meta['terms'][0]
-    for t2 in meta['terms'][1:]:
-        if t2['name'] == term:
-            return t1['name']
-        t1 = t2
-
-    return None
-
-
-def get_next_term(abbr, term):
-    meta = db.metadata.find_one({'_id': abbr})
-    t1 = meta['terms'][0]
-    for t2 in meta['terms'][1:]:
-        if t1['name'] == term:
-            return t2['name']
-        t1 = t2
-
-    return None
+    names = [t['name'] for t in meta['terms']]
+    return names.index(terma) < names.index(termb)
 
 
 def import_legislator(data):
@@ -160,41 +137,61 @@ def import_legislator(data):
         if settings.LEVEL_FIELD in data:
             role[settings.LEVEL_FIELD] = data[settings.LEVEL_FIELD]
 
-    cur_role = data['roles'][0]
-    term = cur_role['term']
+    scraped_role = data['roles'][0]
+    scraped_term = scraped_role['term']
 
     abbr = data[settings.LEVEL_FIELD]
 
-    prev_term = get_previous_term(abbr, term)
-    next_term = get_next_term(abbr, term)
-
     spec = {settings.LEVEL_FIELD: abbr,
-            'type': cur_role['type'],
-            'term': {'$in': [term, prev_term, next_term]}}
-    if 'district' in cur_role:
-        spec['district'] = cur_role['district']
-    if 'chamber' in cur_role:
-        spec['chamber'] = cur_role['chamber']
+            'type': scraped_role['type'],
+            'term': scraped_term}
+    if 'district' in scraped_role:
+        spec['district'] = scraped_role['district']
+    if 'chamber' in scraped_role:
+        spec['chamber'] = scraped_role['chamber']
 
+    # find matching legislator in current term
     leg = db.legislators.find_one(
         {settings.LEVEL_FIELD: abbr,
          '_scraped_name': data['full_name'],
          'roles': {'$elemMatch': spec}})
 
-    #for flt in filters:
-    #    data = flt.filter(data)
+    # legislator with a matching old_role
+    if not leg:
+        spec.pop('term')
+        leg = db.legislators.find_one({
+            settings.LEVEL_FIELD: abbr,
+            '_scraped_name': data['full_name'],
+            'old_roles.%s' % scraped_term: {'$elemMatch': spec}
+        })
+
+        if leg:
+            if 'old_roles' not in data:
+                data['old_roles'] = {}
+             # put scraped roles into their old_roles
+            data['old_roles'][scraped_term] = data['roles']
+            data['roles'] = leg['roles'] # don't overwrite their current roles
+
+    # active matching legislator from different term
+    if not leg:
+        spec.pop('term', None)
+        leg = db.legislators.find_one(
+            {settings.LEVEL_FIELD: abbr,
+             '_scraped_name': data['full_name'],
+             'roles': {'$elemMatch': spec}})
+        if leg:
+            if 'old_roles' not in data:
+                data['old_roles'] = {}
+
+            # scraped_term < leg's term
+            if term_older_than(abbr, scraped_term, leg['roles'][0]['term']):
+                # move scraped roles into old_roles
+                data['old_roles'][scraped_term] = data['roles']
+                data['roles'] = leg['roles']
+            else:
+                data['old_roles'][leg['roles'][0]['term']] = leg['roles']
 
     if leg:
-        if 'old_roles' not in leg:
-            leg['old_roles'] = {}
-
-        if leg['roles'][0]['term'] == prev_term:
-            # Move to old
-            leg['old_roles'][leg['roles'][0]['term']] = leg['roles']
-        elif leg['roles'][0]['term'] == next_term:
-            leg['old_roles'][term] = data['roles']
-            data['roles'] = leg['roles']
-
         update(leg, data, db.legislators)
         return "update"
     else:

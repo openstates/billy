@@ -11,7 +11,11 @@ def setup_func():
     db.metadata.drop()
 
     db.metadata.insert({'_id': 'ex',
-                        'terms': [{'name': '2009-2010',
+                        'terms': [
+                                  {'name': '2000-2001',
+                                   'sessions': ['2000', '2001'],
+                                   'start_year': 2000, 'end_year': 2001},
+                                  {'name': '2009-2010',
                                    'sessions': ['2009', '2010'],
                                    'start_year': 2009, 'end_year': 2010},
                                   {'name': '2011-2012',
@@ -137,18 +141,6 @@ def test_deactivate_legislators():
 
 
 @with_setup(setup_func)
-def test_get_previous_term():
-    prev = legislators.get_previous_term('ex', '2011-2012')
-    assert prev == '2009-2010'
-
-
-@with_setup(setup_func)
-def test_get_next_term():
-    next_term = legislators.get_next_term('ex', '2009-2010')
-    assert next_term == '2011-2012'
-
-
-@with_setup(setup_func)
 def test_import_legislator():
     leg1 = {'_type': 'person', 'state': 'ex', 'full_name': 'T. Rex Hagan',
             'roles': [{'role': 'member', 'chamber': 'upper', 'state': 'ex',
@@ -174,17 +166,54 @@ def test_import_legislator():
                        'party': 'Democrat',
                        'start_date': None, 'end_date': None}]}
 
+    leg5 = {'_type': 'person', 'state': 'ex', 'full_name': 'Bob Dold',
+            'roles': [{'role': 'member', 'chamber': 'upper', 'state': 'ex',
+                       'term': '2000-2001', 'district': '2',
+                       'party': 'Democrat',
+                       'start_date': None, 'end_date': None}]}
+
+    leg6 = {'_type': 'person', 'state': 'ex', 'full_name': 'Grey Sun',
+            'roles': [{'role': 'member', 'chamber': 'upper', 'state': 'ex',
+                       'term': '2000-2001', 'district': '9',
+                       'party': 'Libertarian',
+                       'start_date': None, 'end_date': None}]}
+
+    # T. Rex
     legislators.import_legislator(leg1)
     assert db.legislators.count() == 1
 
+    # T. Rex's second role
     legislators.import_legislator(leg2)
     t_rex = db.legislators.find_one({'_scraped_name': 'T. Rex Hagan'})
     assert db.legislators.count() == 1
     assert t_rex['roles'][0]['term'] == '2011-2012'
     assert '2009-2010' in t_rex['old_roles']
 
+    # Joe Heck in district 2
     legislators.import_legislator(leg3)
     assert db.legislators.count() == 2
 
+    # Bob Dold replaces Joe Heck
     legislators.import_legislator(leg4)
     assert db.legislators.count() == 3
+
+    # import a prior role for Bob Dold
+    legislators.import_legislator(leg5)
+    assert db.legislators.count() == 3
+    dold = db.legislators.find_one({'_scraped_name': 'Bob Dold'})
+    assert '2000-2001' in dold['old_roles']
+    assert dold['roles'][0]['term'] == '2011-2012'
+
+    # Grey Sun - old role only
+    legislators.import_legislator(leg6)
+    # moves the role to old _roles
+    legislators.deactivate_legislators('2011-2012', 'ex')
+    # reimport should find him
+    legislators.import_legislator(leg6)
+    assert db.legislators.count() == 4
+
+    # reimport all, make sure nothing changes
+    for l in [leg1, leg2, leg3, leg4, leg5, leg6]:
+        legislators.import_legislator(l)
+        assert db.legislators.count() == 4
+

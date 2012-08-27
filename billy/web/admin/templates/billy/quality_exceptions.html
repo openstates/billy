@@ -19,7 +19,7 @@
                 <span class="label label-info">{{ i }}</span>
             {% endfor %}</td>
         <td>{{ ex.notes }}</td>
-        <td><a href = '{% url quality_exception_remove metadata.abbreviation ex|key:"_id" %}' >remove</a></td>
+        <td><a href="{% url quality_exception_remove metadata.abbreviation ex|key:"_id" %}" >remove</a></td>
     </tr>
 {% endfor %}
 </table>

@@ -56,11 +56,11 @@ $(document).ready(function() {
 
 {% block content %}
 
-<a href = '{% url admin_legislator leg.leg_id %}' >admin</a>
-| <a href = '{% url legislator_noslug leg.state leg.leg_id %}' >view</a>
+<a href="{% url admin_legislator leg.leg_id %}" >admin</a>
+| <a href="{% url legislator_noslug leg.state leg.leg_id %}" >view</a>
 
-<form action = '{% url admin_legislator_edit_commit %}' method = 'post' >
-    <input type = 'hidden' value = '{{ leg.leg_id }}' name = 'leg_id' />
+<form action="{% url admin_legislator_edit_commit %}" method = 'post' >
+    <input type="hidden" value="{{ leg.leg_id }}" name="leg_id" />
 <table>
 {% for field in fields %}
     <tr>
@@ -69,18 +69,18 @@ $(document).ready(function() {
         </td>
         <td>
             <input
-        type = 'text'
-        name = '{{field}}'
-          id = '{{field}}'
-       value = '{% if leg|key:field != None %}{{ leg|key:field }}{% endif %}'
+        type="text"
+        name="{{field}}"
+          id="{{field}}"
+       value="{% if leg|key:field != None %}{{ leg|key:field }}{% endif %}"
             />
         </td>
         <td>
             is locked
-            <input type = 'checkbox'
-                   name = '{{field}}-locked'
-                     id = '{{field}}-locked'
-                  value = '{{field}}'
+            <input type="checkbox"
+                   name="{{field}}-locked"
+                     id="{{field}}-locked"
+                  value="{{field}}"
 {% if field in locked %}
                 checked
 {% endif %}
@@ -94,10 +94,10 @@ $(document).ready(function() {
         </td>
         <td>
             <input
-        type = 'text'
-        name = 'change_source'
-          id = 'change_source'
-       value = ''
+        type="text"
+        name="change_source"
+          id="change_source"
+       value=""
             />
         </td>
         <td>
@@ -105,13 +105,12 @@ $(document).ready(function() {
     </tr>
     <tr>
         <td></td>
-        <td><input type = 'submit'
-                   class = 'btn btn-primary'
-                   value = 'update legislator' /></td>
+        <td><input type="submit"
+                   class="btn btn-primary"
+                   value="update legislator" /></td>
         <td></td>
     </tr>
 </table>
 </form>
 
 {% endblock %}
-
