@@ -22,6 +22,12 @@ def run_filter(fltr, object_path, obj):
         obj[root] = run_filter(fltr, new_path, obj[root])
         return obj
     try:
+        if isinstance(obj, list):
+            ret = []
+            for entry in obj:
+                ret.append(run_filter(fltr, object_path, entry))
+            return ret
+
         fltr_obj = obj[object_path]
     except KeyError:
         return obj  # Eek, bad object path. Bail.

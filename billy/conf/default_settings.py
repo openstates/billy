@@ -23,6 +23,13 @@ BILL_FILTERS = {
     ]
 }
 
+LEGISLATOR_FILTERS = {
+    'billy.importers.filters.phone_filter': [
+        'offices.phone',
+        'offices.fax'
+    ]
+}
+
 BILLY_SUBJECTS = [
     'Agriculture and Food',
     'Animal Rights and Wildlife Issues',

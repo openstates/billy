@@ -389,7 +389,7 @@ def import_bill(data, votes, categorizer):
     except KeyError:
         pass
     data['alternate_titles'] = list(alt_titles)
-    # data = filter_by_array(filters, data)
+    data = filter_by_array(filters, data)
     # XXX: This is a theoretical implementation
 
     if not bill:
