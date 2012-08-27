@@ -8,7 +8,7 @@ import logging
 from billy import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
-from billy.importers.filters import filter_by_array
+from billy.importers.filters import apply_filters
 
 import pymongo
 
@@ -193,7 +193,7 @@ def import_legislator(data):
             else:
                 data['old_roles'][leg['roles'][0]['term']] = leg['roles']
 
-    data = filter_by_array(filters, data)
+    data = apply_filters(filters, data)
 
     if leg:
         update(leg, data, db.legislators)
