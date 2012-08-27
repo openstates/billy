@@ -5,11 +5,13 @@ import logging
 from time import time
 from collections import defaultdict
 
-from billy.conf import settings
-from billy.utils import metadata, term_for_session
-from billy.scrape import JSONDateEncoder
 from billy import db
+from billy.conf import settings
+from billy.scrape import JSONDateEncoder
+from billy.utils import metadata, term_for_session
 from billy.importers.names import get_legislator_id
+from billy.importers.filters import filter_by_array
+
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
                                    next_big_id, oysterize, fix_bill_id,
@@ -24,7 +26,7 @@ if hasattr(settings, "ENABLE_GIT") and settings.ENABLE_GIT:
 
 import pymongo
 
-
+filters = settings.BILL_FILTERS
 logger = logging.getLogger('billy')
 
 
@@ -387,6 +389,7 @@ def import_bill(data, votes, categorizer):
     except KeyError:
         pass
     data['alternate_titles'] = list(alt_titles)
+    data = filter_by_array(filters, data)
 
     if not bill:
         bill_id = insert_with_id(data)
