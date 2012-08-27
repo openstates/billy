@@ -16,6 +16,10 @@ BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
 BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
+BILL_FILTERS = {
+    'billy.filters.strip_filter': ['title', 'description']
+}
+
 BILLY_SUBJECTS = [
     'Agriculture and Food',
     'Animal Rights and Wildlife Issues',
