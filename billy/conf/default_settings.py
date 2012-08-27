@@ -17,17 +17,9 @@ BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
 BILL_FILTERS = {
-    'billy.importers.filters.strip_filter': [
-        'title',
-        'description'
-    ]
 }
 
 LEGISLATOR_FILTERS = {
-    'billy.importers.filters.phone_filter': [
-        'offices.phone',
-        'offices.fax'
-    ]
 }
 
 BILLY_SUBJECTS = [

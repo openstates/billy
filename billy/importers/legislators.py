@@ -193,8 +193,7 @@ def import_legislator(data):
             else:
                 data['old_roles'][leg['roles'][0]['term']] = leg['roles']
 
-    # data = filter_by_array(filters, data)
-    # XXX: This is a theoretical implementation
+    data = filter_by_array(filters, data)
 
     if leg:
         update(leg, data, db.legislators)
