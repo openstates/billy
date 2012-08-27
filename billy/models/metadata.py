@@ -84,7 +84,7 @@ class Metadata(Document):
     @classmethod
     def get_object(cls, abbr):
         '''
-        This particular model need its own constructor in order to take
+        This particular model needs its own constructor in order to take
         advantage of the metadata cache in billy.util, which would otherwise
         return unwrapped objects.
         '''
