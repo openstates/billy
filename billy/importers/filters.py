@@ -1,5 +1,30 @@
 import re
+import importlib
 
+
+def filter_object(filter_path, object_path, obj):
+    module, func = filter_path.rsplit(".", 1)
+    mod = importlib.import_module(module)
+    fltr = getattr(mod, func)
+    return run_filter(fltr, object_path, obj)
+
+
+def run_filter(fltr, object_path, obj):
+    if "." in object_path:
+        root, new_path = object_path.split(".", 1)
+        obj[root] = run_filter(fltr, new_path, obj[root])
+        return obj
+    fltr_obj = obj[object_path]
+
+    if isinstance(fltr_obj, basestring):
+        obj[object_path] = fltr(fltr_obj)
+
+    if isinstance(fltr_obj, list):
+        ret = []
+        for item in fltr_obj:
+            ret.append(fltr(item))
+        obj[object_path] = ret
+    return obj
 
 def _phone_formatter(obj, extention):
     objs = []
@@ -85,6 +110,9 @@ def email_filter(email):
 
 
 def strip_filter(entry):
+    if not isinstance(entry, basestring):
+        return entry
+
     entry = entry.strip()
     return entry
 
