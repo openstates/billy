@@ -2,6 +2,13 @@ import re
 import importlib
 
 
+def filter_by_array(filter_array, obj):
+    for fltr in filter_array:
+        for key in filter_array[fltr]:
+            obj = filter_object(fltr, key, obj)
+    return obj
+
+
 def filter_object(filter_path, object_path, obj):
     module, func = filter_path.rsplit(".", 1)
     mod = importlib.import_module(module)
@@ -14,7 +21,10 @@ def run_filter(fltr, object_path, obj):
         root, new_path = object_path.split(".", 1)
         obj[root] = run_filter(fltr, new_path, obj[root])
         return obj
-    fltr_obj = obj[object_path]
+    try:
+        fltr_obj = obj[object_path]
+    except KeyError:
+        return obj  # Eek, bad object path. Bail.
 
     if isinstance(fltr_obj, basestring):
         obj[object_path] = fltr(fltr_obj)
