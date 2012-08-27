@@ -26,6 +26,7 @@ def run_filter(fltr, object_path, obj):
         obj[object_path] = ret
     return obj
 
+
 def _phone_formatter(obj, extention):
     objs = []
     for thing in ["country", "area", "prefix", "line_number"]:
