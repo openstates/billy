@@ -10,7 +10,7 @@ from billy.conf import settings
 from billy.scrape import JSONDateEncoder
 from billy.utils import metadata, term_for_session
 from billy.importers.names import get_legislator_id
-from billy.importers.filters import filter_by_array
+from billy.importers.filters import apply_filters
 
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
@@ -389,7 +389,7 @@ def import_bill(data, votes, categorizer):
     except KeyError:
         pass
     data['alternate_titles'] = list(alt_titles)
-    data = filter_by_array(filters, data)
+    data = apply_filters(filters, data)
 
     if not bill:
         bill_id = insert_with_id(data)

@@ -7,7 +7,7 @@ import json
 
 from billy import db
 from billy.conf import settings
-from billy.importers.filters import filter_by_array
+from billy.importers.filters import apply_filters
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
 from billy.importers.utils import fix_bill_id, get_committee_id
@@ -123,7 +123,7 @@ def import_event(data):
                                     'type': data['type'],
                                     'description': data['description']})
 
-    data = filter_by_array(filters, data)
+    data = apply_filters(filters, data)
 
     if not event:
         data['created_at'] = datetime.datetime.utcnow()

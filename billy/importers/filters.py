@@ -2,7 +2,7 @@ import re
 import importlib
 
 
-def filter_by_array(filter_array, obj):
+def apply_filters(filter_array, obj):
     for fltr in filter_array:
         for key in filter_array[fltr]:
             obj = filter_object(fltr, key, obj)

@@ -17,7 +17,7 @@ from .utils import CachedAttribute
 class Role(dict):
 
     def data(self):
-        '''This roles term metadata from the metadata['terms'] list.
+        '''This role's term metadata from the metadata['terms'] list.
         '''
         metadata = self.manager.document
         return metadata.term_dict[self['term']]
