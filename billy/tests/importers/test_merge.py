@@ -1,6 +1,3 @@
-# Copyright (c) Sunlight Labs, 2012, under the terms and conditions layed out
-# in the LICENSE file.
-
 from billy.importers.utils import merge_legislators
 
 import json

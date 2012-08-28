@@ -262,7 +262,8 @@ class Legislator(Document):
                     session_start = session_data.get('start_date')
                     session_end = session_data.get('end_date')
                     if session_start and session_end:
-                        started_during = (role_start < session_start < role_end)
+                        started_during = (role_start < session_start <
+                                          role_end)
                         ended_during = (role_start < session_end < role_end)
                         if started_during or ended_during:
                             self['context_role'] = role
