@@ -390,8 +390,6 @@ def import_bill(data, votes, categorizer):
                             del(action['related_votes'])  # We can't guess
                             #                              offhand.
                     else:
-                        print data['bill_id'], vote['vote_id'], vote
-                        print data['bill_id'], vote['vote_id'], action
                         if vote['chamber'] != action['actor']:
                             continue
 
