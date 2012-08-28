@@ -387,6 +387,9 @@ def import_bill(data, votes, categorizer):
         attached = False
         if set(action['type']).intersection(flags):
             for vote in data['votes']:
+                if not vote['date'] or not action['date']:
+                    continue
+
                 delta = (vote['date'] - action['date'])
                 if delta < dt.timedelta(hours=20) and \
                    delta > dt.timedelta(hours=-20):
