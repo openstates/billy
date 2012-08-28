@@ -144,7 +144,7 @@ def git_commit(message):
     c.tree = git_active_tree.id
     c.parents = [HEAD]
     repo.object_store.add_object(git_active_tree)
-    c.author = c.committer = "Billy <openstates@sunlightfoundation.com>"
+    c.author = c.committer = "Billy <billy@localhost>"
     c.commit_time = c.author_time = int(time())
     tz = parse_timezone("-0400")[0]
     c.commit_timezone = c.author_timezone = tz
@@ -170,7 +170,7 @@ Fondly,
     tree.add("README", 0100644, blob.id)
     commit = Commit()
     commit.tree = tree.id
-    author = "Billy <openstates@sunlightfoundation.com>"
+    author = "Billy <billy@localhost>"
     commit.author = commit.committer = author
     commit.commit_time = commit.author_time = int(time())
     tz = parse_timezone('-0400')[0]

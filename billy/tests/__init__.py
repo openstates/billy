@@ -1,7 +1,6 @@
 from billy.conf import settings
+# modify the db name upon initial import (this file has to run first)
 settings.MONGO_DATABASE += '_test'
-from billy import db
-from billy.models import base
 import pymongo
 
 
