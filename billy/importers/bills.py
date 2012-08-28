@@ -321,6 +321,24 @@ def import_bill(data, votes, categorizer):
     # process actions
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
+
+
+    flags = set([
+        "bill:passed",
+        "bill:failed",
+        "bill:veto_override:passed",
+        "bill:veto_override:failed",
+        "amendment:passed",
+        "amendment:failed",
+        "committee:passed",
+        "committee:passed:favorable",
+        "committee:passed:unfavorable",
+        "committee:passed:failed"
+    ])
+
+    already_linked = set()
+    remove_vote = set()
+
     for action in data['actions']:
         adate = action['date']
 
@@ -366,25 +384,12 @@ def import_bill(data, votes, categorizer):
         elif (not dates['signed'] and 'governor:signed' in action['type']):
             dates['signed'] = adate
 
-        flags = set([
-            "bill:passed",
-            "bill:failed",
-            "bill:veto_override:passed",
-            "bill:veto_override:failed",
-            "amendment:passed",
-            "amendment:failed",
-            "committee:passed",
-            "committee:passed:favorable",
-            "committee:passed:unfavorable",
-            "committee:passed:failed"
-        ])
         attached = False
         if set(action['type']).intersection(flags):
             for vote in data['votes']:
                 delta = (vote['date'] - action['date'])
                 if delta < dt.timedelta(hours=20) and \
                    delta > dt.timedelta(hours=-20):
-
                     if attached:
                         if "related_votes" in action:
                             del(action['related_votes'])  # We can't guess
@@ -394,9 +399,17 @@ def import_bill(data, votes, categorizer):
                             continue
 
                         related_vote = vote['vote_id']
+                        if related_vote in already_linked:
+                            remove_vote.add(related_vote)
+
+                        already_linked.add(related_vote)
                         action['related_votes'] = [related_vote]
                         attached = True
 
+    for action in data['actions']:
+        for vote in remove_vote:
+            if "related_votes" in action and vote in action['related_votes']:
+                action['related_votes'].remove(vote)
 
     # save action dates to data
     data['action_dates'] = dates
