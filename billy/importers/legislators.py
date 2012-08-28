@@ -8,17 +8,12 @@ import logging
 from billy import db
 from billy.conf import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
-from billy.importers.filters import (LegislatorPhoneFilter,
-                                     LegislatorEmailFilter)
+from billy.importers.filters import apply_filters
 
 import pymongo
 
+filters = settings.LEGISLATOR_FILTERS
 logger = logging.getLogger('billy')
-
-filters = [
-    LegislatorPhoneFilter(),
-    LegislatorEmailFilter()
-]
 
 
 def ensure_indexes():
@@ -198,8 +193,7 @@ def import_legislator(data):
             else:
                 data['old_roles'][leg['roles'][0]['term']] = leg['roles']
 
-    #for flt in filters:
-    #    data = flt.filter(data)
+    data = apply_filters(filters, data)
 
     if leg:
         update(leg, data, db.legislators)

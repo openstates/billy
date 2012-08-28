@@ -1,9 +1,46 @@
 import re
+import importlib
 
 
-class Filter(object):
-    def filter(self, obj):
-        pass
+def apply_filters(filter_array, obj):
+    for fltr in filter_array:
+        for key in filter_array[fltr]:
+            obj = filter_object(fltr, key, obj)
+    return obj
+
+
+def filter_object(filter_path, object_path, obj):
+    module, func = filter_path.rsplit(".", 1)
+    mod = importlib.import_module(module)
+    fltr = getattr(mod, func)
+    return run_filter(fltr, object_path, obj)
+
+
+def run_filter(fltr, object_path, obj):
+    if "." in object_path:
+        root, new_path = object_path.split(".", 1)
+        obj[root] = run_filter(fltr, new_path, obj[root])
+        return obj
+    try:
+        if isinstance(obj, list):
+            ret = []
+            for entry in obj:
+                ret.append(run_filter(fltr, object_path, entry))
+            return ret
+
+        fltr_obj = obj[object_path]
+    except KeyError:
+        return obj  # Eek, bad object path. Bail.
+
+    if isinstance(fltr_obj, basestring):
+        obj[object_path] = fltr(fltr_obj)
+
+    if isinstance(fltr_obj, list):
+        ret = []
+        for item in fltr_obj:
+            ret.append(fltr(item))
+        obj[object_path] = ret
+    return obj
 
 
 def _phone_formatter(obj, extention):
@@ -90,6 +127,9 @@ def email_filter(email):
 
 
 def strip_filter(entry):
+    if not isinstance(entry, basestring):
+        return entry
+
     entry = entry.strip()
     return entry
 
@@ -100,47 +140,3 @@ def single_space_filter(entry):
 
     entry = re.sub("\s+", " ", entry)
     return strip_filter(entry)
-
-
-class LegislatorPhoneFilter(Filter):
-    def filter(self, obj):
-        if "offices" in obj:
-            for i in range(0, len(obj['offices'])):
-                if "phone" in obj['offices'][i]:
-                    obj['offices'][i]['phone'] = \
-                            phone_filter(obj['offices'][i]['phone'])
-        return obj
-
-
-class LegislatorEmailFilter(Filter):
-    def filter(self, obj):
-        if "email" in obj:
-            obj['email'] = email_filter(obj['email'])
-        return obj
-
-
-class StripFilter(Filter):
-    def filter(self, obj):
-        if isinstance(obj, basestring):
-            return strip_filter(obj)
-        elif isinstance(obj, list):
-            newl = []
-            for x in obj:
-                newl.append(self.filter(x))
-            return newl
-        for x in obj:
-            obj[x] = self.filter(obj[x])
-        return obj
-
-
-class BillStringsFilter(Filter):
-    def filter(self, obj):
-        keys = [
-            "title",
-            "description",
-            "summary"
-        ]
-        for key in keys:
-            if key in obj:
-                obj[key] = single_space_filter(obj)
-        return obj

@@ -22,8 +22,8 @@ def sources(obj):
 
 
 @register.filter
-def plusfield(object, key):
-    return object['+' + key]
+def plusfield(obj, key):
+    return obj.get('+' + key)
 
 
 @register.filter
@@ -35,8 +35,8 @@ def trunc(string):
 
 
 @register.filter
-def underscore_field(object, key):
-    return object['_' + key]
+def underscore_field(obj, key):
+    return obj['_' + key]
 
 
 @register.filter

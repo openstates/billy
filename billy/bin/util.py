@@ -1,5 +1,6 @@
 import argparse
 import logging
+import importlib
 
 from billy.conf import settings, base_arg_parser
 from billy.utils import configure_logging
@@ -25,7 +26,7 @@ if settings.ENABLE_OYSTER:
 
 def import_command_module(mod):
     try:
-        __import__(mod)
+        importlib.import_module(mod)
     except ImportError, e:
         logger.warning(
             'error "{0}" prevented loading of {1} module'.format(e, mod))

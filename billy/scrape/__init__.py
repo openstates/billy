@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import datetime
+import importlib
 import json
 
 from billy.scrape.validator import DatetimeValidator
@@ -221,7 +222,7 @@ def get_scraper(mod_path, scraper_type):
     # act of importing puts it into the registry
     try:
         mod_path = '%s.%s' % (mod_path, scraper_type)
-        __import__(mod_path)
+        importlib.import_module(mod_path)
     except ImportError as e:
         raise ScrapeError("could not import %s" % mod_path, e)
 
