@@ -144,14 +144,10 @@
         <td class="{{row.committees.empty_count|yesno:"bad,good"}}">
             {{row.committees.empty_count}}</td>
         <td
-            {% if row.committees.members_with_leg_id < 75 %}
+            {% if row.committees.members_with_leg_id < 95 %}
             class="bad"
             {% else %}
-                {% if row.committees.members_with_leg_id  < 95 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
+            class="good"
             {% endif %}
             >{{row.committees.members_with_leg_id|floatformat}}%</td>
         <!-- bills -->
@@ -198,14 +194,12 @@
             {% endif %}
             >{{row.bills.typed_actions|floatformat}}%</td>
         <td
-            {% if row.bills.sponsors_with_id < 75 %}
+            {% if row.bills.sponsors_with_id < 90 %}
             class="bad"
+            {% elif row.bills.sponsors_with_id < 95 %}
+            class="warning"
             {% else %}
-                {% if row.bills.sponsors_with_id < 95 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
+            class="good"
             {% endif %}
             >{{row.bills.sponsors_with_id|floatformat}}%</td>
 
@@ -213,14 +207,10 @@
         <td class="{{row.bills.vote_count|yesno:"good,bad"}}">
             {{row.bills.vote_count}}</td>
         <td
-            {% if row.bills.rollcalls_with_leg_id < 75 %}
+            {% if row.bills.rollcalls_with_leg_id < 95 %}
             class="bad"
             {% else %}
-                {% if row.bills.rollcalls_with_leg_id < 95 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
+            class="good"
             {% endif %}
             >{{row.bills.rollcalls_with_leg_id|floatformat}}%</td>
         <td class="{{row.bills.bad_vote_counts|length|yesno:"bad,good"}}">
