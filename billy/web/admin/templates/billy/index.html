@@ -70,17 +70,19 @@
             {{row.legislators.vacant_seats|length}}</td>
         <td class="{{row.legislators.overfilled_seats|length|yesno:"bad,good"}}">
             {{row.legislators.overfilled_seats|length}}</td>
+        {% if row.influence_explorer %}
         <td
             {% if row.legislators.transparencydata_id < 75 %}
             class="bad"
+            {% elif row.legislators.transparencydata_id < 95 %}
+            class="warning"
             {% else %}
-                {% if row.legislators.transparencydata_id < 95 %}
-                class="warning"
-                {% else %}
-                class="good"
-                {% endif %}
+            class="good"
             {% endif %}
             >{{row.legislators.transparencydata_id|floatformat}}%</td>
+        {% else %}
+        <td class="good">---</td>
+        {% endif %}
         <td
             {% if row.legislators.url < 90 %}
             class="bad"

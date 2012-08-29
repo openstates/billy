@@ -82,6 +82,8 @@ def browse_index(request, template='billy/index.html'):
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
         report['unicameral'] = ('lower_chamber_name' not in meta)
+        report['influence_explorer'] = ('influenceexplorer' in
+                                        meta['feature_flags'])
         report['bills']['typed_actions'] = (100 -
             report['bills']['actions_per_type'].get('other', 100))
         rows.append(report)
