@@ -29,7 +29,7 @@
         <th>&nbsp;</th>
         <th colspan=7>Legislators</th>
         <th colspan=5>Committees</th>
-        <th colspan=9>Bills</th>
+        <th colspan=7>Bills</th>
         <th colspan=3>Votes</th>
     <tr>
         <th>State</th>
@@ -48,8 +48,6 @@
         <th>empty</th>
         <th>leg_ids</th>
         <!-- bills -->
-        <th>upper</th>
-        <th>lower</th>
         <th>No Actions</th>
         <th>No Sponsors</th>
         <th>No Versions</th>
@@ -151,14 +149,6 @@
             {% endif %}
             >{{row.committees.members_with_leg_id|floatformat}}%</td>
         <!-- bills -->
-        <td class="{{row.bills.upper_count|yesno:"good,bad"}}">
-            {{row.bills.upper_count}}</td>
-        {% if row.unicameral %}
-            <td class="good">---</td>
-        {% else %}
-            <td class="{{row.bills.lower_count|yesno:"good,bad"}}">
-                {{row.bills.lower_count}}</td>
-        {% endif %}
         <td class="{{row.bills.actionless_count|yesno:"bad,good"}}">
             {{row.bills.actionless_count}}</td>
         <td class="{{row.bills.sponsorless_count|yesno:"bad,good"}}">
