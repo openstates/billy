@@ -49,10 +49,21 @@ except ImportError:
 
 db = None
 
+class NoDB(object):
+    def __init__(self, error):
+        self.error = error
+
+    def __getattr__(self, attr):
+        raise self.error
+
 def _configure_db(host, port, db_name):
     global db
-    conn = pymongo.Connection(host, port)
-    db = conn[db_name]
+    try:
+        conn = pymongo.Connection(host, port)
+        db = conn[db_name]
+    # return a dummy NoDB object if we couldn't connect
+    except pymongo.errors.AutoReconnect as e:
+        db = NoDB(e)
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
