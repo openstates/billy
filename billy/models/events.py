@@ -1,7 +1,8 @@
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
 
-from .base import db, Document
+from billy.core import mdb as db
+from .base import Document
 from .metadata import Metadata
 
 

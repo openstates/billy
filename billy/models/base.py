@@ -2,11 +2,9 @@ import re
 import copy
 import itertools
 
-from pymongo import Connection
-
 from django.core import urlresolvers
 
-from billy.core import settings as billy_settings
+from billy.core import _model_registry, _model_registry_by_collection
 from billy.web.admin import urls as admin_urls
 
 
@@ -14,16 +12,6 @@ from billy.web.admin import urls as admin_urls
 def take(n, iterable):
     "Return first n items of the iterable as a list"
     return list(itertools.islice(iterable, n))
-
-# get db connection
-connection = Connection(host=billy_settings.MONGO_HOST,
-                        port=billy_settings.MONGO_PORT)
-db = getattr(connection, billy_settings.MONGO_DATABASE)
-feeds_db = connection.newsblogs
-
-
-_model_registry = {}
-_model_registry_by_collection = {}
 
 
 def get_model(classname):

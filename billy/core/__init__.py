@@ -4,6 +4,8 @@ import argparse
 import logging
 
 import pymongo
+from pymongo.son_manipulator import SONManipulator
+import pyes
 
 from billy.core import default_settings
 
@@ -48,8 +50,12 @@ except ImportError:
     logging.warning('no billy_settings file found, continuing with defaults..')
 
 db = None
+mdb = None
+feeds_db = None
+_model_registry = {}
+_model_registry_by_collection = {}
 
-class NoDB(object):
+class ErrorProxy(object):
     def __init__(self, error):
         self.error = error
 
@@ -58,12 +64,38 @@ class NoDB(object):
 
 def _configure_db(host, port, db_name):
     global db
+    global mdb
+    global feeds_db
+
+    class Transformer(SONManipulator):
+        def transform_outgoing(self, son, collection,
+                               mapping=_model_registry_by_collection):
+            try:
+                return mapping[collection.name](son)
+            except KeyError:
+                return son
+
+    transformer = Transformer()
+
     try:
         conn = pymongo.Connection(host, port)
         db = conn[db_name]
+        mdb = conn[db_name]
+        feeds_db = conn['newsblogs']
+        mdb.add_son_manipulator(transformer)
+        feeds_db.add_son_manipulator(transformer)
     # return a dummy NoDB object if we couldn't connect
     except pymongo.errors.AutoReconnect as e:
-        db = NoDB(e)
+        db = ErrorProxy(e)
+        mdb = ErrorProxy(e)
+        feeds_db = ErrorProxy(e)
+
+def _configure_es(host, timeout):
+    try:
+        elasticsearch = pyes.ES(host, timeout)
+    except Exception as e:
+        elasticsearch = ErrorProxy(e)
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
+_configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)

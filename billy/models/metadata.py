@@ -3,8 +3,9 @@ import itertools
 
 from django.core import urlresolvers
 
-from .base import (db, Document, RelatedDocument, RelatedDocuments,
-                   ListManager, DictManager, AttrManager, DoesNotExist)
+from billy.core import mdb as db
+from .base import (Document, RelatedDocument, RelatedDocuments, ListManager,
+                   DictManager, AttrManager, DoesNotExist)
 from ..utils import metadata as get_metadata
 
 

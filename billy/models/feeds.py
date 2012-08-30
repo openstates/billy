@@ -3,7 +3,9 @@ import urlparse
 import datetime
 from django.template.defaultfilters import truncatewords
 
-from .base import db, feeds_db, Document
+from billy.core import mdb as db
+from billy.core import feeds_db
+from .base import Document
 from .metadata import Metadata
 
 

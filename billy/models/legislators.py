@@ -6,9 +6,9 @@ import pymongo
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
+from billy.core import mdb as db
 from billy.utils import term_for_session
-
-from .base import (db, Document, RelatedDocuments, ListManager)
+from .base import Document, RelatedDocuments, ListManager
 from .metadata import Metadata
 from .bills import BillVote
 from .utils import CachedAttribute

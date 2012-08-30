@@ -1,8 +1,8 @@
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
-from .base import (db, Document, RelatedDocument, RelatedDocuments,
-                   ListManager)
+from billy.core import mdb as db
+from .base import Document, RelatedDocument, RelatedDocuments, ListManager
 from .metadata import Metadata
 
 

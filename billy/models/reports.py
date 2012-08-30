@@ -1,4 +1,5 @@
-from .base import db, Document
+from billy.core import mdb as db
+from .base import Document
 from .metadata import Metadata
 
 

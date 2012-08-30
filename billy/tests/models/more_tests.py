@@ -12,11 +12,9 @@ import datetime
 
 import nose.tools
 from nose.tools import with_setup
-from billy.models.base import db
+from billy.models import db
 from pymongo import Connection
 from billy.core import settings
-from billy.models import Transformer
-from billy.models import base
 
 
 def setup_func():

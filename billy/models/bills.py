@@ -4,19 +4,15 @@ import collections
 import itertools
 
 from django.core import urlresolvers
-import pyes
 import pymongo
 
-from billy.core import settings
 from billy.utils import parse_param_dt
-
-from .base import (db, Document, RelatedDocument, RelatedDocuments,
+from billy.core import mdb as db
+from .base import (Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)
 from .metadata import Metadata
 from .utils import CachedAttribute, mongoid_2_url
 
-elasticsearch = pyes.ES(settings.ELASTICSEARCH_HOST,
-                        settings.ELASTICSEARCH_TIMEOUT)
 
 
 class Sponsor(dict):
