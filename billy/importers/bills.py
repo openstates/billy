@@ -293,11 +293,7 @@ def import_bill(data, votes, categorizer):
         # use sponsor's chamber if specified
         id = get_legislator_id(abbr, data['session'], sponsor.get('chamber'),
                                sponsor['name'])
-        typ = "leg_id"
-        if id:
-            typ = {"C": "committee_id", "L": "leg_id"}[id[2]]
-
-        sponsor[typ] = id
+        sponsor['leg_id'] = id
         if id is None:
             cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
             if not cid is None:
@@ -318,16 +314,7 @@ def import_bill(data, votes, categorizer):
             for svote in vote[vtype]:
                 id = get_legislator_id(abbr, data['session'],
                                        vote['chamber'], svote)
-                payload = {'name': svote }
-                typ = "leg_id"
-                if id:
-                    typ = {"C": "committee_id", "L": "leg_id"}[id[2]]
-
-                payload[typ] = id
-                if typ != 'leg':
-                    payload['leg_id'] = None
-
-                svlist.append(payload)
+                svlist.append({'name': svote, 'leg_id': id})
 
             vote[vtype] = svlist
 
