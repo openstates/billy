@@ -22,18 +22,29 @@
         <th>Term / Chamber</th>
         <th>Scraped Name</th>
         <th>Legislator</th>
+        <th>Committee</th>
     </tr>
 {% for term, chamber, name in leg_ids %}
     <tr>
         <td>{{term}} {{chamber}}</td>
         <td>{{name}}</td>
         <td>
-            <select class="mselect" name="{{term}},{{chamber}},{{name}}" type="text" >
+            <select class="mselect" name="leg,{{term}},{{chamber}},{{name}}" type="text" >
                 <option value="Unknown" >Unknown</option>
                 {% for leg in legs %}
                 <option value="{{ leg.leg_id }}" >
                 {{ leg.first_name }} {{ leg.last_name }}
                 ({{ leg.leg_id }})
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <select class="mselect" name="cttie,{{term}},{{chamber}},{{name}}" type="text" >
+                <option value="Unknown" >Unknown</option>
+                {% for ctty in committees %}
+                <option value="{{ ctty|key:"_id" }}" >
+                {{ctty.committee}}/{{ctty.chamber}} ({{ ctty|key:"_id" }})
                 </option>
                 {% endfor %}
             </select>
@@ -71,4 +82,28 @@
 {% endfor %}
 </table>
 
+<table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>Scraped Name</th>
+        <th>Term</th>
+        <th>Chamber</th>
+        <th>Committee ID</th>
+        <th>Committee Name</th>
+        <th>Danger Zone</th>
+    </tr>
+{% for id in committee_ids %}
+    {% with cid=id|key:"_id" %}
+        {% with cty=all_committee_ids|key:cid %}
+    <tr>
+        <td>{{id.name}}</td>
+        <td>{{id.term}}</td>
+        <td>{{id.chamber}}</td>
+        <td>{{id.committee_id}}</td>
+        <td>{{all_committee_ids|key:id.committee_id|key:"committee"}}</td>
+        <td></td>
+    </tr>
+        {% endwith %}
+    {% endwith %}
+{% endfor %}
+</table>
 {% endblock %}
