@@ -799,6 +799,7 @@ def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
+    committees = list(db.committees.find({"state": abbr}))
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
@@ -833,6 +834,7 @@ def leg_ids(request, abbr):
         "metadata": meta,
         "leg_ids": eyedees,
         "all_ids": sorted_ids,
+        "committees": committees,
         "known_legs": known_legs,
         "legs": legs
     })
@@ -849,7 +851,7 @@ def leg_ids_remove(request, abbr=None, id=None):
 def leg_ids_commit(request, abbr):
     ids = dict(request.POST)
     for eyedee in ids:
-        term, chamber, name = eyedee.split(",", 2)
+        typ, term, chamber, name = eyedee.split(",", 3)
         value = ids[eyedee][0]
         if value == "Unknown":
             continue
@@ -869,6 +871,7 @@ def leg_ids_commit(request, abbr):
                              "abbr": abbr,
                              "leg_id": value,
                              "chamber": chamber,
+                             "type": typ
                          },
                          True,  # Upsert
                          safe=True)

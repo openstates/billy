@@ -22,18 +22,30 @@
         <th>Term / Chamber</th>
         <th>Scraped Name</th>
         <th>Legislator</th>
+        <th>Committee</th>
     </tr>
 {% for term, chamber, name in leg_ids %}
     <tr>
         <td>{{term}} {{chamber}}</td>
         <td>{{name}}</td>
         <td>
-            <select class="mselect" name="{{term}},{{chamber}},{{name}}" type="text" >
+            <select class="mselect" name="leg,{{term}},{{chamber}},{{name}}" type="text" >
                 <option value="Unknown" >Unknown</option>
                 {% for leg in legs %}
                 <option value="{{ leg.leg_id }}" >
                 {{ leg.first_name }} {{ leg.last_name }}
                 ({{ leg.leg_id }})
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <select class="mselect" name="committee,{{term}},{{chamber}},{{name}}" type="text" >
+                <option value="Unknown" >Unknown</option>
+                {% for committee in committees %}
+                <option value="{{ committee|key:"_id" }}" >
+                    {{ committee.chamber }}/{{ committee.committee }}
+                    ({{committee|key:"_id"}})
                 </option>
                 {% endfor %}
             </select>
@@ -49,6 +61,7 @@
         <th>Scraped Name</th>
         <th>Term</th>
         <th>Chamber</th>
+        <th>Type</th>
         <th>Legislator ID</th>
         <th>Legislator Name</th>
         <th>Danger Zone</th>
@@ -59,6 +72,7 @@
         <td>{{leg.name}}</td>
         <td>{{leg.term}}</td>
         <td>{{leg.chamber}}</td>
+        <td>{{leg.type}}</td>
         <td>{{leg.leg_id}}</td>
         {% if known_legs|key:leg.leg_id %}
         <td>{{known_legs|key:leg.leg_id|key:'full_name'}}</td>
