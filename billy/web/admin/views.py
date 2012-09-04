@@ -799,20 +799,12 @@ def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
-    committees = list(db.committees.find({"state": abbr}))
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
-    committee_ids = db.manual.committee_ids.find({"abbr": abbr})
-
     sorted_ids = {}
     known_legs = {}
-    all_committee_ids = {}
-
     for leg in legs:
         known_legs[leg['leg_id']] = leg
-
-    for committee in committees:
-        all_committee_ids[committee['_id']] = committee
 
     def _id(term, chamber, name):
         return "%s-%s-%s" % (term, chamber, name)
@@ -841,10 +833,7 @@ def leg_ids(request, abbr):
         "metadata": meta,
         "leg_ids": eyedees,
         "all_ids": sorted_ids,
-        "committee_ids": committee_ids,
-        "all_committee_ids": all_committee_ids,
         "known_legs": known_legs,
-        "committees": committees,
         "legs": legs
     })
 
@@ -860,7 +849,7 @@ def leg_ids_remove(request, abbr=None, id=None):
 def leg_ids_commit(request, abbr):
     ids = dict(request.POST)
     for eyedee in ids:
-        typ, term, chamber, name = eyedee.split(",", 3)
+        term, chamber, name = eyedee.split(",", 2)
         value = ids[eyedee][0]
         if value == "Unknown":
             continue
@@ -871,27 +860,18 @@ def leg_ids_commit(request, abbr):
             chamber,
             term
         )
-        payload = {
-            "_id": thing,
-            "name": name,
-            "term": term,
-            "abbr": abbr,
-            "chamber": chamber,
-        }
 
-        database = None
-
-        if typ == "leg":
-            payload["leg_id"] = value
-            database = db.manual.leg_ids
-        else:
-            payload['committee_id'] = value
-            database = db.manual.committee_ids
-
-        database.update({"_id": thing},
-                        payload,
-                        True,  # Upsert
-                        safe=True)
+        db.manual.leg_ids.update({"_id": thing},
+                         {
+                             "_id": thing,
+                             "name": name,
+                             "term": term,
+                             "abbr": abbr,
+                             "leg_id": value,
+                             "chamber": chamber,
+                         },
+                         True,  # Upsert
+                         safe=True)
 
     return redirect('admin_leg_ids', abbr)
 
