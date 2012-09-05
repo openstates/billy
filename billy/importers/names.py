@@ -28,6 +28,25 @@ def get_legislator_id(abbr, session, chamber, name):
     return matcher.match(name, chamber)
 
 
+def get_committee_id(abbr, session, chamber, name):
+    try:
+        matcher = __matchers[(abbr, session)]
+    except KeyError:
+        metadata = db.metadata.find_one({'_id': abbr})
+        term = None
+        for term in metadata['terms']:
+            if session in term['sessions']:
+                break
+        else:
+            raise Exception("bad session: " + session)
+
+        matcher = CommitteeNameMatcher(abbr, term['name'])
+
+        __matchers[(abbr, session)] = matcher
+
+    return matcher.match(name, chamber)
+
+
 class NameMatcher(object):
     """
     Match various forms of a name, provided they uniquely identify
@@ -228,4 +247,30 @@ class NameMatcher(object):
             return None  # XXX: Expected behavior?
 
         name = self._normalize(name)
+        return self._names[chamber].get(name, None)
+
+
+class CommitteeNameMatcher(NameMatcher):
+    def _learn_manual_matches(self):
+        rows = db.manual.leg_ids.find({
+            "abbr": self._abbr,
+            "type": "committee"
+        })
+
+        for row in rows:
+            (term, chamber, name, leg_id) = (
+                    row['term'], row['chamber'], row['name'], row['leg_id'])
+
+            if (term == self._term or not term) and leg_id:
+                self._manual[chamber][name] = leg_id
+                if name in self._manual[None]:
+                    self._manual[None][name] = None
+                else:
+                    self._manual[None][name] = leg_id
+
+    def match(self, name, chamber=None):
+        try:
+            return self._manual[chamber][name]
+        except KeyError:
+            pass
         return self._names[chamber].get(name, None)
