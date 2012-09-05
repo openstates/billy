@@ -48,6 +48,7 @@ def import_events(abbr, data_dir, import_actions=False):
 
         def _resolve_ctty(committee):
             return get_committee_id(data[settings.LEVEL_FIELD],
+                                    data['session'],
                                     committee['chamber'],
                                     committee['participant'])
 

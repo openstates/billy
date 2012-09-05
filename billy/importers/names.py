@@ -28,7 +28,7 @@ def get_legislator_id(abbr, session, chamber, name):
     return matcher.match(name, chamber)
 
 
-def get_committee_id(abbr, session, chamber, name):
+def attempt_committee_match(abbr, session, chamber, name):
     try:
         matcher = __matchers[(abbr, session)]
     except KeyError:
@@ -41,9 +41,6 @@ def get_committee_id(abbr, session, chamber, name):
             raise Exception("bad session: " + session)
 
         matcher = CommitteeNameMatcher(abbr, term['name'])
-
-        __matchers[(abbr, session)] = matcher
-
     return matcher.match(name, chamber)
 
 

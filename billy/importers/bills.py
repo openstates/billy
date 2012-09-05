@@ -295,7 +295,10 @@ def import_bill(data, votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
-            cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
+            cid = get_committee_id(abbr,
+                                   data['session'],
+                                   data['chamber'],
+                                   sponsor['name'])
             if not cid is None:
                 sponsor['committee_id'] = cid
 
@@ -304,7 +307,9 @@ def import_bill(data, votes, categorizer):
 
         # committee_ids
         if 'committee' in vote:
-            committee_id = get_committee_id(abbr, vote['chamber'],
+            committee_id = get_committee_id(abbr,
+                                            data['session'],
+                                            vote['chamber'],
                                             vote['committee'])
             vote['committee_id'] = committee_id
 
@@ -341,7 +346,10 @@ def import_bill(data, votes, categorizer):
         adate = action['date']
 
         def _match_committee(name):
-            return get_committee_id(abbr, action['actor'], name)
+            return get_committee_id(abbr,
+                                    data['session'],
+                                    action['actor'],
+                                    name)
 
         def _match_legislator(name):
             return get_legislator_id(abbr,
