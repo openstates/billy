@@ -87,7 +87,10 @@ class NameMatcher(object):
         self._learn_manual_matches()
 
     def _learn_manual_matches(self):
-        rows = db.manual.leg_ids.find({"abbr": self._abbr})
+        rows = db.manual.leg_ids.find({
+            "abbr": self._abbr,
+            "type": "leg"
+        })
 
         for row in rows:
             (term, chamber, name, leg_id) = (
