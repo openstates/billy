@@ -29,18 +29,15 @@ def get_legislator_id(abbr, session, chamber, name):
 
 
 def attempt_committee_match(abbr, session, chamber, name):
-    try:
-        matcher = __matchers[(abbr, session)]
-    except KeyError:
-        metadata = db.metadata.find_one({'_id': abbr})
-        term = None
-        for term in metadata['terms']:
-            if session in term['sessions']:
-                break
-        else:
-            raise Exception("bad session: " + session)
+    metadata = db.metadata.find_one({'_id': abbr})
+    term = None
+    for term in metadata['terms']:
+        if session in term['sessions']:
+            break
+    else:
+        raise Exception("bad session: " + session)
 
-        matcher = CommitteeNameMatcher(abbr, term['name'])
+    matcher = CommitteeNameMatcher(abbr, term['name'])
     return matcher.match(name, chamber)
 
 
