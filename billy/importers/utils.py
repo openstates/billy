@@ -372,6 +372,10 @@ def get_committee_id(abbr, session, chamber, committee):
                                      chamber,
                                      committee)
 
+
+    if manual:
+        return manual
+
     key = (abbr, chamber, committee)
     if key in __committee_ids:
         return __committee_ids[key]
