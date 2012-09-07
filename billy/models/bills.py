@@ -217,15 +217,17 @@ class BillVote(Document):
         ids = []
         for k in ('yes', 'no', 'other'):
             ids.extend(map(id_getter, self[k + '_votes']))
-        objs = db.legislators.find({'_id': {'$in': ids}}, **kwargs)
+        objs = db.legislators.find({'_all_ids': {'$in': ids}}, **kwargs)
 
         # Handy to keep a reference to the vote on each legislator.
         objs = list(objs)
+        id_cache = {}
         for obj in objs:
             obj.vote = self
-        objs = dict((obj['_id'], obj) for obj in objs)
+            for _id in obj['_all_ids']:
+                id_cache[_id] = obj
 
-        return objs
+        return id_cache
 
     @CachedAttribute
     def legislator_vote_value(self):
@@ -245,9 +247,16 @@ class BillVote(Document):
     def _vote_legislators(self, yes_no_other):
         '''Return all legislators who votes yes/no/other on this bill.
         '''
-        id_getter = operator.itemgetter('leg_id')
-        ids = map(id_getter, self['%s_votes' % yes_no_other])
-        return map(self._legislator_objects.get, ids)
+        #id_getter = operator.itemgetter('leg_id')
+        #ids = map(id_getter, self['%s_votes' % yes_no_other])
+        #return map(self._legislator_objects.get, ids)
+        result = []
+        for voter in self[yes_no_other + '_votes']:
+            if voter['leg_id']:
+                result.append(self._legislator_objects.get(voter['leg_id']))
+            else:
+                result.append(voter)
+        return result
 
     def yes_vote_legislators(self):
         return self._vote_legislators('yes')

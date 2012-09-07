@@ -209,10 +209,7 @@ class Legislator(Document):
                 _bill = _bill()
             term = _bill['_term']
 
-        if term is not None:
-            pass
-
-        elif session is not None:
+        if term is None and session is not None:
             term = term_for_session(self['state'], session)
 
         # Use the term to get the related roles. First look in the current
