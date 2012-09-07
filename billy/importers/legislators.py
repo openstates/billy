@@ -169,10 +169,10 @@ def import_legislator(data):
 
         if leg:
             if 'old_roles' not in data:
-                data['old_roles'] = {}
+                data['old_roles'] = leg.get('old_roles', {})
              # put scraped roles into their old_roles
             data['old_roles'][scraped_term] = data['roles']
-            data['roles'] = leg['roles'] # don't overwrite their current roles
+            data['roles'] = leg['roles']  # don't overwrite their current roles
 
     # active matching legislator from different term
     if not leg:
@@ -183,7 +183,7 @@ def import_legislator(data):
              'roles': {'$elemMatch': spec}})
         if leg:
             if 'old_roles' not in data:
-                data['old_roles'] = {}
+                data['old_roles'] = leg.get('old_roles', {})
 
             # scraped_term < leg's term
             if term_older_than(abbr, scraped_term, leg['roles'][0]['term']):

@@ -72,8 +72,6 @@ urlpatterns = patterns('billy.web.admin.views',
     # missing data
     url(r'^(?P<abbr>[a-z]{2})/other_actions/$', 'other_actions',
         name='other_actions'),
-    url(r'^(?P<abbr>[a-z]{2})/district_stub/$', 'district_stub',
-        name='district_stub'),
     url(r'^(?P<abbr>[a-z]{2})/duplicate_versions/$', 'duplicate_versions',
         name='duplicate_versions'),
 

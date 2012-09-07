@@ -2,6 +2,7 @@ import os
 import glob
 import json
 import logging
+import datetime
 from time import time
 from collections import defaultdict
 
@@ -143,7 +144,7 @@ def git_commit(message):
     c.tree = git_active_tree.id
     c.parents = [HEAD]
     repo.object_store.add_object(git_active_tree)
-    c.author = c.committer = "Billy <openstates@sunlightfoundation.com>"
+    c.author = c.committer = "Billy <billy@localhost>"
     c.commit_time = c.author_time = int(time())
     tz = parse_timezone("-0400")[0]
     c.commit_timezone = c.author_timezone = tz
@@ -169,7 +170,7 @@ Fondly,
     tree.add("README", 0100644, blob.id)
     commit = Commit()
     commit.tree = tree.id
-    author = "Billy <openstates@sunlightfoundation.com>"
+    author = "Billy <billy@localhost>"
     commit.author = commit.committer = author
     commit.commit_time = commit.author_time = int(time())
     tz = parse_timezone('-0400')[0]
@@ -320,6 +321,22 @@ def import_bill(data, votes, categorizer):
     # process actions
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
+
+    vote_flags = {
+        "bill:passed",
+        "bill:failed",
+        "bill:veto_override:passed",
+        "bill:veto_override:failed",
+        "amendment:passed",
+        "amendment:failed",
+        "committee:passed",
+        "committee:passed:favorable",
+        "committee:passed:unfavorable",
+        "committee:passed:failed"
+    }
+    already_linked = set()
+    remove_vote = set()
+
     for action in data['actions']:
         adate = action['date']
 
@@ -349,13 +366,13 @@ def import_bill(data, votes, categorizer):
                 id = resolver(entity['name'])
                 entity['id'] = id
 
-        # first & last
+        # first & last dates
         if not dates['first'] or adate < dates['first']:
             dates['first'] = adate
         if not dates['last'] or adate > dates['last']:
             dates['last'] = adate
 
-        # passed & signed
+        # passed & signed dates
         if (not dates['passed_upper'] and action['actor'] == 'upper'
             and 'bill:passed' in action['type']):
             dates['passed_upper'] = adate
@@ -364,6 +381,35 @@ def import_bill(data, votes, categorizer):
             dates['passed_lower'] = adate
         elif (not dates['signed'] and 'governor:signed' in action['type']):
             dates['signed'] = adate
+
+        # vote-action matching
+        action_attached = False
+        if set(action['type']).intersection(vote_flags):
+            for vote in data['votes']:
+                if not vote['date'] or not action['date']:
+                    continue
+
+                delta = abs(vote['date'] - action['date'])
+                if (delta < datetime.timedelta(hours=20) and
+                    vote['chamber'] == action['actor']):
+                    if action_attached:
+                        # multiple votes match, we can't guess
+                        if "related_votes" in action:
+                            del(action['related_votes'])
+                    else:
+                        related_vote = vote['vote_id']
+                        if related_vote in already_linked:
+                            remove_vote.add(related_vote)
+
+                        already_linked.add(related_vote)
+                        action['related_votes'] = [related_vote]
+                        action_attached = True
+
+    # remove related_votes that we linked to multiple actions
+    for action in data['actions']:
+        for vote in remove_vote:
+            if "related_votes" in action and vote in action['related_votes']:
+                action['related_votes'].remove(vote)
 
     # save action dates to data
     data['action_dates'] = dates

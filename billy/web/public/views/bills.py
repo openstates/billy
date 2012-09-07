@@ -70,7 +70,7 @@ class RelatedBillsList(RelatedObjectsList):
                 long_description.append('which have been signed into law')
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},
-                                          fields=('full_name','_id'))
+                                          fields=('full_name', '_id'))
                 leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
             if search_text:
@@ -191,6 +191,7 @@ class RelatedBillsList(RelatedObjectsList):
                     (reverse('bills', args=args, kwargs=kwargs),
                      new_get.urlencode())))
         return super(RelatedBillsList, self).get(request, *args, **kwargs)
+
 
 class StateBills(RelatedBillsList):
     template_name = templatename('bills_list')

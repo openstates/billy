@@ -12,33 +12,40 @@
     <a href="{% url object_json "metadata" metadata.abbreviation %}">Metadata</a>
 </div>
 
-<div class="container">
-<div class="row">
+<style>
+    .good { background-color: #83D47A; }
+    .bad { background-color: #D47A7D; }
+</style>
 
-<div class="span6">
-<div class="well">
+<div class="container">
+
+<div class="row"> <div class="span12">
+<div class="well {% if runlog.failure %}bad{% else %}good{% endif %}">
     <h3><a href="{% url state_run_detail metadata.abbreviation %}" >Last run information</a></h3>
-    <ul>
     {% if runlog %}
-    <li>Last run took {{ runlog.scraped.time_delta }} seconds, and was
-        started on
-        {{ runlog.scraped.started }}</li>
-        <li>{% if runlog.failure %}
-            <b>There was a failure during runtime</b>
-        {% else %}
-            The scrape took place without exception
-        {% endif %}</li>
-        {% for key, val in runlog.import.items %}
-            <li>{{ key }} - out of {{ val.total }} records, {{ val.insert }}
-            records were inserted, and {{ val.update }} were updated</li>
-        {% endfor %}
+    <p>
+    <br /> Last scrape started at {{ runlog.scraped.started }} UTC,
+    {% if runlog.failure %}
+    <b>failed, took {{runlog.scraped.time_delta}}. </b>
+    <br />Last successful run was at {{last_success.scraped.started}} UTC, took {{last_success.scraped.time_delta}}.
     {% else %}
-        <li>No records found, sadly. You might have run the import with an old
-        version of Billy, or perhaps haven't run this state yet. However,
-        the fact you're here might throw a wrench in all that.</li>
+    finished successfully in {{runlog.scraped.time_delta}}.
+    {% endif %}
+    </p>
+    <ul>
+        {% for key, val in runlog.imported.items %}
+            <li>{{ key }} - out of {{ val.total }} records, {{ val.insert }}
+            records were new {#, and {{ val.update }} were updated#}
+        {% endfor %}
     {% endif %}
     </ul>
-</div>
+</div> </div> </div>
+
+
+<div class="row">
+<!-- left column -->
+<div class="span6">
+
 
 <div class="well">
     <h3><a href="{% url admin_bills metadata.abbreviation %}">Bills</a></h3>
@@ -79,7 +86,7 @@
       <dt>Upper:</dt><dd>{{report.legislators.upper_active_count}}</dd>
       <dt>Lower:</dt><dd>{{report.legislators.lower_active_count}}</dd>
       <dt>Inactive:</dt><dd>{{report.legislators.inactive_count}}</dd>
-      <dt>with TransparencyData id:</dt><dd>{{report.legislators.transparencydata_id}}</dd>
+      <dt>with Influence Explorer id:</dt><dd>{{report.legislators.transparencydata_id}}</dd>
       <dt>with URL:</dt><dd>{{report.legislators.url}}</dd>
       <dt>with Photo URL:</dt><dd>{{report.legislators.photo_url}}</dd>
       <dt>with Email:</dt><dd>{{report.legislators.email}}</dd>
