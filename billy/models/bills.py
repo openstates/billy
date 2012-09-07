@@ -119,7 +119,13 @@ class Action(dict):
         if 'related_entities' in self:
             for entity in self['related_entities']:
                 name = entity['name']
-                url = mongoid_2_url(state, entity['id'])
+                _id = entity['id']
+
+                # If the importer couldn't ID the entity,
+                # skip.
+                if _id is None:
+                    continue
+                url = mongoid_2_url(state, _id)
                 link = '<a href="%s">%s</a>' % (url, name)
                 if name in action:
                     action = action.replace(entity['name'], link)
