@@ -556,6 +556,7 @@ def save_votes(bill, votes):
         vote['_id'] = vote['vote_id']
         vote['bill_id'] = bill['_id']
         vote[settings.LEVEL_FIELD] = bill[settings.LEVEL_FIELD]
+        vote['session'] = bill['session']
         vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
         vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]
