@@ -7,6 +7,7 @@ import logging
 import inspect
 import argparse
 import traceback
+import importlib
 import unicodecsv
 
 import datetime as dt
@@ -239,7 +240,7 @@ def main(old_scrape_compat=False):
             sys.path.insert(0, newpath)
 
         # get metadata
-        module = __import__(args.module)
+        module = importlib.import_module(args.module)
         metadata = module.metadata
         module_settings = getattr(module, 'settings', {})
         abbrev = metadata['abbreviation']

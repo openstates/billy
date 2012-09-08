@@ -82,6 +82,8 @@ def browse_index(request, template='billy/index.html'):
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
         report['unicameral'] = ('lower_chamber_name' not in meta)
+        report['influence_explorer'] = ('influenceexplorer' in
+                                        meta['feature_flags'])
         report['bills']['typed_actions'] = (100 -
             report['bills']['actions_per_type'].get('other', 100))
         rows.append(report)
@@ -99,22 +101,24 @@ def overview(request, abbr):
     context['report'] = report
     context['sessions'] = db.bills.find({'state': abbr}).distinct('session')
 
+    def _add_time_delta(runlog):
+        time_delta = runlog['scraped']['ended'] - runlog['scraped']['started']
+        runlog['scraped']['time_delta'] = datetime.timedelta(time_delta.days,
+                                                         time_delta.seconds)
     try:
         runlog = db.billy_runs.find({
             "scraped.state": abbr
         }).sort("scraped.started", direction=pymongo.DESCENDING)[0]
-        # This hack brought to you by Django's inability to do subtraction
-        # in the template:)
-        runlog['scraped']['time_delta'] = (runlog['scraped']['ended'] -
-                                           runlog['scraped']['started'])
+        _add_time_delta(runlog)
         context['runlog'] = runlog
-        if "failure" in runlog:
-            context['alert'] = dict(type='error',
-                                    title="This build is currently broken!",
-                                    message="""
-The last scrape was a failure. Check in the run log section for more details,
-or check out the scrape run report page for this state.
-""")
+
+        if runlog.get('failure'):
+            last_success = db.billy_runs.find({
+                "scraped.state": abbr,
+                "failure": None,
+            }).sort("scraped.started", direction=pymongo.DESCENDING)[0]
+            _add_time_delta(last_success)
+            context['last_success'] = last_success
     except IndexError:
         runlog = False
 
@@ -641,32 +645,6 @@ def other_actions(request, abbr):
 
 
 @login_required
-def district_stub(request, abbr):
-    def keyfunc(x):
-        try:
-            district = int(x[2])
-        except ValueError:
-            district = x[2]
-        return x[1], district
-
-    counts = defaultdict(int)
-    for leg in db.legislators.find({'state': abbr, 'active': True}):
-        if 'chamber' in leg:
-            counts[(leg['chamber'], leg['district'])] += 1
-
-    data = []
-    for key, count in counts.iteritems():
-        chamber, district = key
-        data.append((abbr, chamber, district, count, ''))
-
-    data.sort(key=keyfunc)
-
-    return _csv_response(request, "districts",
-                         ('abbr', 'chamber', 'district', 'count', ''),
-                         data, abbr)
-
-
-@login_required
 def duplicate_versions(request, abbr):
     meta, report = _meta_and_report(abbr)
 
@@ -821,6 +799,7 @@ def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
     legs = list(db.legislators.find({"state": abbr}))
+    committees = list(db.committees.find({"state": abbr}))
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
@@ -855,6 +834,7 @@ def leg_ids(request, abbr):
         "metadata": meta,
         "leg_ids": eyedees,
         "all_ids": sorted_ids,
+        "committees": committees,
         "known_legs": known_legs,
         "legs": legs
     })
@@ -871,7 +851,7 @@ def leg_ids_remove(request, abbr=None, id=None):
 def leg_ids_commit(request, abbr):
     ids = dict(request.POST)
     for eyedee in ids:
-        term, chamber, name = eyedee.split(",", 2)
+        typ, term, chamber, name = eyedee.split(",", 3)
         value = ids[eyedee][0]
         if value == "Unknown":
             continue
@@ -891,6 +871,7 @@ def leg_ids_commit(request, abbr):
                              "abbr": abbr,
                              "leg_id": value,
                              "chamber": chamber,
+                             "type": typ
                          },
                          True,  # Upsert
                          safe=True)

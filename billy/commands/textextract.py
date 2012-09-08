@@ -1,5 +1,7 @@
 import sys
 import urllib2
+import importlib
+
 from billy.core import settings
 from billy.commands import BaseCommand
 
@@ -16,7 +18,7 @@ class TextExtract(BaseCommand):
         # inject scraper paths so scraper module can be found
         for newpath in settings.SCRAPER_PATHS:
             sys.path.insert(0, newpath)
-        module = __import__(args.module)
+        module = importlib.import_module(args.module)
 
         extract_text = module.extract_text
 

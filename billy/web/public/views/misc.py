@@ -116,10 +116,10 @@ class VotesList(RelatedObjectsList):
     title_template = '''
         {% if obj.collection_name == 'bills' %}
             Votes on bill {{obj.display_name}} -
-            {{metadata.legislature_name}} - OpenStates
+            {{metadata.legislature_name}} - Open States
         {% elif obj.collection_name == 'legislators' %}
             Votes by {{obj.display_name}} -
-            {{metadata.legislature_name}} - OpenStates
+            {{metadata.legislature_name}} - Open States
         {% endif %}
         '''
 

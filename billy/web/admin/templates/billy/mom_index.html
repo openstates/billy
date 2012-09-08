@@ -30,9 +30,9 @@
 
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
-<script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
+<script src="{% static 'select2-2.0/select2.min.js' %}"></script>
 
-    <script type="text/javascript">
+    <script>
         $(document).ready(function() {
             $('#leg1').select2({placeholder: 'Pick a Legislator'});
             $('#leg2').select2({placeholder: 'Pick a Legislator'});

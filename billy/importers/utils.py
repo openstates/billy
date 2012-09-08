@@ -303,8 +303,8 @@ def merge_legislators(leg1, leg2):
     roles = 'roles'
     old_roles = 'old_roles'
 
-    no_compare = set(('_id', 'leg_id', '_all_ids', '_locked_fields',
-        'created_at', 'updated_at', roles, old_roles))
+    no_compare = {'_id', 'leg_id', '_all_ids', '_locked_fields', 'created_at',
+                  'updated_at', roles, old_roles}
 
     leg1['_all_ids'] += leg2['_all_ids']
 

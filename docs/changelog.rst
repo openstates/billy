@@ -1,12 +1,31 @@
 billy changelog
 ===============
 
-1.3-dev
--------
+1.4.0
+-----
+**31 August 2012**
+    * new summary field on bills
+    * enable editing legislators in admin
+    * leg_id view replacing more manual_data csvs
+    * automatically attempt to link actions to votes and bills
+    * support fields API parameter in more places
+    * popularity tracking added
+    * fix to how roles are shown for old legislators
+    * limits to number of items displayed in public view when counts are
+        extremely high
+    * basic user-account & dev-mode support
+    * deeper influence explorer integration
+    * addition of import filters
+    * ability to create data quality exceptions
+    * more tests for models
+
+1.3.0
+-----
 **30 July 2012**
     * first truly usable version of billy.web.public
     * remove retire, load_legislators, and prune_committees commands in favor of admin
     * more admin improvements including subject support and cleaned up reporting
+    * new offices support on legislators
     * refactor of billy.models
     * db: denormalize votes into own collection on bill import
     * db: add action_dates to bills

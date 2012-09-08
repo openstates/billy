@@ -216,4 +216,3 @@ def test_import_legislator():
     for l in [leg1, leg2, leg3, leg4, leg5, leg6]:
         legislators.import_legislator(l)
         assert db.legislators.count() == 4
-

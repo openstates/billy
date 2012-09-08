@@ -30,9 +30,8 @@ class UpdateLegIds(BaseCommand):
 
             for bill in bills:
                 for sponsor in bill['sponsors']:
-                    if not sponsor['leg_id']:
-                        sponsor['leg_id'] = nm.match(sponsor['name'],
-                                                     bill['chamber'])
+                    sponsor['leg_id'] = nm.match(sponsor['name'],
+                                                 bill['chamber'])
                 for vote in bill['votes']:
                     for type in ('yes_votes', 'no_votes', 'other_votes'):
                         for voter in vote[type]:

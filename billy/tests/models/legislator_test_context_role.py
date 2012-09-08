@@ -13,7 +13,6 @@ import datetime
 import nose.tools
 from nose.tools import with_setup
 from billy.models import db
-from pymongo import Connection
 from billy.core import settings
 
 
@@ -307,7 +306,7 @@ Need to test context_role with:
 # Test context_role for current term, session, bill, vote.
 @with_setup(setup_func)
 def test_current_using_bill():
-    # The bill's first action was in 2011, so the correct role is the first 
+    # The bill's first action was in 2011, so the correct role is the first
     # one in leg['roles'], which lasts from 2011 to 2012.
     leg = db.legislators.find_one('CAL000104')
     correct_role = leg['roles'][0]

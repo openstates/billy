@@ -17,7 +17,7 @@ from .utils import CachedAttribute
 class Role(dict):
 
     def data(self):
-        '''This roles term metadata from the metadata['terms'] list.
+        '''This role's term metadata from the metadata['terms'] list.
         '''
         metadata = self.manager.document
         return metadata.term_dict[self['term']]
@@ -209,10 +209,7 @@ class Legislator(Document):
                 _bill = _bill()
             term = _bill['_term']
 
-        if term is not None:
-            pass
-
-        elif session is not None:
+        if term is None and session is not None:
             term = term_for_session(self['state'], session)
 
         # Use the term to get the related roles. First look in the current
@@ -262,7 +259,8 @@ class Legislator(Document):
                     session_start = session_data.get('start_date')
                     session_end = session_data.get('end_date')
                     if session_start and session_end:
-                        started_during = (role_start < session_start < role_end)
+                        started_during = (role_start < session_start <
+                                          role_end)
                         ended_during = (role_start < session_end < role_end)
                         if started_during or ended_during:
                             self['context_role'] = role

@@ -7,8 +7,8 @@
 
 {% block script %}
     <link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
-    <script type="text/javascript" src="{% static 'select2-2.0/select2.min.js' %}"></script>
-    <script type="text/javascript">
+    <script src="{% static 'select2-2.0/select2.min.js' %}"></script>
+    <script>
 
     var uncat_subjects = {
 {% for sub in uncat_subjects %}
