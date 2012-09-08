@@ -156,19 +156,19 @@ def dump_bill_csvs(abbr):
             sdict.update(bill_info)
             sponsor_csv.writerow(sdict)
 
-        for vote in bill['votes']:
-            vdict = extract_fields(vote, vote_fields)
-            # copy chamber from vote into vote_chamber
-            vdict['vote_chamber'] = vdict['chamber']
-            vdict.update(bill_info)
-            vote_csv.writerow(vdict)
+    for vote in db.votes.find({settings.LEVEL_FIELD: abbr}):
+        vdict = extract_fields(vote, vote_fields)
+        # copy chamber from vote into vote_chamber
+        vdict['vote_chamber'] = vdict['chamber']
+        vdict.update(bill_info)
+        vote_csv.writerow(vdict)
 
-            for vtype in ('yes', 'no', 'other'):
-                for leg_vote in vote[vtype + '_votes']:
-                    legvote_csv.writerow({'vote_id': vote['vote_id'],
-                                      'leg_id': leg_vote['leg_id'],
-                                      'name': leg_vote['name'].encode('utf8'),
-                                      'vote': vtype})
+        for vtype in ('yes', 'no', 'other'):
+            for leg_vote in vote[vtype + '_votes']:
+                legvote_csv.writerow({'vote_id': vote['vote_id'],
+                                  'leg_id': leg_vote['leg_id'],
+                                  'name': leg_vote['name'].encode('utf8'),
+                                  'vote': vtype})
     return (bill_csv_fname, action_csv_fname, sponsor_csv_fname,
             vote_csv_fname, legvote_csv_fname)
 
