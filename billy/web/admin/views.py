@@ -816,23 +816,25 @@ def leg_ids(request, abbr):
 
     if not report:
         raise Http404('No reports found for abbreviation %r.' % abbr)
-    bill_unmatched = set(tuple(i) for i in
-                         report['bills']['unmatched_leg_ids'])
-    com_unmatched = set(tuple(i) for i in
+    bill_unmatched = set(tuple(i + ['sponsor']) for i in
+                         report['bills']['unmatched_sponsors'])
+    vote_unmatched = set(tuple(i + ['vote']) for i in
+                         report['votes']['unmatched_voters'])
+    com_unmatched = set(tuple(i + ['committee']) for i in
                          report['committees']['unmatched_leg_ids'])
-    combined_sets = bill_unmatched | com_unmatched
-    eyedees = []
+    combined_sets = bill_unmatched | vote_unmatched | com_unmatched
+    unmatched_ids = []
 
-    for term, chamber, name in combined_sets:
+    for term, chamber, name, id_type in combined_sets:
         key = _id(term, chamber, name)
         if key in sorted_ids:
             continue
 
-        eyedees.append((term, chamber, name))
+        unmatched_ids.append((term, chamber, name, type))
 
     return render(request, 'billy/leg_ids.html', {
         "metadata": meta,
-        "leg_ids": eyedees,
+        "leg_ids": unmatched_ids,
         "all_ids": sorted_ids,
         "committees": committees,
         "known_legs": known_legs,
