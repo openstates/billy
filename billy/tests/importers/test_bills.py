@@ -8,6 +8,7 @@ from nose.tools import with_setup, assert_equal
 def setup_func():
     db.metadata.drop()
     db.bills.drop()
+    db.votes.drop()
     db.legislators.drop()
     db.document_ids.drop()
     db.vote_ids.drop()
@@ -110,10 +111,11 @@ def test_import_bill():
     assert bill['sponsors'][0]['leg_id'] == 'EXL000001'
 
     # test vote import
-    assert len(bill['votes']) == 3
-    assert bill['votes'][0]['vote_id'] == 'EXV00000001'
-    assert bill['votes'][0]['yes_votes'][0]['leg_id'] == 'EXL000001'
-    assert 'committee_id' in bill['votes'][1]
+    bill_votes = db.votes.find()
+    assert bill_votes.count() == 3
+    assert bill_votes[0]['vote_id'] == 'EXV00000001'
+    assert bill_votes[0]['yes_votes'][0]['leg_id'] == 'EXL000001'
+    assert 'committee_id' in bill_votes[1]
 
     # test actions
     assert bill['action_dates']['first'] == 1331000000
@@ -146,8 +148,9 @@ def test_import_bill():
     bill = db.bills.find_one('EXB00000002')
 
     # votes haven't changed, versions, titles, and sponsors have
-    assert len(bill['votes']) == 3
-    assert bill['votes'][0]['vote_id'] == 'EXV00000001'
+    bill_votes = db.votes.find()
+    assert bill_votes.count() == 3
+    assert bill_votes[0]['vote_id'] == 'EXV00000001'
     assert len(bill['versions']) == 3
     assert len(bill['sponsors']) == 1
     assert 'third title' in bill['alternate_titles']
@@ -191,8 +194,9 @@ def test_import_bill_with_partial_bill_vote_id():
 
     bill = db.bills.find_one()
     assert bill['bill_id'] == 'S 1'
-    assert bill['votes'][0]['motion'] == 'house passage'
-    assert bill['votes'][0]['chamber'] == 'lower'
+    vote = db.votes.find_one()
+    assert vote['motion'] == 'house passage'
+    assert vote['chamber'] == 'lower'
 
 
 def test_fix_bill_id():
