@@ -19,6 +19,7 @@ def setup_func():
     assert db.name.endswith('_test')
     db.metadata.drop()
     db.bills.drop()
+    db.votes.drop()
     db.legislators.drop()
     db.document_ids.drop()
     db.vote_ids.drop()
@@ -264,7 +265,6 @@ def setup_func():
              u'type': u'primary'},
              ],
         u'state': u'ca',
-        'votes': [dict(vote, date=datetime.datetime(2011, 12, 6, 0, 0))]
         })
 
     # A prior session bill, where prior is 20092010.

@@ -34,3 +34,25 @@ def get_quality_exceptions(abbr):
     for qe in db.quality_exceptions.find({'abbr': abbr}):
         quality_exceptions[qe['type']].update(qe['ids'])
     return quality_exceptions
+
+
+def combine_reports(reports, base_report):
+    report = base_report
+
+    for session in reports.itervalues():
+        # go over all report fields
+        # integers are summed, sets are combined, and dicts summed by key
+        for field, value in report.iteritems():
+            if isinstance(value, int):
+                report[field] += session[field]
+            elif isinstance(value, set):
+                report[field].update(session[field])
+                session[field] = list(session[field])
+            elif isinstance(value, defaultdict):
+                for k, v in session[field].iteritems():
+                    report[field][k] += v
+
+    for field, value in report.iteritems():
+        if isinstance(value, set):
+            report[field] = list(value)
+    return report
