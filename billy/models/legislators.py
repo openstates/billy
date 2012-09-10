@@ -284,7 +284,7 @@ class Legislator(Document):
         return ''
 
     def all_terms(self):
-        terms = set(self['old_roles'].keys())
+        terms = set(self.get('old_roles', {}).keys())
         if self['roles']:
             terms.add(self['roles'][0]['term'])
         _term_order = [term['name'] for term in
