@@ -480,6 +480,10 @@ class Bill(Document):
 
         # process full-text query
         if query:
+            # block spammers, possibly move to a BANNED_SEARCH_LIST setting
+            if '<a href' in query:
+                return []
+
             query = {"query_string": {"fields": ["text", "title"],
                                       "default_operator": "AND",
                                       "query": query}}
