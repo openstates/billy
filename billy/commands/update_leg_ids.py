@@ -34,7 +34,6 @@ class UpdateLegIds(BaseCommand):
                                                  bill['chamber'])
                 db.bills.save(bill, safe=True)
 
-
             votes = db.votes.find({settings.LEVEL_FIELD: args.abbr,
                                    'session': session})
             for vote in votes:
@@ -42,3 +41,4 @@ class UpdateLegIds(BaseCommand):
                     for voter in vote[type]:
                         voter['leg_id'] = nm.match(voter['name'],
                                                    vote['chamber'])
+                db.votes.save(vote, safe=True)

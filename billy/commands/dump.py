@@ -169,6 +169,7 @@ def dump_bill_csvs(abbr):
                                   'leg_id': leg_vote['leg_id'],
                                   'name': leg_vote['name'].encode('utf8'),
                                   'vote': vtype})
+
     return (bill_csv_fname, action_csv_fname, sponsor_csv_fname,
             vote_csv_fname, legvote_csv_fname)
 
