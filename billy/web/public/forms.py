@@ -9,7 +9,6 @@ def get_state_select_form(data):
     state_abbrs = [('', '')]
     for state in sorted(settings.ACTIVE_STATES):
         try:
-            print state
             obj = Metadata.get_object(state)
             state_abbrs.append((obj['_id'], obj['name']))
         except DoesNotExist:
