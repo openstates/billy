@@ -763,9 +763,12 @@ def bill(request, abbr, session=None, id=None, billy_id=None):
     if not bill:
         msg = 'No bill found in {name} session {session!r} with id {id!r}.'
         raise Http404(msg.format(name=meta['name'], session=session, id=id))
+    else:
+        votes = db.votes.find({'bill_id': bill['_id']})
 
     return render(request, 'billy/bill.html',
-                  {'bill': bill, 'metadata': meta, 'id': bill['_id']})
+                  {'bill': bill, 'metadata': meta, 'votes': votes,
+                   'id': bill['_id']})
 
 
 @login_required
