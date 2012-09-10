@@ -69,7 +69,8 @@ def ensure_indexes():
                            ('action_dates.passed_lower', pymongo.DESCENDING)])
 
     # votes index
-    db.votes.ensure_index('bill_id')
+    db.votes.ensure_index([('bill_id', pymongo.ASCENDING),
+                           ('date', pymongo.ASCENDING)])
     db.votes.ensure_index([('_voters', pymongo.ASCENDING),
                            ('date', pymongo.ASCENDING)])
 
@@ -310,6 +311,7 @@ def import_bill(data, standalone_votes, categorizer):
         bill_votes += standalone_votes.pop((data['chamber'], data['session'],
                                             data['bill_id']), [])
 
+    # do id matching and other vote prep
     if bill:
         prepare_votes(abbr, data['session'], bill['_id'], bill_votes)
     else:
@@ -407,7 +409,7 @@ def import_bill(data, standalone_votes, categorizer):
     # remove related_votes that we linked to multiple actions
     for action in data['actions']:
         for vote in remove_vote:
-            if "related_votes" in action and vote in action['related_votes']:
+            if vote in action.get('related_votes', []):
                 action['related_votes'].remove(vote)
 
     # save action dates to data
@@ -535,11 +537,13 @@ def prepare_votes(abbr, session, bill_id, scraped_votes):
             vote['committee_id'] = committee_id
 
         # vote leg_ids
+        vote['_voters'] = []
         for vtype in ('yes_votes', 'no_votes', 'other_votes'):
             svlist = []
             for svote in vote[vtype]:
                 id = get_legislator_id(abbr, session, vote['chamber'], svote)
                 svlist.append({'name': svote, 'leg_id': id})
+                vote['_voters'].append(id)
 
             vote[vtype] = svlist
 
@@ -557,9 +561,6 @@ def save_votes(bill, votes):
         vote['bill_id'] = bill['_id']
         vote[settings.LEVEL_FIELD] = bill[settings.LEVEL_FIELD]
         vote['session'] = bill['session']
-        vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
-        vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
-        vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]
         db.votes.save(vote, safe=True)
 
 
