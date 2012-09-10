@@ -482,7 +482,7 @@ class Bill(Document):
         if query:
             # block spammers, possibly move to a BANNED_SEARCH_LIST setting
             if '<a href' in query:
-                return []
+                return db.bills.find({'state': None})
 
             query = {"query_string": {"fields": ["text", "title"],
                                       "default_operator": "AND",
