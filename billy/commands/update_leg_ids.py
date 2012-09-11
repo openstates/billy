@@ -37,8 +37,11 @@ class UpdateLegIds(BaseCommand):
             votes = db.votes.find({settings.LEVEL_FIELD: args.abbr,
                                    'session': session})
             for vote in votes:
+                vote['_voters'] = []
                 for type in ('yes_votes', 'no_votes', 'other_votes'):
                     for voter in vote[type]:
                         voter['leg_id'] = nm.match(voter['name'],
                                                    vote['chamber'])
+                        if voter['leg_id']:
+                            vote['_voters'].append(voter['leg_id'])
                 db.votes.save(vote, safe=True)
