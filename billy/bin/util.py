@@ -11,7 +11,6 @@ configure_logging()
 
 COMMAND_MODULES = (
     # lots of these commands can go away as billy matures
-    'billy.commands.serve',             # useful for development
     'billy.commands.textextract',       # useful for development
     'billy.commands.download_photos',
     'billy.commands.dump',
