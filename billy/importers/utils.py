@@ -157,10 +157,6 @@ def update(old, new, collection, sneaky_update_filter=None):
             format is a dict mapping field names to a comparison function
             that returns True iff there is a change
     """
-    # To prevent deleting standalone votes..
-    if 'votes' in new and not new['votes']:
-        del new['votes']
-
     # need_save = something has changed
     need_save = False
 

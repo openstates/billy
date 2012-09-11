@@ -155,24 +155,6 @@ class Legislator(Document):
         else:
             return ''
 
-    def sessions_served(self):
-        session_details = self.metadata['session_details']
-        terms = self.metadata['terms']
-        for role in self['roles']:
-            if role['type'] == 'member':
-                term_name = role['term']
-
-                try:
-                    details = session_details[term_name]
-                except KeyError:
-                    for term in terms:
-                        if term['name'] == term_name:
-                            for session in term['sessions']:
-                                details = session_details[session]
-                                yield details['display_name']
-                else:
-                    yield details['display_name']
-
     def context_role(self, bill=None, vote=None, session=None, term=None):
         '''Tell this legislator object which session to use when calculating
         the legisator's context_role for a given bill or vote.
@@ -301,20 +283,16 @@ class Legislator(Document):
 
         return ''
 
-    def old_sessions_served(self):
-        '''Returns the sessions served info from
-        old_roles.'''
-        display_names = set()
-        term_dict = self.metadata.term_dict
-        session_details = self.metadata['session_details']
-        for term, oldroles_list in self['old_roles'].items():
-            for role in oldroles_list:
-                termdata = term_dict[term]
-                for term_ in termdata:
-                    for session in term_['sessions']:
-                        name = session_details[session]['display_name']
-                        display_names.add(name)
-        return display_names
+    def all_terms(self):
+        terms = set(self.get('old_roles', {}).keys())
+        if self['roles']:
+            terms.add(self['roles'][0]['term'])
+        _term_order = [term['name'] for term in
+                       self.metadata['terms']]
+        terms = [x[1] for x in
+                 sorted([(_term_order.index(term), term) for term in terms])]
+        return terms
+
 
     @CachedAttribute
     def _old_roles_committees(self):

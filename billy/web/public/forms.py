@@ -2,13 +2,18 @@ from django import forms
 from django.conf import settings
 #from django.contrib.admin.widgets import FilteredSelectMultiple
 
-from billy.models import db, Metadata
+from billy.models import db, Metadata, DoesNotExist
 
 
 def get_state_select_form(data):
-    states = map(Metadata.get_object, sorted(settings.ACTIVE_STATES))
     state_abbrs = [('', '')]
-    state_abbrs += [(obj['_id'], obj['name']) for obj in states]
+    for state in sorted(settings.ACTIVE_STATES):
+        try:
+            obj = Metadata.get_object(state)
+            state_abbrs.append((obj['_id'], obj['name']))
+        except DoesNotExist:
+            # ignore missing states
+            pass
 
     class StateSelectForm(forms.Form):
         abbr = forms.ChoiceField(choices=state_abbrs, label="state")

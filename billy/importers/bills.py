@@ -68,6 +68,8 @@ def ensure_indexes():
                            ('action_dates.passed_lower', pymongo.DESCENDING)])
 
     # votes index
+    db.votes.ensure_index([('bill_id', pymongo.ASCENDING),
+                           ('date', pymongo.ASCENDING)])
     db.votes.ensure_index([('_voters', pymongo.ASCENDING),
                            ('date', pymongo.ASCENDING)])
 
@@ -75,7 +77,7 @@ def ensure_indexes():
     db.subjects.ensure_index('abbr')
 
 
-def import_votes(data_dir):
+def load_standalone_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
     paths = glob.glob(pattern)
 
@@ -221,7 +223,14 @@ def oysterize_version(bill, version):
              )
 
 
-def import_bill(data, votes, categorizer):
+def import_bill(data, standalone_votes, categorizer):
+    """
+        insert or update a bill
+
+        data - raw bill JSON
+        standalone_votes - votes scraped separately
+        categorizer - SubjectCategorizer (None - no categorization)
+    """
     abbr = data[settings.LEVEL_FIELD]
 
     # clean up bill_ids
@@ -242,22 +251,6 @@ def import_bill(data, votes, categorizer):
     if categorizer:
         categorizer.categorize_bill(data)
 
-    # this is a hack initially added for Rhode Island where we can't
-    # determine the full bill_id, if this key is in the metadata
-    # we just use the numeric portion, not ideal as it won't work
-    # where HB/SBs overlap, but in RI they never do
-    if metadata(abbr).get('_partial_vote_bill_id'):
-        # pull off numeric portion of bill_id
-        numeric_bill_id = data['bill_id'].split()[1]
-        bill_votes = votes.pop((data['chamber'], data['session'],
-                                numeric_bill_id), [])
-    else:
-        # add loaded votes to data
-        bill_votes = votes.pop((data['chamber'], data['session'],
-                                data['bill_id']), [])
-
-    data['votes'].extend(bill_votes)
-
     # companions
     for companion in data['companions']:
         companion['bill_id'] = fix_bill_id(companion['bill_id'])
@@ -273,18 +266,16 @@ def import_bill(data, votes, categorizer):
             logger.warning('Unknown companion: {chamber} {session} {bill_id}'
                            .format(**companion))
 
+    # look for a prior version of this bill
     bill = db.bills.find_one({settings.LEVEL_FIELD: abbr,
                               'session': data['session'],
                               'chamber': data['chamber'],
                               'bill_id': data['bill_id']})
 
-    # keep vote/doc ids consistent
-    vote_matcher = VoteMatcher(abbr)
+    # keep doc ids consistent
     doc_matcher = DocumentMatcher(abbr)
     if bill:
-        vote_matcher.learn_ids(bill['votes'])
         doc_matcher.learn_ids(bill['versions'] + bill['documents'])
-    vote_matcher.set_ids(data['votes'])
     doc_matcher.set_ids(data['versions'] + data['documents'])
 
     # match sponsor leg_ids
@@ -298,26 +289,35 @@ def import_bill(data, votes, categorizer):
             if not cid is None:
                 sponsor['committee_id'] = cid
 
-    # process votes
-    for vote in data['votes']:
 
-        # committee_ids
-        if 'committee' in vote:
-            committee_id = get_committee_id(abbr, vote['chamber'],
-                                            vote['committee'])
-            vote['committee_id'] = committee_id
+    # process votes ############
 
-        # vote leg_ids
-        for vtype in ('yes_votes', 'no_votes', 'other_votes'):
-            svlist = []
-            for svote in vote[vtype]:
-                id = get_legislator_id(abbr, data['session'],
-                                       vote['chamber'], svote)
-                svlist.append({'name': svote, 'leg_id': id})
+    # pull votes off bill
+    bill_votes = data.pop('votes', [])
 
-            vote[vtype] = svlist
+    # grab the external bill votes if present
+    if metadata(abbr).get('_partial_vote_bill_id'):
+        # this is a hack initially added for Rhode Island where we can't
+        # determine the full bill_id, if this key is in the metadata
+        # we just use the numeric portion, not ideal as it won't work
+        # where HB/SBs overlap, but in RI they never do
+        # pull off numeric portion of bill_id
+        numeric_bill_id = data['bill_id'].split()[1]
+        bill_votes += standalone_votes.pop((data['chamber'], data['session'],
+                                            numeric_bill_id), [])
+    else:
+        # add loaded votes to data
+        bill_votes += standalone_votes.pop((data['chamber'], data['session'],
+                                            data['bill_id']), [])
 
-    # process actions
+    # do id matching and other vote prep
+    if bill:
+        prepare_votes(abbr, data['session'], bill['_id'], bill_votes)
+    else:
+        prepare_votes(abbr, data['session'], None, bill_votes)
+
+    # process actions ###########
+
     dates = {'first': None, 'last': None, 'passed_upper': None,
              'passed_lower': None, 'signed': None}
 
@@ -383,9 +383,11 @@ def import_bill(data, votes, categorizer):
 
         # vote-action matching
         action_attached = False
-        if set(action['type']).intersection(vote_flags):
-            for vote in data['votes']:
-                if not vote['date'] or not action['date']:
+        # only attempt vote matching if action has a date and is one of the
+        # designated vote action types
+        if set(action['type']).intersection(vote_flags) and action['date']:
+            for vote in bill_votes:
+                if not vote['date']:
                     continue
 
                 delta = abs(vote['date'] - action['date'])
@@ -393,8 +395,7 @@ def import_bill(data, votes, categorizer):
                     vote['chamber'] == action['actor']):
                     if action_attached:
                         # multiple votes match, we can't guess
-                        if "related_votes" in action:
-                            del(action['related_votes'])
+                        action.pop('related_votes', None)
                     else:
                         related_vote = vote['vote_id']
                         if related_vote in already_linked:
@@ -407,7 +408,7 @@ def import_bill(data, votes, categorizer):
     # remove related_votes that we linked to multiple actions
     for action in data['actions']:
         for vote in remove_vote:
-            if "related_votes" in action and vote in action['related_votes']:
+            if vote in action.get('related_votes', []):
                 action['related_votes'].remove(vote)
 
     # save action dates to data
@@ -439,14 +440,12 @@ def import_bill(data, votes, categorizer):
     if not bill:
         bill_id = insert_with_id(data)
         git_add_bill(data)
-
-        denormalize_votes(data, bill_id)
+        save_votes(data, bill_votes)
         return "insert"
     else:
         git_add_bill(bill)
-
         update(bill, data, db.bills)
-        denormalize_votes(bill, bill['_id'])
+        save_votes(bill, bill_votes)
         return "update"
 
 
@@ -462,7 +461,7 @@ def import_bills(abbr, data_dir):
         "total": 0
     }
 
-    votes = import_votes(data_dir)
+    votes = load_standalone_votes(data_dir)
     try:
         categorizer = SubjectCategorizer(abbr)
     except Exception as e:
@@ -516,19 +515,51 @@ def populate_current_fields(abbr):
         db.bills.save(bill, safe=True)
 
 
-def denormalize_votes(bill, bill_id):
-    # remove all existing votes for this bill
-    db.votes.remove({'bill_id': bill_id}, safe=True)
+def prepare_votes(abbr, session, bill_id, scraped_votes):
+    # if bill already exists, try and preserve vote_ids
+    vote_matcher = VoteMatcher(abbr)
 
-    # add votes
-    for vote in bill.get('votes', []):
-        vote = vote.copy()
+    if bill_id:
+        existing_votes = list(db.votes.find({'bill_id': bill_id}))
+        if existing_votes:
+            vote_matcher.learn_ids(existing_votes)
+
+    vote_matcher.set_ids(scraped_votes)
+
+    # link votes to committees and legislators
+    for vote in scraped_votes:
+
+        # committee_ids
+        if 'committee' in vote:
+            committee_id = get_committee_id(abbr, vote['chamber'],
+                                            vote['committee'])
+            vote['committee_id'] = committee_id
+
+        # vote leg_ids
+        vote['_voters'] = []
+        for vtype in ('yes_votes', 'no_votes', 'other_votes'):
+            svlist = []
+            for svote in vote[vtype]:
+                id = get_legislator_id(abbr, session, vote['chamber'], svote)
+                svlist.append({'name': svote, 'leg_id': id})
+                vote['_voters'].append(id)
+
+            vote[vtype] = svlist
+
+def save_votes(bill, votes):
+    # doesn't delete votes if none were scraped this time
+    if not votes:
+        return
+
+    # remove all existing votes for this bill
+    db.votes.remove({'bill_id': bill['_id']}, safe=True)
+
+    # save the votes
+    for vote in votes:
         vote['_id'] = vote['vote_id']
-        vote['bill_id'] = bill_id
+        vote['bill_id'] = bill['_id']
         vote[settings.LEVEL_FIELD] = bill[settings.LEVEL_FIELD]
-        vote['_voters'] = [l['leg_id'] for l in vote['yes_votes']]
-        vote['_voters'] += [l['leg_id'] for l in vote['no_votes']]
-        vote['_voters'] += [l['leg_id'] for l in vote['other_votes']]
+        vote['session'] = bill['session']
         db.votes.save(vote, safe=True)
 
 
