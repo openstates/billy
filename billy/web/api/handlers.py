@@ -69,10 +69,14 @@ def _build_field_list(request, default_fields=None):
         return default_fields
     else:
         d = dict(zip(fields.split(','), itertools.repeat(1)))
-        d['_id'] = d.pop('id', 0)
+        d['_id'] = d.pop('id', 1)
         d['_type'] = 1
         return d
 
+
+def _get_vote_fields(fields):
+    return [field.replace('votes.', '', 1) for field in fields or [] if
+            field.startswith('votes.')] or None
 
 class BillyHandlerMetaClass(HandlerMetaClass):
     """
@@ -146,7 +150,15 @@ class BillHandler(BillyHandler):
                      'bill_id': bill_id}
             if chamber:
                 query['chamber'] = chamber.lower()
-        return find_bill(query, fields=_build_field_list(request))
+        fields = _build_field_list(request)
+        bill = find_bill(query, fields=fields)
+        vote_fields = _get_vote_fields(fields)
+        # include votes if no fields are specified, if it is specified, or
+        # if subfields are specified
+        if not fields or 'votes' in fields or vote_fields:
+            bill['votes'] = list(db.votes.find({'bill_id': bill['_id']},
+                                          fields=vote_fields))
+        return bill
 
 
 class BillSearchHandler(BillyHandler):
@@ -210,7 +222,24 @@ class BillSearchHandler(BillyHandler):
         elif sort == 'last_action':
             query = query.sort([('action_dates.last', -1)])
 
-        return list(query)
+        # attach votes if necessary
+        bills = list(query)
+        bill_ids = [bill['_id'] for bill in bills]
+        vote_fields = _get_vote_fields(bill_fields)
+        if 'votes' in bill_fields or vote_fields:
+            # add bill_id to vote_fields for relating back
+            votes = list(db.votes.find({'bill_id': {'$in': bill_ids}},
+                                       fields=vote_fields + ['bill_id']))
+            votes_by_bill = defaultdict(list)
+            for vote in votes:
+                votes_by_bill[vote['bill_id']].append(vote)
+                # remove bill_id unless they really requested it
+                if 'bill_id' not in vote_fields:
+                    vote.pop('bill_id')
+            for bill in bills:
+                bill['votes'] = votes_by_bill[bill['_id']]
+
+        return bills
 
 
 class LegislatorHandler(BillyHandler):

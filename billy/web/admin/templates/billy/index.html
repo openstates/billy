@@ -196,17 +196,17 @@
             >{{row.bills.sponsors_with_id|floatformat}}%</td>
 
         <!-- votes -->
-        <td class="{{row.bills.vote_count|yesno:"good,bad"}}">
-            {{row.bills.vote_count}}</td>
+        <td class="{{row.votes.vote_count|yesno:"good,bad"}}">
+            {{row.votes.vote_count}}</td>
         <td
-            {% if row.bills.rollcalls_with_leg_id < 95 %}
+            {% if row.votes.rollcalls_with_leg_id < 95 %}
             class="bad"
             {% else %}
             class="good"
             {% endif %}
-            >{{row.bills.rollcalls_with_leg_id|floatformat}}%</td>
-        <td class="{{row.bills.bad_vote_counts|length|yesno:"bad,good"}}">
-            {{row.bills.bad_vote_counts|length}}</td>
+            >{{row.votes.rollcalls_with_leg_id|floatformat}}%</td>
+        <td class="{{row.votes.bad_vote_counts|length|yesno:"bad,good"}}">
+            {{row.votes.bad_vote_counts|length}}</td>
     </tr>
     {% endfor %}
     </tbody>

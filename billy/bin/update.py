@@ -160,8 +160,7 @@ def _do_imports(abbrev, args):
                 import_committees(abbrev, settings.BILLY_DATA_DIR)
 
     if 'events' in args.types:
-        report['events'] = \
-                import_events(abbrev, settings.BILLY_DATA_DIR)
+        report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
 
     return report
 
@@ -169,6 +168,7 @@ def _do_imports(abbrev, args):
 def _do_reports(abbrev, args):
     from billy import db
     from billy.reports.bills import bill_report
+    from billy.reports.votes import vote_report
     from billy.reports.legislators import legislator_report
     from billy.reports.committees import committee_report
 
@@ -180,6 +180,7 @@ def _do_reports(abbrev, args):
         report['legislators'] = legislator_report(abbrev)
     if 'bills' in args.types:
         report['bills'] = bill_report(abbrev)
+        report['votes'] = vote_report(abbrev)
     if 'committees' in args.types:
         report['committees'] = committee_report(abbrev)
 

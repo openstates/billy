@@ -78,7 +78,7 @@
 
 <div class="votes">
   <h4>Votes:</h4>
-  {% if bill.votes %}
+  {% if votes %}
   <table class="table">
       <tr>
           <th>ID</th>
@@ -90,7 +90,7 @@
           <th>No Votes</th>
           <th>Other Votes</th>
       </tr>
-    {% for vote in bill.votes %}
+    {% for vote in votes %}
     <tr>
         <td>{{vote.vote_id}}</td>
         <td>{{vote.motion}}</td>
