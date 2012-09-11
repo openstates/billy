@@ -456,15 +456,23 @@ class BoundaryHandler(BillyHandler):
             for coord_set in shape:
                 all_lon.extend(c[0] for c in coord_set)
                 all_lat.extend(c[1] for c in coord_set)
-        lon_delta = abs(max(all_lon) - min(all_lon))
-        lat_delta = abs(max(all_lat) - min(all_lat))
+
+        min_lat = min(all_lat)
+        min_lon = min(all_lon)
+        max_lat = max(all_lat)
+        max_lon = max(all_lon)
+
+        lon_delta = abs(max_lon - min_lon)
+        lat_delta = abs(max_lat - min_lat)
 
         region = {'center_lon': centroid[0], 'center_lat': centroid[1],
                   'lon_delta': lon_delta, 'lat_delta': lat_delta,
                  }
+        bbox = [[min_lat, min_lon], [max_lat, max_lon]]
 
         district = db.districts.find_one({'boundary_id': boundary_id})
         district['shape'] = data['simple_shape']['coordinates']
         district['region'] = region
+        district['bbox'] = bbox
 
         return district
