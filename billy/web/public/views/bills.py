@@ -243,6 +243,17 @@ class BillFeed(StateBills):
                             content_type='application/xml')
 
 
+def bill_noslug(request, abbr, bill_id):
+    bill = db.bills.find_one({'_id': bill_id})
+    if bill is None:
+        raise Http404("No such bill (%s)" % (bill_id))
+
+    return redirect('bill',
+                    abbr=abbr,
+                    session=bill['session'],
+                    bill_id=bill['bill_id'])
+
+
 def bill(request, abbr, session, bill_id):
     # get fixed version
     fixed_bill_id = fix_bill_id(bill_id)
