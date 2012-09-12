@@ -3,6 +3,7 @@ python:
     - "2.7"
 install: pip install pymongo nose name_tools validictory scrapelib jellyfish unicodecsv Django pyes argparse --use-mirrors
 script: nosetests
+services: mongodb
 notifications:
     email:
         - jturk@sunlightfoundation.com
