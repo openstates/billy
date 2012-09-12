@@ -288,12 +288,12 @@ def test_get_committee_id():
                           '_id': 'EXC000005'})
 
     # simple lookup
-    assert (bills.get_committee_id('ex', "S1", 'upper', 'Animal Control') ==
+    assert (bills.get_committee_id('ex', 'upper', 'Animal Control') ==
             'EXC000001')
     # different chamber
-    assert (bills.get_committee_id('ex', "S1", 'lower', 'Animal Control') ==
+    assert (bills.get_committee_id('ex', 'lower', 'Animal Control') ==
             'EXC000002')
     # without 'Committee on'  (this one also has a subcommittee)
-    assert (bills.get_committee_id('ex', "S1", 'upper', 'Science') ==
+    assert (bills.get_committee_id('ex', 'upper', 'Science') ==
             'EXC000004')
-    assert bills.get_committee_id('ex', "S1", 'upper', 'Nothing') is None
+    assert bills.get_committee_id('ex', 'upper', 'Nothing') is None

@@ -361,10 +361,9 @@ def merge_legislators(leg1, leg2):
 __committee_ids = {}
 
 
-def get_committee_id(abbr, session, chamber, committee):
+def get_committee_id(abbr, chamber, committee):
 
     manual = attempt_committee_match(abbr,
-                                     session,
                                      chamber,
                                      committee)
 

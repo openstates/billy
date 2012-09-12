@@ -28,16 +28,10 @@ def get_legislator_id(abbr, session, chamber, name):
     return matcher.match(name, chamber)
 
 
-def attempt_committee_match(abbr, session, chamber, name):
+def attempt_committee_match(abbr, chamber, name):
     metadata = db.metadata.find_one({'_id': abbr})
-    term = None
-    for term in metadata['terms']:
-        if session in term['sessions']:
-            break
-    else:
-        raise Exception("bad session: " + session)
 
-    matcher = CommitteeNameMatcher(abbr, term['name'])
+    matcher = CommitteeNameMatcher(abbr, None)  # Term
     return matcher.match(name, chamber)
 
 
@@ -102,7 +96,7 @@ class NameMatcher(object):
     def _learn_manual_matches(self):
         rows = db.manual.leg_ids.find({
             "abbr": self._abbr,
-            "type": "leg"
+            "type": "legislator"
         })
 
         for row in rows:

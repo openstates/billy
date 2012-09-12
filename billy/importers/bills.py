@@ -286,12 +286,10 @@ def import_bill(data, standalone_votes, categorizer):
                                sponsor['name'])
         sponsor['leg_id'] = id
         if id is None:
-            cid = get_committee_id(abbr,
-                                   data['session'],
-                                   data['chamber'],
-                                   sponsor['name'])
+            cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
             if not cid is None:
                 sponsor['committee_id'] = cid
+
 
     # process votes ############
 
@@ -343,10 +341,7 @@ def import_bill(data, standalone_votes, categorizer):
         adate = action['date']
 
         def _match_committee(name):
-            return get_committee_id(abbr,
-                                    data['session'],
-                                    action['actor'],
-                                    name)
+            return get_committee_id(abbr, action['actor'], name)
 
         def _match_legislator(name):
             return get_legislator_id(abbr,
@@ -537,9 +532,7 @@ def prepare_votes(abbr, session, bill_id, scraped_votes):
 
         # committee_ids
         if 'committee' in vote:
-            committee_id = get_committee_id(abbr,
-                                            session,
-                                            vote['chamber'],
+            committee_id = get_committee_id(abbr, vote['chamber'],
                                             vote['committee'])
             vote['committee_id'] = committee_id
 
