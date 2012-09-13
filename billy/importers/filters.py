@@ -19,7 +19,10 @@ def filter_object(filter_path, object_path, obj):
 def run_filter(fltr, object_path, obj):
     if "." in object_path:
         root, new_path = object_path.split(".", 1)
-        obj[root] = run_filter(fltr, new_path, obj[root])
+        try:
+            obj[root] = run_filter(fltr, new_path, obj[root])
+        except KeyError:
+            pass
         return obj
     try:
         if isinstance(obj, list):

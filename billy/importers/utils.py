@@ -11,6 +11,7 @@ import name_tools
 
 from billy import db
 from billy.conf import settings
+from billy.importers.names import attempt_committee_match
 
 if settings.ENABLE_OYSTER:
     oyster_import_exception = None
@@ -361,6 +362,15 @@ __committee_ids = {}
 
 
 def get_committee_id(abbr, chamber, committee):
+
+    manual = attempt_committee_match(abbr,
+                                     chamber,
+                                     committee)
+
+
+    if manual:
+        return manual
+
     key = (abbr, chamber, committee)
     if key in __committee_ids:
         return __committee_ids[key]
