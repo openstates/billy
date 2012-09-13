@@ -248,6 +248,7 @@ class CommitteeNameMatcher(NameMatcher):
         for row in rows:
             (term, chamber, name, leg_id) = (
                     row['term'], row['chamber'], row['name'], row['leg_id'])
+            row['chamber'] = None  # In case the DB has gone wonky on us.
 
             if (term == self._term or not term) and leg_id:
                 self._manual[chamber][name] = leg_id
@@ -256,7 +257,8 @@ class CommitteeNameMatcher(NameMatcher):
                 else:
                     self._manual[None][name] = leg_id
 
-    def match(self, name, chamber=None):
+    def match(self, name, chamber):
+        chamber = None  # In case something's gone crazy
         try:
             return self._manual[chamber][name]
         except KeyError:
