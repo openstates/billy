@@ -4,6 +4,7 @@ import re
 from django import template
 from django.utils.html import strip_tags
 
+from billy.conf import settings
 from billy.web.public.views.utils import templatename
 from billy.web.public.forms import get_state_select_form
 
@@ -25,6 +26,26 @@ def sources(obj):
 def plusfield(obj, key):
     return obj.get('+' + key)
 
+@register.filter
+def party_noun(party, count=1):
+    try:
+        details = settings.PARTY_DETAILS[party]
+        if count == 1:
+            # singular
+            return details['noun']
+        else:
+            # try to get special plural, or add s to singular
+            try:
+                return details['plural_noun']
+            except KeyError:
+                return details['noun'] + 's'
+    except KeyError:
+        # if there's a KeyError just return the adjective with or without
+        # pluralization
+        if count == 1:
+            return party
+        else:
+            return party + 's'
 
 @register.filter
 def trunc(string):
