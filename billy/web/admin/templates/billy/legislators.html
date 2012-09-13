@@ -28,7 +28,7 @@
 {% endif %}
 
 
-<div class="span4">
+<div class="span5">
 <h3> {{metadata.upper_chamber_title}}s </h3>
 <table class="table">
 <thead>
@@ -36,20 +36,26 @@
     <th>Name</th>
     <th>District</th>
     <th>Party</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
 </tr>
 </thead>
 <tbody>
 {% for leg in upper_legs %}
 <tr>
-    <td><a href="{% url admin_legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
+    <td><a href="{% url legislator_noslug leg.state leg.leg_id %}">public</a></td>
+    <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
+    <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
 </tr>
 {% endfor %}
 </table>
 </div>
 
-<div class="span4">
+<div class="span5">
 <h3> {{metadata.lower_chamber_title}}s </h3>
 <table class="table">
 <thead>
@@ -57,14 +63,20 @@
     <th>Name</th>
     <th>District</th>
     <th>Party</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
 </tr>
 </thead>
 <tbody>
 {% for leg in lower_legs %}
 <tr>
-    <td><a href="{% url admin_legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
+    <td><a href="{% url legislator_noslug leg.state leg.leg_id %}">public</a></td>
+    <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
+    <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
 </tr>
 {% endfor %}
 </tbody>
@@ -78,12 +90,15 @@
 <tr>
     <th>Name</th>
     <th>Old Roles</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
+    <th>&nbsp;</th>
 </tr>
 <thead>
 <tbody>
 {% for leg in inactive_legs %}
 <tr>
-    <td><a href="{% url admin_legislator leg.leg_id %}">{{leg.first_name}} {{leg.last_name}}</a></td>
+    <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>
         <dl>
             {% for k,v in leg.old_roles.iteritems %}
@@ -92,6 +107,8 @@
             {% endfor %}
         </dl>
     </td>
+    <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
+    <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
 </tr>
 {% endfor %}
 </tbody>
