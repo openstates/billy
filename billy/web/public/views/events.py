@@ -2,6 +2,9 @@
     views specific to events
 """
 import operator
+import urllib
+import datetime as dt
+
 from django.shortcuts import render
 from django.http import Http404
 
@@ -31,7 +34,33 @@ def event(request, abbr, event_id):
     if event is None:
         raise Http404
 
+    fmt = "%Y%m%dT%H%M%SZ"
+
+    start_date = event['when'].strftime(fmt)
+    duration = dt.timedelta(hours=1)
+    ed = (event['when'] + duration)
+    end_date = ed.strftime(fmt)
+
+    gcal_info = {
+        "action": "TEMPLATE",
+        "text": event['description'],
+        "dates": "%s/%s" % (start_date, end_date),
+        "details": "",
+        "location": event['location'].encode('utf-8'),
+        "trp": "false",
+        "sprop": "http://openstates.org/%s/events/%s/" % (
+            abbr,
+            event_id
+        ),
+        "sprop": "name:Open States Event"
+    }
+    gcal_string = urllib.urlencode(gcal_info)
+
     return render(request, templatename('event'),
-                  dict(abbr=abbr, metadata=Metadata.get_object(abbr),
-                       event=event, sources=event['sources'],
+                  dict(abbr=abbr,
+                       metadata=Metadata.get_object(abbr),
+                       event=event,
+                       sources=event['sources'],
+                       gcal_info=gcal_info,
+                       gcal_string=gcal_string,
                        statenav_active='events'))
