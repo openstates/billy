@@ -267,6 +267,11 @@ def bill(request, abbr, session, bill_id):
         raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))
 
+    events = db.events.find({
+        "state": abbr,
+        "related_bills.bill_id": bill['_id']
+    }).sort("when", -1)
+
     popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
@@ -279,6 +284,7 @@ def bill(request, abbr, session, bill_id):
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
+             events=events,
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
