@@ -36,6 +36,9 @@ def event_ical(request, abbr, event_id):
     event = db.events.find_one({'_id': event_id})
     if event is None:
         raise Http404
+
+    x_name = "X-OPENSTATES"
+
     cal = Calendar()
     cal.add('prodid', '-//Open States//openstates.org//')
     cal.add('version', billy.__version__)
@@ -51,6 +54,11 @@ def event_ical(request, abbr, event_id):
     for participant in event['participants']:
         name = participant['participant']
         cal_event.add('attendee', name)
+        cal_event.add("%s-ATTENDEE-ID" % (x_name), participant['id'])
+
+    for bill in event['related_bills']:
+        if bill['bill_id']:
+            cal_event.add("%s-RELATED-BILL-ID" % (x_name), bill['bill_id'])
 
     cal.add_component(cal_event)
     return HttpResponse(cal.as_string(), content_type="text/calendar")
