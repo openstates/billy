@@ -53,7 +53,7 @@ def event_ical(request, abbr, event_id):
         cal_event.add('attendee', name)
 
     cal.add_component(cal_event)
-    return HttpResponse(cal.as_string())
+    return HttpResponse(cal.as_string(), content_type="text/calendar")
 
 
 def event(request, abbr, event_id):
