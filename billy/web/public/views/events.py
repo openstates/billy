@@ -4,10 +4,13 @@
 import operator
 import urllib
 import datetime as dt
+from icalendar import Calendar, Event
 
 from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, HttpResponse
 
+
+import billy
 from billy.models import db, Metadata
 from billy.models.pagination import IteratorPaginator
 
@@ -27,6 +30,30 @@ class EventsList(RelatedObjectsList):
     statenav_active = 'events'
     description_template = '{{obj.legislature_name}} Events'
     title_template = 'Events - {{obj.legislature_name}} - Open States'
+
+
+def event_ical(request, abbr, event_id):
+    event = db.events.find_one({'_id': event_id})
+    if event is None:
+        raise Http404
+    cal = Calendar()
+    cal.add('prodid', '-//Open States//openstates.org//')
+    cal.add('version', billy.__version__)
+
+    cal_event = Event()
+    cal_event.add('summary', event['description'])
+    cal_event['uid'] = "%s@openstates.org" % (event['_id'])
+    cal_event.add('priority', 5)
+    cal_event.add('dtstart', event['when'])
+    cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
+    cal_event.add('dtstamp', event['updated_at'])
+
+    for participant in event['participants']:
+        name = participant['participant']
+        cal_event.add('attendee', name)
+
+    cal.add_component(cal_event)
+    return HttpResponse(cal.as_string())
 
 
 def event(request, abbr, event_id):

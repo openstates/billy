@@ -59,6 +59,8 @@ urlpatterns += patterns('billy.web.public.views.events',
         name='events_rss'),
     url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/', 'event',
         name='event'),
+    url(r'^(?P<abbr>[a-z]{2})/ical/(?P<event_id>\w+)/', 'event_ical',
+        name='event_ical'),
 )
 
 # committees
