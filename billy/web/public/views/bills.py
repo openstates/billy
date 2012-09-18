@@ -16,6 +16,7 @@ from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
 
+EVENT_PAGE_COUNT = 10
 
 class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
@@ -271,6 +272,9 @@ def bill(request, abbr, session, bill_id):
         "state": abbr,
         "related_bills.bill_id": bill['_id']
     }).sort("when", -1)
+    events = list(events)
+    if len(events) > EVENT_PAGE_COUNT:
+        events = events[:EVENT_PAGE_COUNT]
 
     popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
 
