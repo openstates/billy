@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import pytz
 import glob
 import logging
 import datetime
@@ -7,6 +8,7 @@ import json
 
 from billy import db
 from billy.conf import settings
+from billy.utils import metadata
 from billy.importers.filters import apply_filters
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
@@ -107,6 +109,22 @@ def import_events(abbr, data_dir, import_actions=False):
     ensure_indexes()
 
 
+def normalize_dates(event):
+    abbr = event['state']
+    meta = metadata(abbr)
+
+    tz = pytz.timezone(meta['capitol_timezone'])
+
+    # right now, we just need to update when the event is.
+    for attr in ['when']:
+        if not event[attr].tzinfo:
+            localtime = tz.localize(event[attr])
+
+        utctime = datetime.datetime(*localtime.utctimetuple()[:6])
+        event[attr] = utctime
+    return event
+
+
 def import_event(data):
     event = None
 
@@ -124,6 +142,8 @@ def import_event(data):
                                     'description': data['description']})
 
     data = apply_filters(filters, data)
+
+    data = normalize_dates(data)
 
     if not event:
         data['created_at'] = datetime.datetime.utcnow()
