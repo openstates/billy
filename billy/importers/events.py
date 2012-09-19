@@ -8,7 +8,6 @@ import json
 
 from billy import db
 from billy.conf import settings
-from billy.utils import metadata
 from billy.importers.filters import apply_filters
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, next_big_id
@@ -111,7 +110,7 @@ def import_events(abbr, data_dir, import_actions=False):
 
 def normalize_dates(event):
     abbr = event['state']
-    meta = metadata(abbr)
+    meta = db.metadata.find_one("ex")
 
     tz = pytz.timezone(meta['capitol_timezone'])
 
