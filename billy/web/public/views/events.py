@@ -62,7 +62,7 @@ def event_ical(request, abbr, event_id):
             cal_event.add("%s-RELATED-BILL-ID" % (x_name), bill['bill_id'])
 
     cal.add_component(cal_event)
-    return HttpResponse(cal.as_string(), content_type="text/calendar")
+    return HttpResponse(cal.to_ical(), content_type="text/calendar")
 
 
 def event(request, abbr, event_id):
