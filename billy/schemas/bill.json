@@ -196,7 +196,15 @@
             "items": {
                 "properties": {
                     "mimetype": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "text/html",
+                            "application/pdf",
+                            "application/msword",
+                            "application/rtf",
+                            "application/octet-stream",
+                            "application/vnd.wordperfect"
+                        ]
                     },
                     "name": {
                         "type": "string"
