@@ -308,6 +308,28 @@ def vote(request, abbr, vote_id):
                        statenav_active='bills'))
 
 
+def document(request, abbr, session, bill_id, doc_id):
+    # get fixed version
+    fixed_bill_id = fix_bill_id(bill_id)
+    # redirect if URL's id isn't fixed id without spaces
+    if fixed_bill_id.replace(' ', '') != bill_id:
+        return redirect('document', abbr=abbr, session=session,
+                        bill_id=fixed_bill_id.replace(' ', ''), doc_id=doc_id)
+
+    bill = db.bills.find_one({'state': abbr, 'session': session,
+                              'bill_id': fixed_bill_id})
+
+    for version in bill['versions']:
+        if version['doc_id'] == doc_id:
+            break
+    else:
+        raise Http404('No such document.')
+
+    return render(request, templatename('document'),
+                  dict(abbr=abbr, session=session, bill=bill, version=version,
+                       metadata=bill.metadata, statenav_active='bills'))
+
+
 def bill_by_mongoid(request, id_):
     bill = db.bills.find_one(id_)
     return redirect(bill.get_absolute_url())

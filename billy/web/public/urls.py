@@ -4,7 +4,6 @@ from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
 from billy.web.public.views.bills import StateBills, AllStateBills, BillFeed
 from billy.web.public.views.region import ShowMoreLegislators
-
 from billy.web.public.feeds import (VotesListFeed, NewsListFeed,
                                     StateEventsFeed)
 
@@ -32,6 +31,7 @@ urlpatterns = patterns('billy.web.public.views.misc',
 
 )
 
+# user-related views
 urlpatterns += patterns('',
     (
         r'^login/$',
@@ -81,6 +81,7 @@ urlpatterns += patterns('billy.web.public.views.legislators',
         'legislator', name='legislator_noslug'),
 )
 
+# bills
 urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/feed/$', BillFeed.as_view(),
@@ -93,6 +94,9 @@ urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/'
         r'(?P<bill_id>[^/]+)/(?P<key>documents)/$', 'all_documents',
         name='bill_all_documents'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/'
+        r'(?P<bill_id>[^/]+)/documents/(?P<doc_id>\w+)/$', 'document',
+        name='document'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/'
         r'(?P<bill_id>[^/]+)/(?P<key>versions)/$', 'all_versions',
         name='bill_all_versions'),
