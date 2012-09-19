@@ -196,7 +196,6 @@
             "items": {
                 "properties": {
                     "mimetype": {
-                        "required": false,
                         "type": "string"
                     },
                     "name": {
