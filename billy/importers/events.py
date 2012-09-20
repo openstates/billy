@@ -110,7 +110,7 @@ def import_events(abbr, data_dir, import_actions=False):
 
 def normalize_dates(event):
     abbr = event['state']
-    meta = db.metadata.find_one("ex")
+    meta = db.metadata.find_one(abbr)
 
     tz = pytz.timezone(meta['capitol_timezone'])
 
