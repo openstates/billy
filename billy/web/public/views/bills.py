@@ -18,6 +18,7 @@ from .search import search_by_bill_id
 
 EVENT_PAGE_COUNT = 10
 
+
 class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
     use_table = True

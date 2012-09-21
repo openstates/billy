@@ -26,6 +26,7 @@ def sources(obj):
 def plusfield(obj, key):
     return obj.get('+' + key)
 
+
 @register.filter
 def party_noun(party, count=1):
     try:
@@ -46,6 +47,7 @@ def party_noun(party, count=1):
             return party
         else:
             return party + 's'
+
 
 @register.filter
 def trunc(string):

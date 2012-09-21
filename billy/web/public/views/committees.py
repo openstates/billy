@@ -14,6 +14,7 @@ from .utils import templatename, mongo_fields
 
 EVENT_PAGE_COUNT = 10
 
+
 @pjax()
 def committees(request, abbr):
     try:

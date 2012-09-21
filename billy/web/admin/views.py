@@ -99,7 +99,8 @@ def overview(request, abbr):
     context = {}
     context['metadata'] = meta
     context['report'] = report
-    context['sessions'] = db.bills.find({'state': abbr}).distinct('session')
+    context['sessions'] = db.bills.find({settings.LEVEL_FIELD: abbr}
+                                       ).distinct('session')
 
     def _add_time_delta(runlog):
         time_delta = runlog['scraped']['ended'] - runlog['scraped']['started']
@@ -497,7 +498,8 @@ def summary_index(request, abbr, session):
 
     def build_state(abbr):
 
-        bills = list(db.bills.find({'state': abbr, 'session': session}))
+        bills = list(db.bills.find({settings.LEVEL_FIELD: abbr,
+                                    'session': session}))
         res = {}
         for k in object_types:
             res[k] = build(chain.from_iterable(map(itemgetter(k), bills)))
@@ -517,7 +519,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
-    spec = {'state': abbr, 'session': session}
+    spec = {settings.LEVEL_FIELD: abbr, 'session': session}
 
     if object_type in collections:
         collection = getattr(db, object_type)
@@ -568,7 +570,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
     except ValueError:
         pass
 
-    spec = {'state': abbr, 'session': session}
+    spec = {settings.LEVEL_FIELD: abbr, 'session': session}
     fields = {'_id': 1}
 
     if object_type in collections:
@@ -801,8 +803,8 @@ def legislators(request, abbr):
 def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
-    legs = list(db.legislators.find({"state": abbr}))
-    committees = list(db.committees.find({"state": abbr}))
+    legs = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
+    committees = list(db.committees.find({settings.LEVEL_FIELD: abbr}))
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
@@ -1253,7 +1255,7 @@ def delete_committees(request):
 
 @login_required
 def mom_index(request, abbr):
-    legislators = list(db.legislators.find({"state": abbr}))
+    legislators = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
     return render(request, 'billy/mom_index.html', {
         "abbr": abbr,
         "legs": legislators
