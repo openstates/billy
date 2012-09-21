@@ -367,7 +367,6 @@ def get_committee_id(abbr, chamber, committee):
                                      chamber,
                                      committee)
 
-
     if manual:
         return manual
 

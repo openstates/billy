@@ -3,6 +3,7 @@ import itertools
 
 from django.core import urlresolvers
 
+from billy.conf import settings
 from .base import (db, Document, RelatedDocument, RelatedDocuments,
                    ListManager, DictManager, AttrManager, DoesNotExist)
 from ..utils import metadata as get_metadata
@@ -57,23 +58,26 @@ class Metadata(Document):
     >>> bill.metadata.abbr
     'de'
     '''
-    instance_key = 'state'
+    instance_key = settings.LEVEL_FIELD
 
     collection = db.metadata
 
-    legislators = RelatedDocuments('Legislator', model_keys=['state'],
+    legislators = RelatedDocuments('Legislator',
+                                   model_keys=[settings.LEVEL_FIELD],
                                    instance_key='abbreviation')
 
-    committees = RelatedDocuments('Committee', model_keys=['state'],
+    committees = RelatedDocuments('Committee',
+                                  model_keys=[settings.LEVEL_FIELD],
                                   instance_key='abbreviation')
 
-    bills = RelatedDocuments('Bill', model_keys=['state'],
+    bills = RelatedDocuments('Bill', model_keys=[settings.LEVEL_FIELD],
                              instance_key='abbreviation')
 
-    feed_entries = RelatedDocuments('FeedEntry', model_keys=['state'],
+    feed_entries = RelatedDocuments('FeedEntry',
+                                    model_keys=[settings.LEVEL_FIELD],
                                     instance_key='abbreviation')
 
-    events = RelatedDocuments('Event', model_keys=['state'],
+    events = RelatedDocuments('Event', model_keys=[settings.LEVEL_FIELD],
                               instance_key='abbreviation')
 
     report = RelatedDocument('Report', instance_key='_id')
@@ -96,12 +100,12 @@ class Metadata(Document):
 
     @property
     def abbr(self):
-        '''Return the state's two letter abbreviation.'''
+        '''Return the two letter abbreviation.'''
         return self['_id']
 
     @property
     def most_recent_session(self):
-        'Get the most recent session for this state.'
+        'Get the most recent session.'
         session = self['terms'][-1]['sessions'][-1]
         return session
 
@@ -161,13 +165,13 @@ class Metadata(Document):
         return sorted(self.bills().distinct('type'))
 
     def committees_legislators(self, *args, **kwargs):
-        '''Return an iterable of committees with all the state'
+        '''Return an iterable of committees with all the
         legislators cached for reference in the Committee model.
         So do a "select_related" operation on committee members.
         '''
         committees = list(self.committees(*args, **kwargs))
         legislators = self.legislators({'active': True},
-                    fields=['full_name', 'state'])
+                    fields=['full_name', settings.LEVEL_FIELD])
         _legislators = {}
 
         # This will be a cache of legislator objects used in

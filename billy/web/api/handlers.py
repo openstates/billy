@@ -25,7 +25,7 @@ _chamber_aliases = {
 }
 
 
-_lower_fields = ('state',)
+_lower_fields = (settings.LEVEL_FIELD,)
 
 
 def _build_mongo_filter(request, keys, icase=True):
@@ -77,6 +77,7 @@ def _build_field_list(request, default_fields=None):
 def _get_vote_fields(fields):
     return [field.replace('votes.', '', 1) for field in fields or [] if
             field.startswith('votes.')] or None
+
 
 class BillyHandlerMetaClass(HandlerMetaClass):
     """
@@ -172,9 +173,9 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        base_fields = _build_mongo_filter(request, ('state', 'chamber',
-                                                    'subjects', 'bill_id',
-                                                    'bill_id__in'))
+        base_fields = _build_mongo_filter(request, (settings.LEVEL_FIELD,
+                                                    'chamber', 'subjects',
+                                                    'bill_id', 'bill_id__in'))
 
         # process extra attributes
         query = request.GET.get('q')
@@ -254,8 +255,8 @@ class LegislatorSearchHandler(BillyHandler):
         # replace with request's fields if they exist
         legislator_fields = _build_field_list(request, legislator_fields)
 
-        _filter = _build_mongo_filter(request, ('state', 'first_name',
-                                                'last_name'))
+        _filter = _build_mongo_filter(request, (settings.LEVEL_FIELD,
+                                                'first_name', 'last_name'))
         elemMatch = _build_mongo_filter(request, ('chamber', 'term',
                                                   'district', 'party'))
         if elemMatch:
@@ -285,7 +286,8 @@ class CommitteeSearchHandler(BillyHandler):
         committee_fields = _build_field_list(request, committee_fields)
 
         _filter = _build_mongo_filter(request, ('committee', 'subcommittee',
-                                                'chamber', 'state'))
+                                                'chamber',
+                                                settings.LEVEL_FIELD))
         return list(db.committees.find(_filter, committee_fields))
 
 
@@ -299,7 +301,7 @@ class EventsHandler(BillyHandler):
 
         spec = {}
 
-        for key in ('state', 'type'):
+        for key in (settings.LEVEL_FIELD, 'type'):
             value = request.GET.get(key)
             if not value:
                 continue
@@ -377,7 +379,7 @@ class LegislatorGeoHandler(BillyHandler):
         boundary_mapping = {}
 
         for dist in resp['objects']:
-            state = dist['name'][0:2].lower()
+            abbr = dist['name'][0:2].lower()
             chamber = {'/1.0/boundary-set/sldu/': 'upper',
                        '/1.0/boundary-set/sldl/': 'lower'}[dist['set']]
             census_name = dist['slug']
@@ -387,10 +389,10 @@ class LegislatorGeoHandler(BillyHandler):
                                            'boundary_id': census_name})
             count = districts.count()
             if count:
-                filters.append({'state': state,
+                filters.append({settings.LEVEL_FIELD: abbr,
                                 'district': districts[0]['name'],
                                 'chamber': chamber})
-                boundary_mapping[(state, districts[0]['name'],
+                boundary_mapping[(abbr, districts[0]['name'],
                                   chamber)] = census_name
 
         if not filters:
@@ -399,7 +401,7 @@ class LegislatorGeoHandler(BillyHandler):
         legislators = list(db.legislators.find({'$or': filters},
                                                _build_field_list(request)))
         for leg in legislators:
-            leg['boundary_id'] = boundary_mapping[(leg['state'],
+            leg['boundary_id'] = boundary_mapping[(leg[settings.LEVEL_FIELD],
                                                    leg['district'],
                                                    leg['chamber'])]
         return legislators
@@ -415,7 +417,7 @@ class DistrictHandler(BillyHandler):
         districts = list(db.districts.find(filter))
 
         # change leg filter
-        filter['state'] = filter.pop('abbr')
+        filter[settings.LEVEL_FIELD] = filter.pop('abbr')
         filter['active'] = True
         legislators = db.legislators.find(filter, fields={'_id': 0,
                                                           'leg_id': 1,

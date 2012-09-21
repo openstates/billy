@@ -29,8 +29,6 @@ def get_legislator_id(abbr, session, chamber, name):
 
 
 def attempt_committee_match(abbr, chamber, name):
-    metadata = db.metadata.find_one({'_id': abbr})
-
     matcher = CommitteeNameMatcher(abbr, None)  # Term
     return matcher.match(name, chamber)
 

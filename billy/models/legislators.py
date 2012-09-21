@@ -7,7 +7,7 @@ from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
 from billy.utils import term_for_session
-
+from billy.conf import settings
 from .base import (db, Document, RelatedDocuments, ListManager)
 from .metadata import Metadata
 from .bills import BillVote
@@ -93,7 +93,7 @@ class Legislator(Document):
 
     @property
     def metadata(self):
-        return Metadata.get_object(self['state'])
+        return Metadata.get_object(self[settings.LEVEL_FIELD])
 
     def slug(self):
         return slugify(self.display_name())
@@ -192,7 +192,7 @@ class Legislator(Document):
             term = _bill['_term']
 
         if term is None and session is not None:
-            term = term_for_session(self['state'], session)
+            term = term_for_session(self[settings.LEVEL_FIELD], session)
 
         # Use the term to get the related roles. First look in the current
         # roles list, then fail over to the old_roles list.
@@ -292,7 +292,6 @@ class Legislator(Document):
         terms = [x[1] for x in
                  sorted([(_term_order.index(term), term) for term in terms])]
         return terms
-
 
     @CachedAttribute
     def _old_roles_committees(self):

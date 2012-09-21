@@ -268,7 +268,8 @@ class BillVote(Document):
         return self._vote_legislators('other')
 
     def get_absolute_url(self):
-        url = urlresolvers.reverse('vote', args=[self['state'], self['_id']])
+        url = urlresolvers.reverse('vote', args=[self[settings.LEVEL_FIELD],
+                                                 self['_id']])
         return url
 
     @CachedAttribute
@@ -319,12 +320,13 @@ class Bill(Document):
 
     @property
     def metadata(self):
-        return Metadata.get_object(self['state'])
+        return Metadata.get_object(self[settings.LEVEL_FIELD])
 
     def get_absolute_url(self):
         # canonical URL doesn't have spaces
         url = urlresolvers.reverse('bill',
-                                   args=[self['state'], self['session'],
+                                   args=[self[settings.LEVEL_FIELD],
+                                         self['session'],
                                          self['bill_id'].replace(' ', '')])
         return url
 
@@ -332,7 +334,8 @@ class Bill(Document):
         return self['bill_id']
 
     def get_admin_url(self):
-        return urlresolvers.reverse('bill', args=[self['state'], self.id])
+        return urlresolvers.reverse('bill', args=[self[settings.LEVEL_FIELD],
+                                                  self.id])
 
     def session_details(self):
         metadata = self.metadata

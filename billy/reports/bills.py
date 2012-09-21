@@ -5,7 +5,8 @@ from collections import defaultdict
 from billy import db
 from billy.conf import settings
 from billy.utils import term_for_session
-from billy.reports.utils import update_common, get_quality_exceptions, combine_reports
+from billy.reports.utils import (update_common, get_quality_exceptions,
+                                 combine_reports)
 
 logger = logging.getLogger('billy')
 
