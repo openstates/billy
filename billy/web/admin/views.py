@@ -593,8 +593,9 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
 
 @login_required
-def object_json(request, collection, _id,
-                re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
+def object_json(request, collection, _id):
+
+    re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
     class MongoEncoder(JSONEncoder):
 
@@ -609,15 +610,7 @@ def object_json(request, collection, _id,
                 return JSONEncoder.default(obj, **kwargs)
 
     obj = getattr(db, collection).find_one(_id)
-    obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
-    obj_isbill = (obj['_type'] == 'bill')
-    obj_url = None
-
-    if obj_isbill:
-        try:
-            obj_url = obj['sources'][0]['url']
-        except:
-            pass
+    obj = OrderedDict(sorted(obj.items()))
 
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
@@ -634,7 +627,9 @@ def object_json(request, collection, _id,
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
     return render(request, 'billy/object_json.html', dict(
-        obj=obj, obj_id=obj_id, obj_json=obj_json, obj_url=obj_url))
+        obj=obj, obj_id=obj_id, obj_json=obj_json, collection=collection,
+        metadata=metadata(obj['state']),
+    ))
 
 
 @login_required
