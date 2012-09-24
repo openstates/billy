@@ -57,13 +57,12 @@ $(document).ready(function() {
             </button>
             </p>
         </div>
-        <ul>
-            <li>The actions here will <b>remove</b> legislator
-            <a href="{% url admin_legislator remove %}" >{{ remove }}</a></li>
-            <li>The actions here will <b>update</b> legislator
-            <a href="{% url admin_legislator merge.leg_id %}" >{{ merge.leg_id }}</a>
-            </li>
-        </ul>
+        <span>
+            The actions here will <b>remove</b> legislator
+            <a href="{% url object_json "legislators" remove %}" >{{ remove }}</a>
+            and <b>update</b> legislator
+            <a href="{% url object_json "legislators" merge.leg_id %}" >{{ merge.leg_id }}</a>
+        </span>
         <div class="merge-plan" >
             <table>
                 <tr>

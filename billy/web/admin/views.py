@@ -1102,18 +1102,6 @@ def event(request, abbr, event_id):
 
 
 @login_required
-def legislator(request, id):
-    leg = db.legislators.find_one({'_all_ids': id})
-    if not leg:
-        raise Http404('No legislators found for id %r.' % id)
-
-    meta = metadata(leg[settings.LEVEL_FIELD])
-
-    return render(request, 'billy/legislator.html', {'leg': leg,
-                                                     'metadata': meta})
-
-
-@login_required
 def legislator_edit(request, id):
     leg = db.legislators.find_one({'_all_ids': id})
     if not leg:
@@ -1123,7 +1111,7 @@ def legislator_edit(request, id):
     return render(request, 'billy/legislator_edit.html', {
         'leg': leg,
         'metadata': meta,
-        'locked': leg['_locked_fields'] if "_locked_fields" in leg else [],
+        'locked': leg.get('_locked_fields', []),
         'fields': [
             "last_name",
             "full_name",
