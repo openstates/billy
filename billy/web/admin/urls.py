@@ -30,8 +30,6 @@ urlpatterns = patterns('billy.web.admin.views',
 
     # admin overview pages
     url(r'^(?P<abbr>[a-z]{2})/$', 'overview', name='admin_overview'),
-    url(r'^(?P<abbr>[a-z]{2})/metadata/$', 'metadata_json',
-        name='metadata_json'),
 
     # committees
     url(r'^(?P<abbr>[a-z]{2})/committees/$', 'committees',

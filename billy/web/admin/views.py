@@ -127,28 +127,6 @@ def overview(request, abbr):
 
 
 @login_required
-def metadata_json(request, abbr):
-    re_attr = re.compile(r'^    "(.{1,100})":', re.M)
-    obj = metadata(abbr)
-    obj_json = json.dumps(obj, indent=4, cls=JSONDateEncoder)
-
-    def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
-        val = m.group(1)
-        return tmpl % (val, val)
-
-    for k in obj:
-        obj_json = re_attr.sub(subfunc, obj_json)
-
-    tmpl = '<a href="{0}">{0}</a>'
-    obj_json = re.sub('"(http://.+?)"',
-                      lambda m: tmpl.format(*m.groups()), obj_json)
-    context = {'metadata': obj,
-               'keys': sorted(obj),
-               'metadata_json': obj_json}
-    return render(request, 'billy/metadata_json.html', context)
-
-
-@login_required
 def run_detail_graph_data(request, abbr):
 
     def rolling_average(oldAverage, newItem, oldAverageCount):
@@ -626,9 +604,14 @@ def object_json(request, collection, _id):
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
+    if obj['_type'] != 'metadata':
+        metadata = metadata(obj['state'])
+    else:
+        metadata = obj
+
     return render(request, 'billy/object_json.html', dict(
         obj=obj, obj_id=obj_id, obj_json=obj_json, collection=collection,
-        metadata=metadata(obj['state']),
+        metadata=metadata,
     ))
 
 
