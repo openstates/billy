@@ -106,6 +106,7 @@ class Scraper(scrapelib.Scraper):
 
         self.metadata = metadata
         self.output_dir = output_dir
+        self.output_names = set()
 
         # make output_dir
         os.path.isdir(self.output_dir) or os.path.makedirs(self.output_dir)
@@ -121,6 +122,11 @@ class Scraper(scrapelib.Scraper):
         self.log = self.logger.info
         self.debug = self.logger.debug
         self.warning = self.logger.warning
+
+    @property
+    def object_count(self):
+        # number of distinct output filenames
+        return len(self.output_names)
 
     def validate_json(self, obj):
         if not hasattr(self, '_schema'):
@@ -180,6 +186,7 @@ class Scraper(scrapelib.Scraper):
         obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
 
         filename = obj.get_filename()
+        self.output_names.add(filename) # keep tally of all output names
         with open(os.path.join(self.output_dir, self.scraper_type, filename),
                   'w') as f:
             json.dump(obj, f, cls=JSONDateEncoder)
