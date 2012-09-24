@@ -113,4 +113,11 @@ $(document).ready(function() {
 </table>
 </form>
 
+<form class="well form-inline" action="{% url retire_legislator leg.leg_id %}" method="POST">
+  <h4>Retire Legislator</h4>
+  <label>Retirement Date</label>
+  <input type="text" placeholder="YYYY-MM-DD" name="end_date">
+  <button type="submit" class="btn btn-danger">Retire Legislator</button>
+</form>
+
 {% endblock %}
