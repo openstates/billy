@@ -120,6 +120,10 @@ def import_committee(data, current_session, current_term):
             if (role['type'] == 'committee member' and
                 role['term'] == current_term and
                 role.get('committee_id') == committee['_id']):
+                # if the position hadn't been copied over before, copy it now
+                if role.get('position') != member['role']:
+                    role['position'] = member['role']
+                    db.legislators.save(legislator, safe=True)
                 break
         else:
             new_role = {'type': 'committee member',
@@ -127,6 +131,7 @@ def import_committee(data, current_session, current_term):
                         'term': current_term,
                         'chamber': committee['chamber'],
                         'committee_id': committee['_id'],
+                        'position': member['role']
                        }
             # copy over all necessary fields from committee
             new_role[settings.LEVEL_FIELD] = committee[settings.LEVEL_FIELD]
