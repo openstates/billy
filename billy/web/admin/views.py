@@ -3,7 +3,6 @@ import json
 import time
 import types
 import urllib
-import random
 import pymongo
 import decimal
 import functools
@@ -28,7 +27,7 @@ from django.views.decorators.http import require_http_methods
 
 from billy import db
 from billy.conf import settings
-from billy.utils import metadata, find_bill
+from billy.utils import metadata
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
@@ -605,13 +604,13 @@ def object_json(request, collection, _id):
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
     if obj['_type'] != 'metadata':
-        metadata = metadata(obj['state'])
+        mdata = metadata(obj['state'])
     else:
-        metadata = obj
+        mdata = obj
 
     return render(request, 'billy/object_json.html', dict(
         obj=obj, obj_id=obj_id, obj_json=obj_json, collection=collection,
-        metadata=metadata,
+        metadata=mdata,
     ))
 
 
@@ -659,36 +658,6 @@ def _bill_spec(meta, limit):
     return spec
 
 
-@never_cache
-@login_required
-def random_bill(request, abbr):
-    meta = metadata(abbr)
-    if not meta:
-        raise Http404
-
-    spec = _bill_spec(meta, request.GET.get('limit', ''))
-    bills = db.bills.find(spec)
-
-    count = bills.count()
-    if count:
-        bill = bills[random.randint(0, count - 1)]
-        warning = None
-    else:
-        bill = None
-        warning = 'No bills matching the criteria were found.'
-
-    try:
-        bill_id = bill['_id']
-    except TypeError:
-        # Bill was none (see above).
-        bill_id = None
-
-    context = {'bill': bill, 'id': bill_id, 'random': True,
-               'state': abbr.lower(), 'warning': warning, 'metadata': meta}
-
-    return render(request, 'billy/bill.html', context)
-
-
 @login_required
 def bill_list(request, abbr):
     meta = metadata(abbr)
@@ -729,26 +698,6 @@ def bad_vote_list(request, abbr):
     context = {'metadata': meta, 'vote_ids': bad_vote_ids,
                'votes': votes}
     return render(request, 'billy/vote_list.html', context)
-
-
-@login_required
-def bill(request, abbr, session=None, id=None, billy_id=None):
-    meta = metadata(abbr)
-
-    if billy_id:
-        bill = db.bills.find_one({'_id': billy_id})
-    else:
-        bill = find_bill({settings.LEVEL_FIELD: abbr, 'session': session,
-                         'bill_id': id.upper()})
-    if not bill:
-        msg = 'No bill found in {name} session {session!r} with id {id!r}.'
-        raise Http404(msg.format(name=meta['name'], session=session, id=id))
-    else:
-        votes = db.votes.find({'bill_id': bill['_id']})
-
-    return render(request, 'billy/bill.html',
-                  {'bill': bill, 'metadata': meta, 'votes': votes,
-                   'id': bill['_id']})
 
 
 @login_required
@@ -1178,10 +1127,9 @@ def retire_legislator(request, id):
                      message='{0} was successfully retired.'.format(
                          legislator['full_name']))
 
-    return render(request, 'billy/legislator.html', {'leg': legislator,
-                                                     'metadata': meta,
-                                                     'alert': alert,
-                                                    })
+    return render(request, 'billy/legislator_edit.html', {'leg': legislator,
+                                                          'metadata': meta,
+                                                          'alert': alert})
 
 
 @login_required

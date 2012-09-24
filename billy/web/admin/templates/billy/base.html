@@ -30,12 +30,12 @@
                     </a>
                     <ul class="dropdown-menu">
                     <li> <a href="{% url admin_bills metadata.abbreviation %}">Bill Overview</a> </li>
-                    <li> <a href="{% url random_bill metadata.abbreviation %}">Random Bill</a> </li>
                     <li> <a href="{% url bad_vote_list metadata.abbreviation %}">Bad Vote Counts</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
-                    <li> <a href="{% url random_bill metadata.abbreviation %}?limit=current_term">Current Term</a> </li>
+                    <li> <a href="{% url bill_list metadata.abbreviation %}">Current Session</a> </li>
+                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=current_term">Current Term</a> </li>
                     <li> <a href="{% url duplicate_versions metadata.abbreviation %}">Dup. Versions</a> </li>
                     </ul>
                 </li>

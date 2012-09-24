@@ -50,13 +50,7 @@ urlpatterns = patterns('billy.web.admin.views',
 
     # bills
     url(r'^(?P<abbr>[a-z]{2})/bills/$', 'bills', name='admin_bills'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/random/$', 'random_bill',
-        name='random_bill'),
     url(r'^(?P<abbr>[a-z]{2})/bills/list/$', 'bill_list', name='bill_list'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<billy_id>\w+)/$', 'bill',
-        name='admin_bill_by_id'),
-    url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>.+)/(?P<id>.*)/$', 'bill',
-        name='admin_bill'),
 
     url(r'^(?P<abbr>[a-z]{2})/bad_vote_list/$', 'bad_vote_list',
         name='bad_vote_list'),
