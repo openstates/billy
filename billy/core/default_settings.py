@@ -67,6 +67,12 @@ BILLY_SUBJECTS = [
     'Transportation',
     'Welfare and Poverty']
 
+PARTY_DETAILS = {
+    'Democratic': {'noun': 'Democrat', 'abbreviation': 'D'},
+    'Republican': {'noun': 'Republican', 'abbreviation': 'R'},
+    'Independent': {'noun': 'Independent', 'abbreviation': 'I'},
+}
+
 ENABLE_OYSTER = False
 
 LEVEL_FIELD = 'state'

@@ -1,7 +1,7 @@
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
 
-from billy.core import mdb as db
+from billy.core import mdb as db, settings
 from .base import Document
 from .metadata import Metadata
 
@@ -12,7 +12,7 @@ class Event(Document):
 
     @property
     def metadata(self):
-        return Metadata.get_object(self['state'])
+        return Metadata.get_object(self[settings.LEVEL_FIELD])
 
     def bills(self):
         bills = []
@@ -30,5 +30,6 @@ class Event(Document):
 
     def get_absolute_url(self):
         slug = slugify(truncatewords(self['description'], 10))
-        url = urlresolvers.reverse('event', args=[self['state'], self['_id']])
+        url = urlresolvers.reverse('event', args=[self[settings.LEVEL_FIELD],
+                                                  self['_id']])
         return '%s%s/' % (url, slug)

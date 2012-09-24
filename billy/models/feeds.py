@@ -3,8 +3,7 @@ import urlparse
 import datetime
 from django.template.defaultfilters import truncatewords
 
-from billy.core import mdb as db
-from billy.core import feeds_db
+from billy.core import mdb as db, feeds_db, settings
 from .base import Document
 from .metadata import Metadata
 
@@ -144,4 +143,4 @@ class FeedEntry(Document):
 
     @property
     def metadata(self):
-        return Metadata.get_object(self['state'])
+        return Metadata.get_object(self[settings.LEVEL_FIELD])

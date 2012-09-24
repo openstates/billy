@@ -1,11 +1,10 @@
-import datetime
 import logging
 from collections import defaultdict
 
 from billy import db
 from billy.conf import settings
 from billy.utils import term_for_session
-from billy.reports.utils import update_common, get_quality_exceptions, combine_reports
+from billy.reports.utils import get_quality_exceptions, combine_reports
 
 logger = logging.getLogger('billy')
 
@@ -82,7 +81,7 @@ def scan_votes(abbr):
             logger.warning('unnecessary {0} exceptions for {1} votes: \n  {2}'
                            .format(qe_type, len(qes), '\n  '.join(qes)))
 
-    return { 'sessions': sessions }
+    return {'sessions': sessions}
 
 
 def calculate_percentages(report):

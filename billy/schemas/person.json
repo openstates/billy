@@ -19,6 +19,7 @@
         "subcommittee": {"type": "string", "required": false},
         "district": {"type": "string", "required": false},
         "party": {"type": "string", "required": false},
+        "other_parties": {"type": "array", "required": false, "items": {"type": "string"}},
         "start_date": {"type": ["string", "datetime", "null"]},
         "end_date": {"type": ["string", "datetime", "null"]},
         "position": {"type": "string", "required": false}

@@ -3,7 +3,6 @@ import json
 import time
 import types
 import urllib
-import random
 import pymongo
 import decimal
 import functools
@@ -26,9 +25,8 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from billy.core import db
-from billy.core import settings
-from billy.utils import metadata, find_bill
+from billy.core import db, settings
+from billy.utils import metadata
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
@@ -99,7 +97,8 @@ def overview(request, abbr):
     context = {}
     context['metadata'] = meta
     context['report'] = report
-    context['sessions'] = db.bills.find({'state': abbr}).distinct('session')
+    context['sessions'] = db.bills.find({settings.LEVEL_FIELD: abbr}
+                                       ).distinct('session')
 
     def _add_time_delta(runlog):
         time_delta = runlog['scraped']['ended'] - runlog['scraped']['started']
@@ -123,28 +122,6 @@ def overview(request, abbr):
         runlog = False
 
     return render(request, 'billy/state_index.html', context)
-
-
-@login_required
-def metadata_json(request, abbr):
-    re_attr = re.compile(r'^    "(.{1,100})":', re.M)
-    obj = metadata(abbr)
-    obj_json = json.dumps(obj, indent=4, cls=JSONDateEncoder)
-
-    def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
-        val = m.group(1)
-        return tmpl % (val, val)
-
-    for k in obj:
-        obj_json = re_attr.sub(subfunc, obj_json)
-
-    tmpl = '<a href="{0}">{0}</a>'
-    obj_json = re.sub('"(http://.+?)"',
-                      lambda m: tmpl.format(*m.groups()), obj_json)
-    context = {'metadata': obj,
-               'keys': sorted(obj),
-               'metadata_json': obj_json}
-    return render(request, 'billy/metadata_json.html', context)
 
 
 @login_required
@@ -497,7 +474,8 @@ def summary_index(request, abbr, session):
 
     def build_state(abbr):
 
-        bills = list(db.bills.find({'state': abbr, 'session': session}))
+        bills = list(db.bills.find({settings.LEVEL_FIELD: abbr,
+                                    'session': session}))
         res = {}
         for k in object_types:
             res[k] = build(chain.from_iterable(map(itemgetter(k), bills)))
@@ -517,7 +495,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
-    spec = {'state': abbr, 'session': session}
+    spec = {settings.LEVEL_FIELD: abbr, 'session': session}
 
     if object_type in collections:
         collection = getattr(db, object_type)
@@ -568,7 +546,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
     except ValueError:
         pass
 
-    spec = {'state': abbr, 'session': session}
+    spec = {settings.LEVEL_FIELD: abbr, 'session': session}
     fields = {'_id': 1}
 
     if object_type in collections:
@@ -591,8 +569,9 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
 
 
 @login_required
-def object_json(request, collection, _id,
-                re_attr=re.compile(r'^    "(.{1,100})":', re.M)):
+def object_json(request, collection, _id):
+
+    re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
     class MongoEncoder(JSONEncoder):
 
@@ -607,15 +586,7 @@ def object_json(request, collection, _id,
                 return JSONEncoder.default(obj, **kwargs)
 
     obj = getattr(db, collection).find_one(_id)
-    obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
-    obj_isbill = (obj['_type'] == 'bill')
-    obj_url = None
-
-    if obj_isbill:
-        try:
-            obj_url = obj['sources'][0]['url']
-        except:
-            pass
+    obj = OrderedDict(sorted(obj.items()))
 
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
@@ -631,8 +602,15 @@ def object_json(request, collection, _id,
     obj_json = re.sub('"(http://.+?)"',
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
+    if obj['_type'] != 'metadata':
+        mdata = metadata(obj['state'])
+    else:
+        mdata = obj
+
     return render(request, 'billy/object_json.html', dict(
-        obj=obj, obj_id=obj_id, obj_json=obj_json, obj_url=obj_url))
+        obj=obj, obj_id=obj_id, obj_json=obj_json, collection=collection,
+        metadata=mdata,
+    ))
 
 
 @login_required
@@ -679,36 +657,6 @@ def _bill_spec(meta, limit):
     return spec
 
 
-@never_cache
-@login_required
-def random_bill(request, abbr):
-    meta = metadata(abbr)
-    if not meta:
-        raise Http404
-
-    spec = _bill_spec(meta, request.GET.get('limit', ''))
-    bills = db.bills.find(spec)
-
-    count = bills.count()
-    if count:
-        bill = bills[random.randint(0, count - 1)]
-        warning = None
-    else:
-        bill = None
-        warning = 'No bills matching the criteria were found.'
-
-    try:
-        bill_id = bill['_id']
-    except TypeError:
-        # Bill was none (see above).
-        bill_id = None
-
-    context = {'bill': bill, 'id': bill_id, 'random': True,
-               'state': abbr.lower(), 'warning': warning, 'metadata': meta}
-
-    return render(request, 'billy/bill.html', context)
-
-
 @login_required
 def bill_list(request, abbr):
     meta = metadata(abbr)
@@ -752,26 +700,6 @@ def bad_vote_list(request, abbr):
 
 
 @login_required
-def bill(request, abbr, session=None, id=None, billy_id=None):
-    meta = metadata(abbr)
-
-    if billy_id:
-        bill = db.bills.find_one({'_id': billy_id})
-    else:
-        bill = find_bill({settings.LEVEL_FIELD: abbr, 'session': session,
-                         'bill_id': id.upper()})
-    if not bill:
-        msg = 'No bill found in {name} session {session!r} with id {id!r}.'
-        raise Http404(msg.format(name=meta['name'], session=session, id=id))
-    else:
-        votes = db.votes.find({'bill_id': bill['_id']})
-
-    return render(request, 'billy/bill.html',
-                  {'bill': bill, 'metadata': meta, 'votes': votes,
-                   'id': bill['_id']})
-
-
-@login_required
 def legislators(request, abbr):
     meta = metadata(abbr)
 
@@ -801,8 +729,8 @@ def legislators(request, abbr):
 def leg_ids(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
-    legs = list(db.legislators.find({"state": abbr}))
-    committees = list(db.committees.find({"state": abbr}))
+    legs = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
+    committees = list(db.committees.find({settings.LEVEL_FIELD: abbr}))
 
     leg_ids = db.manual.leg_ids.find({"abbr": abbr})
     sorted_ids = {}
@@ -1100,18 +1028,6 @@ def event(request, abbr, event_id):
 
 
 @login_required
-def legislator(request, id):
-    leg = db.legislators.find_one({'_all_ids': id})
-    if not leg:
-        raise Http404('No legislators found for id %r.' % id)
-
-    meta = metadata(leg[settings.LEVEL_FIELD])
-
-    return render(request, 'billy/legislator.html', {'leg': leg,
-                                                     'metadata': meta})
-
-
-@login_required
 def legislator_edit(request, id):
     leg = db.legislators.find_one({'_all_ids': id})
     if not leg:
@@ -1121,7 +1037,7 @@ def legislator_edit(request, id):
     return render(request, 'billy/legislator_edit.html', {
         'leg': leg,
         'metadata': meta,
-        'locked': leg['_locked_fields'] if "_locked_fields" in leg else [],
+        'locked': leg.get('_locked_fields', []),
         'fields': [
             "last_name",
             "full_name",
@@ -1210,10 +1126,9 @@ def retire_legislator(request, id):
                      message='{0} was successfully retired.'.format(
                          legislator['full_name']))
 
-    return render(request, 'billy/legislator.html', {'leg': legislator,
-                                                     'metadata': meta,
-                                                     'alert': alert,
-                                                    })
+    return render(request, 'billy/legislator_edit.html', {'leg': legislator,
+                                                          'metadata': meta,
+                                                          'alert': alert})
 
 
 @login_required
@@ -1253,7 +1168,7 @@ def delete_committees(request):
 
 @login_required
 def mom_index(request, abbr):
-    legislators = list(db.legislators.find({"state": abbr}))
+    legislators = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
     return render(request, 'billy/mom_index.html', {
         "abbr": abbr,
         "legs": legislators

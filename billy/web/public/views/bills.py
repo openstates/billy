@@ -16,6 +16,8 @@ from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
 
+EVENT_PAGE_COUNT = 10
+
 
 class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
@@ -243,6 +245,17 @@ class BillFeed(StateBills):
                             content_type='application/xml')
 
 
+def bill_noslug(request, abbr, bill_id):
+    bill = db.bills.find_one({'_id': bill_id})
+    if bill is None:
+        raise Http404("No such bill (%s)" % (bill_id))
+
+    return redirect('bill',
+                    abbr=abbr,
+                    session=bill['session'],
+                    bill_id=bill['bill_id'])
+
+
 def bill(request, abbr, session, bill_id):
     # get fixed version
     fixed_bill_id = fix_bill_id(bill_id)
@@ -256,6 +269,14 @@ def bill(request, abbr, session, bill_id):
         raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))
 
+    events = db.events.find({
+        "state": abbr,
+        "related_bills.bill_id": bill['_id']
+    }).sort("when", -1)
+    events = list(events)
+    if len(events) > EVENT_PAGE_COUNT:
+        events = events[:EVENT_PAGE_COUNT]
+
     popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
@@ -268,6 +289,7 @@ def bill(request, abbr, session, bill_id):
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
+             events=events,
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
@@ -285,6 +307,28 @@ def vote(request, abbr, vote_id):
                        bill=bill,
                        vote=vote,
                        statenav_active='bills'))
+
+
+def document(request, abbr, session, bill_id, doc_id):
+    # get fixed version
+    fixed_bill_id = fix_bill_id(bill_id)
+    # redirect if URL's id isn't fixed id without spaces
+    if fixed_bill_id.replace(' ', '') != bill_id:
+        return redirect('document', abbr=abbr, session=session,
+                        bill_id=fixed_bill_id.replace(' ', ''), doc_id=doc_id)
+
+    bill = db.bills.find_one({'state': abbr, 'session': session,
+                              'bill_id': fixed_bill_id})
+
+    for version in bill['versions']:
+        if version['doc_id'] == doc_id:
+            break
+    else:
+        raise Http404('No such document.')
+
+    return render(request, templatename('document'),
+                  dict(abbr=abbr, session=session, bill=bill, version=version,
+                       metadata=bill.metadata, statenav_active='bills'))
 
 
 def bill_by_mongoid(request, id_):

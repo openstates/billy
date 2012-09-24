@@ -2,6 +2,7 @@ from django.core import urlresolvers
 from django.template.defaultfilters import slugify
 
 from billy.core import mdb as db
+from billy.core import settings
 from .base import Document, RelatedDocument, RelatedDocuments, ListManager
 from .metadata import Metadata
 
@@ -23,7 +24,7 @@ class CommitteeMemberManager(ListManager):
             objs = self._legislators
         except AttributeError:
             # If this was a metadata.committees_legislators,
-            # all the state's legislators will be accessible
+            # all the legislators will be accessible
             # from the committee instance.
             try:
                 objs = self.committee._legislators
@@ -60,7 +61,7 @@ class Committee(Document):
 
     @property
     def metadata(self):
-        return Metadata.get_object(self['state'])
+        return Metadata.get_object(self[settings.LEVEL_FIELD])
 
     def get_absolute_url(self):
         args = [self.metadata['abbreviation'],

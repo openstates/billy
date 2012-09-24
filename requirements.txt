@@ -2,7 +2,7 @@ Django>=1.4
 django-pjax
 -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston
 boto
-icalendar==2.1
+icalendar
 lxml>=2.2
 name_tools>=0.1.2
 nose

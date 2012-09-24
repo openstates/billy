@@ -52,8 +52,10 @@ except ImportError:
 db = None
 mdb = None
 feeds_db = None
+elasticsearch = None
 _model_registry = {}
 _model_registry_by_collection = {}
+
 
 class ErrorProxy(object):
     def __init__(self, error):
@@ -61,6 +63,7 @@ class ErrorProxy(object):
 
     def __getattr__(self, attr):
         raise self.error
+
 
 def _configure_db(host, port, db_name):
     global db
@@ -90,7 +93,9 @@ def _configure_db(host, port, db_name):
         mdb = ErrorProxy(e)
         feeds_db = ErrorProxy(e)
 
+
 def _configure_es(host, timeout):
+    global elasticsearch
     try:
         elasticsearch = pyes.ES(host, timeout)
     except Exception as e:

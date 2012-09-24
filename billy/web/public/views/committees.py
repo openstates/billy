@@ -12,6 +12,8 @@ from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
 
+EVENT_PAGE_COUNT = 10
+
 
 @pjax()
 def committees(request, abbr):
@@ -69,10 +71,19 @@ def committee(request, abbr, committee_id):
     if committee is None:
         raise Http404
 
+    events = db.events.find({
+        "state": abbr,
+        "participants.id": committee_id
+    }).sort("when", -1)
+    events = list(events)
+    if len(events) > EVENT_PAGE_COUNT:
+        events = events[:EVENT_PAGE_COUNT]
+
     popularity.counter.inc('committees', committee_id, abbr=abbr)
 
     return render(request, templatename('committee'),
                   dict(committee=committee, abbr=abbr,
                        metadata=Metadata.get_object(abbr),
                        sources=committee['sources'],
-                       statenav_active='committees'))
+                       statenav_active='committees',
+                       events=events))

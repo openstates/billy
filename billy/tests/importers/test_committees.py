@@ -113,8 +113,8 @@ def test_import_committee():
     committee = {'_type': 'committee', 'state': 'ex',
                  'chamber': 'joint', 'committee': 'Reptilian Task Force',
                  'members': [
-                     {'name': 'Richard Feynman'},
-                     {'name': 'A. Einstein'},
+                     {'name': 'Richard Feynman', 'role': 'Vice-Chair'},
+                     {'name': 'A. Einstein', 'role': 'Chair'},
                  ]
                 }
 
@@ -134,4 +134,6 @@ def test_import_committee():
                                 'chamber': 'joint',
                                 'state': 'ex',
                                 'type': 'committee member',
-                                'committee': 'Reptilian Task Force'}
+                                'committee': 'Reptilian Task Force',
+                                'position': 'Vice-Chair'
+                               }

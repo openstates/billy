@@ -56,8 +56,8 @@ $(document).ready(function() {
 
 {% block content %}
 
-<a href="{% url admin_legislator leg.leg_id %}" >admin</a>
-| <a href="{% url legislator_noslug leg.state leg.leg_id %}" >view</a>
+<a href="{% url object_json "legislators" leg.leg_id %}" >json</a>
+| <a href="{% url legislator_noslug leg.state leg.leg_id %}" >public</a>
 
 <form action="{% url admin_legislator_edit_commit %}" method = 'post' >
     <input type="hidden" value="{{ leg.leg_id }}" name="leg_id" />
@@ -111,6 +111,13 @@ $(document).ready(function() {
         <td></td>
     </tr>
 </table>
+</form>
+
+<form class="well form-inline" action="{% url retire_legislator leg.leg_id %}" method="POST">
+  <h4>Retire Legislator</h4>
+  <label>Retirement Date</label>
+  <input type="text" placeholder="YYYY-MM-DD" name="end_date">
+  <button type="submit" class="btn btn-danger">Retire Legislator</button>
 </form>
 
 {% endblock %}

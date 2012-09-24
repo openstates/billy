@@ -79,20 +79,23 @@ class DownloadPhotos(BaseCommand):
 
                 try:
                     # original size, standardized filenames
-                    fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))
+                    fname = os.path.join(orig_dir,
+                                         '{0}.jpg'.format(leg['_id']))
                     subprocess.check_call(['convert', tmpname, fname])
                     _upload(fname, bucket)
 
                     # xsmall - 50x70
-                    fname = os.path.join(xsmall_dir, '{0}.jpg'.format(leg['_id']))
+                    fname = os.path.join(xsmall_dir,
+                                         '{0}.jpg'.format(leg['_id']))
                     subprocess.check_call(['convert', tmpname, '-resize',
                                            '50x75', fname])
                     _upload(fname, bucket)
 
                     # small - 150x200
-                    fname = os.path.join(small_dir, '{0}.jpg'.format(leg['_id']))
+                    fname = os.path.join(small_dir,
+                                         '{0}.jpg'.format(leg['_id']))
                     subprocess.check_call(['convert', tmpname, '-resize',
                                            '150x200', fname])
                     _upload(fname, bucket)
-                except subprocess.CalledProcessError as e:
+                except subprocess.CalledProcessError:
                     print 'convert failed for ', fname

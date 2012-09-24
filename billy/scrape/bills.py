@@ -131,6 +131,8 @@ class Bill(SourcedObject):
         If multiple formats are provided, a good rule of thumb is to
         prefer text, followed by html, followed by pdf/word/etc.
         """
+        if not mimetype:
+            raise ValueError('mimetype parameter to add_version is required')
         if on_duplicate != 'ignore':
             if url in self._seen_versions:
                 if on_duplicate == 'error':
@@ -143,9 +145,7 @@ class Bill(SourcedObject):
                     return       # do nothing
             self._seen_versions.add(url)
 
-        d = dict(name=name, url=url, **kwargs)
-        if mimetype:
-            d['mimetype'] = mimetype
+        d = dict(name=name, url=url, mimetype=mimetype, **kwargs)
         self['versions'].append(d)
 
     def add_action(self, actor, action, date,

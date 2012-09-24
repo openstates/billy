@@ -56,7 +56,7 @@ class Document(dict):
     This base class represents a MongoDB document.
 
     Methods that return related documents from other collections,
-    like `state.legislators` or `bill.sponsors` should return a cursor
+    like `metadata.legislators` or `bill.sponsors` should return a cursor
     object that can be limited, sorted, counted, etc.
 
     Methods that dereference embedded objects into list of objects from

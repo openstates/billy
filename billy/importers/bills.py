@@ -289,7 +289,6 @@ def import_bill(data, standalone_votes, categorizer):
             if not cid is None:
                 sponsor['committee_id'] = cid
 
-
     # process votes ############
 
     # pull votes off bill
@@ -438,7 +437,7 @@ def import_bill(data, standalone_votes, categorizer):
     data = apply_filters(filters, data)
 
     if not bill:
-        bill_id = insert_with_id(data)
+        insert_with_id(data)
         git_add_bill(data)
         save_votes(data, bill_votes)
         return "insert"
@@ -545,6 +544,7 @@ def prepare_votes(abbr, session, bill_id, scraped_votes):
                 vote['_voters'].append(id)
 
             vote[vtype] = svlist
+
 
 def save_votes(bill, votes):
     # doesn't delete votes if none were scraped this time

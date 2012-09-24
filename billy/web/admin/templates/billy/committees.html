@@ -20,15 +20,18 @@
         <td> {{com.committee}}
              {% if com.subcommittee %} : {{com.subcommittee}} {% endif %}
              {% with com|key:"_id" as comm_id %}<br/>
+             <a href="{% url committee com.state comm_id %}"><b>public</b></a> | 
              <a href="{% url object_json "committees" comm_id %}"><b>json</b></a>
              {% endwith %}
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="{% url admin_legislator m.leg_id%}"> {%endif%}
-                {{ m.name }}
-                {% if m.leg_id %}</a> {%endif%}
-            ({{m.role}})
+            <li> {{ m.name }} ({{m.role}})
+                {% if m.leg_id %}
+                <a href="{% url legislator_noslug com.state m.leg_id %}">public</a>
+                <a href="{% url object_json "legislators" m.leg_id %}">json</a>
+                {% else %} [<b>unmatched</b>]
+                {% endif %}
             </li>
             {% empty %}
             <li>EMPTY</li>
@@ -64,10 +67,12 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="{% url admin_legislator m.leg_id%}"> {%endif%}
-                {{ m.name }}
-                {% if m.leg_id %}</a> {%endif%}
-            ({{m.role}})
+            <li> {{ m.name }} ({{m.role}})
+                {% if m.leg_id %}
+                <a href="{% url legislator_noslug com.state m.leg_id %}">public</a>
+                <a href="{% url object_json "legislators" m.leg_id %}">json</a>
+                {% else %} [<b>unmatched</b>]
+                {% endif %}
             </li>
             {% empty %}
             <li>EMPTY</li>
@@ -104,10 +109,12 @@
         </td>
         <td> <ul>
             {%for m in com.members %}
-            <li>{% if m.leg_id %}<a href="{% url admin_legislator m.leg_id%}"> {%endif%}
-                {{ m.name }}
-                {% if m.leg_id %}</a> {%endif%}
-            ({{m.role}})
+            <li> {{ m.name }} ({{m.role}})
+                {% if m.leg_id %}
+                <a href="{% url legislator_noslug com.state m.leg_id %}">public</a>
+                <a href="{% url object_json "legislators" m.leg_id %}">json</a>
+                {% else %} [<b>unmatched</b>]
+                {% endif %}
             </li>
             {% empty %}
                 <li>EMPTY</li>

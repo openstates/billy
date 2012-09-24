@@ -6,7 +6,7 @@
 {{event.state}}
 {% for data in event.related_bills %}
 <ul>
-    <li><a href="{% url 'admin_bill' event.state bill.bill_id %}">{{bill.bill_id}}</a></li>
+    <li><a href="{% url object_json 'bills' bill.bill_id %}">{{bill.bill_id}}</a></li>
     <li>{{bill.description}}</li>
 </ul>
 {% endfor %}
