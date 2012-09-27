@@ -4,7 +4,7 @@ import re
 from django import template
 from django.utils.html import strip_tags
 
-from billy.conf import settings
+from billy.core import settings
 from billy.web.public.views.utils import templatename
 from billy.web.public.forms import get_state_select_form
 

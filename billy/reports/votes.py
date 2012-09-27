@@ -1,8 +1,7 @@
 import logging
 from collections import defaultdict
 
-from billy.core import db
-from billy.conf import settings
+from billy.core import db, settings
 from billy.utils import term_for_session
 from billy.reports.utils import get_quality_exceptions, combine_reports
 
