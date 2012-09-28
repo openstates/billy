@@ -256,7 +256,7 @@ def main(old_scrape_compat=False):
         settings.update(module_settings)
         settings.update(args)
 
-        configure_logging(args.module)
+        configure_logging()
 
         # configure oyster
         if settings.ENABLE_OYSTER:

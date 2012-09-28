@@ -73,6 +73,29 @@ PARTY_DETAILS = {
     'Independent': {'noun': 'Independent', 'abbreviation': 'I'},
 }
 
+LOGGING_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': "%(asctime)s %(levelname)s %(name)s: %(message)s",
+            'datefmt': '%H:%M:%S'
+        }
+    },
+    'handlers': {
+        'default': {'level': 'INFO', 'class': 'logging.StreamHandler',
+                    'formatter': 'standard'},
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'], 'level': 'INFO', 'propagate': True
+        },
+        'requests': {
+            'handlers': ['default'], 'level': 'WARN', 'propagate': True
+        },
+    },
+}
+
 ENABLE_OYSTER = False
 
 LEVEL_FIELD = 'state'

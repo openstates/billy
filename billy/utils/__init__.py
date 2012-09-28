@@ -1,9 +1,9 @@
 import urllib
 import urlparse
-import logging
+import logging.config
 import datetime
 
-from billy.core import db
+from billy.core import db, settings
 import difflib
 
 
@@ -75,14 +75,8 @@ def extract_fields(d, fields, delimiter='|'):
     return rd
 
 
-def configure_logging(module=None):
-    # TODO: make this a lot better
-    if module:
-        format = ("%(asctime)s %(name)s %(levelname)s " + module +
-                  " %(message)s")
-    else:
-        format = "%(asctime)s %(name)s %(levelname)s %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=format, datefmt="%H:%M:%S")
+def configure_logging():
+    logging.config.dictConfig(settings.LOGGING_CONFIG)
 
 
 def textual_diff(l1, l2):

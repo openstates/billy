@@ -48,7 +48,7 @@ def main():
     # parse arguments, update settings, then run the appropriate function
     args = parser.parse_args()
     settings.update(args)
-    configure_logging(args.subcommand)
+    configure_logging()
     subcommands[args.subcommand].handle(args)
 
 if __name__ == '__main__':
