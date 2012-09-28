@@ -119,14 +119,17 @@ def legislator(request, abbr, _id, slug=None):
         abbr,
         billy_settings.API_KEY
     )
-    f = urllib2.urlopen(qurl)
-    districts = json.load(f)
-    district_id = None
-    for district in districts:
-        legs = [x['leg_id'] for x in district['legislators']]
-        if legislator['leg_id'] in legs:
-            district_id = district['boundary_id']
-            break
+    try:
+        f = urllib2.urlopen(qurl)
+        districts = json.load(f)
+        district_id = None
+        for district in districts:
+            legs = [x['leg_id'] for x in district['legislators']]
+            if legislator['leg_id'] in legs:
+                district_id = district['boundary_id']
+                break
+    except urllib2.URLError:
+        district_id = None
 
     sponsored_bills = legislator.sponsored_bills(
         limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
