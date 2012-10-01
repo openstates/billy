@@ -138,11 +138,13 @@ def dump_bill_csvs(abbr):
                                                'bill_legislator_votes.csv',
                                                legvote_fields)
 
+    _bill_info = {}
     for bill in db.bills.find({settings.LEVEL_FIELD: abbr}):
         bill_csv.writerow(extract_fields(bill, bill_fields))
 
         bill_info = extract_fields(bill,
                    ('bill_id', settings.LEVEL_FIELD, 'session', 'chamber'))
+        _bill_info[bill['_id']] = bill_info
 
         # basically same behavior for actions, sponsors and votes:
         #    extract fields, update with bill_info, write to csv
@@ -160,7 +162,7 @@ def dump_bill_csvs(abbr):
         vdict = extract_fields(vote, vote_fields)
         # copy chamber from vote into vote_chamber
         vdict['vote_chamber'] = vdict['chamber']
-        vdict.update(bill_info)
+        vdict.update(_bill_info[vote['bill_id']])
         vote_csv.writerow(vdict)
 
         for vtype in ('yes', 'no', 'other'):
