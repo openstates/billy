@@ -9,7 +9,7 @@ import zipfile
 import unicodecsv
 
 from billy.core import settings
-from billy.utils import metadata, extract_fields
+from billy.utils import metadata
 from billy.commands import BaseCommand
 from billy.core import db
 
@@ -17,6 +17,19 @@ import scrapelib
 import validictory
 import boto
 from boto.s3.key import Key
+
+
+def extract_fields(d, fields, delimiter='|'):
+    """ get values out of an object ``d`` for saving to a csv """
+    rd = {}
+    for f in fields:
+        v = d.get(f, None)
+        if isinstance(v, (str, unicode)):
+            v = v.encode('utf8')
+        elif isinstance(v, list):
+            v = delimiter.join(v)
+        rd[f] = v
+    return rd
 
 
 # TODO: make prefix/use_cname configurable
