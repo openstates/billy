@@ -41,6 +41,9 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     @property
     def is_tty(self):
+        # bluff for Jenkins
+        if os.environ.get('JENKINS_URL'):
+            return True
         isatty = getattr(self.stream, 'isatty', None)
         return isatty and isatty()
 
