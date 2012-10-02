@@ -1,7 +1,7 @@
 import os
 import sys
 import argparse
-import logging
+import logging, logging.config
 
 import pymongo
 from pymongo.son_manipulator import SONManipulator
@@ -25,6 +25,12 @@ global_group.add_argument('--cache_dir', dest='BILLY_CACHE_DIR')
 class Settings(object):
     def __init__(self):
         pass
+
+    def __setattr__(self, attr, val):
+        super(Settings, self).__setattr__(attr, val)
+        # if logging config is changed, reconfigure logging
+        if attr == 'LOGGING_CONFIG':
+            logging.config.dictConfig(self.LOGGING_CONFIG)
 
     def update(self, module):
         if isinstance(module, dict):

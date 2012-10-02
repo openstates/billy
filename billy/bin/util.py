@@ -3,11 +3,9 @@ import logging
 import importlib
 
 from billy.core import settings, base_arg_parser
-from billy.utils import configure_logging
 from billy.commands import BaseCommand
 
 logger = logging.getLogger('billy')
-configure_logging()
 
 COMMAND_MODULES = (
     # lots of these commands can go away as billy matures
@@ -48,7 +46,6 @@ def main():
     # parse arguments, update settings, then run the appropriate function
     args = parser.parse_args()
     settings.update(args)
-    configure_logging()
     subcommands[args.subcommand].handle(args)
 
 if __name__ == '__main__':

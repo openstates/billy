@@ -120,8 +120,11 @@ class Scraper(scrapelib.Scraper):
         # logging convenience methods
         self.logger = logging.getLogger("billy")
         self.log = self.logger.info
+        self.info = self.logger.info
         self.debug = self.logger.debug
         self.warning = self.logger.warning
+        self.error = self.logger.error
+        self.critical = self.logger.critical
 
     @property
     def object_count(self):
