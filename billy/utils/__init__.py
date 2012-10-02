@@ -1,6 +1,5 @@
 import urllib
 import urlparse
-import logging.config
 import datetime
 
 from billy.core import db, settings
@@ -73,10 +72,6 @@ def extract_fields(d, fields, delimiter='|'):
             v = delimiter.join(v)
         rd[f] = v
     return rd
-
-
-def configure_logging():
-    logging.config.dictConfig(settings.LOGGING_CONFIG)
 
 
 def textual_diff(l1, l2):
