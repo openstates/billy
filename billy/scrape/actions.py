@@ -1,5 +1,5 @@
 import re
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 
 class Rule(namedtuple('Rule', 'regexes types stop attrs')):
@@ -73,7 +73,7 @@ class BaseCategorizer(object):
         text = self.pre_categorize(text)
 
         types = set()
-        return_val = {}
+        return_val = defaultdict(set)
 
         for rule in self.rules:
 
@@ -83,8 +83,12 @@ class BaseCategorizer(object):
             if attrs is not None:
                 # add types, rule attrs and matched attrs
                 types |= rule.types
-                return_val.update(rule.attrs)
-                return_val.update(attrs)
+
+                # Also add its specified attrs.
+                for k, v in attrs.items():
+                    return_val[k].add(v)
+
+                return_val.update(**rule.attrs)
 
                 # break if there was a match and rule says so, otherwise
                 # continue testing against other rules
@@ -96,6 +100,35 @@ class BaseCategorizer(object):
 
         # run post-categorize hook
         return_val = self.post_categorize(return_val)
+
+        return self.finalize(return_val)
+
+    def finalize(self, return_val):
+        '''Before the types and attrs get passed to the
+        importer they need to be altered by converting lists to
+        sets, etc.
+        '''
+        attrs = return_val
+        return_val = {}
+
+        # Get rid of defaultdict.
+        for k, v in attrs.items():
+
+            # Skip empties.
+            if not v:
+                continue
+            else:
+                v = filter(None, v)
+
+            # Get rid of sets.
+            if isinstance(v, set):
+                v = list(v)
+
+            # Some vals should be strings, not seqs.
+            if k == 'actor' and len(v) == 1:
+                v = v.pop()
+
+            return_val[k] = v
 
         return return_val
 
