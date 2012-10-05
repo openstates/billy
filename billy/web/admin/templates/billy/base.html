@@ -37,6 +37,7 @@
                     <li> <a href="{% url bill_list metadata.abbreviation %}">Current Session</a> </li>
                     <li> <a href="{% url bill_list metadata.abbreviation %}?limit=current_term">Current Term</a> </li>
                     <li> <a href="{% url duplicate_versions metadata.abbreviation %}">Dup. Versions</a> </li>
+                    <li> <a href="{% url progress_meter_gaps metadata.abbreviation %}">Progress gaps</a> </li>
                     </ul>
                 </li>
                 <li> <a href='{% url admin_legislators metadata.abbreviation %}'>Legislators</a> </li>

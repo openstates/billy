@@ -1410,3 +1410,20 @@ def newsblogs(request):
         'pagination_truncated': pagination_truncated,
         'page': page,
         })
+
+
+@login_required
+def progress_meter_gaps(request, abbr):
+    '''List all bills that have been signed but haven't passed
+    their house of origin. See billy.importers.bills for the
+    actual conditions applied. There are a few.
+    '''
+    meta = metadata(abbr)
+    if not meta:
+        raise Http404('No metadata found for abbreviation %r' % abbr)
+    report = mdb.reports.find_one({'_id': abbr})
+    ids = report['bills']['progress_meter_gaps']
+    bills = db.bills.find({'_id': {'$in': ids}})
+    context = {'metadata': meta, 'bill_ids': ids,
+               'bills': bills, 'query_text': 'progress meter gaps exist'}
+    return render(request, 'billy/bill_list.html', context)
