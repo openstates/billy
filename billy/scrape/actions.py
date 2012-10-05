@@ -1,5 +1,5 @@
 import re
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, Iterable
 
 
 class Rule(namedtuple('Rule', 'regexes types stop attrs')):
@@ -115,10 +115,10 @@ class BaseCategorizer(object):
         for k, v in attrs.items():
 
             # Skip empties.
-            if not v:
+            if not isinstance(v, Iterable):
                 continue
-            else:
-                v = filter(None, v)
+
+            v = filter(None, v)
 
             # Get rid of sets.
             if isinstance(v, set):
