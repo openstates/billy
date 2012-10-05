@@ -150,7 +150,6 @@ class Bill(SourcedObject):
 
     def add_action(self, actor, action, date,
                     type=None,
-                    committee=None,
                     committees=None,
                     legislators=None,
                    **kwargs):
@@ -183,9 +182,8 @@ class Bill(SourcedObject):
         committees = _cleanup_list(committees, [])
         legislators = _cleanup_list(legislators, [])
 
-        if not committee is None:
-            logger.warning("Deprecation notice: Please move to committees.")
-            committees.append(committee)
+        if isinstance(committees, basestring):
+            committees = [committees]
 
         related_entities = []         # OK, let's work some magic.
         for committee in committees:
