@@ -1,13 +1,12 @@
 import os
-import time
 import logging
-import datetime
 import importlib
 import json
 
 from billy.scrape.validator import DatetimeValidator
 
 from billy.core import settings
+from billy.utils import JSONEncoderPlus
 
 import scrapelib
 
@@ -38,18 +37,6 @@ class NoDataForPeriod(ScrapeError):
     def __str__(self):
         return 'No data exists for %s' % self.period
 
-
-class JSONDateEncoder(json.JSONEncoder):
-    """
-    JSONEncoder that encodes datetime objects as Unix timestamps.
-    """
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            return time.mktime(obj.utctimetuple())
-        elif isinstance(obj, datetime.date):
-            return time.mktime(obj.timetuple())
-
-        return json.JSONEncoder.default(self, obj)
 
 # maps scraper_type -> scraper
 _scraper_registry = dict()
@@ -192,7 +179,7 @@ class Scraper(scrapelib.Scraper):
         self.output_names.add(filename)     # keep tally of all output names
         with open(os.path.join(self.output_dir, self.scraper_type, filename),
                   'w') as f:
-            json.dump(obj, f, cls=JSONDateEncoder)
+            json.dump(obj, f, cls=JSONEncoderPlus)
 
         # validate after writing, allows for inspection
         self.validate_json(obj)

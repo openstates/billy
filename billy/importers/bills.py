@@ -7,8 +7,7 @@ from time import time
 from collections import defaultdict
 
 from billy.core import settings, db
-from billy.scrape import JSONDateEncoder
-from billy.utils import metadata, term_for_session
+from billy.utils import metadata, term_for_session, JSONEncoderPlus
 from billy.importers.names import get_legislator_id
 from billy.importers.filters import apply_filters
 
@@ -111,10 +110,7 @@ def git_add_bill(data):
     global git_active_tree
     global git_active_commit
 
-    bill = json.dumps(data,
-                      cls=JSONDateEncoder,
-                      sort_keys=True,
-                      indent=4)
+    bill = json.dumps(data, cls=JSONEncoderPlus, sort_keys=True, indent=4)
     spam = Blob.from_string(bill)
     bid = str(data['_id'])
     git_active_repo.object_store.add_object(spam)

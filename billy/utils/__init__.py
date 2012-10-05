@@ -1,6 +1,10 @@
 import urllib
 import urlparse
 import datetime
+import json
+import time
+
+from bson import ObjectId
 
 from billy.core import db
 import difflib
@@ -41,6 +45,22 @@ def parse_param_dt(dt):
         except ValueError:
             pass
     raise ValueError('unable to parse %s' % dt)
+
+
+class JSONEncoderPlus(json.JSONEncoder):
+    """
+    JSONEncoder that encodes datetime objects as Unix timestamps and mongo
+    ObjectIds as strings.
+    """
+    def default(self, obj, **kwargs):
+        if isinstance(obj, datetime.datetime):
+            return time.mktime(obj.utctimetuple())
+        elif isinstance(obj, datetime.date):
+            return time.mktime(obj.timetuple())
+        elif isinstance(obj, ObjectId):
+            return str(obj)
+
+        return super(JSONEncoderPlus, self).default(obj, **kwargs)
 
 
 def term_for_session(abbr, session, meta=None):

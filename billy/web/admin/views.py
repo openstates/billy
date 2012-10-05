@@ -11,7 +11,6 @@ import datetime
 import urlparse
 
 from bson import ObjectId
-from json import JSONEncoder
 
 from operator import itemgetter
 from itertools import chain, imap
@@ -26,8 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import db, mdb, settings
-from billy.utils import metadata
-from billy.scrape import JSONDateEncoder
+from billy.utils import metadata, JSONEncoderPlus
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
 from billy.reports.utils import get_quality_exceptions, QUALITY_EXCEPTIONS
@@ -246,7 +244,7 @@ def run_detail_graph_data(request, abbr):
         data['title'][line] = speck[line]['title']
 
     return HttpResponse(
-        json.dumps(data, cls=JSONDateEncoder),
+        json.dumps(data, cls=JSONEncoderPlus),
         #content_type="text/json"
         content_type="text/plain")
 
@@ -427,7 +425,7 @@ def bills(request, abbr):
                     except KeyError:
                         spec_val = r
                     else:
-                        spec_val = json.dumps(spec_val, cls=JSONDateEncoder)
+                        spec_val = json.dumps(spec_val, cls=JSONEncoderPlus)
 
                     params = dict(spec['summary'], session=session,
                                   val=spec_val)
@@ -517,7 +515,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                         pass
         objs = get_objects(objs)
 
-    objs = (dumps(obj, cls=JSONDateEncoder) for obj in objs)
+    objs = (dumps(obj, cls=JSONEncoderPlus) for obj in objs)
     counter = defaultdict(Decimal)
     for obj in objs:
         counter[obj] += 1
@@ -558,7 +556,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
         objects = db.bills.find(spec, fields)
         objects = (('bills', obj['_id']) for obj in objects)
 
-    spec = json.dumps(spec, cls=JSONDateEncoder, indent=4)
+    spec = json.dumps(spec, cls=JSONEncoderPlus, indent=4)
 
     return render(request, 'billy/summary_object_keyvals.html', dict(
         object_type=object_type,
@@ -573,23 +571,11 @@ def object_json(request, collection, _id):
 
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
-    class MongoEncoder(JSONEncoder):
-
-        def default(self, obj, **kwargs):
-            if isinstance(obj, ObjectId):
-                return str(obj)
-            elif isinstance(obj, datetime.datetime):
-                return time.mktime(obj.utctimetuple())
-            elif isinstance(obj, datetime.date):
-                return time.mktime(obj.timetuple())
-            else:
-                return JSONEncoder.default(obj, **kwargs)
-
     obj = getattr(db, collection).find_one(_id)
     obj = OrderedDict(sorted(obj.items()))
 
     obj_id = obj['_id']
-    obj_json = json.dumps(obj, cls=MongoEncoder, indent=4)
+    obj_json = json.dumps(obj, cls=JSONEncoderPlus, indent=4)
 
     def subfunc(m, tmpl='    <a name="%s">%s:</a>'):
         val = m.group(1)
@@ -1235,7 +1221,7 @@ def _mom_attr_diff(merge, leg1, leg2):
 
 
 def _mom_mangle(attr):
-    args = {"sort_keys": True, "indent": 4, "cls": JSONDateEncoder}
+    args = {"sort_keys": True, "indent": 4, "cls": JSONEncoderPlus}
     if isinstance(attr, types.ListType):
         return json.dumps(attr, **args)
     if isinstance(attr, types.DictType):

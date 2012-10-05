@@ -14,9 +14,8 @@ import datetime as dt
 
 from billy.core import db
 from billy.core import settings, base_arg_parser
-from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
-                          check_sessions)
-from billy.utils import term_for_session
+from billy.scrape import ScrapeError, get_scraper, check_sessions
+from billy.utils import term_for_session, JSONEncoderPlus
 from billy.scrape.validator import DatetimeValidator
 
 
@@ -336,7 +335,7 @@ def main(old_scrape_compat=False):
 
             with open(os.path.join(args.output_dir, 'metadata.json'),
                       'w') as f:
-                json.dump(metadata, f, cls=JSONDateEncoder)
+                json.dump(metadata, f, cls=JSONEncoderPlus)
 
             run_record = []
             exec_record = {
