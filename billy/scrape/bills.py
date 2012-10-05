@@ -182,6 +182,10 @@ class Bill(SourcedObject):
         committees = _cleanup_list(committees, [])
         legislators = _cleanup_list(legislators, [])
 
+        if 'committee' in kwargs:
+            raise ValueError("invalid param 'committee' passed to add_action, "
+                             "must use committees")
+
         if isinstance(committees, basestring):
             committees = [committees]
 
