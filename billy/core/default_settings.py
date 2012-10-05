@@ -83,11 +83,15 @@ LOGGING_CONFIG = {
         }
     },
     'handlers': {
-        'default': {'level': 'INFO', 'class': 'logging.StreamHandler',
+        'default': {'level': 'DEBUG',
+                    'class': 'billy.ext.ansistrm.ColorizingStreamHandler',
                     'formatter': 'standard'},
     },
     'loggers': {
         '': {
+            'handlers': ['default'], 'level': 'DEBUG', 'propagate': True
+        },
+        'scrapelib': {
             'handlers': ['default'], 'level': 'INFO', 'propagate': True
         },
         'requests': {

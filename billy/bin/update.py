@@ -16,7 +16,7 @@ from billy.core import db
 from billy.core import settings, base_arg_parser
 from billy.scrape import (ScrapeError, JSONDateEncoder, get_scraper,
                           check_sessions)
-from billy.utils import configure_logging, term_for_session
+from billy.utils import term_for_session
 from billy.scrape.validator import DatetimeValidator
 
 
@@ -255,8 +255,6 @@ def main(old_scrape_compat=False):
         # load module settings, then command line settings
         settings.update(module_settings)
         settings.update(args)
-
-        configure_logging()
 
         # configure oyster
         if settings.ENABLE_OYSTER:

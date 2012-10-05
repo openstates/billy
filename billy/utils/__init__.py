@@ -1,9 +1,8 @@
 import urllib
 import urlparse
-import logging.config
 import datetime
 
-from billy.core import db, settings
+from billy.core import db
 import difflib
 
 
@@ -60,23 +59,6 @@ def urlescape(url):
     path = urllib.quote(path, '/%')
     qs = urllib.quote_plus(qs, ':&=')
     return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
-
-
-def extract_fields(d, fields, delimiter='|'):
-    """ get values out of an object ``d`` for saving to a csv """
-    rd = {}
-    for f in fields:
-        v = d.get(f, None)
-        if isinstance(v, (str, unicode)):
-            v = v.encode('utf8')
-        elif isinstance(v, list):
-            v = delimiter.join(v)
-        rd[f] = v
-    return rd
-
-
-def configure_logging():
-    logging.config.dictConfig(settings.LOGGING_CONFIG)
 
 
 def textual_diff(l1, l2):

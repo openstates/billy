@@ -25,7 +25,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from billy.core import db, settings
+from billy.core import db, mdb, settings
 from billy.utils import metadata
 from billy.scrape import JSONDateEncoder
 from billy.importers.utils import merge_legislators
@@ -690,8 +690,8 @@ def bad_vote_list(request, abbr):
     meta = metadata(abbr)
     if not meta:
         raise Http404('No metadata found for abbreviation %r' % abbr)
-    report = db.reports.find_one({'_id': abbr})
-    bad_vote_ids = report['bills']['bad_vote_counts']
+    report = mdb.reports.find_one({'_id': abbr})
+    bad_vote_ids = report['votes']['bad_vote_counts']
     votes = db.votes.find({'_id': {'$in': bad_vote_ids}})
 
     context = {'metadata': meta, 'vote_ids': bad_vote_ids,
