@@ -77,7 +77,7 @@ def test_rule_attrs_feature():
     action = 'Test attrs'
     attrs = categorizer.categorize(action)
 
-    eq_(attrs['species'], ['goat'])
+    eq_(attrs['species'], 'goat')
 
 
 def test_types_aggregation():
