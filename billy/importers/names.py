@@ -246,7 +246,7 @@ class NameMatcher(object):
         return self._names[chamber].get(name, None)
 
 
-class CommitteeNameMatcher(NameMatcher):
+class CommitteeNameMatcher(object):
     def __init__(self, abbr, term):
         self._names = {'upper': {}, 'lower': {}, None: {}}
         self._manual = {'upper': {}, 'lower': {}, None: {}, 'joint': {}}
