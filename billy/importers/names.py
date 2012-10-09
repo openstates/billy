@@ -16,9 +16,7 @@ logger = logging.getLogger('billy')
 def get_legislator_id(abbr, session, chamber, name):
     try:
         matcher = __matchers[(abbr, session)]
-        #print 'used existing matcher', abbr, session
     except KeyError:
-        print 'new matcher', abbr, session
         metadata = db.metadata.find_one({'_id': abbr})
         term = None
         for term in metadata['terms']:
