@@ -172,4 +172,4 @@ class ICalendarEmitter(Emitter):
 
             cal.add_component(event)
 
-        return cal.as_string()
+        return cal.to_ical()
