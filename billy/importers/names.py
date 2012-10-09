@@ -4,7 +4,11 @@ import logging
 from billy.core import db
 from billy.core import settings
 
+# abbr, session : NameMatcher
 __matchers = {}
+
+# abbr : NameMatcher
+__com_matchers = {}
 
 logger = logging.getLogger('billy')
 
@@ -12,7 +16,9 @@ logger = logging.getLogger('billy')
 def get_legislator_id(abbr, session, chamber, name):
     try:
         matcher = __matchers[(abbr, session)]
+        #print 'used existing matcher', abbr, session
     except KeyError:
+        print 'new matcher', abbr, session
         metadata = db.metadata.find_one({'_id': abbr})
         term = None
         for term in metadata['terms']:
@@ -29,7 +35,11 @@ def get_legislator_id(abbr, session, chamber, name):
 
 
 def attempt_committee_match(abbr, chamber, name):
-    matcher = CommitteeNameMatcher(abbr, None)  # Term
+    try:
+        matcher = __com_matchers[abbr]
+    except KeyError:
+        matcher = CommitteeNameMatcher(abbr, None)
+
     return matcher.match(name, chamber)
 
 
@@ -237,6 +247,13 @@ class NameMatcher(object):
 
 
 class CommitteeNameMatcher(NameMatcher):
+    def __init__(self, abbr, term):
+        self._names = {'upper': {}, 'lower': {}, None: {}}
+        self._manual = {'upper': {}, 'lower': {}, None: {}, 'joint': {}}
+        self._abbr = abbr
+        self._term = term
+        self._learn_manual_matches()
+
     def _learn_manual_matches(self):
         rows = db.manual.leg_ids.find({
             "abbr": self._abbr,

@@ -74,6 +74,7 @@ def ensure_indexes():
 
     # subjects index
     db.subjects.ensure_index('abbr')
+    db.manual.leg_ids.ensure_index('abbr')
 
 
 def load_standalone_votes(data_dir):
