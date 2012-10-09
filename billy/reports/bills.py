@@ -33,6 +33,7 @@ def _bill_report_dict():
             'versionless_count': 0,
             'version_count': 0,
             'unmatched_sponsors': set(),
+            'progress_meter_gaps': set(),
            }
 
 
@@ -126,6 +127,31 @@ def scan_bills(abbr):
             duplicate_versions[doc['url']] += 1
         # TODO: add duplicate document detection back in?
 
+        # Check for progress meter gaps.
+        progress_meter_gaps = session_d['progress_meter_gaps']
+        action_dates = bill['action_dates']
+        bill_chamber = bill['chamber']
+        other_chamber = dict(lower='upper', upper='lower')[bill_chamber]
+
+        # Check for bills that were signed but didn't pass both chambers.
+        if bill['type'] == 'bill':
+            if action_dates['signed']:
+                if not action_dates['passed_upper']:
+                    progress_meter_gaps.add(bill['_id'])
+                elif not action_dates['passed_lower']:
+                    progress_meter_gaps.add(bill['_id'])
+
+        else:
+            # Check for nonbills that were signed but didn't pass their
+            # house of origin.
+            if action_dates['signed']:
+                if not action_dates['passed_' + bill_chamber]:
+                    progress_meter_gaps.add(bill['_id'])
+
+        if action_dates['passed_' + other_chamber]:
+            if not action_dates['passed_' + bill_chamber]:
+                progress_meter_gaps.add(bill['_id'])
+
     dup_version_urls = []
     dup_source_urls = []
     for url, n in duplicate_versions.iteritems():
@@ -146,6 +172,7 @@ def scan_bills(abbr):
             'other_actions': other_actions.items(),
             'uncategorized_subjects': uncategorized_subjects.items(),
             'sessions': sessions,
+            'progress_meter_gaps': [],
            }
 
 

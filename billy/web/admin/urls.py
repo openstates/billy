@@ -63,6 +63,8 @@ urlpatterns = patterns('billy.web.admin.views',
         name='other_actions'),
     url(r'^(?P<abbr>[a-z]{2})/duplicate_versions/$', 'duplicate_versions',
         name='duplicate_versions'),
+    url(r'^(?P<abbr>[a-z]{2})/progress_meter_gaps/$', 'progress_meter_gaps',
+        name='progress_meter_gaps'),
 
     # Summary urls.
     url(r'^(?P<abbr>[a-z]{2})/summary/(?P<session>[^/]+)$', 'summary_index',
