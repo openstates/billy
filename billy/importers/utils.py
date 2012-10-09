@@ -37,7 +37,7 @@ _bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
 
 def fix_bill_id(bill_id):
     bill_id = bill_id.replace('.', '')
-    return _bill_id_re.sub(r'\1 \2', bill_id).strip()
+    return _bill_id_re.sub(r'\1 \2', bill_id, 1).strip()
 
 
 # load standard fields from schema files
