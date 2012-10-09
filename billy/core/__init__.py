@@ -1,7 +1,8 @@
 import os
 import sys
 import argparse
-import logging, logging.config
+import logging
+import logging.config
 
 import pymongo
 from pymongo.son_manipulator import SONManipulator
