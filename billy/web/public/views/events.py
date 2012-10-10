@@ -54,7 +54,7 @@ def event_ical(request, abbr, event_id):
     for participant in event['participants']:
         name = participant['participant']
         cal_event.add('attendee', name)
-        if participant['id']:
+        if "id" in participant and participant['id']:
             cal_event.add("%s-ATTENDEE-ID" % (x_name), participant['id'])
 
     for bill in event['related_bills']:
