@@ -92,10 +92,10 @@ LOGGING_CONFIG = {
             'handlers': ['default'], 'level': 'DEBUG', 'propagate': True
         },
         'scrapelib': {
-            'handlers': ['default'], 'level': 'INFO', 'propagate': True
+            'handlers': ['default'], 'level': 'INFO', 'propagate': False
         },
         'requests': {
-            'handlers': ['default'], 'level': 'WARN', 'propagate': True
+            'handlers': ['default'], 'level': 'WARN', 'propagate': False
         },
     },
 }
