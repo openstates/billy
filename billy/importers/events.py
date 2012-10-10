@@ -126,6 +126,7 @@ def normalize_dates(event):
 
 def import_event(data):
     event = None
+    data = normalize_dates(data)
 
     if '_guid' in data:
         event = db.events.find_one({settings.LEVEL_FIELD:
@@ -140,9 +141,8 @@ def import_event(data):
                                     'type': data['type'],
                                     'description': data['description']})
 
-    data = apply_filters(filters, data)
 
-    data = normalize_dates(data)
+    data = apply_filters(filters, data)
 
     if not event:
         data['created_at'] = datetime.datetime.utcnow()
