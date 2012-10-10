@@ -439,7 +439,9 @@ class Bill(Document):
         _filter = {}
         for key, value in [('state', state),
                             ('chamber', chamber),
-                            ('subjects', subjects)]:
+                            ('subjects', subjects),
+                            ('bill_id', bill_id),
+                          ]:
             if value is not None:
                 _filter[key] = value
 
