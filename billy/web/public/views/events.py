@@ -79,7 +79,7 @@ def event(request, abbr, event_id):
 
     gcal_info = {
         "action": "TEMPLATE",
-        "text": event['description'],
+        "text": event['description'].encode('utf-8'),
         "dates": "%s/%s" % (start_date, end_date),
         "details": "",
         "location": event['location'].encode('utf-8'),
