@@ -51,15 +51,17 @@ def event_ical(request, abbr, event_id):
     cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
     cal_event.add('dtstamp', event['updated_at'])
 
-    for participant in event['participants']:
-        name = participant['participant']
-        cal_event.add('attendee', name)
-        if "id" in participant and participant['id']:
-            cal_event.add("%s-ATTENDEE-ID" % (x_name), participant['id'])
+    if "participants" in event:
+        for participant in event['participants']:
+            name = participant['participant']
+            cal_event.add('attendee', name)
+            if "id" in participant and participant['id']:
+                cal_event.add("%s-ATTENDEE-ID" % (x_name), participant['id'])
 
-    for bill in event['related_bills']:
-        if bill['bill_id']:
-            cal_event.add("%s-RELATED-BILL-ID" % (x_name), bill['bill_id'])
+    if "related_bills" in event:
+        for bill in event['related_bills']:
+            if "bill_id" in bill and bill['bill_id']:
+                cal_event.add("%s-RELATED-BILL-ID" % (x_name), bill['bill_id'])
 
     cal.add_component(cal_event)
     return HttpResponse(cal.to_ical(), content_type="text/calendar")
@@ -79,7 +81,7 @@ def event(request, abbr, event_id):
 
     gcal_info = {
         "action": "TEMPLATE",
-        "text": event['description'],
+        "text": event['description'].encode('utf-8'),
         "dates": "%s/%s" % (start_date, end_date),
         "details": "",
         "location": event['location'].encode('utf-8'),
