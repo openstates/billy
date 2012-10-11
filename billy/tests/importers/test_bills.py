@@ -165,12 +165,9 @@ def test_import_bill():
 def test_import_bill_with_partial_bill_vote_id():
     # test a hack added for Rhode Island where vote bill_ids are missing
     # their prefix (ie. 7033 instead of HB 7033)
-    db.metadata.insert({'_id': 'zz',
-                        'terms': [{'name': 'T1', 'sessions': ['S1', 'S2']}],
-                        '_partial_vote_bill_id': True,
-                       })
-    data = {'_type': 'bill', 'state': 'zz', 'bill_id': 'S1',
-            'chamber': 'upper', 'session': 'S1',
+    # fixture's yz state has _partial_vote_bill_id enabled
+    data = {'_type': 'bill', 'state': 'yz', 'bill_id': 'S1',
+            'chamber': 'upper', 'session': 'S1a',
             'title': 'main title',
             'sponsors': [],
             'versions': [],
@@ -181,7 +178,7 @@ def test_import_bill_with_partial_bill_vote_id():
            }
     standalone_votes = {
         # chamber, session, bill id -> vote list
-        ('upper', 'S1', '1'): [
+        ('upper', 'S1a', '1'): [
           {'motion': 'house passage', 'chamber': 'lower', 'date': None,
            'yes_count': 1, 'no_count': 0, 'other_count': 0,
            'yes_votes': [], 'no_votes': [], 'other_votes': [],
@@ -216,8 +213,8 @@ def test_fix_bill_id():
 
 @with_setup(setup_func)
 def test_populate_current_fields():
-    db.bills.insert({'state': 'ex', 'session': 'S1', 'title': 'current term'})
-    db.bills.insert({'state': 'ex', 'session': 'S2',
+    db.bills.insert({'state': 'ex', 'session': 'S2', 'title': 'current term'})
+    db.bills.insert({'state': 'ex', 'session': 'Special2',
                      'title': 'current everything'})
     db.bills.insert({'state': 'ex', 'session': 'S0', 'title': 'not current'})
 
