@@ -1,3 +1,4 @@
+import re
 import math
 import operator
 import collections
@@ -7,7 +8,7 @@ from django.core import urlresolvers
 import pymongo
 import pyes
 
-from billy.utils import parse_param_dt
+from billy.utils import parse_param_dt, fix_bill_id
 from billy.core import mdb as db, settings, elasticsearch
 from .base import (Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)
@@ -439,7 +440,9 @@ class Bill(Document):
         _filter = {}
         for key, value in [('state', state),
                             ('chamber', chamber),
-                            ('subjects', subjects)]:
+                            ('subjects', subjects),
+                            ('bill_id', bill_id),
+                          ]:
             if value is not None:
                 _filter[key] = value
 
@@ -482,6 +485,13 @@ class Bill(Document):
             # block spammers, possibly move to a BANNED_SEARCH_LIST setting
             if '<a href' in query:
                 return db.bills.find({'state': None})
+
+            if re.findall('\d+', query):
+                _id_filter = dict(_filter)
+                _id_filter['bill_id'] = fix_bill_id(query).upper()
+                result = db.bills.find(_id_filter)
+                if result:
+                    return result
 
             query = {"query_string": {"fields": ["text", "title"],
                                       "default_operator": "AND",

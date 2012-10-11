@@ -5,16 +5,13 @@ from nose.tools import with_setup
 from billy.core import db
 from billy.importers.metadata import import_metadata
 from billy.importers import events
+from .. import fixtures
 
 
 def setup_func():
     db.events.drop()
     db.event_ids.drop()
-    db.metadata.drop()
-
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            "fixture_data")
-    import_metadata("ex", data_dir)
+    fixtures.load_metadata()
 
 
 @with_setup(setup_func)

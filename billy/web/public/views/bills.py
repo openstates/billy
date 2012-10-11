@@ -7,10 +7,9 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.utils.feedgenerator import Rss201rev2Feed
 
-from billy.utils import popularity
+from billy.utils import popularity, fix_bill_id
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
-from billy.importers.utils import fix_bill_id
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList

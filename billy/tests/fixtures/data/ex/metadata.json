@@ -1,0 +1,23 @@
+{
+    "_level": "state",
+    "abbreviation": "ex",
+    "capitol_timezone": "Etc/UTC",
+    "legislature_name": "United States Congress",
+    "lower_chamber_name": "House of Representatives",
+    "lower_chamber_term": 2,
+    "lower_chamber_title": "Representative",
+    "name": "Example State",
+    "terms": [
+        {
+            "end_year": 2012,
+            "name": "112th",
+            "sessions": [
+                "112th"
+            ],
+            "start_year": 2011
+        }
+    ],
+    "upper_chamber_name": "Senate",
+    "upper_chamber_term": 6,
+    "upper_chamber_title": "Senator"
+}
