@@ -1,4 +1,6 @@
-from nose.tools import eq_
+import re
+
+from nose.tools import eq_, assert_true
 
 from billy.scrape.actions import Rule, BaseCategorizer
 
@@ -27,11 +29,28 @@ rules = (
     # Test multiple types.
     Rule(r'1', ['1', '2']),
     Rule(r'3', ['3']),
+
+    # Test finalized data types.
+    Rule(r'Sponsored by (?P<legislators>.+)'),
+
+    Rule(r'Thom', actor='weirdo'),
     )
 
 
 class Categorizer(BaseCategorizer):
     rules = rules
+
+    def post_categorize(self, attrs):
+        res = set()
+        if 'legislators' in attrs:
+            for text in attrs['legislators']:
+                rgx = r'(,\s+(?![a-z]\.)|\s+and\s+)'
+                legs = re.split(rgx, text)
+                legs = filter(lambda x: x not in [', ', ' and '], legs)
+                res |= set(legs)
+        attrs['legislators'] = list(res)
+        return attrs
+
 
 categorizer = Categorizer()
 
@@ -84,3 +103,21 @@ def test_types_aggregation():
     action = 'Types 1, 2, and 3'
     attrs = categorizer.categorize(action)
     eq_(set(attrs['type']), set(['1', '2', '3']))
+
+
+def test_finalized_datatypes():
+    '''Make sure internally used sets are converted to
+    lists by actions.BaseCategorizer.finalize.
+    '''
+    action = 'Sponsored by Thom, Paul and James'
+    attrs = categorizer.categorize(action)
+    assert_true(isinstance(attrs['legislators'], list))
+
+
+def test_finalized_actor():
+    '''Make sure 'actor' key is being converted to a
+    string by actions.BaseCategorizer.finalize.
+    '''
+    action = 'Sponsored by Thom, Paul and James'
+    attrs = categorizer.categorize(action)
+    eq_(attrs['actor'], 'weirdo')
