@@ -7,14 +7,14 @@ from time import time
 from collections import defaultdict
 
 from billy.core import settings, db
-from billy.utils import metadata, term_for_session, JSONEncoderPlus
+from billy.utils import (metadata, term_for_session, fix_bill_id,
+                         JSONEncoderPlus)
 from billy.importers.names import get_legislator_id
 from billy.importers.filters import apply_filters
 
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
-                                   next_big_id, oysterize, fix_bill_id,
-                                   get_committee_id)
+                                   next_big_id, oysterize, get_committee_id)
 
 if hasattr(settings, "ENABLE_GIT") and settings.ENABLE_GIT:
     from dulwich.repo import Repo

@@ -2,7 +2,7 @@ import re
 import operator
 
 from billy.models import db
-from billy.importers.utils import fix_bill_id
+from billy.utils import fix_bill_id
 
 
 def search_by_bill_id(abbr, search_text):

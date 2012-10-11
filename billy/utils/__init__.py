@@ -1,8 +1,9 @@
-import urllib
-import urlparse
 import datetime
 import json
+import re
 import time
+import urllib
+import urlparse
 
 from bson import ObjectId
 
@@ -104,6 +105,15 @@ def textual_diff(l1, l2):
             "line": lastfix
         }
     return lines
+
+
+# fixing bill ids
+_bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
+
+
+def fix_bill_id(bill_id):
+    bill_id = bill_id.replace('.', '')
+    return _bill_id_re.sub(r'\1 \2', bill_id, 1).strip()
 
 
 def find_bill(query, fields=None):

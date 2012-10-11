@@ -8,8 +8,7 @@ from django.core import urlresolvers
 import pymongo
 import pyes
 
-from billy.utils import parse_param_dt
-from billy.importers.utils import fix_bill_id
+from billy.utils import parse_param_dt, fix_bill_id
 from billy.core import mdb as db, settings, elasticsearch
 from .base import (Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)

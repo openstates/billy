@@ -6,12 +6,12 @@ import logging
 import datetime
 import json
 
-from billy.core import db
-from billy.core import settings
+from billy.core import db, settings
+from billy.utils import fix_bill_id
 from billy.importers.filters import apply_filters
 from billy.importers.names import get_legislator_id
-from billy.importers.utils import prepare_obj, update, next_big_id
-from billy.importers.utils import fix_bill_id, get_committee_id
+from billy.importers.utils import (prepare_obj, update, next_big_id,
+                                   get_committee_id)
 
 import pymongo
 
