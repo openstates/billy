@@ -1,10 +1,10 @@
 import datetime
 from billy.models import db
 
+from .. import fixtures
 
 def setup_func():
     assert db.name.endswith('_test')
-    db.metadata.drop()
     db.bills.drop()
     db.legislators.drop()
     db.document_ids.drop()
@@ -12,32 +12,7 @@ def setup_func():
     db.vote_ids.drop()
     db.committees.drop()
 
-    db.metadata.insert({
-        u'_id': u'ex',
-        u'_type': u'metadata',
-        u'abbreviation': u'ex',
-        u'legislature_name': u'Example State Legislature',
-        u'lower_chamber_name': u'Assembly',
-        u'lower_chamber_term': 2,
-        u'lower_chamber_title': u'Assemblymember',
-        u'name': u'Example',
-        u'session_details': {
-            u'20112012': {
-                u'display_name': u'2011-2012 Fake Session',
-                u'start_date': datetime.datetime(2010, 12, 6, 0, 0),
-                u'type': u'primary'},
-            u'20112012 Special Session 1': {
-                u'display_name': u'2011-2012, 1st Special Fake Session',
-                u'type': u'special'}},
-        u'terms': [
-            {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
-             u'end_year': 2012,
-             u'name': u'20112012',
-             u'sessions': [u'20112012 Special Session 1', u'20112012'],
-             u'start_year': 2011}],
-        u'upper_chamber_name': u'Senate',
-        u'upper_chamber_term': 4,
-        u'upper_chamber_title': u'Senator'})
+    fixtures.load_metadata()
 
     db.legislators.insert({
         u'_all_ids': [u'EXL000001'],
@@ -66,7 +41,7 @@ def setup_func():
             u'party': u'Democratic',
             u'start_date': None,
             u'state': u'ex',
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'member'},
 
             {u'chamber': u'lower',
@@ -74,7 +49,7 @@ def setup_func():
             u'committee_id': u'EXC000001',
             u'state': u'ex',
             u'subcommittee': None,
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'committee member'}],
         })
 
@@ -101,7 +76,7 @@ def setup_func():
             u'party': u'Democratic',
             u'start_date': None,
             u'state': u'ex',
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'member'},
 
             {u'chamber': u'lower',
@@ -109,7 +84,7 @@ def setup_func():
             u'committee_id': u'EXC000001',
             u'state': u'ex',
             u'subcommittee': None,
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'committee member'}],
         })
 
@@ -136,7 +111,7 @@ def setup_func():
             u'party': u'Democratic',
             u'start_date': None,
             u'state': u'ex',
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'member'},
 
             {u'chamber': u'lower',
@@ -144,7 +119,7 @@ def setup_func():
             u'committee_id': u'EXC000002',
             u'state': u'ex',
             u'subcommittee': None,
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'committee member'}],
         })
 
@@ -173,7 +148,7 @@ def setup_func():
             u'party': u'Democratic',
             u'start_date': None,
             u'state': u'LO',
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'member'},
 
             {u'chamber': u'lower',
@@ -181,7 +156,7 @@ def setup_func():
             u'committee_id': u'EXC000002',
             u'state': u'LO',
             u'subcommittee': None,
-            u'term': u'20112012',
+            u'term': u'T1',
             u'type': u'committee member'}],
         })
 
@@ -257,7 +232,7 @@ def setup_func():
         u'_current_session': True,
         u'_current_term': True,
         u'_id': u'EXB00000001',
-        u'_term': u'20112012',
+        u'_term': u'T1',
         u'_type': u'bill',
         u'action_dates': {
             u'first': datetime.datetime(2011, 1, 7, 0, 0),
@@ -283,7 +258,7 @@ def setup_func():
         u'companions': [],
         u'country': u'us',
         u'level': u'state',
-        u'session': u'20112012',
+        u'session': u'S1',
         u'sponsors': [
             {u'leg_id': u'EXL000001',
              u'name': u'FakeLegislator1',
@@ -298,7 +273,7 @@ def setup_func():
         u'_current_session': True,
         u'_current_term': True,
         u'_id': u'LOB00000001',
-        u'_term': u'20112012',
+        u'_term': u'T1',
         u'_type': u'bill',
         u'action_dates': {
             u'first': datetime.datetime(2011, 1, 7, 0, 0),
@@ -324,7 +299,7 @@ def setup_func():
         u'companions': [],
         u'country': u'us',
         u'level': u'state',
-        u'session': u'20112012',
+        u'session': u'S1',
         u'sponsors': [
             {u'leg_id': u'LOL000001',
              u'name': u'NYAN CAT',

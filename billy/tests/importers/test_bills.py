@@ -4,9 +4,9 @@ from billy.importers import bills, names
 
 from nose.tools import with_setup, assert_equal
 
+from .. import fixtures
 
 def setup_func():
-    db.metadata.drop()
     db.bills.drop()
     db.votes.drop()
     db.legislators.drop()
@@ -15,8 +15,8 @@ def setup_func():
     db.committees.drop()
     names.__matchers = {}
 
-    db.metadata.insert({'_id': 'ex',
-                        'terms': [{'name': 'T1', 'sessions': ['S1', 'S2']}]})
+    fixtures.load_metadata()
+
     db.legislators.insert({'state': 'ex',
                            '_id': 'EXL000001', 'leg_id': 'EXL000001',
                            'chamber': 'upper',
