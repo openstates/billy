@@ -20,7 +20,7 @@ b.add_action('lower', 'passed house without vote', datetime.date(2012, 1, 2),
              type='bill:passed')
 b.add_action('upper', 'referred to senate committees',
              datetime.datetime(2012, 2, 1), type='committee:referred',
-             committee=['Agriculture', 'Judiciary'])
+             committees=['Agriculture', 'Judiciary'])
 b.add_action('upper', 'failed in senate', datetime.datetime(2012, 2, 5),
              type=['bill:reading:3', 'bill:failed'], vote_slug='vote-1')
 b.add_title('The Armadillo Bill')

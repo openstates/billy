@@ -7,7 +7,7 @@ ex = {
     "lower_chamber_title": "Representative",
     "upper_chamber_name": "Senate",
     "upper_chamber_term": 6,
-    "upper_chamber_title": "Senator"
+    "upper_chamber_title": "Senator",
     "name": "Example State",
     "terms": [
         {
@@ -15,7 +15,7 @@ ex = {
             "sessions": [
                 "S0",
             ],
-            "start_year": 2009
+            "start_year": 2009,
             "end_year": 2010,
         },
         {
@@ -23,7 +23,7 @@ ex = {
             "sessions": [
                 "S1", "Special1",
             ],
-            "start_year": 2011
+            "start_year": 2011,
             "end_year": 2012,
         },
         {
@@ -31,7 +31,7 @@ ex = {
             "sessions": [
                 "S2", "Special2",
             ],
-            "start_year": 2013
+            "start_year": 2013,
             "end_year": 2014,
         }
     ],
