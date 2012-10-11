@@ -18,6 +18,7 @@ def test_type():
                                                            'constitutional amendment'])
     assert b['type'] == ['resolution', 'constitutional amendment']
 
+
 def test_on_duplicate():
     b = Bill('S1', 'upper', 'SB1', 'on_duplicate')
     b.add_version('current', 'http://example.com/doc/1', mimetype='text/html')
