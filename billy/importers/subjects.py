@@ -21,14 +21,8 @@ class SubjectCategorizer(object):
             subjects.update(categories)
         bill['subjects'] = list(subjects)
 
-    def categorize_bills(self, latest_term_only=False):
-        meta = metadata(self.abbr)
+    def categorize_bills(self):
         spec = {settings.LEVEL_FIELD: self.abbr}
-
-        # process just the sessions from the latest term
-        if latest_term_only:
-            sessions = meta['terms'][-1]['sessions']
-            spec['session'] = {'$in': sessions}
 
         for bill in db.bills.find(spec):
             self.categorize_bill(bill)
