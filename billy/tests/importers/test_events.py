@@ -13,7 +13,7 @@ def setup_func():
     db.metadata.drop()
 
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            "fixture_data")
+                            "fixtures/data")
     import_metadata("ex", data_dir)
 
 

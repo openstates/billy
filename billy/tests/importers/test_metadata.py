@@ -12,7 +12,7 @@ def drop_metadata():
 @with_setup(drop_metadata)
 def test_import_metadata():
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            "fixture_data")
+                            "fixtures/data")
     import_metadata("ex", data_dir)
     metadata = db.metadata.find_one({"_id": "ex"})
     assert metadata
