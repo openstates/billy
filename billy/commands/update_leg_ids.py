@@ -2,6 +2,7 @@ from billy.core import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
 from billy.importers.names import NameMatcher
+from billy.importers.utils import get_committee_id
 from billy.core import settings
 
 
@@ -32,6 +33,10 @@ class UpdateLegIds(BaseCommand):
                 for sponsor in bill['sponsors']:
                     sponsor['leg_id'] = nm.match(sponsor['name'],
                                                  bill['chamber'])
+                    cid = get_committee_id(args.abbr, bill['chmber'],
+                                           sponsor['name'])
+                    if cid:
+                        sponsor['committee_id'] = cid
                 db.bills.save(bill, safe=True)
 
             votes = db.votes.find({settings.LEVEL_FIELD: args.abbr,
