@@ -105,6 +105,7 @@ def _timestamp_to_dt(timestamp):
 def compare_committee(ctty1, ctty2):
     def _cleanup(obj):
         ctty_junk_words = [
+            "(\s+|^)standing(\s+|$)",
             "(\s+|^)committee(\s+|$)",
             "(\s+|^)on(\s+|$)",
             "(\s+|^)joint(\s+|$)",
