@@ -110,12 +110,10 @@ def test_metadata_committees_extra_spec():
 # Terms
 @with_setup(setup_func)
 def test_metadata_terms_session_names():
-    '''Does Metadata.committees add the extra spec to the mongo query?
-    '''
     # Get term session names manually.
     meta1 = db.metadata.find_one('ex')
     for term1 in meta1['terms']:
-        if term1['name'] == '20112012':
+        if term1['name'] == 'T1':
             break
     names1 = []
     for sess in term1['sessions']:
@@ -123,7 +121,7 @@ def test_metadata_terms_session_names():
 
     # Now through the model method.
     meta2 = db.metadata.find_one('ex')
-    names2 = list(meta2.terms_manager[0].session_names())
+    names2 = list(meta2.terms_manager[1].session_names())
 
     eq_(names1, names2)
 

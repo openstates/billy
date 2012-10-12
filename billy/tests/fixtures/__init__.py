@@ -6,3 +6,4 @@ def load_metadata():
     db.metadata.drop()
     data_dir = os.path.join(os.path.dirname(__file__), "data")
     import_metadata("ex", data_dir)
+    import_metadata("yz", data_dir)

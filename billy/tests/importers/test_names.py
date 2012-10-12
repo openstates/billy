@@ -3,9 +3,10 @@ from nose.tools import with_setup
 from billy.core import db
 from billy.importers import names
 
+from .. import fixtures
 
 def setup_func():
-    db.metadata.drop()
+    fixtures.load_metadata()
     db.legislators.drop()
     # TODO: this is kind of a hack, fix it?
     names.__matchers = {}
@@ -13,8 +14,6 @@ def setup_func():
 
 @with_setup(setup_func)
 def test_get_legislator_id():
-    db.metadata.insert({'_id': 'ex', 'terms': [{'name': 'T1',
-                                                'sessions': ['S1']}]})
     db.legislators.insert({'_id': 'EXL000042',
                            'state': 'ex',
                            'full_name': 'Ed Iron Cloud III',

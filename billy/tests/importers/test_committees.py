@@ -4,15 +4,15 @@ from billy.core import db
 from billy.importers import committees
 from billy.importers import names
 
+from .. import fixtures
+
 
 def setup_func():
-    db.metadata.drop()
     db.legislators.drop()
     db.committees.drop()
     names.__matchers = {}
 
-    db.metadata.insert({'_id': 'ex',
-                        'terms': [{'name': 'T1', 'sessions': ['S1']}]})
+    fixtures.load_metadata()
 
     leg_a = {'full_name': 'Richard Feynman', 'leg_id': 'EXL000001',
              '_id': 'EXL000001',
