@@ -111,7 +111,8 @@ class NameMatcher(object):
 
             if (term == self._term or not term) and leg_id:
                 self._manual[chamber][name] = leg_id
-                if name in self._manual[None]:
+                # if the name is already in _manual[None] and isn't leg_id
+                if self._manual[None].get(name, False) not in (False, leg_id):
                     self._manual[None][name] = None
                 else:
                     self._manual[None][name] = leg_id
