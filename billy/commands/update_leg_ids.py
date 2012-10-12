@@ -33,7 +33,7 @@ class UpdateLegIds(BaseCommand):
                 for sponsor in bill['sponsors']:
                     sponsor['leg_id'] = nm.match(sponsor['name'],
                                                  bill['chamber'])
-                    cid = get_committee_id(args.abbr, bill['chmber'],
+                    cid = get_committee_id(args.abbr, bill['chamber'],
                                            sponsor['name'])
                     if cid:
                         sponsor['committee_id'] = cid
