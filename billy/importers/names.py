@@ -100,22 +100,22 @@ class NameMatcher(object):
         self._learn_manual_matches()
 
     def _learn_manual_matches(self):
-        rows = db.manual.leg_ids.find({
+        rows = db.manual.name_matchers.find({
             "abbr": self._abbr,
             "type": "legislator"
         })
 
         for row in rows:
-            (term, chamber, name, leg_id) = (
-                    row['term'], row['chamber'], row['name'], row['leg_id'])
+            (term, chamber, name, obj_id) = (
+                    row['term'], row['chamber'], row['name'], row['obj_id'])
 
-            if (term == self._term or not term) and leg_id:
-                self._manual[chamber][name] = leg_id
-                # if the name is already in _manual[None] and isn't leg_id
-                if self._manual[None].get(name, False) not in (False, leg_id):
+            if (term == self._term or not term) and obj_id:
+                self._manual[chamber][name] = obj_id
+                # if the name is already in _manual[None] and isn't obj_id
+                if self._manual[None].get(name, False) not in (False, obj_id):
                     self._manual[None][name] = None
                 else:
-                    self._manual[None][name] = leg_id
+                    self._manual[None][name] = obj_id
 
     def _normalize(self, name):
         """
@@ -254,22 +254,22 @@ class CommitteeNameMatcher(object):
         self._learn_manual_matches()
 
     def _learn_manual_matches(self):
-        rows = db.manual.leg_ids.find({
+        rows = db.manual.name_matchers.find({
             "abbr": self._abbr,
             "type": "committee"
         })
 
         for row in rows:
-            (term, chamber, name, leg_id) = (
-                    row['term'], row['chamber'], row['name'], row['leg_id'])
+            (term, chamber, name, obj_id) = (
+                    row['term'], row['chamber'], row['name'], row['obj_id'])
             row['chamber'] = None  # In case the DB has gone wonky on us.
 
-            if (term == self._term or not term) and leg_id:
-                self._manual[chamber][name] = leg_id
+            if (term == self._term or not term) and obj_id:
+                self._manual[chamber][name] = obj_id
                 if name in self._manual[None]:
                     self._manual[None][name] = None
                 else:
-                    self._manual[None][name] = leg_id
+                    self._manual[None][name] = obj_id
 
     def match(self, name, chamber):
         chamber = None  # In case something's gone crazy

@@ -24,12 +24,12 @@
         <th>Legislator</th>
         <th>Committee</th>
     </tr>
-{% for term, chamber, name in leg_ids %}
+{% for term, chamber, name in unmatched_ids %}
     <tr>
         <td>{{term}} {{chamber}}</td>
         <td>{{name}}</td>
         <td>
-            <select class="mselect" name="leg,{{term}},{{chamber}},{{name}}" type="text" >
+            <select class="mselect" name="legislator,{{term}},{{chamber}},{{name}}" type="text" >
                 <option value="Unknown" >Unknown</option>
                 {% for leg in legs %}
                 <option value="{{ leg.leg_id }}" >
@@ -66,22 +66,20 @@
         <th>Legislator Name</th>
         <th>Danger Zone</th>
     </tr>
-{% for id in all_ids %}
-    {% with leg=all_ids|key:id %}
+{% for id, leg in all_ids.iteritems %}
     <tr>
         <td>{{leg.name}}</td>
         <td>{{leg.term}}</td>
         <td>{{leg.chamber}}</td>
         <td>{{leg.type}}</td>
-        <td>{{leg.leg_id}}</td>
-        {% if known_legs|key:leg.leg_id %}
-        <td>{{known_legs|key:leg.leg_id|key:'full_name'}}</td>
+        <td>{{leg.obj_id}}</td>
+        {% if known_objs|key:leg.obj_id %}
+            <td>{{known_objs|key:leg.obj_id|key:'full_name'}}</td>
         {% else %}
         <td></td>
         {% endif %}
-        <td><a href="{% url admin_leg_ids_remove metadata.abbreviation all_ids|key:id|key:'_id' %}" >remove</a></td>
+        <td><a href="{% url admin_leg_ids_remove metadata.abbreviation id %}" >remove</a></td>
     </tr>
-    {% endwith %}
 {% endfor %}
 </table>
 

@@ -718,18 +718,19 @@ def leg_ids(request, abbr):
     legs = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
     committees = list(db.committees.find({settings.LEVEL_FIELD: abbr}))
 
-    leg_ids = db.manual.leg_ids.find({"abbr": abbr})
+    matchers = db.manual.name_matchers.find({"abbr": abbr})
     sorted_ids = {}
-    known_legs = {}
+    known_objs = {}
+    seen_names = set()
+
     for leg in legs:
-        known_legs[leg['leg_id']] = leg
+        known_objs[leg['_id']] = leg
+    for com in committees:
+        known_objs[com['_id']] = com
 
-    def _id(term, chamber, name):
-        return "%s-%s-%s" % (term, chamber, name)
-
-    for item in leg_ids:
-        key = _id(item['term'], item['chamber'], item['name'])
-        sorted_ids[key] = item
+    for item in matchers:
+        sorted_ids[item['_id']] = item
+        seen_names.add((item['term'], item['chamber'], item['name']))
 
     if not report:
         raise Http404('No reports found for abbreviation %r.' % abbr)
@@ -743,25 +744,24 @@ def leg_ids(request, abbr):
     unmatched_ids = []
 
     for term, chamber, name, id_type in combined_sets:
-        key = _id(term, chamber, name)
-        if key in sorted_ids:
+        if (term, chamber, name) in seen_names:
             continue
 
-        unmatched_ids.append((term, chamber, name, type))
+        unmatched_ids.append((term, chamber, name, id_type))
 
     return render(request, 'billy/leg_ids.html', {
         "metadata": meta,
-        "leg_ids": unmatched_ids,
+        "unmatched_ids": unmatched_ids,
         "all_ids": sorted_ids,
         "committees": committees,
-        "known_legs": known_legs,
+        "known_objs": known_objs,
         "legs": legs
     })
 
 
 @login_required
 def leg_ids_remove(request, abbr=None, id=None):
-    db.manual.leg_ids.remove({"_id": id}, safe=True)
+    db.manual.name_matchers.remove({"_id": ObjectId(id)}, safe=True)
     return redirect('admin_leg_ids', abbr)
 
 
@@ -775,25 +775,12 @@ def leg_ids_commit(request, abbr):
         if value == "Unknown":
             continue
 
-        thing = "%s-%s-%s-%s" % (
-            value,
-            name,
-            chamber,
-            term
-        )
-
-        db.manual.leg_ids.update({"_id": thing},
-                         {
-                             "_id": thing,
-                             "name": name,
-                             "term": term,
-                             "abbr": abbr,
-                             "leg_id": value,
-                             "chamber": chamber,
-                             "type": typ
-                         },
-                         True,  # Upsert
-                         safe=True)
+        db.manual.name_matchers.update({"name": name, "term": term, "abbr": abbr,
+                                      "chamber": chamber},
+                                     {"name": name, "term": term, "abbr": abbr,
+                                      "obj_id": value, "chamber": chamber,
+                                      "type": typ },
+                                     upsert=True, safe=True)
 
     return redirect('admin_leg_ids', abbr)
 
@@ -1333,8 +1320,6 @@ def newsblogs(request):
     entity_types = {'L': 'legislators',
                     'C': 'committees',
                     'B': 'bills'}
-
-    # print tab_range_len, tab, previous, next_, tab_index - 4
 
     for entry in entries:
         summary = entry['summary']
