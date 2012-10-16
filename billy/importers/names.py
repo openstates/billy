@@ -141,7 +141,7 @@ class NameMatcher(object):
         name, obj = legislator, legislator['_id']
 
         if (legislator['roles'] and legislator['roles'][0]['term'] ==
-            self._term):
+            self._term and legislator['roles'][0]['type'] == 'member'):
             chamber = legislator['roles'][0]['chamber']
         else:
             try:
