@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from billy.core import db
 from billy.core import settings
-from billy.utils import metadata
 
 
 class SubjectCategorizer(object):

@@ -77,6 +77,21 @@ def ensure_indexes():
     db.manual.name_matchers.ensure_index('abbr')
 
 
+def match_sponsor_ids(abbr, bill):
+    for sponsor in bill['sponsors']:
+        # use sponsor's chamber if specified
+        sponsor['leg_id'] = get_legislator_id(abbr, bill['session'],
+                                              sponsor.get('chamber',
+                                                          bill['chamber']),
+                                              sponsor['name'])
+        if sponsor['leg_id'] is None:
+            sponsor['leg_id'] = get_legislator_id(abbr, bill['session'], None,
+                                                  sponsor['name'])
+        if sponsor['leg_id'] is None:
+            sponsor['committee_id'] = get_committee_id(abbr, bill['chamber'],
+                                                       sponsor['name'])
+
+
 def load_standalone_votes(data_dir):
     pattern = os.path.join(data_dir, 'votes', '*.json')
     paths = glob.glob(pattern)
@@ -276,15 +291,7 @@ def import_bill(data, standalone_votes, categorizer):
     doc_matcher.set_ids(data['versions'] + data['documents'])
 
     # match sponsor leg_ids
-    for sponsor in data['sponsors']:
-        # use sponsor's chamber if specified
-        id = get_legislator_id(abbr, data['session'], sponsor.get('chamber'),
-                               sponsor['name'])
-        sponsor['leg_id'] = id
-        if id is None:
-            cid = get_committee_id(abbr, data['chamber'], sponsor['name'])
-            if not cid is None:
-                sponsor['committee_id'] = cid
+    match_sponsor_ids(abbr, data)
 
     # process votes ############
 

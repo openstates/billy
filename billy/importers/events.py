@@ -141,7 +141,6 @@ def import_event(data):
                                     'type': data['type'],
                                     'description': data['description']})
 
-
     data = apply_filters(filters, data)
 
     if not event:

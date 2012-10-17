@@ -36,7 +36,7 @@ def attempt_committee_match(abbr, chamber, name):
     try:
         matcher = __com_matchers[abbr]
     except KeyError:
-        matcher = CommitteeNameMatcher(abbr, None)
+        matcher = __com_matchers[abbr] = CommitteeNameMatcher(abbr, None)
 
     return matcher.match(name, chamber)
 
@@ -239,7 +239,7 @@ class NameMatcher(object):
             logger.warning("Chamber %s is invalid for a legislator." % (
                 chamber
             ))
-            return None  # XXX: Expected behavior?
+            return None
 
         name = self._normalize(name)
         return self._names[chamber].get(name, None)
@@ -247,7 +247,6 @@ class NameMatcher(object):
 
 class CommitteeNameMatcher(object):
     def __init__(self, abbr, term):
-        self._names = {'upper': {}, 'lower': {}, None: {}}
         self._manual = {'upper': {}, 'lower': {}, None: {}, 'joint': {}}
         self._abbr = abbr
         self._term = term
@@ -264,7 +263,7 @@ class CommitteeNameMatcher(object):
                     row['term'], row['chamber'], row['name'], row['obj_id'])
             row['chamber'] = None  # In case the DB has gone wonky on us.
 
-            if (term == self._term or not term) and obj_id:
+            if (term == self._term or not term or not self._term) and obj_id:
                 self._manual[chamber][name] = obj_id
                 if name in self._manual[None]:
                     self._manual[None][name] = None
@@ -272,9 +271,7 @@ class CommitteeNameMatcher(object):
                     self._manual[None][name] = obj_id
 
     def match(self, name, chamber):
-        chamber = None  # In case something's gone crazy
         try:
             return self._manual[chamber][name]
         except KeyError:
-            pass
-        return self._names[chamber].get(name, None)
+            return None

@@ -1359,7 +1359,6 @@ def newsblogs(request):
     #         if entity_data['type'] == 'organization':
     #             ie_url = 'http://influenceexplorer.com/organization/%s/%s'
     #             ie_url = ie_url % (entity_data['slug'], entity_data['id'])
-    #             print 'found one!'
     #         else:
     #             continue
     #         summary = entry['summary']

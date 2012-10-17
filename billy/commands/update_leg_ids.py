@@ -2,7 +2,7 @@ from billy.core import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
 from billy.importers.names import get_legislator_id
-from billy.importers.utils import get_committee_id
+from billy.importers.bills import match_sponsor_ids
 from billy.core import settings
 
 
@@ -28,18 +28,7 @@ class UpdateLegIds(BaseCommand):
                                    'session': session})
 
             for bill in bills:
-                for sponsor in bill['sponsors']:
-                    # use sponsor's chamber if specified
-                    id = get_legislator_id(args.abbr, bill['session'],
-                                           sponsor.get('chamber'),
-                                           sponsor['name'])
-                    sponsor['leg_id'] = id
-                    if id is None:
-                        cid = get_committee_id(args.abbr, bill['chamber'],
-                                               sponsor['name'])
-                        if not cid is None:
-                            sponsor['committee_id'] = cid
-
+                match_sponsor_ids(args.abbr, bill)
                 db.bills.save(bill, safe=True)
 
             votes = db.votes.find({settings.LEVEL_FIELD: args.abbr,
