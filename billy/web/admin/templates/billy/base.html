@@ -47,6 +47,8 @@
                         data-toggle="dropdown">Manual Data<b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
+                    <li><a href="{% url admin_matching metadata.abbreviation %}">Name Matching</a> </li>
+                    <li><a href="{% url admin_subjects metadata.abbreviation %}">Subjects</a> </li>
                     <li><a href="{% url other_actions metadata.abbreviation %}">Other Actions</a> </li>
                     <li><a href="{% url quality_exceptions metadata.abbreviation %}">Data Quality Exceptions</a> </li>
                     </ul>

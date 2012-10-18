@@ -11,7 +11,7 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/remove_exception/(?P<obj>.+)/$',
         'quality_exception_remove', name='quality_exception_remove'),
 
-    # Subject stuff
+    # subjects
     url(r'^(?P<abbr>[a-z]{2})/subjects/$', 'subjects',
         name='admin_subjects'),
     url(r'^(?P<abbr>[a-z]{2})/subjects-commit/$', 'subjects_commit',
@@ -19,13 +19,13 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^(?P<abbr>[a-z]{2})/subjects-remove/(?P<id>.+)/$', 'subjects_remove',
         name='admin_subjects_remove'),
 
-    # Leg ID stuff
-    url(r'^(?P<abbr>[a-z]{2})/leg_ids/$', 'leg_ids',
-        name='admin_leg_ids'),
-    url(r'^(?P<abbr>[a-z]{2})/leg_ids-commit/$', 'leg_ids_commit',
-        name='admin_leg_ids_commit'),
-    url(r'^(?P<abbr>[a-z]{2})/leg_ids-remove/(?P<id>.+)/$', 'leg_ids_remove',
-        name='admin_leg_ids_remove'),
+    # matching
+    url(r'^(?P<abbr>[a-z]{2})/name-matching/$', 'matching.edit',
+        name='admin_matching'),
+    url(r'^(?P<abbr>[a-z]{2})/matching-commit/$', 'matching.commit',
+        name='admin_matching_commit'),
+    url(r'^(?P<abbr>[a-z]{2})/matching-remove/(?P<id>.+)/$', 'matching.remove',
+        name='admin_matching_remove'),
 
 
     # admin overview pages
