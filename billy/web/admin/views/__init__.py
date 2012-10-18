@@ -775,11 +775,11 @@ def leg_ids_commit(request, abbr):
         if value == "Unknown":
             continue
 
-        db.manual.name_matchers.update({"name": name, "term": term, "abbr": abbr,
-                                      "chamber": chamber},
+        db.manual.name_matchers.update({"name": name, "term": term,
+                                        "abbr": abbr, "chamber": chamber},
                                      {"name": name, "term": term, "abbr": abbr,
                                       "obj_id": value, "chamber": chamber,
-                                      "type": typ },
+                                      "type": typ},
                                      upsert=True, safe=True)
 
     return redirect('admin_leg_ids', abbr)
