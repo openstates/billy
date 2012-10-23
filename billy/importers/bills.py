@@ -233,7 +233,7 @@ def track_version(bill, version):
            'sponsors': [s['leg_id'] for s in bill['sponsors'] if s['leg_id']]
           }
     # insert or update this document
-    db.tracked_versions.insert({'_id': version[doc_id]}, {'$set': doc},
+    db.tracked_versions.update({'_id': version['doc_id']}, {'$set': doc},
                                upsert=True)
 
 

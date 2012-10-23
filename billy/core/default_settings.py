@@ -97,6 +97,9 @@ LOGGING_CONFIG = {
         'requests': {
             'handlers': ['default'], 'level': 'WARN', 'propagate': False
         },
+        'boto': {
+            'handlers': ['default'], 'level': 'WARN', 'propagate': False
+        },
     },
 }
 
