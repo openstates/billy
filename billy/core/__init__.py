@@ -7,6 +7,7 @@ import logging.config
 import pymongo
 from pymongo.son_manipulator import SONManipulator
 import pyes
+import boto
 
 from billy.core import default_settings
 
@@ -60,6 +61,7 @@ db = None
 mdb = None
 feeds_db = None
 elasticsearch = None
+s3bucket = None
 _model_registry = {}
 _model_registry_by_collection = {}
 
@@ -108,6 +110,15 @@ def _configure_es(host, timeout):
     except Exception as e:
         elasticsearch = ErrorProxy(e)
 
+
+def _configure_s3(aws_key, aws_secret, bucket):
+    global s3bucket
+    try:
+        s3bucket = boto.connect_s3(aws_key, aws_secret).get_bucket(bucket)
+    except Exception as e:
+        s3bucket = ErrorProxy(e)
+
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
 _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
+_configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)
