@@ -1,3 +1,4 @@
+import importlib
 from billy.core import settings, db, s3bucket
 import boto.s3
 
@@ -22,3 +23,9 @@ def s3_get(id):
         headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
         k.set_contents_from_string(data, headers=headers)
         return data
+
+
+def plaintext(id):
+    abbr = id[0:2].lower()
+    doc = db.tracked_documents.find_one(id)
+    return importlib.import_module(abbr).extract_text(doc, s3_get(id))
