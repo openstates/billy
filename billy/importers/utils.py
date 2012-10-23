@@ -12,14 +12,6 @@ import name_tools
 from billy.core import db, settings
 from billy.importers.names import attempt_committee_match
 
-if settings.ENABLE_OYSTER:
-    oyster_import_exception = None
-    try:
-        from oyster.core import kernel
-    except ImportError as e:
-        kernel = None               # noqa
-        oyster_import_exception = e
-
 
 def _get_property_dict(schema):
     """ given a schema object produce a nested dictionary of fields """
@@ -408,10 +400,3 @@ def get_committee_id_alt(abbr, name, chamber):
         matched_committee = get_committee_id_alt(abbr, name, None)
 
     return matched_committee
-
-
-def oysterize(url, doc_class, id, **kwargs):
-    if not kernel:
-        raise oyster_import_exception
-    # kwargs pass through as metadata
-    kernel.track_url(url, doc_class, id=id, **kwargs)

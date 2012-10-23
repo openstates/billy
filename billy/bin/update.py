@@ -255,12 +255,6 @@ def main(old_scrape_compat=False):
         settings.update(module_settings)
         settings.update(args)
 
-        # configure oyster
-        if settings.ENABLE_OYSTER:
-            from oyster.conf import settings as oyster_settings
-            oyster_settings.DOCUMENT_CLASSES[args.module + ':billtext'] = \
-                    module.document_class
-
         # make output dir
         args.output_dir = os.path.join(settings.BILLY_DATA_DIR, abbrev)
 

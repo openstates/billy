@@ -14,7 +14,7 @@ from billy.importers.filters import apply_filters
 
 from billy.importers.subjects import SubjectCategorizer
 from billy.importers.utils import (insert_with_id, update, prepare_obj,
-                                   next_big_id, oysterize, get_committee_id)
+                                   next_big_id, get_committee_id)
 
 if hasattr(settings, "ENABLE_GIT") and settings.ENABLE_GIT:
     from dulwich.repo import Repo
@@ -220,19 +220,21 @@ def git_prelod(abbr):
     git_active_tree = tree
 
 
-def oysterize_version(bill, version):
-    titles = [bill['title']] + bill.get('alternate_titles', [])
-    logger.info('{0} tracked in oyster'.format(version['doc_id']))
-    oysterize(version['url'], bill[settings.LEVEL_FIELD] + ':billtext',
-              id=version['doc_id'],
-              # metadata
-              mimetype=version.get('mimetype', None),
-              titles=titles,
-              state=bill['state'], session=bill['session'],
-              chamber=bill['chamber'], bill_id=bill['bill_id'],
-              subjects=bill.get('subjects', []),
-              sponsors=[s['leg_id'] for s in bill['sponsors']],
-             )
+def track_version(bill, version):
+    doc = {'titles': [bill['title']] + bill.get('alternate_titles', []),
+           'url': version['url'],
+           'type': 'version',
+           'mimetype': version.get('mimetype', None),
+           'state': bill['state'],
+           'session': bill['session'],
+           'chamber': bill['chamber'],
+           'bill_id': bill['bill_id'],
+           'subjects': bill.get('subjects', []),
+           'sponsors': [s['leg_id'] for s in bill['sponsors'] if s['leg_id']]
+          }
+    # insert or update this document
+    db.tracked_versions.insert({'_id': version[doc_id]}, {'$set': doc},
+                               upsert=True)
 
 
 def import_bill(data, standalone_votes, categorizer):
@@ -422,9 +424,8 @@ def import_bill(data, standalone_votes, categorizer):
     alt_titles = set(data.get('alternate_titles', []))
 
     for version in data['versions']:
-        # push versions to oyster
-        if settings.ENABLE_OYSTER and 'url' in version:
-            oysterize_version(data, version)
+        # add/update tracked_documents collection
+        track_version(bill, version)
 
         # Merge any version titles into the alternate_titles list
         if 'title' in version:

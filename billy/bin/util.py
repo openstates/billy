@@ -17,9 +17,6 @@ COMMAND_MODULES = (
     'billy.commands.validate_api',
 )
 
-if settings.ENABLE_OYSTER:
-    COMMAND_MODULES += ('billy.commands.oysterize',)
-
 
 def import_command_module(mod):
     try:
