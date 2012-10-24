@@ -19,7 +19,7 @@ def s3_get(id):
     try:
         return k.get_contents_as_string()
     except:
-        doc = db.tracked_documents.find_one(id)
+        doc = db.tracked_versions.find_one(id)
         if not doc:
             return None
         data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
@@ -45,7 +45,7 @@ def _clean_text(text):
 
 def plaintext(id):
     abbr = id[0:2].lower()
-    doc = db.tracked_documents.find_one(id)
+    doc = db.tracked_versions.find_one(id)
     module = importlib.import_module(abbr)
     text = module.extract_text(doc, s3_get(id))
     return _clean_text(text)

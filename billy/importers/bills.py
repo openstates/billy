@@ -424,7 +424,7 @@ def import_bill(data, standalone_votes, categorizer):
     alt_titles = set(data.get('alternate_titles', []))
 
     for version in data['versions']:
-        # add/update tracked_documents collection
+        # add/update tracked_versions collection
         track_version(data, version)
 
         # Merge any version titles into the alternate_titles list
