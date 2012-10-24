@@ -192,7 +192,7 @@ def _do_reports(abbrev, args):
     db.reports.save(report, safe=True)
 
 
-def main(old_scrape_compat=False):
+def main():
     try:
         parser = argparse.ArgumentParser(
           description='update billy data',
@@ -285,10 +285,7 @@ def main(old_scrape_compat=False):
             args.chambers = ['upper', 'lower']
 
         if not args.actions:
-            if old_scrape_compat:
-                args.actions = ['scrape']
-            else:
-                args.actions = ['scrape', 'import', 'report']
+            args.actions = ['scrape', 'import', 'report']
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
@@ -408,9 +405,6 @@ def main(old_scrape_compat=False):
         logging.getLogger('billy').critical('Error: %s', e)
         sys.exit(1)
 
-
-def scrape_compat_main():
-    main(True)
 
 if __name__ == '__main__':
     main()
