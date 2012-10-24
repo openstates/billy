@@ -43,7 +43,7 @@ class SyncVersions(BaseCommand):
                     errors += 1
                     traceback.print_exc()
             else:
-                task.delay((doc['_id'],))
+                task.delay(doc['_id'])
 
 
         print '{0} {1} for {2} documents, {3} errors'.format(

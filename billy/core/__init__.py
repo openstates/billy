@@ -8,6 +8,7 @@ import pymongo
 from pymongo.son_manipulator import SONManipulator
 import pyes
 import boto
+from celery import Celery
 
 from billy.core import default_settings
 
@@ -62,6 +63,7 @@ mdb = None
 feeds_db = None
 elasticsearch = None
 s3bucket = None
+celery = None
 _model_registry = {}
 _model_registry_by_collection = {}
 
@@ -118,7 +120,14 @@ def _configure_s3(aws_key, aws_secret, bucket):
     except Exception as e:
         s3bucket = ErrorProxy(e)
 
+
+def _configure_celery():
+    global celery
+    celery = Celery(include=['billy.fulltext.elasticsearch'])
+
+
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
 _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
 _configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)
+_configure_celery()
