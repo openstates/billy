@@ -116,7 +116,10 @@ def _configure_es(host, timeout):
 def _configure_s3(aws_key, aws_secret, bucket):
     global s3bucket
     try:
-        s3bucket = boto.connect_s3(aws_key, aws_secret).get_bucket(bucket)
+        if aws_key and aws_secret and bucket:
+            s3bucket = boto.connect_s3(aws_key, aws_secret).get_bucket(bucket)
+        else:
+            s3bucket = ErrorProxy(ValueError('s3 not configured in settings'))
     except Exception as e:
         s3bucket = ErrorProxy(e)
 
