@@ -27,7 +27,7 @@ class SyncVersions(BaseCommand):
         if args.elasticsearch:
             spec['_elasticsearch'] = None
             task = ElasticSearchPush
-        documents = db.tracked_versions.find(spec)
+        documents = db.tracked_versions.find(spec, timeout=False)
 
         print 'starting {0} for {1} documents ({2})'.format(task.__name__,
                                                             documents.count(),
