@@ -1,7 +1,7 @@
 import logging
 from celery.task.base import Task
 
-from billy.core import elasticsearch
+from billy.core import db, elasticsearch
 from . import plaintext
 
 log = logging.getLogger('billy.fulltext.elasticsearch')
@@ -16,7 +16,8 @@ class ElasticSearchPush(Task):
         try:
             text = plaintext(doc_id)
 
-            es.index(dict(doc, text=text), 'bills', 'version', id=doc_id)
+            elasticsearch.index(dict(doc, text=text), 'bills', 'version',
+                                id=doc_id)
 
         except Exception as e:
             log.warning('error tracking %s', doc_id, exc_info=True)
