@@ -19,6 +19,9 @@ class ElasticSearchPush(Task):
 
             elasticsearch.index(dict(doc, text=text), 'bills', 'version',
                                 id=doc_id)
+            db.tracked_versions.update({'_id': doc_id},
+                                       {'$set': {'_elasticsearch': True}},
+                                       safe=True)
 
         except Exception:
             log.warning('error tracking %s', doc_id, exc_info=True)
