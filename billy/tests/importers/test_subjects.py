@@ -4,15 +4,18 @@ from billy.core import db
 from billy.importers.subjects import SubjectCategorizer
 from .. import fixtures
 
+
 def setup_func():
     fixtures.load_metadata()
     db.bills.drop()
     db.subjects.drop()
 
+
 @with_setup(setup_func)
 def test_basic_categorization():
 
-    db.subjects.insert({'abbr': 'ex', 'remote': 'AK-47', 'normal': ['Guns', 'Crime']})
+    db.subjects.insert({'abbr': 'ex', 'remote': 'AK-47',
+                        'normal': ['Guns', 'Crime']})
     db.subjects.insert({'abbr': 'ex', 'remote': 'Hunting', 'normal': ['Guns']})
     db.subjects.insert({'abbr': 'ex', 'remote': 'Candy', 'normal': ['Food']})
 
@@ -45,7 +48,8 @@ def test_basic_categorization():
 @with_setup(setup_func)
 def test_all_bills_categorization():
 
-    db.subjects.insert({'abbr': 'ex', 'remote': 'AK-47', 'normal': ['Guns', 'Crime']})
+    db.subjects.insert({'abbr': 'ex', 'remote': 'AK-47',
+                        'normal': ['Guns', 'Crime']})
     db.subjects.insert({'abbr': 'ex', 'remote': 'Hunting', 'normal': ['Guns']})
     db.subjects.insert({'abbr': 'ex', 'remote': 'Candy', 'normal': ['Food']})
 
@@ -57,7 +61,7 @@ def test_all_bills_categorization():
              {'scraped_subjects': ['AK-47', 'Candy'], 'bill_id': '3',
               'state': 'ex'},
              {'scraped_subjects': ['AK-47', 'Hunting'], 'bill_id': '4',
-              'state': 'ex'} ]
+              'state': 'ex'}]
     map(db.bills.insert, bills)
 
     # run categorization on all bills
@@ -78,4 +82,3 @@ def test_all_bills_categorization():
     # avoid duplicates
     bill = db.bills.find_one({'bill_id': '4'})
     assert_equal(bill['subjects'], [u'Guns', u'Crime'])
-

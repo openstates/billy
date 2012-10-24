@@ -6,6 +6,7 @@ from . import plaintext
 
 log = logging.getLogger('billy.fulltext.elasticsearch')
 
+
 class ElasticSearchPush(Task):
     # results go into ES
     ignore_result = True
@@ -19,6 +20,6 @@ class ElasticSearchPush(Task):
             elasticsearch.index(dict(doc, text=text), 'bills', 'version',
                                 id=doc_id)
 
-        except Exception as e:
+        except Exception:
             log.warning('error tracking %s', doc_id, exc_info=True)
             raise

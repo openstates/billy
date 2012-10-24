@@ -4,7 +4,7 @@ the Legislator model:
 
 '''
 from . import setup_func
-from nose.tools import with_setup, eq_, set_trace
+from nose.tools import with_setup, eq_
 from billy.models import db
 
 
@@ -212,5 +212,3 @@ def test_legislator_rolesmanager_mutation():
 #     rv2 = list(meta2.bills(spec))
 
 #     eq_(rv1, rv2)
-
-

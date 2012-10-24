@@ -1,9 +1,7 @@
-import os
 import datetime as dt
 from nose.tools import with_setup
 
 from billy.core import db
-from billy.importers.metadata import import_metadata
 from billy.importers import events
 from .. import fixtures
 

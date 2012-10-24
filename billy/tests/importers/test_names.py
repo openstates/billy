@@ -5,6 +5,7 @@ from billy.importers import names
 
 from .. import fixtures
 
+
 def setup_func():
     fixtures.load_metadata()
     db.legislators.drop()

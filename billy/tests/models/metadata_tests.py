@@ -172,5 +172,3 @@ def test_metadata_bills_extra_spec():
     rv2 = list(meta2.bills(spec))
 
     eq_(rv1, rv2)
-
-

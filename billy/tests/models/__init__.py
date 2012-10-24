@@ -3,6 +3,7 @@ from billy.models import db
 
 from .. import fixtures
 
+
 def setup_func():
     assert db.name.endswith('_test')
     db.bills.drop()

@@ -1,6 +1,5 @@
 import sys
 import traceback
-import importlib
 
 from billy.core import db, settings
 from billy.commands import BaseCommand
@@ -44,7 +43,6 @@ class SyncVersions(BaseCommand):
                     traceback.print_exc()
             else:
                 task.delay(doc['_id'])
-
 
         print '{0} {1} for {2} documents, {3} errors'.format(
             'ran' if args.immediate else 'queued', task.__name__,

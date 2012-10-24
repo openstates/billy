@@ -30,4 +30,3 @@ b.add_companion('SB200')
 bill_with_multiple_types = Bill('S1', 'upper', 'SJR1',
                                 'Division of State - Consitutional Amendment',
                         type=['joint resolution', 'constitutional amendment'])
-

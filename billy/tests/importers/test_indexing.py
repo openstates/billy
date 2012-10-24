@@ -1,6 +1,7 @@
 from billy.core import db
 from billy.importers.bills import ensure_indexes as bill_indexes
 
+
 def _assert_index(query, name_piece=None):
     cursor = query.explain()['cursor']
     if name_piece:
@@ -8,6 +9,7 @@ def _assert_index(query, name_piece=None):
                                                                cursor))
     else:
         assert cursor.startswith('BtreeCursor'), ("cursor (%s)" % cursor)
+
 
 def test_bill_indexes():
     bill_indexes()
@@ -45,4 +47,3 @@ def test_bill_indexes():
     _assert_index(db.votes.find({'bill_id': 'XYZ', 'date': 123}))
     _assert_index(db.votes.find({'_voters': 'XYZ'}))
     _assert_index(db.votes.find({'_voters': 'XYZ', 'date': 123}))
-

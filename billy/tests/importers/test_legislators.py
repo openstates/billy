@@ -7,6 +7,7 @@ from billy.importers import legislators, utils
 
 from .. import fixtures
 
+
 def setup_func():
     db.legislators.drop()
     fixtures.load_metadata()

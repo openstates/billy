@@ -13,7 +13,6 @@ import datetime
 import nose.tools
 from nose.tools import with_setup
 from billy.models import db
-from billy.core import settings
 
 
 def setup_func():

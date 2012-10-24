@@ -6,6 +6,7 @@ from nose.tools import with_setup, assert_equal
 
 from .. import fixtures
 
+
 def setup_func():
     db.bills.drop()
     db.votes.drop()

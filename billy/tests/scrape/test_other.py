@@ -90,4 +90,3 @@ def test_vote():
     v.yes('Clinton')
     with assert_raises(ValueError):
         v.validate()
-

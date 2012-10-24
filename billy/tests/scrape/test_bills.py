@@ -4,6 +4,7 @@ from billy.scrape.bills import Bill
 
 # separate test for duplicate versions to add_version
 
+
 def test_type():
     # one
     b = Bill('S1', 'upper', 'SB1', 'multiple-types')
@@ -14,8 +15,8 @@ def test_type():
     assert b['type'] == ['resolution']
 
     # multi
-    b = Bill('S1', 'upper', 'SB1', 'multiple-types', type=['resolution',
-                                                           'constitutional amendment'])
+    b = Bill('S1', 'upper', 'SB1', 'multiple-types',
+             type=['resolution', 'constitutional amendment'])
     assert b['type'] == ['resolution', 'constitutional amendment']
 
 

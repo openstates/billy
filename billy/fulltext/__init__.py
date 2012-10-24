@@ -1,6 +1,10 @@
+import re
+import string
 import importlib
 from billy.core import settings, db, s3bucket
 import boto.s3
+import scrapelib
+
 
 def id_to_url(id):
     abbr = id[0:2].lower()
@@ -25,7 +29,23 @@ def s3_get(id):
         return data
 
 
+PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
+
+
+def _clean_text(text):
+    if isinstance(text, unicode):
+        text = text.encode('ascii', 'ignore')
+    else:
+        text = text.decode('utf8', 'ignore').encode('ascii', 'ignore')
+    text = text.replace(u'\xa0', u' ')  # nbsp -> sp
+    text = PUNCTUATION.sub(' ', text)   # strip punctuation
+    text = re.sub('\s+', ' ', text)     # collapse spaces
+    return text
+
+
 def plaintext(id):
     abbr = id[0:2].lower()
     doc = db.tracked_documents.find_one(id)
-    return importlib.import_module(abbr).extract_text(doc, s3_get(id))
+    module = importlib.import_module(abbr)
+    text = module.extract_text(doc, s3_get(id))
+    return _clean_text(text)

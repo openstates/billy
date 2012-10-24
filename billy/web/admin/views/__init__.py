@@ -711,7 +711,6 @@ def legislators(request, abbr):
     })
 
 
-
 @login_required
 def subjects(request, abbr):
     meta = metadata(abbr)
