@@ -25,8 +25,8 @@ def s3_get(id):
         data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
         content_type = data.response.headers['content-type']
         headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
-        k.set_contents_from_string(data, headers=headers)
-        return data
+        k.set_contents_from_string(data.bytes, headers=headers)
+        return data.bytes
 
 
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
