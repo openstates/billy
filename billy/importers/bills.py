@@ -425,7 +425,7 @@ def import_bill(data, standalone_votes, categorizer):
 
     for version in data['versions']:
         # add/update tracked_documents collection
-        track_version(bill, version)
+        track_version(data, version)
 
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
