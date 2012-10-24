@@ -1,7 +1,7 @@
 language: python
 python:
     - "2.7"
-install: pip install pymongo nose name_tools validictory scrapelib jellyfish unicodecsv Django pyes argparse pytz --use-mirrors
+install: pip install pymongo nose name_tools validictory scrapelib jellyfish unicodecsv Django pyes argparse pytzcelery boto --use-mirrors
 script: nosetests
 services: mongodb
 notifications:

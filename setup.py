@@ -21,7 +21,6 @@ setup(name='billy',
       platforms=['any'],
       entry_points="""
 [console_scripts]
-billy-scrape = billy.bin.update:scrape_compat_main
 billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
@@ -39,5 +38,6 @@ billy-util = billy.bin.util:main
         "unicodecsv",
         "validictory>=0.7.1",
         "pyes",
+        "celery",
     ]
 )
