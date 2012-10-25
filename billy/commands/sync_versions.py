@@ -28,9 +28,10 @@ class SyncVersions(BaseCommand):
             spec['_elasticsearch'] = None
             task = ElasticSearchPush
         documents = db.tracked_versions.find(spec, timeout=False)
+        doc_count = documents.count()
 
         print 'starting {0} for {1} documents ({2})'.format(task.__name__,
-                                                            documents.count(),
+                                                            doc_count,
                                     'immediate' if args.immediate else 'queued'
                                                            )
 
@@ -45,5 +46,5 @@ class SyncVersions(BaseCommand):
                 task.delay(doc['_id'])
 
         print '{0} {1} for {2} documents, {3} errors'.format(
-            'ran' if args.immediate else 'queued', task.__name__,
-            documents.count(), errors)
+            'ran' if args.immediate else 'queued', task.__name__, doc_count,
+            errors)
