@@ -73,7 +73,16 @@ def browse_index(request, template='billy/index.html'):
     if only:
         spec = {'_id': {'$in': only.split(',')}}
 
-    for report in db.reports.find(spec):
+    for report in db.reports.find(spec, fields=('legislators', 'committees',
+                                                'votes',
+                                                'bills.actions_per_type',
+                                                'bills.versionless_count',
+                                                'bills.actionless_count',
+                                                'bills.sponsorless_count',
+                                                'bills.sponsors_with_id',
+                                                'bills.duplicate_versions',
+                                                'bills.have_subjects',
+                                               )):
         report['id'] = report['_id']
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
