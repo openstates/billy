@@ -5,6 +5,7 @@ from billy.core import settings, db, s3bucket
 import boto.s3
 import scrapelib
 
+log = logging.getLogger('billy.fulltext.elasticsearch')
 
 def id_to_url(id):
     abbr = id[0:2].lower()
@@ -26,6 +27,7 @@ def s3_get(id):
         content_type = data.response.headers['content-type']
         headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
         k.set_contents_from_string(data.bytes, headers=headers)
+        log.debug('pushed %s to s3 as %s', doc['url'], id)
         return data.bytes
 
 

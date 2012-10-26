@@ -22,7 +22,8 @@ class ElasticSearchPush(Task):
             db.tracked_versions.update({'_id': doc_id},
                                        {'$set': {'_elasticsearch': True}},
                                        safe=True)
+            log.info('pushed %s to ElasticSearch', doc_id)
 
         except Exception:
-            log.warning('error tracking %s', doc_id, exc_info=True)
+            log.warning('error pushing %s to ElasticSearch', doc_id, exc_info=True)
             raise
