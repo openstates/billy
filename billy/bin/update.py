@@ -214,7 +214,8 @@ def main():
         for arg in ('upper', 'lower'):
             what.add_argument('--' + arg, action='append_const',
                               dest='chambers', const=arg)
-        for arg in ('bills', 'legislators', 'committees', 'votes', 'events'):
+        for arg in ('bills', 'legislators', 'committees',
+                    'votes', 'events', 'transcripts'):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
         for arg in ('scrape', 'import', 'report'):
@@ -289,7 +290,7 @@ def main():
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
-                          'alldata']
+                          'alldata', 'transcripts']
             if 'events' in metadata['feature_flags']:
                 args.types.append('events')
 
@@ -342,7 +343,8 @@ def main():
             exec_start = dt.datetime.utcnow()
 
             # scraper order matters
-            order = ('legislators', 'committees', 'votes', 'bills', 'events')
+            order = ('legislators', 'committees', 'votes', 'bills',
+                     'transcripts', 'events')
             _traceback = None
             try:
                 for stype in order:
