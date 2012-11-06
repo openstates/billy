@@ -1,0 +1,30 @@
+{
+    "description": "transcript data",
+    "properties": {
+        "description": {
+            "type": "string"
+        },
+        "session": {
+            "type": "string"
+        },
+        "sources": {
+            "items": {
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+        },
+        "type": {
+            "type": "string"
+        },
+        "when": {
+            "type": "datetime"
+        }
+    },
+    "type": "object"
+}
