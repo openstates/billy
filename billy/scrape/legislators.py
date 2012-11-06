@@ -2,7 +2,7 @@ import os
 import json
 
 from billy.scrape import Scraper, SourcedObject
-
+from billy.core import settings
 
 class LegislatorScraper(Scraper):
 
@@ -15,6 +15,9 @@ class LegislatorScraper(Scraper):
         terms = [t['name'] for t in self.metadata['terms']]
         schema['properties']['roles']['items']['properties']['term']['enum'] =\
                 terms
+        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
+                                                      'minLength': 2,
+                                                      'type': 'string'}
         return schema
 
     def scrape(self, chamber, term):

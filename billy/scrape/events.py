@@ -3,6 +3,7 @@ import uuid
 import json
 
 from billy.scrape import Scraper, SourcedObject
+from billy.core import settings
 
 
 class EventScraper(Scraper):
@@ -15,7 +16,9 @@ class EventScraper(Scraper):
 
         with open(schema_path) as f:
             schema = json.load(f)
-
+        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
+                                                      'minLength': 2,
+                                                      'type': 'string'}
         return schema
 
     def scrape(self, chamber, session):

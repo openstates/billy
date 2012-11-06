@@ -2,6 +2,7 @@ import os
 import json
 
 from billy.scrape import Scraper, SourcedObject
+from billy.core import settings
 
 
 class CommitteeScraper(Scraper):
@@ -12,6 +13,9 @@ class CommitteeScraper(Scraper):
         schema_path = os.path.join(os.path.split(__file__)[0],
                                    '../schemas/committee.json')
         schema = json.load(open(schema_path))
+        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
+                                                      'minLength': 2,
+                                                      'type': 'string'}
         return schema
 
     def scrape(self, chamber, term):

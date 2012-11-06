@@ -3,6 +3,7 @@ import json
 import logging
 
 from billy.scrape import Scraper, SourcedObject
+from billy.core import settings
 
 logger = logging.getLogger('billy')
 
@@ -16,6 +17,9 @@ class BillScraper(Scraper):
                                    '../schemas/bill.json')
         schema = json.load(open(schema_path))
         schema['properties']['session']['enum'] = self.all_sessions()
+        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
+                                                      'minLength': 2,
+                                                      'type': 'string'}
         return schema
 
     def scrape(self, chamber, session):

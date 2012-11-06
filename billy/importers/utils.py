@@ -20,6 +20,7 @@ def _get_property_dict(schema):
         pdict[k] = {}
         if 'items' in v and 'properties' in v['items']:
             pdict[k] = _get_property_dict(v['items'])
+    pdict[settings.LEVEL_FIELD] = {}
     return pdict
 
 

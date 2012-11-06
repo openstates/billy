@@ -166,11 +166,6 @@
             },
             "type": "array"
         },
-        "state": {
-            "maxLength": 2,
-            "minLength": 2,
-            "type": "string"
-        },
         "subjects": {
             "items": {
                 "type": "string"
