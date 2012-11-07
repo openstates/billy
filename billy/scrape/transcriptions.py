@@ -26,9 +26,9 @@ class TranscriptionScraper(Scraper):
                                   " scrape method")
 
     def save_transcription(self, transcript):
-        self.log("save_transcript %s %s: %s" % (transcript['when'],
-                                                transcript['type'],
-                                                transcript['description']))
+        self.log("save_transcription %s %s: %s" % (transcript['when'],
+                                                   transcript['type'],
+                                                   transcript['description']))
         self.save_object(transcript)
 
 
@@ -36,7 +36,7 @@ class Transcription(SourcedObject):
     def __init__(self, session, when, type,
                  attribution, text, **kwargs):
 
-        super(Transcript, self).__init__('transcript', **kwargs)
+        super(Transcript, self).__init__('transcription', **kwargs)
         self['session'] = session
         self['when'] = when
         self['attribution'] = who
