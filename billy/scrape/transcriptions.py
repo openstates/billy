@@ -6,13 +6,13 @@ from billy.scrape import Scraper, SourcedObject
 from billy.core import settings
 
 
-class TranscriptScraper(Scraper):
+class TranscriptionScraper(Scraper):
 
-    scraper_type = 'transcripts'
+    scraper_type = 'transcriptions'
 
     def _get_schema(self):
         schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/transcript.json')
+                                   '../schemas/transcription.json')
 
         with open(schema_path) as f:
             schema = json.load(f)
@@ -22,35 +22,27 @@ class TranscriptScraper(Scraper):
         return schema
 
     def scrape(self, chamber, session):
-        raise NotImplementedError("TranscriptScrapers must define a"
+        raise NotImplementedError("TranscriptionScrapers must define a"
                                   " scrape method")
 
-    def save_transcript(self, transcript):
+    def save_transcription(self, transcript):
         self.log("save_transcript %s %s: %s" % (transcript['when'],
                                                 transcript['type'],
                                                 transcript['description']))
         self.save_object(transcript)
 
 
-class Transcript(SourcedObject):
+class Transcription(SourcedObject):
     def __init__(self, session, when, type,
-                 description, **kwargs):
+                 attribution, text, **kwargs):
 
         super(Transcript, self).__init__('transcript', **kwargs)
         self['session'] = session
         self['when'] = when
+        self['attribution'] = who
+        self['text'] = text
         self['type'] = type
-        self['description'] = description
-        self['transcripts'] = []
         self.update(kwargs)
 
     def get_filename(self):
         return "%s.json" % str(uuid.uuid1())
-
-    def add_transcript(self, who, what_they_said, **kwargs):
-        obj = kwargs.copy()
-        obj.update({
-            "who": who,
-            "text": what_they_said
-        })
-        self['transcripts'].append(obj)
