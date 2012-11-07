@@ -76,8 +76,8 @@ urlpatterns = patterns('billy.web.admin.views',
         'object_json', name='object_json'),
 
     # runlog URLs.
-    url(r'^state-run-detail/(?P<abbr>[a-z]{2})/$', 'state_run_detail',
-        name="state_run_detail"),
+    url(r'^run-detail-list/(?P<abbr>[a-z]{2})/$', 'run_detail_list',
+        name="run_detail_list"),
     url(r'^run-detail/(?P<obj>.*)/$', 'run_detail', name="run_detail"),
     url(r'^run-detail-data/(?P<abbr>[a-z]{2})/$', 'run_detail_graph_data',
         name="run_detail-data"),

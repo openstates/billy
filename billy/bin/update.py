@@ -333,7 +333,6 @@ def main():
             exec_record = {
                 "run_record": run_record,
                 "args": sys.argv,
-                "state": abbrev
             }
 
             lex = None
@@ -359,7 +358,7 @@ def main():
             exec_record['started'] = exec_start
             exec_record['ended'] = exec_end
             scrape_data['scraped'] = exec_record
-            scrape_data['state'] = abbrev
+            scrape_data['abbr'] = abbrev
 
             for record in run_record:
                 if "exception" in record:
