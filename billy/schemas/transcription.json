@@ -1,5 +1,5 @@
 {
-    "description": "transcription data",
+    "description": "speech data",
     "properties": {
         "description": {
             "type": "string"

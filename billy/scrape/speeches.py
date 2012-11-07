@@ -6,13 +6,13 @@ from billy.scrape import Scraper, SourcedObject
 from billy.core import settings
 
 
-class TranscriptionScraper(Scraper):
+class SpeechScraper(Scraper):
 
-    scraper_type = 'transcriptions'
+    scraper_type = 'speeches'
 
     def _get_schema(self):
         schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/transcription.json')
+                                   '../schemas/speech.json')
 
         with open(schema_path) as f:
             schema = json.load(f)
@@ -22,21 +22,21 @@ class TranscriptionScraper(Scraper):
         return schema
 
     def scrape(self, chamber, session):
-        raise NotImplementedError("TranscriptionScrapers must define a"
+        raise NotImplementedError("SpeechScrapers must define a"
                                   " scrape method")
 
-    def save_transcription(self, transcript):
-        self.log("save_transcription %s %s: %s" % (transcript['when'],
-                                                   transcript['type'],
-                                                   transcript['description']))
-        self.save_object(transcript)
+    def save_speech(self, speech):
+        self.log("save_speech %s %s: %s" % (speech['when'],
+                                            speech['type'],
+                                            speech['description']))
+        self.save_object(speech)
 
 
-class Transcription(SourcedObject):
+class Speech(SourcedObject):
     def __init__(self, session, when, type,
                  attribution, text, **kwargs):
 
-        super(Transcript, self).__init__('transcription', **kwargs)
+        super(Speech, self).__init__('speech', **kwargs)
         self['session'] = session
         self['when'] = when
         self['attribution'] = who

@@ -76,7 +76,7 @@ def _run_scraper(scraper_type, options, metadata):
     }
     scrape['start_time'] = dt.datetime.utcnow()
 
-    if scraper_type in ('bills', 'votes', 'events', 'transcriptions'):
+    if scraper_type in ('bills', 'votes', 'events', 'speeches'):
         times = options.sessions
         for time in times:
             scraper.validate_session(time, scraper.latest_only)
@@ -215,7 +215,7 @@ def main():
             what.add_argument('--' + arg, action='append_const',
                               dest='chambers', const=arg)
         for arg in ('bills', 'legislators', 'committees',
-                    'votes', 'events', 'transcriptions'):
+                    'votes', 'events', 'speeches'):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
         for arg in ('scrape', 'import', 'report'):
@@ -290,7 +290,7 @@ def main():
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
-                          'alldata', 'transcriptions']
+                          'alldata', 'speeches']
             if 'events' in metadata['feature_flags']:
                 args.types.append('events')
 
@@ -343,7 +343,7 @@ def main():
 
             # scraper order matters
             order = ('legislators', 'committees', 'votes', 'bills',
-                     'transcriptions', 'events')
+                     'speeches', 'events')
             _traceback = None
             try:
                 for stype in order:
