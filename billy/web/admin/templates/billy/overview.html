@@ -21,7 +21,7 @@
 
 <div class="row"> <div class="span12">
 <div class="well {% if runlog.failure %}bad{% else %}good{% endif %}">
-    <h3><a href="{% url state_run_detail metadata.abbreviation %}" >Last run information</a></h3>
+    <h3><a href="{% url run_detail_list metadata.abbreviation %}" >Last run information</a></h3>
     {% if runlog %}
     <p>
     <br /> Last scrape started at {{ runlog.scraped.started }} UTC,

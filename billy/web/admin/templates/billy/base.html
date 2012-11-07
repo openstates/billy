@@ -53,7 +53,7 @@
                     <li><a href="{% url quality_exceptions metadata.abbreviation %}">Data Quality Exceptions</a> </li>
                     </ul>
                 </li>
-                <li> <a href="{% url state_run_detail metadata.abbreviation %}">Run Detail</a> </li>
+                <li> <a href="{% url run_detail_list metadata.abbreviation %}">Run Detail</a> </li>
                 {% endif %}
                 {% block menu %}{% endblock %}
             </ul>
