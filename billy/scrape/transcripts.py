@@ -25,11 +25,11 @@ class TranscriptScraper(Scraper):
         raise NotImplementedError("TranscriptScrapers must define a"
                                   " scrape method")
 
-    def save_event(self, event):
-        self.log("save_event %s %s: %s" % (event['when'],
-                                           event['type'],
-                                           event['description']))
-        self.save_object(event)
+    def save_transcript(self, transcript):
+        self.log("save_transcript %s %s: %s" % (transcript['when'],
+                                                transcript['type'],
+                                                transcript['description']))
+        self.save_object(transcript)
 
 
 class Transcript(SourcedObject):
@@ -41,8 +41,16 @@ class Transcript(SourcedObject):
         self['when'] = when
         self['type'] = type
         self['description'] = description
-        self['speeches'] = []
+        self['transcripts'] = []
         self.update(kwargs)
 
     def get_filename(self):
         return "%s.json" % str(uuid.uuid1())
+
+    def add_transcript(self, who, what_they_said, **kwargs):
+        obj = kwargs.copy()
+        obj.update({
+            "who": who,
+            "text": what_they_said
+        })
+        self['transcripts'].append(obj)
