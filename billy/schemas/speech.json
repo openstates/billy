@@ -1,6 +1,15 @@
 {
     "description": "speech data",
     "properties": {
+        "attribution": {
+            "type": "string"
+        },
+        "document_id": {
+            "type": "string"
+        },
+        "sequence": {
+            "type": "integer"
+        },
         "session": {
             "type": "string"
         },
@@ -18,12 +27,6 @@
         },
         "type": {
             "type": "string"
-        },
-        "attribution": {
-            "type": "string"
-        },
-        "sequence": {
-            "type": "integer"
         },
         "when": {
             "type": "datetime"

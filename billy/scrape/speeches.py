@@ -33,9 +33,11 @@ class SpeechScraper(Scraper):
 
 
 class Speech(SourcedObject):
-    def __init__(self, session, when, sequence, attribution, text, **kwargs):
+    def __init__(self, session, docid, when, sequence,
+                 attribution, text, **kwargs):
         super(Speech, self).__init__('speech', **kwargs)
         self['session'] = session
+        self['document_id'] = docid
         self['when'] = when
         self['attribution'] = attribution
         self['text'] = text
