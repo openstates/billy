@@ -23,7 +23,7 @@ class SyncVersions(BaseCommand):
             sys.path.insert(0, newpath)
 
         errors = 0
-        spec = {'state': args.abbr}
+        spec = {settings.LEVEL_FIELD: args.abbr}
         if args.elasticsearch:
             spec['_elasticsearch'] = None
             task = ElasticSearchPush
