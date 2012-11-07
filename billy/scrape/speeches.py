@@ -26,22 +26,21 @@ class SpeechScraper(Scraper):
                                   " scrape method")
 
     def save_speech(self, speech):
-        self.log("save_speech %s %s: %s" % (speech['when'],
-                                            speech['type'],
-                                            speech['description']))
+        self.log("save_speech %s %s %s" % (speech['when'],
+                                           speech['attribution'],
+                                           speech['sequence']))
         self.save_object(speech)
 
 
 class Speech(SourcedObject):
-    def __init__(self, session, when, type,
-                 attribution, text, **kwargs):
-
+    def __init__(self, session, when, sequence, attribution, text, **kwargs):
         super(Speech, self).__init__('speech', **kwargs)
         self['session'] = session
         self['when'] = when
-        self['attribution'] = who
+        self['attribution'] = attribution
         self['text'] = text
-        self['type'] = type
+        self['sequence'] = sequence
+        self['type'] = 'speech'
         self.update(kwargs)
 
     def get_filename(self):
