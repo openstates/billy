@@ -225,7 +225,7 @@ def track_version(bill, version):
            'url': version['url'],
            'type': 'version',
            'mimetype': version.get('mimetype', None),
-           'state': bill['state'],
+           'state': bill[settings.LEVEL_FIELD],
            'session': bill['session'],
            'chamber': bill['chamber'],
            'bill_id': bill['bill_id'],
