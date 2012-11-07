@@ -20,7 +20,10 @@
             <td> {{bill.chamber}} </td>
             <td> {{bill.bill_id}} </td>
             <td> {{bill.title}} </td>
-            <td> <a href="{% url bill bill.state bill.session bill.bill_id %}">public</a> </td>
+            {% url bill bill.state bill.session bill.bill_id as bill_url%}
+            {% if bill_url %}
+            <td> <a href="">public</a> </td>
+            {% endif %}
             <td> <a href="{% url object_json 'bills' bill|key:'_id' %}">json</a> </td>
         </tr>
         {% endfor %}
