@@ -17,6 +17,7 @@ from itertools import chain, imap
 from collections import defaultdict, OrderedDict
 
 from django.core import urlresolvers
+from django.conf import settings as django_settings
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
@@ -46,6 +47,12 @@ def keyfunc(obj):
         return int(obj['district'])
     except ValueError:
         return obj['district']
+
+def _pass_through(f):
+    return f
+
+if django_settings.DEBUG:
+    login_required = _pass_through
 
 
 @login_required
@@ -317,7 +324,7 @@ def bills(request, abbr):
                                          meta['terms'])))
 
     def sorter(item, index=terms.index, len_=len(terms)):
-        '''Sort session strings in order described in state's metadata.'''
+        '''Sort session strings in order described in metadata.'''
         session, data = item
         return index(session)
 
@@ -598,7 +605,7 @@ def object_json(request, collection, _id):
                       lambda m: tmpl.format(*m.groups()), obj_json)
 
     if obj['_type'] != 'metadata':
-        mdata = metadata(obj['state'])
+        mdata = metadata(obj[settings.LEVEL_FIELD])
     else:
         mdata = obj
 
