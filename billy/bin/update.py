@@ -76,7 +76,7 @@ def _run_scraper(scraper_type, options, metadata):
     }
     scrape['start_time'] = dt.datetime.utcnow()
 
-    if scraper_type in ('bills', 'votes', 'events'):
+    if scraper_type in ('bills', 'votes', 'events', 'transcripts'):
         times = options.sessions
         for time in times:
             scraper.validate_session(time, scraper.latest_only)
