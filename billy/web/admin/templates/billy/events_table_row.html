@@ -1,3 +1,4 @@
+{% load billy_utiltags %}
 <tr>
     <td><a href="{% url admin_event event|level event_id %}">{{event_id}}</a></td>
     <td>{{event.when|date:"M d, Y"}}</a></td>
