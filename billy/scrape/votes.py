@@ -17,13 +17,7 @@ class VoteScraper(Scraper):
         """
         raise NotImplementedError('VoteScrapers must define a scrape method')
 
-    def save_vote(self, vote):
-        """
-        Save a scraped :class:`~billy.scrape.votes.Vote` object.
-
-        Should be called after all data for the given vote is collected.
-        """
-        self.save_object(vote)
+    save_vote = Scraper.save_object
 
 
 class Vote(SourcedObject):

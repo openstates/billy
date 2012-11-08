@@ -11,8 +11,7 @@ class SpeechScraper(Scraper):
         raise NotImplementedError("SpeechScrapers must define a"
                                   " scrape method")
 
-    def save_speech(self, speech):
-        self.save_object(speech)
+    save_speech = Scraper.save_object
 
 
 class Speech(SourcedObject):

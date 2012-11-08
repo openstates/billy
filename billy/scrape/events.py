@@ -10,8 +10,7 @@ class EventScraper(Scraper):
     def scrape(self, chamber, session):
         raise NotImplementedError("EventScrapers must define a scrape method")
 
-    def save_event(self, event):
-        self.save_object(event)
+    save_event = Scraper.save_object
 
 
 class Event(SourcedObject):
