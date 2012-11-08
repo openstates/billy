@@ -19,13 +19,7 @@ class BillScraper(Scraper):
         """
         raise NotImplementedError('BillScrapers must define a scrape method')
 
-    def save_bill(self, bill):
-        """
-        Save a scraped :class:`~billy.scrape.bills.Bill` object.
-
-        Should be called after all data for the given bill has been collected.
-        """
-        self.save_object(bill)
+    save_bill = Scraper.save_object
 
 
 class Bill(SourcedObject):

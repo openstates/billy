@@ -16,14 +16,7 @@ class LegislatorScraper(Scraper):
         raise NotImplementedError('LegislatorScrapers must define a '
                                   'scrape method')
 
-    def save_legislator(self, legislator):
-        """
-        Save a scraped :class:`~billy.scrape.legislators.Legislator`
-        object.
-
-        Only call after all data for the given legislator has been collected.
-        """
-        self.save_object(legislator)
+    save_legislator = Scraper.save_object
 
 
 class Person(SourcedObject):

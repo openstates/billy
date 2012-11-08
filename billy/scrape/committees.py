@@ -9,11 +9,7 @@ class CommitteeScraper(Scraper):
         raise NotImplementedError('CommitteeScrapers must define a '
                                   'scrape method')
 
-    def save_committee(self, committee):
-        """
-        Save a scraped :class:`~billy.scrape.committees.Committee` object.
-        """
-        self.save_object(committee)
+    save_committee = Scraper.save_object
 
 
 class Committee(SourcedObject):
