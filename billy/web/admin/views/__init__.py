@@ -1241,14 +1241,14 @@ def newsblogs(request):
         next_ = tab_range[i:]
 
     # Get the data.
-    state = request.GET.get('state')
+    abbr = request.GET.get('abbr')
 
     if entities is True:
         spec = {'entity_ids': {'$ne': None}}
     else:
         spec = {}
-    if state:
-        spec.update(state=state)
+    if abbr:
+        spec.update(abbr=abbr)
 
     entries = db.feed_entries.find(spec, skip=skip, limit=limit,
         sort=[('published_parsed', pymongo.DESCENDING)])
@@ -1308,8 +1308,8 @@ def newsblogs(request):
     return render(request, 'billy/newsblogs.html', {
         'entries': _entries,
         'entry_count': entries.count(),
-        'states': db.feed_entries.distinct('state'),
-        'state': state,
+        'abbrs': db.feed_entries.distinct('abbr'),
+        'abbr': abbr,
         'tab_range': tab_range,
         'previous': previous,
         'next_': next_,

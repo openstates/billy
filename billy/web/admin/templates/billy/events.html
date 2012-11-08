@@ -1,9 +1,8 @@
 {% extends "billy/base.html" %}
 {% load humanize %}
+{% load billy_utiltags %}
 
-{% block title %}
-{{ bill.state|upper }} {{ bill.bill_id }}
-{% endblock %}
+{% block title %} {{metadata.display_name}} Events {% endblock %}
 
 {% block content %}
 <h2>{{ metadata.display_name }} Events</h2>

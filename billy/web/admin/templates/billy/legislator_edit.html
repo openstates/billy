@@ -57,7 +57,8 @@ $(document).ready(function() {
 {% block content %}
 
 <a href="{% url object_json "legislators" leg.leg_id %}" >json</a>
-| <a href="{% url legislator_noslug leg.state leg.leg_id %}" >public</a>
+{% url legislator_noslug leg|level leg.leg_id as leg_url %}
+{% if leg_url %} | <a href="{{leg_url}}" >public</a> {% endif %}
 
 <form action="{% url admin_legislator_edit_commit %}" method = 'post' >
     <input type="hidden" value="{{ leg.leg_id }}" name="leg_id" />
