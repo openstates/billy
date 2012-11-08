@@ -133,6 +133,7 @@ def _do_imports(abbrev, args):
     from billy.importers.legislators import import_legislators
     from billy.importers.committees import import_committees
     from billy.importers.events import import_events
+    from billy.importers.speeches import import_speeches
 
     # always import metadata and districts
     import_metadata(abbrev, settings.BILLY_DATA_DIR)
@@ -166,6 +167,9 @@ def _do_imports(abbrev, args):
 
     if 'events' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
+
+    if 'speeches' in args.types:
+        report['speeches'] = import_speeches(abbrev, settings.BILLY_DATA_DIR)
 
     return report
 
