@@ -4,7 +4,7 @@
         "attribution": {
             "type": "string"
         },
-        "document_id": {
+        "record_id": {
             "type": "string"
         },
         "sequence": {
