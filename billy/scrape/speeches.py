@@ -19,6 +19,8 @@ class Speech(SourcedObject):
     def __init__(self, session, docid, when, sequence,
                  attribution, text, **kwargs):
         super(Speech, self).__init__('speech', **kwargs)
+        self.uuid = uuid.uuid1()  # If we need to save more than once.
+
         self['session'] = session
         self['record_id'] = docid
         self['when'] = when
@@ -29,7 +31,7 @@ class Speech(SourcedObject):
         self.update(kwargs)
 
     def get_filename(self):
-        return "%s.json" % str(uuid.uuid1())
+        return "%s.json" % str(self.uuid)
 
     def __unicode__(self):
         return '%s %s %s' % (self['when'], self['attribution'],

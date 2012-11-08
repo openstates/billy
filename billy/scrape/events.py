@@ -18,6 +18,8 @@ class Event(SourcedObject):
     def __init__(self, session, when, type,
                  description, location, end=None, **kwargs):
         super(Event, self).__init__('event', **kwargs)
+        self.uuid = uuid.uuid1()  # If we need to save an event more than once
+
         self['session'] = session
         self['when'] = when
         self['type'] = type
@@ -55,7 +57,7 @@ class Event(SourcedObject):
         self['participants'].append(kwargs)
 
     def get_filename(self):
-        return "%s.json" % str(uuid.uuid1())
+        return "%s.json" % str(self.uuid)
 
     def __unicode__(self):
         return "%s %s: %s" % (self['when'], self['type'], self['description'])
