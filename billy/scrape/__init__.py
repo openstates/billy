@@ -101,6 +101,8 @@ class Scraper(scrapelib.Scraper):
         # validation
         self.strict_validation = strict_validation
         self.validator = DatetimeValidator()
+        self._schema = {}
+        self._load_schemas()
 
         self.follow_robots = False
 
@@ -113,16 +115,37 @@ class Scraper(scrapelib.Scraper):
         self.error = self.logger.error
         self.critical = self.logger.critical
 
+    def _load_schemas(self):
+        """ load all schemas into schema dict """
+
+        types = ('bill', 'committee', 'person', 'vote', 'event', 'speech')
+
+        for type in types:
+            schema_path = os.path.join(os.path.split(__file__)[0],
+                                       '../schemas/%s.json' % type)
+            self._schema[type] = json.load(open(schema_path))
+            self._schema[type]['properties'][settings.LEVEL_FIELD] = {
+                'maxLength': 2, 'minLength': 2, 'type': 'string'}
+
+        # bills & votes
+        self._schema['bill']['properties']['session']['enum'] = \
+                self.all_sessions()
+        self._schema['vote']['properties']['session']['enum'] = \
+                self.all_sessions()
+
+        # legislators
+        terms = [t['name'] for t in self.metadata['terms']]
+        self._schema['person']['properties']['roles']['items'] \
+                ['properties']['term']['enum'] = terms
+
     @property
     def object_count(self):
         # number of distinct output filenames
         return len(self.output_names)
 
     def validate_json(self, obj):
-        if not hasattr(self, '_schema'):
-            self._schema = self._get_schema()
         try:
-            self.validator.validate(obj, self._schema)
+            self.validator.validate(obj, self._schema[obj['_type']])
         except ValueError as ve:
             self.warning(str(ve))
             if self.strict_validation:
@@ -172,6 +195,8 @@ class Scraper(scrapelib.Scraper):
         raise NoDataForPeriod(term)
 
     def save_object(self, obj):
+        self.log('save %s %s', obj['_type'], unicode(obj))
+
         # copy over LEVEL_FIELD
         obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
 
@@ -230,6 +255,7 @@ def get_scraper(mod_path, scraper_type):
         raise ScrapeError("no %s scraper found in module %s" %
                            (scraper_type, mod_path))
     return ScraperClass
+
 
 
 def check_sessions(metadata, sessions):
