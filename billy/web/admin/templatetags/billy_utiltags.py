@@ -4,6 +4,7 @@ import datetime as dt
 from pprint import pformat
 
 from django import template
+from billy.core import settings
 
 register = template.Library()
 
@@ -26,6 +27,11 @@ def key(d, key_name):
         return d[key_name]
     except KeyError:
         return None
+
+
+@register.filter
+def level(d):
+    return d[settings.LEVEL_FIELD]
 
 
 @register.filter

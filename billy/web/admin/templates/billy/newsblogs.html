@@ -17,17 +17,17 @@
 <div class="container-fluid">
 <div class="sidebar" style="left: 10px; position: fixed; top: 50px; width: 100px;">
 <ul style="list-style-type: none; margin-left: 0px;">
-{% for abbr in states %}
-    <li><a href="{% url newsblogs %}?state={{abbr}}">{{abbr}}</a></li>
+{% for a in abbrs %}
+    <li><a href="{% url newsblogs %}?abbr={{a}}">{{a}}</a></li>
 {% endfor %}
 </ul>
 </div>
 <div class="content" style="margin-left: 130px; max-width: 60em;">
 
-	{% if state %}
-		<h3>{{entry_count}} news and blog items for {{state}}</h3>
-	{% endif %}
-	<div class="pagination">
+    {% if abbr %}
+        <h3>{{entry_count}} news and blog items for {{abbr|upper}}</h3>
+    {% endif %}
+    <div class="pagination">
 
         {# commence pagination insanity #}
         <ul>
@@ -50,8 +50,8 @@
           {% endfor %}
         </ul>
       </div>
-	{% for entry in entries %}
-		{% include "billy/entry.html" %}
-	{% endfor %}
+    {% for entry in entries %}
+        {% include "billy/entry.html" %}
+    {% endfor %}
 </div>
 {% endblock %}
