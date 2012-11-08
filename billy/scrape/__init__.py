@@ -202,7 +202,14 @@ class Scraper(scrapelib.Scraper):
 
         filename = obj.get_filename()
         self.output_names.add(filename)     # keep tally of all output names
-        with open(os.path.join(self.output_dir, self.scraper_type, filename),
+
+        # pluralize type
+        if obj['_type'] == 'speech':
+            data_dir = 'speeches'
+        else:
+            data_dir = obj['_type'] + 's'
+
+        with open(os.path.join(self.output_dir, data_dir, filename),
                   'w') as f:
             json.dump(obj, f, cls=JSONEncoderPlus)
 
