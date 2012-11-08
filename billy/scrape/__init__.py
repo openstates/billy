@@ -206,6 +206,8 @@ class Scraper(scrapelib.Scraper):
         # pluralize type
         if obj['_type'] == 'speech':
             data_dir = 'speeches'
+        elif obj['_type'] == 'person':
+            data_dir = 'legislators'
         else:
             data_dir = obj['_type'] + 's'
 
