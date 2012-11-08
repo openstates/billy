@@ -47,7 +47,10 @@
     <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
-    <td><a href="{% url legislator_noslug leg.state leg.leg_id %}">public</a></td>
+    <td>
+        {% url legislator_noslug leg.state leg.leg_id as leg_url %}
+        {% if leg_url %}<a href="{{leg_url}}">public</a>{% endif %}
+    </td>
     <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
     <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
 </tr>
@@ -74,7 +77,10 @@
     <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
-    <td><a href="{% url legislator_noslug leg.state leg.leg_id %}">public</a></td>
+    <td>
+        {% url legislator_noslug leg.state leg.leg_id as leg_url %}
+        {% if leg_url %}<a href="{{leg_url}}">public</a>{% endif %}
+    </td>
     <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
     <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
 </tr>
