@@ -157,7 +157,7 @@ function lineize( key, val, title ) {
     });
 }
 $(document).ready(function(){
-    $.getJSON( "/admin/run-detail-data/{{ state }}", function(data) {
+    $.getJSON( "/admin/run-detail-data/{{ abbr }}", function(data) {
         d = data['stacked'];
         $.each(d, function(key, val) {
             stackize( key, val, data['title'][key] );
@@ -184,7 +184,7 @@ $(document).ready(function(){
 {% endif %}
 </p>
 <p>
-<h1>run report for {{ runlog.scraped.state }}</h1>
+<h1>run report for {{ runlog.abbr }}</h1>
 
 The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 
@@ -208,15 +208,13 @@ The last scrape took <b>{{ runlog.scraped.t_delta }}</b><br /><br />
 {% endfor %}
 <table class="table table-bordered">
     <tr>
-        <th>State</th>
         <th>Outcome</th>
         <th>Time</th>
     </tr>
 {% for run in allruns %}
     <tr class="{% if run.failure %}error{% else %}success{% endif %}">
-        <td><a href = "/admin/run-detail/{{ run|private:'id' }}/" >{{ run.scraped.state }}</a></td>
         <td>{% if run.failure %}<b>error</b>{% else %}success{% endif %}</td>
-        <td>{{ run.scraped.started|date_display }}</td>
+        <td><a href = "/admin/run-detail/{{ run|private:'id' }}/" >{{ run.scraped.started|date_display }}</a></td>
     </tr>
 {% endfor %}
 </table>

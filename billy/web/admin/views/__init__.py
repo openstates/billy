@@ -119,23 +119,20 @@ def overview(request, abbr):
         runlog['scraped']['time_delta'] = datetime.timedelta(time_delta.days,
                                                          time_delta.seconds)
     try:
-        runlog = db.billy_runs.find({
-            "scraped.state": abbr
-        }).sort("scraped.started", direction=pymongo.DESCENDING)[0]
+        runlog = db.billy_runs.find({"abbr": abbr}).sort(
+            "scraped.started", direction=pymongo.DESCENDING)[0]
         _add_time_delta(runlog)
         context['runlog'] = runlog
 
         if runlog.get('failure'):
-            last_success = db.billy_runs.find({
-                "scraped.state": abbr,
-                "failure": None,
-            }).sort("scraped.started", direction=pymongo.DESCENDING)[0]
+            last_success = db.billy_runs.find({"abbr": abbr, "failure": None}
+                     ).sort("scraped.started", direction=pymongo.DESCENDING)[0]
             _add_time_delta(last_success)
             context['last_success'] = last_success
     except IndexError:
         runlog = False
 
-    return render(request, 'billy/state_index.html', context)
+    return render(request, 'billy/overview.html', context)
 
 
 @login_required
@@ -214,7 +211,7 @@ def run_detail_graph_data(request, abbr):
         return data
     history_count = 50
 
-    default_spec = {"scraped.state": abbr}
+    default_spec = {"abbr": abbr}
     data = {"lines": {}, "pies": {}, "stacked": {}, "title": {}}
 
     speck = {
@@ -268,28 +265,25 @@ def run_detail_graph_data(request, abbr):
 @login_required
 def run_detail(request, obj=None):
     try:
-        run = db.billy_runs.find({
-            "_id": ObjectId(obj)
-        })[0]
+        run = db.billy_runs.find({"_id": ObjectId(obj)})[0]
     except IndexError as e:
-        return render(request, 'billy/run_empty.html', {
+        return render(request, 'billy/run_detail.html', {
             "warning": "No records exist. Fetch returned a(n) %s" % (
                     e.__class__.__name__)})
     return render(request, 'billy/run_detail.html', {
         "run": run,
-        "metadata": {"abbreviation": run['state'], "name": run['state']}
+        "metadata": {"abbreviation": run['abbr'], "name": run['abbr']}
     })
 
 
 @login_required
-def state_run_detail(request, abbr):
+def run_detail_list(request, abbr):
     try:
-        allruns = db.billy_runs.find({
-            "scraped.state": abbr
-        }).sort("scraped.started", direction=pymongo.DESCENDING)[:25]
+        allruns = db.billy_runs.find({"abbr": abbr}
+                ).sort("scraped.started", direction=pymongo.DESCENDING)[:25]
         runlog = allruns[0]
     except IndexError as e:
-        return render(request, 'billy/run_empty.html', {
+        return render(request, 'billy/run_detail.html', {
             "warning": "No records exist. Fetch returned a(n) %s" % (
                     e.__class__.__name__)})
 
@@ -301,7 +295,7 @@ def state_run_detail(request, abbr):
             entry['t_delta'] = (
                 entry['end_time'] - entry['start_time'])
 
-    context = {"runlog": runlog, "allruns": allruns, "state": abbr,
+    context = {"runlog": runlog, "allruns": allruns, "abbr": abbr,
                "metadata": metadata(abbr)}
 
     if "failure" in runlog:
@@ -312,7 +306,7 @@ This build had an exception during it's execution. Please check below
 for the exception and error message.
 """)
 
-    return render(request, 'billy/state_run_detail.html', context)
+    return render(request, 'billy/run_detail_list.html', context)
 
 
 @never_cache
@@ -486,7 +480,7 @@ def summary_index(request, abbr, session):
                 summary[k] += 1
         return dict(summary)
 
-    def build_state(abbr):
+    def build_summary(abbr):
 
         bills = list(db.bills.find({settings.LEVEL_FIELD: abbr,
                                     'session': session}))
@@ -497,7 +491,7 @@ def summary_index(request, abbr, session):
         res.update(bills=build(bills))
 
         return res
-    summary = build_state(abbr)
+    summary = build_summary(abbr)
 
     return render(request, 'billy/summary_index.html', {'summary': summary})
 
@@ -886,8 +880,8 @@ def quality_exception_commit(request, abbr):
             error.append("Somehow %s matched more then one ID..." % (obj))
         else:
             o = o[0]
-            if o['state'] != abbr:
-                error.append("Object %s is not from this state." % (obj))
+            if o[settings.LEVEL_FIELD] != abbr:
+                error.append("Object %s is not from '%s'." % (obj, abbr))
 
     type = get['extype'].strip()
     if type not in QUALITY_EXCEPTIONS:

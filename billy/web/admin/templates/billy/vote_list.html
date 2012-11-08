@@ -1,5 +1,5 @@
 {% extends "billy/base.html" %}
-{% load customtags %}
+{% load billy_utiltags %}
 
 {% block title %} {{meta.name}} bad vote list {% endblock title %}
 
@@ -19,7 +19,7 @@
         <tr>
             <td> {{vote.chamber}} </td>
             <td> <a href="/{{vote.state}}/{{vote.bill_id}}">{{vote.bill_id}}</a> </td>
-            <td> <a href="{% url object_json "votes" vote|underscore_field:"id" %}">{{vote|underscore_field:"id"}}</a> </td>
+            <td> <a href="{% url object_json "votes" vote|private:"id" %}">{{vote|private:"id"}}</a> </td>
             <td> {% if vote.yes_count != vote.yes_votes|length %} yes {% endif %}
                 {% if vote.no_count != vote.no_votes|length %} no {% endif %}
                 {% if vote.other_count != vote.other_votes|length %} other {% endif %}
