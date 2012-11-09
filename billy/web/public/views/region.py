@@ -191,7 +191,7 @@ def search(request, abbr):
              more_legislators_available=more_legislators_available,
              column_headers_tmplname=templatename('search_column_headers'),
              rowtemplate_name=templatename('bills_list_row_with'
-                                           '_state_and_session'),
+                                           '_abbr_and_session'),
              show_chamber_column=True,
              nav_active=None))
 
