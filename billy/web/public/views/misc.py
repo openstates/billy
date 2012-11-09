@@ -1,5 +1,5 @@
 """
-    views that are not state/object specific
+    views that are not object specific
 """
 import json
 import urllib2
@@ -19,13 +19,13 @@ from .utils import templatename, RelatedObjectsList
 def homepage(request):
     return render(request, templatename('homepage'),
                   dict(
-              active_states=map(Metadata.get_object, settings.ACTIVE_STATES)))
+              all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
 
 
 def downloads(request):
-    states = sorted(db.metadata.find(), key=lambda x: x['name'])
+    all_metadata = sorted(db.metadata.find(), key=lambda x: x['name'])
     return render(request, 'billy/web/public/downloads.html',
-                  {'states': states})
+                  {'all_metadata': all_metadata})
 
 
 def find_your_legislator(request):
@@ -57,11 +57,11 @@ def find_your_legislator(request):
             billy_settings.API_KEY
         )
         leg_resp = json.load(urllib2.urlopen(qurl))
-        # allow limiting lookup to state for state map views
-        if 'state' in get:
+        # allow limiting lookup to region for region map views
+        if 'abbr' in get:
             leg_resp = [leg for leg in leg_resp
-                        if leg['state'] == get['state']]
-            context['state'] = get['state']
+                        if leg[billy_settings.LEVEL_FIELD] == get['abbr']]
+            context['abbr'] = get['abbr']
 
         if "boundary" in get:
             to_search = []
@@ -148,8 +148,8 @@ class NewsList(RelatedObjectsList):
         <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
         '''
     title_template = '''
-        New and blogs mentioning {{obj.display_name}} -
-        {{metadata.legislature_name}} - OpenStates
+        News and blogs mentioning {{obj.display_name}} -
+        {{metadata.legislature_name}} - Open States
         '''
 
     def get(self, request, abbr, collection_name, _id, slug):

@@ -37,10 +37,10 @@ def event_ical(request, abbr, event_id):
     if event is None:
         raise Http404
 
-    x_name = "X-OPENSTATES"
+    x_name = "X-BILLY"
 
     cal = Calendar()
-    cal.add('prodid', '-//Open States//openstates.org//')
+    cal.add('prodid', '-//Sunlight Labs//billy//')
     cal.add('version', billy.__version__)
 
     cal_event = Event()
@@ -90,7 +90,7 @@ def event(request, abbr, event_id):
             abbr,
             event_id
         ),
-        "sprop": "name:Open States Event"
+        "sprop": "name:Billy"
     }
     gcal_string = urllib.urlencode(gcal_info)
 
