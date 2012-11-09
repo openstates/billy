@@ -16,7 +16,7 @@ logger = logging.getLogger('billy')
 def import_speeches(abbr, data_dir):
     data_dir = os.path.join(data_dir, abbr)
     pattern = os.path.join(data_dir, 'speeches', '*.json')
-    speech_record_ids = defaultdict(set)
+    speech_record_ids = {}
 
     for path in glob.iglob(pattern):
         # OK, We need to first go through all the JSON and load the document
@@ -24,18 +24,23 @@ def import_speeches(abbr, data_dir):
         with open(path) as f:
             data = prepare_obj(json.load(f))
         session = data['session']
-        speech_record_ids[session].add(data['record_id'])
+        chamber = data['chamber']
+        if not session in speech_record_ids:
+            speech_record_ids[session] = defaultdict(set)
+
+        speech_record_ids[session][chamber].add(data['record_id'])
 
     for session in speech_record_ids:
-        for record in speech_record_ids[session]:
-            # XXX: Should we really be clearing them all up front? Should
-            #      we clear as we process each record block? Is it OK to
-            #      store everything in memory? (there's a lot)
-            #
-            #      this will result in broken data if the import breaks
-            #      below.
-            #  -- PRT
-            clear_old_speeches(session, record)
+        for chamber in speech_record_ids[session]:
+            for record in speech_record_ids[session][chamber]:
+                # XXX: Should we really be clearing them all up front? Should
+                #      we clear as we process each record block? Is it OK to
+                #      store everything in memory? (there's a lot)
+                #
+                #      this will result in broken data if the import breaks
+                #      below.
+                #  -- PRT
+                clear_old_speeches(abbr, chamber, session, record)
 
     for path in glob.iglob(pattern):
         # OK, now we need to import all the JSON. We don't keep the objects
@@ -46,10 +51,12 @@ def import_speeches(abbr, data_dir):
         import_speech(data)
 
 
-def clear_old_speeches(session, record_id):
+def clear_old_speeches(abbr, chamber, session, record_id):
     db.speeches.remove({
         "session": session,
-        "record_id": record_id
+        "record_id": record_id,
+        settings.LEVEL_FIELD: abbr,
+        "chamber": chamber
     }, safe=True)
 
 
