@@ -68,7 +68,7 @@ def import_speech(data):
         rid,
         data['event_id'],
         data['sequence'],
-        data['attribution']
+        data['speaker']
     ))
 
     db.speeches.insert(data, safe=True)

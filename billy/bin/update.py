@@ -180,6 +180,7 @@ def _do_reports(abbrev, args):
     from billy.reports.votes import vote_report
     from billy.reports.legislators import legislator_report
     from billy.reports.committees import committee_report
+    from billy.reports.speeches import speech_report
 
     report = db.reports.find_one({'_id': abbrev})
     if not report:
@@ -192,6 +193,8 @@ def _do_reports(abbrev, args):
         report['votes'] = vote_report(abbrev)
     if 'committees' in args.types:
         report['committees'] = committee_report(abbrev)
+    if 'speeches' in args.types:
+        report['speeches'] = speech_report(abbrev)
 
     db.reports.save(report, safe=True)
 
