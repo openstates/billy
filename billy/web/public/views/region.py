@@ -9,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.http import Http404
 from django.template.defaultfilters import striptags
 
+from billy.core import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator
 from ..forms import get_region_select_form
@@ -138,7 +139,7 @@ def search(request, abbr):
     Tempaltes:
         - billy/web/public/search_results_no_query.html
         - billy/web/public/search_results_bills_legislators.html
-        - billy/web/public/bills_list_row_with_state_and_session.html
+        - billy/web/public/bills_list_row_with_abbr_and_session.html
     '''
     if not request.GET:
         return render(request, templatename('search_results_no_query'),
@@ -169,7 +170,7 @@ def search(request, abbr):
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
         if abbr != 'all':
-            spec.update(state=abbr)
+            spec[settings.LEVEL_FIELD] = abbr
         legislator_results = db.legislators.find(spec)
         more_legislators_available = (5 < legislator_results.count())
         legislator_results = legislator_results.limit(5)
@@ -231,7 +232,7 @@ class ShowMoreLegislators(ListViewBase):
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
         if abbr != 'all':
-            spec.update(state=abbr)
+            spec[settings.LEVEL_FIELD] = abbr
         legislator_results = db.legislators.find(spec)
         return CursorPaginator(legislator_results, show_per_page=10,
                                page=int(self.request.GET.get('page', 1)))
