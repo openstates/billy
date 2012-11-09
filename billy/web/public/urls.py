@@ -80,6 +80,14 @@ urlpatterns += patterns('billy.web.public.views.legislators',
         'legislator', name='legislator_noslug'),
 )
 
+# speeches
+urlpatterns += patterns('billy.web.public.views.speeches',
+    url(r'^(?P<abbr>[a-z]{2})/speeches/$', 'speeches',
+        name='speeches'),
+    url(r'^(?P<abbr>[a-z]{2})/speeches/(?P<event_id>\w+)/', 'speeches_by_event',
+        name='speeches_by_event'),
+)
+
 # bills
 urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z]{2})/bills/$', BillList.as_view(), name='bills'),
@@ -100,10 +108,4 @@ urlpatterns += patterns('billy.web.public.views.bills',
         r'(?P<bill_id>[^/]+)/(?P<key>versions)/$', 'all_versions',
         name='bill_all_versions'),
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<vote_id>\w+)/$', 'vote', name='vote'),
-)
-
-# speeches
-urlpatterns += patterns('billy.web.public.views.speeches',
-    url(r'^(?P<abbr>[a-z]{2})/speeches/(?P<event_id>\w+)/', 'speeches',
-        name='speeches'),
 )
