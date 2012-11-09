@@ -17,18 +17,44 @@ from .utils import templatename, RelatedObjectsList
 
 
 def homepage(request):
+    '''
+    Context:
+        all_metadata
+
+    Templates:
+        - billy/web/public/homepage.html
+    '''
     return render(request, templatename('homepage'),
                   dict(
               all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
 
 
 def downloads(request):
+    '''
+    Context:
+        - all_metadata
+
+    Templates:
+        - billy/web/public/downloads.html
+    '''
     all_metadata = sorted(db.metadata.find(), key=lambda x: x['name'])
     return render(request, 'billy/web/public/downloads.html',
                   {'all_metadata': all_metadata})
 
 
 def find_your_legislator(request):
+    '''
+    Context:
+        - request
+        - lat
+        - long
+        - located
+        - legislators
+
+    Templates:
+        - billy/web/public/find_your_legislator_table.html
+    '''
+
     # check if lat/lon are set
     # if leg_search is set, they most likely don't have ECMAScript enabled.
     # XXX: fallback behavior here for alpha.
@@ -99,7 +125,24 @@ def get_district(request, district_id):
 
 
 class VotesList(RelatedObjectsList):
+    '''
+    Context (see utils.ListViewBase an utils.RelatedObjectsList):
+        - column_headers
+        - rowtemplate_name
+        - description_template
+        - object_list
+        - nav_active
+        - abbr
+        - metadata
+        - url
+        - use_table
+        - obj
+        - collection_name
 
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/votes_list_row.html
+    '''
     list_item_context_name = 'vote'
     collection_name = 'votes'
     mongo_sort = [('date', pymongo.DESCENDING)]
@@ -134,7 +177,24 @@ class VotesList(RelatedObjectsList):
 
 
 class NewsList(RelatedObjectsList):
+    '''
+    Context (see utils.ListViewBase an utils.RelatedObjectsList):
+        - column_headers
+        - rowtemplate_name
+        - description_template
+        - object_list
+        - nav_active
+        - abbr
+        - metadata
+        - url
+        - use_table
+        - obj
+        - collection_name
 
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/feed_entry.html
+    '''
     list_item_context_name = 'entry'
     mongo_sort = [('published_parsed', pymongo.DESCENDING)]
     paginator = CursorPaginator
