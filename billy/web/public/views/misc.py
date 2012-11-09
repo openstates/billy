@@ -150,8 +150,7 @@ class VotesList(RelatedObjectsList):
     query_attr = 'votes_manager'
     use_table = True
     rowtemplate_name = templatename('votes_list_row')
-    column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
-                      'No', 'Other', 'Motion')
+    column_headers_templname = templatename('votes_column_headers')
     nav_active = 'bills'
     description_template = '''
         Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
@@ -198,7 +197,7 @@ class NewsList(RelatedObjectsList):
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
-    column_headers = ('feeds',)
+    column_headers_tmplname = templatename('news_column_headers')
     nav_active = 'bills'
     collection_name = 'entries'
     description_template = '''

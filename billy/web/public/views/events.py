@@ -33,7 +33,7 @@ class EventsList(RelatedObjectsList):
     query_attr = 'events'
     use_table = True
     rowtemplate_name = templatename('events_list_row')
-    column_headers = ('Date', 'Description',)
+    column_headers_tmplname = templatename('events_column_headers')
     show_per_page = 15
     nav_active = 'events'
     description_template = '{{obj.legislature_name}} Events'

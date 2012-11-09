@@ -23,7 +23,7 @@ class RelatedBillsList(RelatedObjectsList):
     list_item_context_name = 'bill'
     paginator = CursorPaginator
     rowtemplate_name = templatename('bills_list_row')
-    column_headers = ('Title', 'Introduced', 'Recent Action',)
+    column_headers_tmplname = templatename('bills_column_headers')
     nav_active = 'bills'
     defer_rendering_title = True
 
@@ -223,8 +223,7 @@ class AllStateBills(RelatedBillsList):
     collection_name = 'bills'
     paginator = CursorPaginator
     use_table = True
-    column_headers = ('State', 'Title', 'Session', 'Introduced',
-                      'Recent Action')
+    column_headers_tmplname = templatename('all_bills_column_headers.html')
     description_template = '''NOT USED'''
     title_template = ('Search bills from all 50 states')
 

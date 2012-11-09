@@ -132,9 +132,7 @@ def search(request, abbr):
         - more_bills_available
         - legislators_list
         - more_legislators_available
-        - bill_column_headers
-        - rowtemplate_name
-        - show_chamber_column
+        - bill_column_headers_tmplname
         - nav_active
 
     Tempaltes:
@@ -190,8 +188,7 @@ def search(request, abbr):
              more_bills_available=more_bills_available,
              legislators_list=legislator_results,
              more_legislators_available=more_legislators_available,
-             bill_column_headers=('State', 'Title', 'Session', 'Introduced',
-                                  'Recent Action',),
+             column_headers_tmplname=templatename('search_column_headers'),
              rowtemplate_name=templatename('bills_list_row_with'
                                            '_state_and_session'),
              show_chamber_column=True,
@@ -221,8 +218,7 @@ class ShowMoreLegislators(ListViewBase):
     template_name = templatename('object_list')
     rowtemplate_name = templatename('legislators_list_row')
     nav_active = None
-    column_headers = ('', 'State', 'Name', 'District', 'Party', 'Chamber')
-    use_table = True
+    column_headers_tmplname = templatename('legislators_list_headers')
     description_template = '''
         <a href={{metadata.get_absolute_url}}>{{metadata.name}}</a>
         legislator names containing "{{request.GET.search_text}}"'''
