@@ -1,11 +1,27 @@
 {% extends "billy/web/public/base.html" %}
 {% load url from future %}
 {% load billy_utiltags %}
+{% load i18n %}
 
 {% block content %}
 
 <h2>{{metadata.legislature_name}}</h2>
 
-Speeches
+<table class="withFilter">
+    <thead>
+        <tr id="titles">
+            <th>{% trans "Who" %}</th>
+            <th>{% trans "What they said" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for speech in speeches %}
+        <tr class="{% cycle 'even' 'odd' %}">
+            <td>{{speech.speaker}}</td>
+            <td>{{speech.text}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}

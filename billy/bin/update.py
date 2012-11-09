@@ -59,6 +59,9 @@ def _run_scraper(scraper_type, options, metadata):
         scraper_type: bills, legislators, committees, votes
     """
     _clear_scraped_data(options.output_dir, scraper_type)
+    if scraper_type == 'speeches':
+        _clear_scraped_data(options.output_dir, 'events')
+
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     if not scraper:
         return [{
