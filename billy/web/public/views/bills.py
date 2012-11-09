@@ -205,9 +205,7 @@ class StateBills(RelatedBillsList):
     query_attr = 'bills'
     paginator = CursorPaginator
     description_template = '''NOT USED'''
-    title_template = '''
-        Search bills -
-        {{ metadata.legislature_name }} - Open States'''
+    title_template = 'Search bills - {{ metadata.legislature_name }}'
 
 
 class AllStateBills(RelatedBillsList):
@@ -228,7 +226,7 @@ class AllStateBills(RelatedBillsList):
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
     description_template = '''NOT USED'''
-    title_template = ('Search bills from all 50 states - Open States')
+    title_template = ('Search bills from all 50 states')
 
 
 class BillFeed(StateBills):
