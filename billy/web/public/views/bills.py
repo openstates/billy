@@ -28,6 +28,19 @@ class RelatedBillsList(RelatedObjectsList):
     defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
+        '''
+        Context:
+            If GET parameters are given:
+            - search_text
+            - form (FilterBillsForm)
+            - long_description
+            - description
+            - get_params
+            Otherwise, the only context item is an unbound FilterBillsForm.
+
+        Templates:
+            - Are specified in subclasses.
+        '''
         context = super(RelatedBillsList, self).get_context_data(
                                                         *args, **kwargs)
         metadata = context['metadata']
@@ -178,6 +191,15 @@ class RelatedBillsList(RelatedObjectsList):
 
 
 class StateBills(RelatedBillsList):
+    '''
+    Context:
+        - Determined by RelatedBillsList.get_context_data
+
+    Teamplates:
+    - billy/web/public/bills_list.html
+    - billy/web/public/_pagination.html
+    - billy/web/public/bills_list_row.html
+    '''
     template_name = templatename('bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
@@ -189,6 +211,15 @@ class StateBills(RelatedBillsList):
 
 
 class AllStateBills(RelatedBillsList):
+    '''
+    Context:
+        - Determined by RelatedBillsList.get_context_data
+
+    Teamplates:
+    - billy/web/public/bills_list.html
+    - billy/web/public/_pagination.html
+    - billy/web/public/bills_list_row_with_state_and_session.html
+    '''
     template_name = templatename('bills_list')
     rowtemplate_name = templatename('bills_list_row_with_state_and_session')
     collection_name = 'bills'
@@ -239,6 +270,22 @@ def bill_noslug(request, abbr, bill_id):
 
 
 def bill(request, abbr, session, bill_id):
+    '''
+    Context:
+        - vote_preview_row_template
+        - abbr
+        - metadata
+        - bill
+        - events
+        - show_all_sponsors
+        - sponsors
+        - sources
+        - statenav_active
+
+    Templates:
+        - billy/web/public/bill.html
+        - billy/web/public/vote_preview_row.html
+    '''
     # get fixed version
     fixed_bill_id = fix_bill_id(bill_id)
     # redirect if URL's id isn't fixed id without spaces
@@ -279,6 +326,17 @@ def bill(request, abbr, session, bill_id):
 
 
 def vote(request, abbr, vote_id):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - bill
+        - vote
+        - statenav_active
+
+    Templates:
+        - vote.html
+    '''
     vote = db.votes.find_one(vote_id)
     if vote is None:
         raise Http404('no such vote: {0}'.format(vote_id))
@@ -292,6 +350,18 @@ def vote(request, abbr, vote_id):
 
 
 def document(request, abbr, session, bill_id, doc_id):
+    '''
+    Context:
+        - abbr
+        - session
+        - bill
+        - version
+        - metadata
+        - statenav_active
+
+    Templates:
+        - billy/web/public/document.html
+    '''
     # get fixed version
     fixed_bill_id = fix_bill_id(bill_id)
     # redirect if URL's id isn't fixed id without spaces
@@ -319,6 +389,18 @@ def bill_by_mongoid(request, id_):
 
 
 def show_all(key):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - bill
+        - sources
+        - statenav_active
+
+    Templates:
+        - billy/web/public/bill_all_{key}.html
+            - where key is passed in, like "actions", etc.
+    '''
     def func(request, abbr, session, bill_id, key):
         # get fixed version
         fixed_bill_id = fix_bill_id(bill_id)
