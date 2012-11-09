@@ -2,10 +2,9 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
-from billy.web.public.views.bills import StateBills, AllStateBills, BillFeed
+from billy.web.public.views.bills import BillList, AllBillList, BillFeed
 from billy.web.public.views.region import ShowMoreLegislators
-from billy.web.public.feeds import (VotesListFeed, NewsListFeed,
-                                    StateEventsFeed)
+from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 
 # misc. views
 urlpatterns = patterns('billy.web.public.views.misc',
@@ -42,20 +41,20 @@ urlpatterns += patterns('',
     ),
 )
 
-# region/state specific
+# region specific
 urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{,3})/search/show_more_legislators/$',
         ShowMoreLegislators.as_view(), name='show_more_legislators'),
-    url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
-    url(r'^state_selection/$', 'state_selection', name='state_selection'),
+    url(r'^(?P<abbr>[a-z]{2})/$', 'region', name='region'),
+    url(r'^region_selection/$', 'region_selection', name='region_selection'),
 )
 
 # events
 urlpatterns += patterns('billy.web.public.views.events',
     url(r'^(?P<abbr>[a-z]{2})/events/$', EventsList.as_view(),
         name='events'),
-    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', StateEventsFeed(),
+    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', EventsFeed(),
         name='events_rss'),
     url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/', 'event',
         name='event'),
@@ -83,10 +82,10 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 
 # bills
 urlpatterns += patterns('billy.web.public.views.bills',
-    url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/$', BillList.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/feed/$', BillFeed.as_view(),
         name='bills_feed'),
-    url(r'^(?P<abbr>all)/bills/$', AllStateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>all)/bills/$', AllBillList.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/(?P<bill_id>[^/]+)/$',
         'bill', name='bill'),
     url(r'^(?P<abbr>[a-z]{2})/(?P<bill_id>[^/]+)/$',

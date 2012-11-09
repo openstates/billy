@@ -1,5 +1,5 @@
 """
-    views that are not state/object specific
+    views that are not object specific
 """
 import json
 import urllib2
@@ -17,18 +17,44 @@ from .utils import templatename, RelatedObjectsList
 
 
 def homepage(request):
+    '''
+    Context:
+        all_metadata
+
+    Templates:
+        - billy/web/public/homepage.html
+    '''
     return render(request, templatename('homepage'),
                   dict(
-              active_states=map(Metadata.get_object, settings.ACTIVE_STATES)))
+              all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
 
 
 def downloads(request):
-    states = sorted(db.metadata.find(), key=lambda x: x['name'])
+    '''
+    Context:
+        - all_metadata
+
+    Templates:
+        - billy/web/public/downloads.html
+    '''
+    all_metadata = sorted(db.metadata.find(), key=lambda x: x['name'])
     return render(request, 'billy/web/public/downloads.html',
-                  {'states': states})
+                  {'all_metadata': all_metadata})
 
 
 def find_your_legislator(request):
+    '''
+    Context:
+        - request
+        - lat
+        - long
+        - located
+        - legislators
+
+    Templates:
+        - billy/web/public/find_your_legislator_table.html
+    '''
+
     # check if lat/lon are set
     # if leg_search is set, they most likely don't have ECMAScript enabled.
     # XXX: fallback behavior here for alpha.
@@ -57,11 +83,11 @@ def find_your_legislator(request):
             billy_settings.API_KEY
         )
         leg_resp = json.load(urllib2.urlopen(qurl))
-        # allow limiting lookup to state for state map views
-        if 'state' in get:
+        # allow limiting lookup to region for region map views
+        if 'abbr' in get:
             leg_resp = [leg for leg in leg_resp
-                        if leg['state'] == get['state']]
-            context['state'] = get['state']
+                        if leg[billy_settings.LEVEL_FIELD] == get['abbr']]
+            context['abbr'] = get['abbr']
 
         if "boundary" in get:
             to_search = []
@@ -99,7 +125,24 @@ def get_district(request, district_id):
 
 
 class VotesList(RelatedObjectsList):
+    '''
+    Context (see utils.ListViewBase an utils.RelatedObjectsList):
+        - column_headers
+        - rowtemplate_name
+        - description_template
+        - object_list
+        - nav_active
+        - abbr
+        - metadata
+        - url
+        - use_table
+        - obj
+        - collection_name
 
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/votes_list_row.html
+    '''
     list_item_context_name = 'vote'
     collection_name = 'votes'
     mongo_sort = [('date', pymongo.DESCENDING)]
@@ -109,17 +152,15 @@ class VotesList(RelatedObjectsList):
     rowtemplate_name = templatename('votes_list_row')
     column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
                       'No', 'Other', 'Motion')
-    statenav_active = 'bills'
+    nav_active = 'bills'
     description_template = '''
         Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
         '''
     title_template = '''
         {% if obj.collection_name == 'bills' %}
-            Votes on bill {{obj.display_name}} -
-            {{metadata.legislature_name}} - Open States
+            Votes on bill {{obj.display_name}} - {{metadata.legislature_name}}
         {% elif obj.collection_name == 'legislators' %}
-            Votes by {{obj.display_name}} -
-            {{metadata.legislature_name}} - Open States
+            Votes by {{obj.display_name}} - {{metadata.legislature_name}}
         {% endif %}
         '''
 
@@ -134,22 +175,39 @@ class VotesList(RelatedObjectsList):
 
 
 class NewsList(RelatedObjectsList):
+    '''
+    Context (see utils.ListViewBase an utils.RelatedObjectsList):
+        - column_headers
+        - rowtemplate_name
+        - description_template
+        - object_list
+        - nav_active
+        - abbr
+        - metadata
+        - url
+        - use_table
+        - obj
+        - collection_name
 
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/feed_entry.html
+    '''
     list_item_context_name = 'entry'
     mongo_sort = [('published_parsed', pymongo.DESCENDING)]
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
     column_headers = ('feeds',)
-    statenav_active = 'bills'
+    nav_active = 'bills'
     collection_name = 'entries'
     description_template = '''
         news and blog entries mentioning
         <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
         '''
     title_template = '''
-        New and blogs mentioning {{obj.display_name}} -
-        {{metadata.legislature_name}} - OpenStates
+        News and blogs mentioning {{obj.display_name}} -
+        {{metadata.legislature_name}}
         '''
 
     def get(self, request, abbr, collection_name, _id, slug):

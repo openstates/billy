@@ -289,7 +289,7 @@ class RelatedDocuments(object):
     subclass, and when accessed on an instance, it will return
     a cursor of all objects that reference this instance's id using
     the key `model_key`. For example, this could be used to get all
-    "legislator" documents for a given state's metadata.
+    "legislator" documents for a given "metadata".
     '''
     def __init__(self, model, model_keys, instance_key='_id',
                  sort=None, model_keys_operator='$or',
@@ -305,7 +305,7 @@ class RelatedDocuments(object):
         :param model_keys_operator: if multiple model_keys are given, the
             boolean mongo query to relate them, like $and, $or, etc.
         :param default_spec_instance_keys: extra instance keys used to populate
-            the default mongo query spec with, like 'state' and 'session'.
+            the default mongo query spec with, like 'abbr' or 'session'.
             Useful in constraining potentially brutal queries.
         '''
         self.model = model

@@ -8,6 +8,7 @@ from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
+from django.contrib.sites.models import Site
 
 
 import billy
@@ -18,6 +19,14 @@ from .utils import templatename, RelatedObjectsList
 
 
 class EventsList(RelatedObjectsList):
+    '''
+    Context:
+        - See RelatedObjectsList.get_context_data
+
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/events_list_row.html
+    '''
     collection_name = 'metadata'
     sort_func = operator.itemgetter('when')
     sort_reversed = True
@@ -27,9 +36,9 @@ class EventsList(RelatedObjectsList):
     rowtemplate_name = templatename('events_list_row')
     column_headers = ('Date', 'Description',)
     show_per_page = 15
-    statenav_active = 'events'
+    nav_active = 'events'
     description_template = '{{obj.legislature_name}} Events'
-    title_template = 'Events - {{obj.legislature_name}} - Open States'
+    title_template = 'Events - {{obj.legislature_name}}'
 
 
 def event_ical(request, abbr, event_id):
@@ -37,15 +46,15 @@ def event_ical(request, abbr, event_id):
     if event is None:
         raise Http404
 
-    x_name = "X-OPENSTATES"
+    x_name = "X-BILLY"
 
     cal = Calendar()
-    cal.add('prodid', '-//Open States//openstates.org//')
+    cal.add('prodid', '-//Sunlight Labs//billy//')
     cal.add('version', billy.__version__)
 
     cal_event = Event()
     cal_event.add('summary', event['description'])
-    cal_event['uid'] = "%s@openstates.org" % (event['_id'])
+    cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
     cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
@@ -68,6 +77,19 @@ def event_ical(request, abbr, event_id):
 
 
 def event(request, abbr, event_id):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - event
+        - sources
+        - gcal_info
+        - gcal_string
+        - nav_active
+
+    Templates:
+        - billy/web/public/event.html
+    '''
     event = db.events.find_one({'_id': event_id})
     if event is None:
         raise Http404
@@ -86,11 +108,8 @@ def event(request, abbr, event_id):
         "details": "",
         "location": event['location'].encode('utf-8'),
         "trp": "false",
-        "sprop": "http://openstates.org/%s/events/%s/" % (
-            abbr,
-            event_id
-        ),
-        "sprop": "name:Open States Event"
+        "sprop": "http://%s/" % Site.objects.all()[0].domain,
+        "sprop": "name:billy"
     }
     gcal_string = urllib.urlencode(gcal_info)
 
@@ -101,4 +120,4 @@ def event(request, abbr, event_id):
                        sources=event['sources'],
                        gcal_info=gcal_info,
                        gcal_string=gcal_string,
-                       statenav_active='events'))
+                       nav_active='events'))

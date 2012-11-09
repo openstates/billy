@@ -1,5 +1,5 @@
 """
-    views that are specific to a state/region
+    views that are specific to a region
 """
 import re
 import urllib
@@ -7,27 +7,37 @@ from collections import defaultdict
 
 from django.shortcuts import redirect, render
 from django.http import Http404
-from django.conf import settings
 from django.template.defaultfilters import striptags
 
+from billy.core import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator
-from ..forms import get_state_select_form
+from ..forms import get_region_select_form
 from .utils import templatename, ListViewBase
 
 
-def state_selection(request):
-    '''Handle submission of the state selection form
-    in the base template.
-    '''
-    form = get_state_select_form(request.GET)
+def region_selection(request):
+    '''Handle submission of the region selection form in the base template. '''
+    form = get_region_select_form(request.GET)
     abbr = form.data.get('abbr')
     if not abbr or len(abbr) != 2:
         return redirect('homepage')
-    return redirect('state', abbr=abbr)
+    return redirect('region', abbr=abbr)
 
 
-def state(request, abbr):
+def region(request, abbr):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - sessions
+        - chambers
+        - joint_committee_count
+        - nav_active
+
+    Templates:
+        - bill/web/public/region.html
+    '''
     report = db.reports.find_one({'_id': abbr})
     try:
         meta = Metadata.get_object(abbr)
@@ -40,7 +50,7 @@ def state(request, abbr):
     # Maybe later, mapreduce instead?
     party_counts = defaultdict(lambda: defaultdict(int))
     for leg in legislators:
-        if 'chamber' in leg:    # if statement to exclude lt. governors
+        if 'chamber' in leg:    # exclude lt. governors
             party_counts[leg['chamber']][leg['party']] += 1
 
     if 'lower_chamber_name' not in meta:
@@ -87,25 +97,52 @@ def state(request, abbr):
             # there's a chance that the session had no bills
             s['bill_count'] = 0
 
-    return render(request, templatename('state'),
+    return render(request, templatename('region'),
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,
-                       statenav_active='home'))
+                       nav_active='home'))
 
 
 def not_active_yet(request, args, kwargs):
+    '''
+    Context:
+        - metadata
+        - nav_active
+
+    Tempaltes:
+        - billy/web/public/state_not_active_yet.html
+    '''
     try:
         metadata = Metadata.get_object(kwargs['abbr'])
     except DoesNotExist:
         raise Http404
 
     return render(request, templatename('state_not_active_yet'),
-                  dict(metadata=metadata, statenav_active=None))
+                  dict(metadata=metadata, nav_active=None))
 
 
 def search(request, abbr):
+    '''
+    Context:
+        - search_text
+        - abbr
+        - metadata
+        - found_by_id
+        - bill_results
+        - more_bills_available
+        - legislators_list
+        - more_legislators_available
+        - bill_column_headers
+        - rowtemplate_name
+        - show_chamber_column
+        - nav_active
 
+    Tempaltes:
+        - billy/web/public/search_results_no_query.html
+        - billy/web/public/search_results_bills_legislators.html
+        - billy/web/public/bills_list_row_with_abbr_and_session.html
+    '''
     if not request.GET:
         return render(request, templatename('search_results_no_query'),
                       {'abbr': abbr})
@@ -120,16 +157,10 @@ def search(request, abbr):
 
     else:
         found_by_id = False
-        if settings.ENABLE_ELASTICSEARCH:
-            kwargs = {}
-            if abbr != 'all':
-                kwargs['state'] = abbr
-            bill_results = Bill.search(search_text, **kwargs)
-        else:
-            spec = {'title': {'$regex': search_text, '$options': 'i'}}
-            if abbr != 'all':
-                spec.update(state=abbr)
-            bill_results = db.bills.find(spec)
+        kwargs = {}
+        if abbr != 'all':
+            kwargs['abbr'] = abbr
+        bill_results = Bill.search(search_text, **kwargs)
 
         # add sorting
         bill_results = bill_results.sort([('action_dates.last', -1)])
@@ -141,7 +172,7 @@ def search(request, abbr):
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
         if abbr != 'all':
-            spec.update(state=abbr)
+            spec[settings.LEVEL_FIELD] = abbr
         legislator_results = db.legislators.find(spec)
         more_legislators_available = (5 < legislator_results.count())
         legislator_results = legislator_results.limit(5)
@@ -162,16 +193,34 @@ def search(request, abbr):
              more_legislators_available=more_legislators_available,
              bill_column_headers=('State', 'Title', 'Session', 'Introduced',
                                   'Recent Action',),
-             rowtemplate_name=templatename('bills_list_row_with'
-                                           '_state_and_session'),
+         rowtemplate_name=templatename('bills_list_row_with_abbr_and_session'),
              show_chamber_column=True,
-             statenav_active=None))
+             nav_active=None))
 
 
 class ShowMoreLegislators(ListViewBase):
+    '''
+    Context:
+        chamber
+        committees
+        abbr
+        metadata
+        chamber_name
+        chamber_select_template
+        chamber_select_collection
+        chamber_select_chambers
+        committees_table_template
+        show_chamber_column
+        sort_order
+        nav_active
+
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/legislators_list_row.html
+    '''
     template_name = templatename('object_list')
     rowtemplate_name = templatename('legislators_list_row')
-    statenav_active = None
+    nav_active = None
     column_headers = ('', 'State', 'Name', 'District', 'Party', 'Chamber')
     use_table = True
     description_template = '''
@@ -186,7 +235,7 @@ class ShowMoreLegislators(ListViewBase):
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
         if abbr != 'all':
-            spec.update(state=abbr)
+            spec[settings.LEVEL_FIELD] = abbr
         legislator_results = db.legislators.find(spec)
         return CursorPaginator(legislator_results, show_per_page=10,
                                page=int(self.request.GET.get('page', 1)))

@@ -1,24 +1,23 @@
 from django import forms
 from django.conf import settings
-#from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from billy.models import db, Metadata, DoesNotExist
 
 
-def get_state_select_form(data):
-    state_abbrs = [('', '')]
-    for state in sorted(settings.ACTIVE_STATES):
+def get_region_select_form(data):
+    abbrs = [('', '')]
+    for abbr in sorted(settings.ACTIVE_STATES):
         try:
-            obj = Metadata.get_object(state)
-            state_abbrs.append((obj['_id'], obj['name']))
+            obj = Metadata.get_object(abbr)
+            abbrs.append((obj['_id'], obj['name']))
         except DoesNotExist:
-            # ignore missing states
+            # ignore missing
             pass
 
-    class StateSelectForm(forms.Form):
-        abbr = forms.ChoiceField(choices=state_abbrs, label="state")
+    class RegionSelectForm(forms.Form):
+        abbr = forms.ChoiceField(choices=abbrs, label="abbr")
 
-    return StateSelectForm(data)
+    return RegionSelectForm(data)
 
 
 class FindYourLegislatorForm(forms.Form):
@@ -31,7 +30,7 @@ def get_filter_bills_form(metadata):
 
         search_text = forms.CharField(required=False)
 
-        # `metadata` will be None if the search is for all states.
+        # `metadata` will be None if the search is across all bills
         if metadata:
             _bill_types = metadata.distinct_bill_types()
             _bill_subjects = metadata.distinct_bill_subjects()

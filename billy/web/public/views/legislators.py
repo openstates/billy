@@ -23,6 +23,27 @@ from .utils import templatename, mongo_fields
 
 @pjax()
 def legislators(request, abbr):
+    '''
+    Context:
+        - metadata
+        - chamber
+        - chamber_title
+        - chamber_select_template
+        - chamber_select_collection
+        - chamber_select_chambers
+        - show_chamber_column
+        - abbr
+        - legislators
+        - sort_order
+        - sort_key
+        - legislator_table
+        - nav_active
+
+    Templates:
+        - billy/web/public/legislators.html
+        - billy/web/public/chamber_select_form.html
+        - billy/web/public/legislator_table.html
+    '''
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -44,7 +65,7 @@ def legislators(request, abbr):
 
     fields = mongo_fields('leg_id', 'full_name', 'photo_url', 'district',
                           'party', 'first_name', 'last_name', 'chamber',
-                          'state', 'last_name')
+                          billy_settings.LEVEL_FIELD, 'last_name')
 
     sort_key = 'district'
     sort_order = 1
@@ -87,10 +108,35 @@ def legislators(request, abbr):
                    sort_order=sort_order,
                    sort_key=sort_key,
                    legislator_table=templatename('legislator_table'),
-                   statenav_active='legislators'))
+                   nav_active='legislators'))
 
 
 def legislator(request, abbr, _id, slug=None):
+    '''
+    Context:
+        - feed_entry_template
+        - vote_preview_row_template
+        - roles
+        - abbr
+        - district_id
+        - metadata
+        - legislator
+        - sources
+        - sponsored_bills
+        - legislator_votes
+        - has_feed_entries
+        - feed_entries
+        - feed_entries_count
+        - feed_entries_more_count
+        - has_votes
+        - nav_active
+
+    Templates:
+        - billy/web/public/legislator.html
+        - billy/web/public/feed_entry.html
+        - billy/web/public/vote_preview_row.html
+
+    '''
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -156,10 +202,29 @@ def legislator(request, abbr, _id, slug=None):
             feed_entries_count=len(feed_entries_list),
             feed_entries_more_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
-            statenav_active='legislators'))
+            nav_active='legislators'))
 
 
 def legislator_inactive(request, abbr, legislator):
+    '''
+    Context:
+        - feed_entry_template
+        - vote_preview_row_template
+        - old_roles
+        - abbr
+        - metadata
+        - legislator
+        - sources
+        - sponsored_bills
+        - legislator_votes
+        - has_votes
+        - nav_active
+
+    Templates:
+        - billy/web/public/legislator.html
+        - billy/web/public/feed_entry.html
+        - billy/web/public/vote_preview_row.html
+    '''
     sponsored_bills = legislator.sponsored_bills(
         limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
 
@@ -177,4 +242,4 @@ def legislator_inactive(request, abbr, legislator):
             sponsored_bills=sponsored_bills,
             legislator_votes=legislator_votes,
             has_votes=has_votes,
-            statenav_active='legislators'))
+            nav_active='legislators'))
