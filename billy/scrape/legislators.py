@@ -1,24 +1,9 @@
-import os
-import json
-
 from billy.scrape import Scraper, SourcedObject
-from billy.core import settings
+
 
 class LegislatorScraper(Scraper):
 
     scraper_type = 'legislators'
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/person.json')
-        schema = json.load(open(schema_path))
-        terms = [t['name'] for t in self.metadata['terms']]
-        schema['properties']['roles']['items']['properties']['term']['enum'] =\
-                terms
-        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
-                                                      'minLength': 2,
-                                                      'type': 'string'}
-        return schema
 
     def scrape(self, chamber, term):
         """
@@ -31,27 +16,7 @@ class LegislatorScraper(Scraper):
         raise NotImplementedError('LegislatorScrapers must define a '
                                   'scrape method')
 
-    def save_person(self, person):
-        """
-        Save a scraped :class:`~billy.scrape.legislators.Person` object.
-        Only call after all data for the given person has been collected.
-
-        Should be used for non-legislator people (e.g. Governor, Lt. Gov).
-        To add :class:`~billy.scrape.legislators.Legislator` objects call
-        :meth:`save_legislator`.
-        """
-        self.log("save_person: %s" % person['full_name'])
-        self.save_object(person)
-
-    def save_legislator(self, legislator):
-        """
-        Save a scraped :class:`~billy.scrape.legislators.Legislator`
-        object.
-
-        Only call after all data for the given legislator has been collected.
-        """
-        self.log("save_legislator: %s" % legislator['full_name'])
-        self.save_object(legislator)
+    save_legislator = Scraper.save_object
 
 
 class Person(SourcedObject):
@@ -109,6 +74,9 @@ class Person(SourcedObject):
         filename = "%s_%s.json" % (role['term'], self['full_name'])
         return filename.encode('ascii', 'replace')
 
+    def __unicode__(self):
+        return self['full_name']
+
 
 class Legislator(Person):
     def __init__(self, term, chamber, district, full_name,
@@ -138,7 +106,6 @@ class Legislator(Person):
         super(Legislator, self).__init__(full_name, first_name,
                                          last_name, middle_name,
                                          **kwargs)
-        #self['type'] = 'legislator'
         self.add_role('member', term, chamber=chamber, district=district,
                       party=party)
 

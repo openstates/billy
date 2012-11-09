@@ -1,6 +1,4 @@
-import os
 import itertools
-import json
 
 from billy.scrape import Scraper, SourcedObject
 
@@ -8,16 +6,6 @@ from billy.scrape import Scraper, SourcedObject
 class VoteScraper(Scraper):
 
     scraper_type = 'votes'
-
-    def __init__(self, *args, **kwargs):
-        super(VoteScraper, self).__init__(*args, **kwargs)
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/vote.json')
-        schema = json.load(open(schema_path))
-        schema['properties']['session']['enum'] = self.all_sessions()
-        return schema
 
     def scrape(self, chamber, session):
         """
@@ -29,17 +17,7 @@ class VoteScraper(Scraper):
         """
         raise NotImplementedError('VoteScrapers must define a scrape method')
 
-    def save_vote(self, vote):
-        """
-        Save a scraped :class:`~billy.scrape.votes.Vote` object.
-
-        Should be called after all data for the given vote is collected.
-        """
-        self.log("save_vote %s %s: %s '%s'" % (vote['session'],
-                                               vote['chamber'],
-                                               vote['bill_id'],
-                                               vote['motion']))
-        self.save_object(vote)
+    save_vote = Scraper.save_object
 
 
 class Vote(SourcedObject):
@@ -130,3 +108,7 @@ class Vote(SourcedObject):
                                             self['bill_id'],
                                             self.sequence.next())
         return filename
+
+    def __unicode__(self):
+        return "%s %s: %s '%s'" % (self['session'], self['chamber'],
+                                   self['bill_id'], self['motion'])

@@ -1,36 +1,15 @@
-import os
-import json
-
 from billy.scrape import Scraper, SourcedObject
-from billy.core import settings
 
 
 class CommitteeScraper(Scraper):
 
     scraper_type = 'committees'
 
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/committee.json')
-        schema = json.load(open(schema_path))
-        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
-                                                      'minLength': 2,
-                                                      'type': 'string'}
-        return schema
-
     def scrape(self, chamber, term):
         raise NotImplementedError('CommitteeScrapers must define a '
                                   'scrape method')
 
-    def save_committee(self, committee):
-        """
-        Save a scraped :class:`~billy.scrape.committees.Committee` object.
-        """
-        name = committee['committee']
-        if committee.get('subcommittee', None):
-            name += '_%s' % committee['subcommittee']
-        self.log("save_committee: %s" % name)
-        self.save_object(committee)
+    save_committee = Scraper.save_object
 
 
 class Committee(SourcedObject):
@@ -67,3 +46,10 @@ class Committee(SourcedObject):
             name += '_%s' % self['subcommittee']
 
         return "%s_%s.json" % (self['chamber'], name.replace('/', ','))
+
+    def __unicode__(self):
+        name = self['committee']
+        sub = self.get('subcommittee', None)
+        if sub:
+            name += ': %s' % sub
+        return name
