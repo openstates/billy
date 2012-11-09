@@ -131,6 +131,7 @@ def _configure_celery():
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
-_configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
+if settings.ENABLE_ELASTICSEARCH:
+    _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
 _configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)
 _configure_celery()

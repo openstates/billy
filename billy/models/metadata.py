@@ -51,7 +51,7 @@ class MetadataVotesManager(AttrManager):
 
 class Metadata(Document):
     '''
-    The metadata can also be thought as the "state" (i.e., Montana, Texas)
+    The metadata can also be thought as the jurisdiction (i.e., Montana, Texas)
     when it's an attribute of another object. For example, if you have a
     bill, you can do this:
 
@@ -122,7 +122,7 @@ class Metadata(Document):
         return self['name']
 
     def get_absolute_url(self):
-        return urlresolvers.reverse('state', args=[self['abbreviation']])
+        return urlresolvers.reverse('region', args=[self['abbreviation']])
 
     def _bills_by_chamber_action(self, chamber, action, *args, **kwargs):
         bills = self.bills({'session': self.most_recent_session,

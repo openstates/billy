@@ -173,18 +173,19 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        base_fields = _build_mongo_filter(request, (settings.LEVEL_FIELD,
-                                                    'chamber', 'subjects',
+        base_fields = _build_mongo_filter(request, ('chamber', 'subjects',
                                                     'bill_id', 'bill_id__in'))
 
         # process extra attributes
         query = request.GET.get('q')
+        abbr = request.GET.get(settings.LEVEL_FIELD).lower()
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
 
         try:
             query = Bill.search(query,
+                                abbr=abbr,
                                 search_window=search_window,
                                 updated_since=since, sponsor_id=sponsor_id,
                                 bill_fields=bill_fields,

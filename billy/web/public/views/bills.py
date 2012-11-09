@@ -4,7 +4,6 @@ import pymongo
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.conf import settings
 from django.utils.feedgenerator import Rss201rev2Feed
 
 from billy.utils import popularity, fix_bill_id
@@ -105,7 +104,7 @@ class RelatedBillsList(RelatedObjectsList):
         # start with the spec
         spec = {}
         if abbr != 'all':
-            spec['state'] = abbr
+            spec['abbr'] = abbr
 
         # Setup the paginator.
         get = self.request.GET.get
@@ -126,47 +125,31 @@ class RelatedBillsList(RelatedObjectsList):
             if found_by_bill_id:
                 return IteratorPaginator(found_by_bill_id)
 
-        if settings.ENABLE_ELASTICSEARCH:
-            chamber = form.data.get('chamber')
-            if chamber:
-                spec['chamber'] = chamber
+        chamber = form.data.get('chamber')
+        if chamber:
+            spec['chamber'] = chamber
 
-            subjects = form.data.get('subjects')
-            if subjects:
-                spec['subjects'] = {'$all': [filter(None, subjects)]}
+        subjects = form.data.get('subjects')
+        if subjects:
+            spec['subjects'] = {'$all': [filter(None, subjects)]}
 
-            sponsor_id = form.data.get('sponsor__leg_id')
-            if sponsor_id:
-                spec['sponsor_id'] = sponsor_id
+        sponsor_id = form.data.get('sponsor__leg_id')
+        if sponsor_id:
+            spec['sponsor_id'] = sponsor_id
 
-            status = form.data.get('status')
-            if status:
-                spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
+        status = form.data.get('status')
+        if status:
+            spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
 
-            type_ = form.data.get('type')
-            if type_:
-                spec['type_'] = type_
+        type_ = form.data.get('type')
+        if type_:
+            spec['type_'] = type_
 
-            session = form.data.get('session')
-            if session:
-                spec['session'] = session
+        session = form.data.get('session')
+        if session:
+            spec['session'] = session
 
-            cursor = Bill.search(search_text, **spec)
-        else:
-            # Elastic search not enabled--query mongo normally.
-            # Mainly here for local work on search views.
-            params = ['chamber', 'subjects', 'sponsor__leg_id',
-                      'actions__type', 'type', 'status', 'session']
-            for key in params:
-                val = form.data.get(key)
-                if val:
-                    key = key.replace('__', '.')
-                    spec[key] = val
-
-            if search_text:
-                spec['title'] = {'$regex': search_text, '$options': 'i'}
-
-            cursor = db.bills.find(spec)
+        cursor = Bill.search(search_text, **spec)
 
         sort = self.request.GET.get('sort', 'last')
         if sort not in ('first', 'last', 'signed', 'passed_upper',

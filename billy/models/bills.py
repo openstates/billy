@@ -112,7 +112,7 @@ class Action(dict):
         '''The action text, with any hyperlinked related entities.'''
         action = self['action']
         annotations = []
-        state = self.bill['state']
+        abbr = self.bill[settings.LEVEL_FIELD]
         if 'related_entities' in self:
             for entity in self['related_entities']:
                 name = entity['name']
@@ -122,7 +122,7 @@ class Action(dict):
                 # skip.
                 if _id is None:
                     continue
-                url = mongoid_2_url(state, _id)
+                url = mongoid_2_url(abbr, _id)
                 link = '<a href="%s">%s</a>' % (url, name)
                 if name in action:
                     action = action.replace(entity['name'], link)
@@ -433,12 +433,12 @@ class Bill(Document):
     versions_preview, versions_remainder = _split_list(12, 'versions')
 
     @staticmethod
-    def search(query=None, state=None, chamber=None, subjects=None,
+    def search(query=None, abbr=None, chamber=None, subjects=None,
                bill_id=None, bill_id__in=None, search_window=None,
                updated_since=None, sponsor_id=None, bill_fields=None,
                status=None, type_=None, session=None):
         _filter = {}
-        for key, value in [('state', state),
+        for key, value in [(settings.LEVEL_FIELD, abbr),
                             ('chamber', chamber),
                             ('subjects', subjects),
                             ('bill_id', bill_id),
@@ -481,10 +481,10 @@ class Bill(Document):
             _filter['session'] = session
 
         # process full-text query
-        if query:
+        if query and settings.ENABLE_ELASTICSEARCH:
             # block spammers, possibly move to a BANNED_SEARCH_LIST setting
             if '<a href' in query:
-                return db.bills.find({'state': None})
+                return db.bills.find({settings.LEVEL_FIELD: None})
 
             if re.findall('\d+', query):
                 _id_filter = dict(_filter)
@@ -500,9 +500,9 @@ class Bill(Document):
 
             # take terms from mongo query
             es_terms = []
-            if 'state' in _filter:
-                es_terms.append(pyes.TermFilter('state',
-                                                _filter.pop('state')))
+            if settings.LEVEL_FIELD in _filter:
+                es_terms.append(pyes.TermFilter(settings.LEVEL_FIELD,
+                                            _filter.pop(settings.LEVEL_FIELD)))
             if 'session' in _filter:
                 es_terms.append(pyes.TermFilter('session',
                                                 _filter.pop('session')))
@@ -525,6 +525,8 @@ class Bill(Document):
                                              scroll='3m', size=250)
             doc_ids = [r.get_id() for r in es_result]
             _filter['versions.doc_id'] = {'$in': doc_ids}
+        elif query:
+            _filter['title'] = {'$regex': query, '$options': 'i'}
 
         # return query
         return db.bills.find(_filter, bill_fields)

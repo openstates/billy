@@ -42,12 +42,12 @@ urlpatterns += patterns('',
     ),
 )
 
-# region/state specific
+# region specific
 urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{,3})/search/show_more_legislators/$',
         ShowMoreLegislators.as_view(), name='show_more_legislators'),
-    url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='state'),
+    url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='region'),
     url(r'^state_selection/$', 'state_selection', name='state_selection'),
 )
 

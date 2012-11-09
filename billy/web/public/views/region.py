@@ -1,5 +1,5 @@
 """
-    views that are specific to a state/region
+    views that are specific to a region
 """
 import re
 import urllib
@@ -7,7 +7,6 @@ from collections import defaultdict
 
 from django.shortcuts import redirect, render
 from django.http import Http404
-from django.conf import settings
 from django.template.defaultfilters import striptags
 
 from billy.models import db, Metadata, DoesNotExist, Bill
@@ -40,7 +39,7 @@ def state(request, abbr):
     # Maybe later, mapreduce instead?
     party_counts = defaultdict(lambda: defaultdict(int))
     for leg in legislators:
-        if 'chamber' in leg:    # if statement to exclude lt. governors
+        if 'chamber' in leg:    # exclude lt. governors
             party_counts[leg['chamber']][leg['party']] += 1
 
     if 'lower_chamber_name' not in meta:
@@ -120,16 +119,10 @@ def search(request, abbr):
 
     else:
         found_by_id = False
-        if settings.ENABLE_ELASTICSEARCH:
-            kwargs = {}
-            if abbr != 'all':
-                kwargs['state'] = abbr
-            bill_results = Bill.search(search_text, **kwargs)
-        else:
-            spec = {'title': {'$regex': search_text, '$options': 'i'}}
-            if abbr != 'all':
-                spec.update(state=abbr)
-            bill_results = db.bills.find(spec)
+        kwargs = {}
+        if abbr != 'all':
+            kwargs['abbr'] = abbr
+        bill_results = Bill.search(search_text, **kwargs)
 
         # add sorting
         bill_results = bill_results.sort([('action_dates.last', -1)])
