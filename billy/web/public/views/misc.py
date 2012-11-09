@@ -150,7 +150,7 @@ class VotesList(RelatedObjectsList):
     query_attr = 'votes_manager'
     use_table = True
     rowtemplate_name = templatename('votes_list_row')
-    column_headers_templname = templatename('votes_column_headers')
+    column_headers_tmplname = templatename('votes_column_headers')
     nav_active = 'bills'
     description_template = '''
         Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
