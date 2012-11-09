@@ -15,11 +15,12 @@ class SpeechScraper(Scraper):
 
 
 class Speech(SourcedObject):
-    def __init__(self, session, docid, when, sequence,
+    def __init__(self, session, chamber, docid, when, sequence,
                  speaker, text, **kwargs):
         super(Speech, self).__init__('speech', **kwargs)
         self.uuid = uuid.uuid1()  # If we need to save more than once.
 
+        self['chamber'] = chamber
         self['session'] = session
         self['record_id'] = docid
         self['when'] = when
