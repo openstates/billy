@@ -1,5 +1,6 @@
+from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj
-from billy.core import db
+from billy.core import db, settings
 
 from collections import defaultdict
 
@@ -53,16 +54,30 @@ def clear_old_speeches(session, record_id):
 
 
 def import_speech(data):
+    abbr = data[settings.LEVEL_FIELD]
     rid = data['record_id']
     session = data['session']
+    chamber = data['chamber']
+
+    # before we get too far, let's find the event we link against.
+
     event = db.events.find_one({
         "record_id": rid,
         "session": session
     })
+
     if event:
         data['event_id'] = event['_id']
     else:
         data['event_id'] = None
+
+    # OK, let's now look up the Legislator.
+
+    leg_id = get_legislator_id(abbr,
+                               session,
+                               chamber,
+                               data['speaker'])
+    data['speaker_id'] = leg_id
 
     logger.info("Saving speech %s %s %s %s" % (
         rid,

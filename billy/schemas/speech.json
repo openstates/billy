@@ -4,6 +4,9 @@
         "record_id": {
             "type": "string"
         },
+        "chamber": {
+            "type": "string"
+        },
         "sequence": {
             "type": "integer"
         },

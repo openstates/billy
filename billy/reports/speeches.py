@@ -20,7 +20,7 @@ def scan_speeches(abbr):
     for speech in db.speeches.find({settings.LEVEL_FIELD: abbr}):
         session = speech['session']
         obj = sessions[session]
-        if "speaker_id" in speech:
+        if "speaker_id" in speech and speech['speaker_id']:
             obj['_speakers_with_id_count'] += 1
         else:
             obj['unmatched_speakers'].add(speech['speaker'])
