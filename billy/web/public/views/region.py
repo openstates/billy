@@ -53,7 +53,9 @@ def region(request, abbr):
         if 'chamber' in leg:    # exclude lt. governors
             party_counts[leg['chamber']][leg['party']] += 1
 
-    if 'lower_chamber_name' not in meta:
+    if 'upper_chamber_name' not in meta:
+        chambers_to_use = ('lower',)
+    elif 'lower_chamber_name' not in meta:
         chambers_to_use = ('upper',)
     else:
         chambers_to_use = ('upper', 'lower')
