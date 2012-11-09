@@ -88,7 +88,7 @@ def region(request, abbr):
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,
-                       statenav_active='home'))
+                       nav_active='home'))
 
 
 def not_active_yet(request, args, kwargs):
@@ -98,7 +98,7 @@ def not_active_yet(request, args, kwargs):
         raise Http404
 
     return render(request, templatename('state_not_active_yet'),
-                  dict(metadata=metadata, statenav_active=None))
+                  dict(metadata=metadata, nav_active=None))
 
 
 def search(request, abbr):
@@ -156,13 +156,13 @@ def search(request, abbr):
              rowtemplate_name=templatename('bills_list_row_with'
                                            '_state_and_session'),
              show_chamber_column=True,
-             statenav_active=None))
+             nav_active=None))
 
 
 class ShowMoreLegislators(ListViewBase):
     template_name = templatename('object_list')
     rowtemplate_name = templatename('legislators_list_row')
-    statenav_active = None
+    nav_active = None
     column_headers = ('', 'State', 'Name', 'District', 'Party', 'Chamber')
     use_table = True
     description_template = '''

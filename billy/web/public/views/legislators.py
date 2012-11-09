@@ -87,7 +87,7 @@ def legislators(request, abbr):
                    sort_order=sort_order,
                    sort_key=sort_key,
                    legislator_table=templatename('legislator_table'),
-                   statenav_active='legislators'))
+                   nav_active='legislators'))
 
 
 def legislator(request, abbr, _id, slug=None):
@@ -156,7 +156,7 @@ def legislator(request, abbr, _id, slug=None):
             feed_entries_count=len(feed_entries_list),
             feed_entries_more_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
-            statenav_active='legislators'))
+            nav_active='legislators'))
 
 
 def legislator_inactive(request, abbr, legislator):
@@ -177,4 +177,4 @@ def legislator_inactive(request, abbr, legislator):
             sponsored_bills=sponsored_bills,
             legislator_votes=legislator_votes,
             has_votes=has_votes,
-            statenav_active='legislators'))
+            nav_active='legislators'))

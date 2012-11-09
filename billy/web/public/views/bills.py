@@ -24,7 +24,7 @@ class RelatedBillsList(RelatedObjectsList):
     paginator = CursorPaginator
     rowtemplate_name = templatename('bills_list_row')
     column_headers = ('Title', 'Introduced', 'Recent Action',)
-    statenav_active = 'bills'
+    nav_active = 'bills'
     defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
@@ -275,7 +275,7 @@ def bill(request, abbr, session, bill_id):
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
-             statenav_active='bills'))
+             nav_active='bills'))
 
 
 def vote(request, abbr, vote_id):
@@ -288,7 +288,7 @@ def vote(request, abbr, vote_id):
                   dict(abbr=abbr, metadata=Metadata.get_object(abbr),
                        bill=bill,
                        vote=vote,
-                       statenav_active='bills'))
+                       nav_active='bills'))
 
 
 def document(request, abbr, session, bill_id, doc_id):
@@ -310,7 +310,7 @@ def document(request, abbr, session, bill_id, doc_id):
 
     return render(request, templatename('document'),
                   dict(abbr=abbr, session=session, bill=bill, version=version,
-                       metadata=bill.metadata, statenav_active='bills'))
+                       metadata=bill.metadata, nav_active='bills'))
 
 
 def bill_by_mongoid(request, id_):
@@ -336,7 +336,7 @@ def show_all(key):
              metadata=Metadata.get_object(abbr),
              bill=bill,
              sources=bill['sources'],
-             statenav_active='bills'))
+             nav_active='bills'))
     return func
 
 all_documents = show_all('documents')

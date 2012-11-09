@@ -27,7 +27,7 @@ class EventsList(RelatedObjectsList):
     rowtemplate_name = templatename('events_list_row')
     column_headers = ('Date', 'Description',)
     show_per_page = 15
-    statenav_active = 'events'
+    nav_active = 'events'
     description_template = '{{obj.legislature_name}} Events'
     title_template = 'Events - {{obj.legislature_name}} - Open States'
 
@@ -101,4 +101,4 @@ def event(request, abbr, event_id):
                        sources=event['sources'],
                        gcal_info=gcal_info,
                        gcal_string=gcal_string,
-                       statenav_active='events'))
+                       nav_active='events'))

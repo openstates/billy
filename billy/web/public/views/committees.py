@@ -7,6 +7,7 @@ from django.template.response import TemplateResponse
 
 from djpjax import pjax
 
+from billy.core import settings
 from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 
@@ -44,8 +45,8 @@ def committees(request, abbr):
     if 'lower_chamber_name' in meta:
         chambers['lower'] = meta['lower_chamber_name']
 
-    fields = mongo_fields('committee', 'subcommittee', 'members', 'state',
-                          'chamber')
+    fields = mongo_fields('committee', 'subcommittee', 'members',
+                          settings.LEVEL_FIELD, 'chamber')
 
     sort_key = request.GET.get('key', 'committee')
     sort_order = int(request.GET.get('order', 1))
@@ -63,7 +64,7 @@ def committees(request, abbr):
                    chamber_select_chambers=chambers,
                    committees_table_template=templatename('committees_table'),
                    show_chamber_column=show_chamber_column,
-                   sort_order=sort_order, statenav_active='committees'))
+                   sort_order=sort_order, nav_active='committees'))
 
 
 def committee(request, abbr, committee_id):
@@ -72,7 +73,7 @@ def committee(request, abbr, committee_id):
         raise Http404
 
     events = db.events.find({
-        "state": abbr,
+        settings.LEVEL_FIELD: abbr,
         "participants.id": committee_id
     }).sort("when", -1)
     events = list(events)
@@ -85,5 +86,5 @@ def committee(request, abbr, committee_id):
                   dict(committee=committee, abbr=abbr,
                        metadata=Metadata.get_object(abbr),
                        sources=committee['sources'],
-                       statenav_active='committees',
+                       nav_active='committees',
                        events=events))

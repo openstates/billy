@@ -109,7 +109,7 @@ class VotesList(RelatedObjectsList):
     rowtemplate_name = templatename('votes_list_row')
     column_headers = ('Bill', 'Date', 'Outcome', 'Yes',
                       'No', 'Other', 'Motion')
-    statenav_active = 'bills'
+    nav_active = 'bills'
     description_template = '''
         Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
         '''
@@ -141,7 +141,7 @@ class NewsList(RelatedObjectsList):
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
     column_headers = ('feeds',)
-    statenav_active = 'bills'
+    nav_active = 'bills'
     collection_name = 'entries'
     description_template = '''
         news and blog entries mentioning

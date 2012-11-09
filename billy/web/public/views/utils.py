@@ -32,7 +32,7 @@ class ListViewBase(TemplateView):
     '''
 
     template_name = templatename('object_list')
-    statenav_active = None
+    nav_active = None
 
     def get_context_data(self, *args, **kwargs):
         super(ListViewBase, self).get_context_data(*args, **kwargs)
@@ -48,7 +48,7 @@ class ListViewBase(TemplateView):
                        rowtemplate_name=self.rowtemplate_name,
                        description_template=self.description_template,
                        object_list=self.get_queryset(),
-                       statenav_active=self.statenav_active,
+                       nav_active=self.nav_active,
                        abbr=abbr,
                        metadata=metadata,
                        url=self.request.path,
@@ -87,7 +87,7 @@ class ListViewBase(TemplateView):
 
 class RelatedObjectsList(ListViewBase):
     '''A generic list view where there's a main object, like a
-    legislator or state, and we want to display all of the main
+    legislator or metadata, and we want to display all of the main
     object's "sponsored_bills" or "introduced_bills." This class
     basically hacks the ListViewBase to add the main object into
     the template context so it can be used to generate a phrase like
