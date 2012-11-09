@@ -4,8 +4,7 @@ from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
 from billy.web.public.views.bills import BillList, AllBillList, BillFeed
 from billy.web.public.views.region import ShowMoreLegislators
-from billy.web.public.feeds import (VotesListFeed, NewsListFeed,
-                                    StateEventsFeed)
+from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 
 # misc. views
 urlpatterns = patterns('billy.web.public.views.misc',
@@ -55,7 +54,7 @@ urlpatterns += patterns('billy.web.public.views.region',
 urlpatterns += patterns('billy.web.public.views.events',
     url(r'^(?P<abbr>[a-z]{2})/events/$', EventsList.as_view(),
         name='events'),
-    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', StateEventsFeed(),
+    url(r'^(?P<abbr>[a-z]{2})/events/rss/$', EventsFeed(),
         name='events_rss'),
     url(r'^(?P<abbr>[a-z]{2})/events/(?P<event_id>\w+)/', 'event',
         name='event'),

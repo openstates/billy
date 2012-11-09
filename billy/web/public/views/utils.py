@@ -138,10 +138,6 @@ class RelatedObjectsList(ListViewBase):
         except KeyError:
             collection_name = self.collection_name
 
-        collection_name = {
-            'state': 'metadata',
-            }.get(collection_name, collection_name)
-
         try:
             _id = self.kwargs['_id']
         except KeyError:

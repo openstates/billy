@@ -65,7 +65,7 @@ def legislators(request, abbr):
 
     fields = mongo_fields('leg_id', 'full_name', 'photo_url', 'district',
                           'party', 'first_name', 'last_name', 'chamber',
-                          'state', 'last_name')
+                          billy_settings.LEVEL_FIELD, 'last_name')
 
     sort_key = 'district'
     sort_order = 1

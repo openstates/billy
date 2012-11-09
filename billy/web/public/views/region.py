@@ -141,7 +141,7 @@ def search(request, abbr):
     Tempaltes:
         - billy/web/public/search_results_no_query.html
         - billy/web/public/search_results_bills_legislators.html
-        - billy/web/public/bills_list_row_with_state_and_session.html
+        - billy/web/public/bills_list_row_with_abbr_and_session.html
     '''
     if not request.GET:
         return render(request, templatename('search_results_no_query'),
@@ -193,8 +193,7 @@ def search(request, abbr):
              more_legislators_available=more_legislators_available,
              bill_column_headers=('State', 'Title', 'Session', 'Introduced',
                                   'Recent Action',),
-             rowtemplate_name=templatename('bills_list_row_with'
-                                           '_state_and_session'),
+         rowtemplate_name=templatename('bills_list_row_with_abbr_and_session'),
              show_chamber_column=True,
              nav_active=None))
 

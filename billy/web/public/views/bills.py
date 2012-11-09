@@ -217,10 +217,10 @@ class AllBillList(RelatedBillsList):
     Teamplates:
     - billy/web/public/bills_list.html
     - billy/web/public/_pagination.html
-    - billy/web/public/bills_list_row_with_state_and_session.html
+    - billy/web/public/bills_list_row_with_abbr_and_session.html
     '''
     template_name = templatename('bills_list')
-    rowtemplate_name = templatename('bills_list_row_with_state_and_session')
+    rowtemplate_name = templatename('bills_list_row_with_abbr_and_session')
     collection_name = 'bills'
     paginator = CursorPaginator
     use_table = True
@@ -291,14 +291,14 @@ def bill(request, abbr, session, bill_id):
     if fixed_bill_id.replace(' ', '') != bill_id:
         return redirect('bill', abbr=abbr, session=session,
                         bill_id=fixed_bill_id.replace(' ', ''))
-    bill = db.bills.find_one({'state': abbr, 'session': session,
+    bill = db.bills.find_one({settings.LEVEL_FIELD: abbr, 'session': session,
                               'bill_id': fixed_bill_id})
     if bill is None:
         raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))
 
     events = db.events.find({
-        "state": abbr,
+        settings.LEVEL_FIELD: abbr,
         "related_bills.bill_id": bill['_id']
     }).sort("when", -1)
     events = list(events)

@@ -95,7 +95,7 @@ class NewsListFeed(GenericListFeed):
         return '%s (%s)' % (item['title'], published)
 
 
-class StateEventsFeed(GenericListFeed):
+class EventsFeed(GenericListFeed):
     collection_name = 'metadata'
     query_attribute = 'events'
 
