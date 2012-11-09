@@ -1,0 +1,61 @@
+{% extends "billy/web/public/base.html" %}
+{% load url from future %}
+{% load i18n %}
+
+{% block content %}
+<h2>{{ metadata.name }} Bills</h2>
+<div class="row">
+    <div class="span12">
+      <div class="row">
+        <div class="span4">
+            <div>
+                <h3 id="filterTitle" class="textReplace">{% trans "Filter Bills" %}</h3>
+                <form action="{% url 'bills' abbr %}" id="sidebarSearch">
+                    <ul>
+                        <li>
+                            <input id="submit" type="submit"/>
+                        </li>
+                        {{ form.as_ul }}
+                    </ul>
+                </form>
+            </div>
+        </div>
+        <div class="span8">
+            <div class="tenCol colRt">
+                {% if not object_list.count %}
+                    {% trans "No bills found matching those criteria. Try widening your criteria." %}
+                {% else %}
+                {% include "billy/web/public/_pagination.html" %}
+                {% if use_table %}
+                <table class="withFilter">
+                    <thead>
+                        <tr id="titles">
+                            <th>{% trans "Title" %}</th>
+                            <th>{% trans "Introduced" %}</th>
+                            <th>{% trans "Recent Action" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                {% endif %}
+
+                    {% for obj in object_list %}
+                        <tr class="{% cycle 'even' 'odd' %}">
+                            {% include rowtemplate_name %}
+                        </tr>
+                    {% endfor %}
+
+                {% if use_table %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                {% include "billy/web/public/_pagination.html" %}
+                {% endif %}
+            </div>
+
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

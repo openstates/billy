@@ -3,6 +3,15 @@ from django.conf import settings
 from billy.web.public.views.region import not_active_yet
 
 
+class DebugMiddleware(object):
+    def process_view(self, request, func, args, kw):
+        # from django.core.urlresolvers import reverse, resolve
+        # print reverse('bills', args=('bc',))
+        # import pdb;pdb.set_trace()
+        # print resolve('/bc/bills')
+        return func(request, *args, **kw)
+
+
 class LimitStatesMiddleware(object):
     '''This middle ware checks state-specific requests to
     ensure the state is in settings.ACTIVE_STATES. If not,
