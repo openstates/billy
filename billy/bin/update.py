@@ -306,7 +306,7 @@ def main():
                 args.types.append('events')
 
             if 'speeches' in metadata['feature_flags']:
-                args.types.append('events')
+                args.types.append('speeches')
 
         plan = """billy-update abbr=%s
     actions=%s
