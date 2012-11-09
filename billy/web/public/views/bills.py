@@ -6,6 +6,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.feedgenerator import Rss201rev2Feed
 
+from billy.core import settings
 from billy.utils import popularity, fix_bill_id
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import CursorPaginator, IteratorPaginator
@@ -190,7 +191,7 @@ class RelatedBillsList(RelatedObjectsList):
         return super(RelatedBillsList, self).get(request, *args, **kwargs)
 
 
-class StateBills(RelatedBillsList):
+class BillList(RelatedBillsList):
     '''
     Context:
         - Determined by RelatedBillsList.get_context_data
@@ -208,7 +209,7 @@ class StateBills(RelatedBillsList):
     title_template = 'Search bills - {{ metadata.legislature_name }}'
 
 
-class AllStateBills(RelatedBillsList):
+class AllBillList(RelatedBillsList):
     '''
     Context:
         - Determined by RelatedBillsList.get_context_data
@@ -226,11 +227,11 @@ class AllStateBills(RelatedBillsList):
     column_headers = ('State', 'Title', 'Session', 'Introduced',
                       'Recent Action')
     description_template = '''NOT USED'''
-    title_template = ('Search bills from all 50 states')
+    title_template = ('Search All Bills')
 
 
-class BillFeed(StateBills):
-    """ does everything StateBills does but outputs as RSS """
+class BillFeed(BillList):
+    """ does everything BillList does but outputs as RSS """
 
     show_per_page = 100
 
@@ -367,7 +368,7 @@ def document(request, abbr, session, bill_id, doc_id):
         return redirect('document', abbr=abbr, session=session,
                         bill_id=fixed_bill_id.replace(' ', ''), doc_id=doc_id)
 
-    bill = db.bills.find_one({'state': abbr, 'session': session,
+    bill = db.bills.find_one({settings.LEVEL_FIELD: abbr, 'session': session,
                               'bill_id': fixed_bill_id})
 
     for version in bill['versions']:
@@ -406,7 +407,8 @@ def show_all(key):
         if fixed_bill_id.replace(' ', '') != bill_id:
             return redirect('bill', abbr=abbr, session=session,
                             bill_id=fixed_bill_id.replace(' ', ''))
-        bill = db.bills.find_one({'state': abbr, 'session': session,
+        bill = db.bills.find_one({settings.LEVEL_FIELD: abbr,
+                                  'session': session,
                                   'bill_id': fixed_bill_id})
         if bill is None:
             raise Http404('no bill found {0} {1} {2}'.format(abbr, session,

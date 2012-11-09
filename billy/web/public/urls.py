@@ -2,7 +2,7 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.events import EventsList
-from billy.web.public.views.bills import StateBills, AllStateBills, BillFeed
+from billy.web.public.views.bills import BillList, AllBillList, BillFeed
 from billy.web.public.views.region import ShowMoreLegislators
 from billy.web.public.feeds import (VotesListFeed, NewsListFeed,
                                     StateEventsFeed)
@@ -83,10 +83,10 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 
 # bills
 urlpatterns += patterns('billy.web.public.views.bills',
-    url(r'^(?P<abbr>[a-z]{2})/bills/$', StateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>[a-z]{2})/bills/$', BillList.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/feed/$', BillFeed.as_view(),
         name='bills_feed'),
-    url(r'^(?P<abbr>all)/bills/$', AllStateBills.as_view(), name='bills'),
+    url(r'^(?P<abbr>all)/bills/$', AllBillList.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z]{2})/bills/(?P<session>[^/]+)/(?P<bill_id>[^/]+)/$',
         'bill', name='bill'),
     url(r'^(?P<abbr>[a-z]{2})/(?P<bill_id>[^/]+)/$',
