@@ -51,7 +51,9 @@ def legislators(request, abbr):
 
     spec = {'active': True, 'district': {'$exists': True}}
 
-    chambers = {'upper': meta['upper_chamber_name']}
+    chambers = {}
+    if 'upper_chamber_name' in meta:
+        chambers['upper'] = meta['upper_chamber_name']
     if 'lower_chamber_name' in meta:
         chambers['lower'] = meta['lower_chamber_name']
 

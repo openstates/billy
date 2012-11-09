@@ -19,10 +19,21 @@
         <h3>{{chambers.0.committees_count}} Committees</h3>
     </div>
     <div class="span4">
-        <h3>Latest Bills Passed</h3>
-        {% for bill in chambers.0.passed_bills %}
-        <li><a href="{% url 'bill' bill|level bill.session bill.bill_id %}">{{bill.bill_id}} - {{bill.title}}</a> - {{bill.action_dates.passed_lower}}</li>
+        <h3>Latest Bills</h3>
+        {% for bill in chambers.0.latest_bills %}
+        <li><a href="{% url 'bill' bill|level bill.session bill.bill_id %}">{{bill.bill_id}} - {{bill.title}}</a> <span class="intro_date">Introduced {{bill.action_dates.first|date:"Y-m-d"}}</span></li>
         {% endfor %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span4">
+        <h3> Sessions </h3>
+        <ul>
+            {% for session in sessions %}
+            <li>{{session.name}} - <a href="{% url 'bills' abbr %}?session={{session.id}}">{{session.bill_count}} bills</a></li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}
