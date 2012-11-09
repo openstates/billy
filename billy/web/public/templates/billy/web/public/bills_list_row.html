@@ -1,0 +1,11 @@
+{% with bill=obj%}
+        <td>
+            <a href="{{ bill.get_absolute_url }}">{{bill.bill_id}}</a>
+            <small class="grey">({{bill.session_details.display_name}})</small>
+            <p class="smallcaps">{{bill.title|truncatewords:25}}</p>
+        </td>
+        <td><span class="grey">{{bill.date_introduced|date:"M j, Y"}}</span></td>
+        {% with action=bill.most_recent_action %}
+        <td><span class="grey">{{action.date|date:"M j, Y"}}</span> <span>{{action.action}}</span></td>
+        {% endwith %}
+{% endwith %}
