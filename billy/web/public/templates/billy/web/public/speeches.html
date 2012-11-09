@@ -17,7 +17,11 @@
     <tbody>
     {% for speech in speeches %}
         <tr class="{% cycle 'even' 'odd' %}">
+            {% if speech.speaker_id %}
+            <td><a href = '{% url "legislator_noslug" abbr speech.speaker_id %}' >{{speech.speaker}}</a></td>
+            {% else %}
             <td>{{speech.speaker}}</td>
+            {% endif %}
             <td>{{speech.text}}</td>
         </tr>
     {% endfor %}
