@@ -300,7 +300,7 @@ def main():
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
-                          'alldata', 'speeches']
+                          'alldata']
             if 'events' in metadata['feature_flags']:
                 args.types.append('events')
 
