@@ -59,12 +59,13 @@ def committees(request, abbr):
         show_chamber_column = True
         chamber_name = ''
 
-    chambers = {'upper': meta['upper_chamber_name'],
-               }
+    chambers = {}
     if meta.committees({'chamber': 'joint'}).count():
         chambers['joint'] = 'Joint'
     if 'lower_chamber_name' in meta:
         chambers['lower'] = meta['lower_chamber_name']
+    if 'upper_chamber_name' in meta:
+        chambers['upper'] = meta['upper_chamber_name']
 
     fields = mongo_fields('committee', 'subcommittee', 'members',
                           settings.LEVEL_FIELD, 'chamber')

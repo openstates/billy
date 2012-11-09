@@ -1,0 +1,34 @@
+{% load url from future %}
+{% load i18n %}
+<table class='table table-striped'>
+  <thead>
+    <tr>
+      <th class="sort"><a href="?key=committee&order={{ sort_order }}&chamber={{chamber}}">{% trans "Name" %}</th>
+      <th>{% trans "Members" %}</th>
+    </tr>
+  </thead>
+  {% for committee in committees %}
+  <tr class="{% cycle odd,even %}">
+    <td><a href="{{ committee.get_absolute_url }}">{{ committee.display_name }}</a></td>
+    <td>
+      {% if not committee.members %}
+          [{% trans "data not yet available" %}]
+      {% else %}
+        <ul class="inlineList noSpace">
+        {% for member, legislator_object in committee.members_objects %}
+          {% if member.leg_id %}
+            <li>
+                <a class="tip withTip" href="{{legislator_object.get_absolute_url}}">{{legislator_object.display_name}}{% if not forloop.last %},{% else %}{% endif %}</a>
+            </li>
+          {% else %}
+          <li>
+            <span class="tip withTip">{{ member.name }}{% if not forloop.last %},{% else %}{% endif %}</span>
+          </li>
+          {% endif %}
+        {% endfor %}
+        </ul>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
