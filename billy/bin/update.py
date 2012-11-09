@@ -301,7 +301,11 @@ def main():
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
                           'alldata']
+
             if 'events' in metadata['feature_flags']:
+                args.types.append('events')
+
+            if 'speeches' in metadata['feature_flags']:
                 args.types.append('events')
 
         plan = """billy-update abbr=%s
