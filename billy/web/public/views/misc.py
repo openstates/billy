@@ -115,11 +115,9 @@ class VotesList(RelatedObjectsList):
         '''
     title_template = '''
         {% if obj.collection_name == 'bills' %}
-            Votes on bill {{obj.display_name}} -
-            {{metadata.legislature_name}} - Open States
+            Votes on bill {{obj.display_name}} - {{metadata.legislature_name}}
         {% elif obj.collection_name == 'legislators' %}
-            Votes by {{obj.display_name}} -
-            {{metadata.legislature_name}} - Open States
+            Votes by {{obj.display_name}} - {{metadata.legislature_name}}
         {% endif %}
         '''
 
@@ -149,7 +147,7 @@ class NewsList(RelatedObjectsList):
         '''
     title_template = '''
         News and blogs mentioning {{obj.display_name}} -
-        {{metadata.legislature_name}} - Open States
+        {{metadata.legislature_name}}
         '''
 
     def get(self, request, abbr, collection_name, _id, slug):
