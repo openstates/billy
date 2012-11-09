@@ -16,7 +16,7 @@
             </tr>
         {% for legislator in legislators %}
             <tr>
-                <td>{{legislator.full_name}}</td>
+                <td><a href="{{legislator.get_absolute_url}}">{{legislator.full_name}}</a></td>
                 <td>{{legislator.district}}</td>
                 <td>{{legislator.party}}</td>
             </tr>
