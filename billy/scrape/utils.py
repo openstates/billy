@@ -1,4 +1,5 @@
 import subprocess
+import re
 
 
 def url_xpath(url, path):
@@ -28,3 +29,7 @@ def pdf_to_lxml(filename, type='html'):
     import lxml.html
     text = convert_pdf(filename, type)
     return lxml.html.fromstring(text)
+
+
+def clean_spaces(s):
+    return re.sub('\s+', ' ', s, flags=re.U).strip()
