@@ -6,15 +6,15 @@ from django.utils.html import strip_tags
 
 from billy.core import settings
 from billy.web.public.views.utils import templatename
-from billy.web.public.forms import get_state_select_form
+from billy.web.public.forms import get_region_select_form
 
 
 register = template.Library()
 
 
-@register.inclusion_tag(templatename('state_select_form'))
-def state_select_form(abbr=None):
-    return {'form':  get_state_select_form({'abbr': abbr})}
+@register.inclusion_tag(templatename('region_select_form'))
+def region_select_form(abbr=None):
+    return {'form':  get_region_select_form({'abbr': abbr})}
 
 
 @register.inclusion_tag(templatename('sources'))

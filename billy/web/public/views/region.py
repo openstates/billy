@@ -11,19 +11,17 @@ from django.template.defaultfilters import striptags
 
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator
-from ..forms import get_state_select_form
+from ..forms import get_region_select_form
 from .utils import templatename, ListViewBase
 
 
-def state_selection(request):
-    '''Handle submission of the state selection form
-    in the base template.
-    '''
-    form = get_state_select_form(request.GET)
+def region_selection(request):
+    '''Handle submission of the region selection form in the base template. '''
+    form = get_region_select_form(request.GET)
     abbr = form.data.get('abbr')
     if not abbr or len(abbr) != 2:
         return redirect('homepage')
-    return redirect('state', abbr=abbr)
+    return redirect('region', abbr=abbr)
 
 
 def state(request, abbr):
