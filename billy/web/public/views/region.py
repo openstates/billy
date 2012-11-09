@@ -24,7 +24,7 @@ def region_selection(request):
     return redirect('region', abbr=abbr)
 
 
-def state(request, abbr):
+def region(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     try:
         meta = Metadata.get_object(abbr)
@@ -84,7 +84,7 @@ def state(request, abbr):
             # there's a chance that the session had no bills
             s['bill_count'] = 0
 
-    return render(request, templatename('state'),
+    return render(request, templatename('region'),
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,

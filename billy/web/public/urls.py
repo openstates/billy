@@ -47,7 +47,7 @@ urlpatterns += patterns('billy.web.public.views.region',
     url(r'^(?P<abbr>[a-z]{,3})/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z]{,3})/search/show_more_legislators/$',
         ShowMoreLegislators.as_view(), name='show_more_legislators'),
-    url(r'^(?P<abbr>[a-z]{2})/$', 'state', name='region'),
+    url(r'^(?P<abbr>[a-z]{2})/$', 'region', name='region'),
     url(r'^region_selection/$', 'region_selection', name='region_selection'),
 )
 
