@@ -17,6 +17,27 @@ EVENT_PAGE_COUNT = 10
 
 @pjax()
 def committees(request, abbr):
+    '''
+    Context:
+        chamber
+        committees
+        abbr
+        metadata
+        chamber_name
+        chamber_select_template
+        chamber_select_collection
+        chamber_select_chambers
+        committees_table_template
+        show_chamber_column
+        sort_order
+        statenav_active
+
+    Templates:
+        - billy/web/public/committees.html
+        - billy/web/public/committees-pjax.html
+        - billy/web/public/chamber_select_form.html
+        - billy/web/public/committees_table.html
+    '''
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -67,6 +88,19 @@ def committees(request, abbr):
 
 
 def committee(request, abbr, committee_id):
+    '''
+    Context:
+        - committee
+        - abbr
+        - metadata
+        - sources
+        - statenav_active
+        - events
+
+    Tempaltes:
+        - billy/web/public/committee.html
+        - billy/web/public/developer_committee.html
+    '''
     committee = db.committees.find_one({'_id': committee_id})
     if committee is None:
         raise Http404

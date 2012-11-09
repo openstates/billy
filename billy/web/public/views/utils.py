@@ -29,6 +29,17 @@ class ListViewBase(TemplateView):
     has been the reuse of what attempts to be a generic sort of
     template but in reality has become an awful monster template,
     named "object_list.html." Possibly more tuning needed.
+
+    Context:
+        - column_headers
+        - rowtemplate_name
+        - description_template
+        - object_list
+        - statenav_active
+        - abbr
+        - metadata
+        - url
+        - use_table
     '''
 
     template_name = templatename('object_list')
@@ -92,6 +103,13 @@ class RelatedObjectsList(ListViewBase):
     basically hacks the ListViewBase to add the main object into
     the template context so it can be used to generate a phrase like
     'showing all sponsored bills for Wesley Chesebro.'
+
+    Context:
+        - obj
+        - collection_name
+
+    Templates:
+        - defined in subclasses
     '''
     defer_rendering_title = True
 

@@ -18,6 +18,14 @@ from .utils import templatename, RelatedObjectsList
 
 
 class EventsList(RelatedObjectsList):
+    '''
+    Context:
+        - See RelatedObjectsList.get_context_data
+
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/events_list_row.html
+    '''
     collection_name = 'metadata'
     sort_func = operator.itemgetter('when')
     sort_reversed = True
@@ -68,6 +76,19 @@ def event_ical(request, abbr, event_id):
 
 
 def event(request, abbr, event_id):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - event
+        - sources
+        - gcal_info
+        - gcal_string
+        - statenav_active
+
+    Templates:
+        - billy/web/public/event.html
+    '''
     event = db.events.find_one({'_id': event_id})
     if event is None:
         raise Http404
