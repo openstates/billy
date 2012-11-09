@@ -16,8 +16,13 @@ def speeches(request, abbr, event_id):
         '_id': event_id
     })
 
+    speeches = db.speeches.find({
+        "event_id": event_id
+    })
+
     return render(request, templatename('speeches'),
                   dict(abbr=abbr,
                        metadata=Metadata.get_object(abbr),
+                       speeches=speeches,
                        event=event,
                        nav_active='events'))

@@ -1,10 +1,10 @@
 {
     "description": "speech data",
     "properties": {
-        "record_id": {
+        "chamber": {
             "type": "string"
         },
-        "chamber": {
+        "record_id": {
             "type": "string"
         },
         "sequence": {
@@ -30,6 +30,9 @@
         },
         "speaker_id": {
             "required": false,
+            "type": "string"
+        },
+        "text": {
             "type": "string"
         },
         "type": {
