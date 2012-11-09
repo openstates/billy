@@ -280,7 +280,7 @@ def bill(request, abbr, session, bill_id):
         - show_all_sponsors
         - sponsors
         - sources
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/bill.html
@@ -332,7 +332,7 @@ def vote(request, abbr, vote_id):
         - metadata
         - bill
         - vote
-        - statenav_active
+        - nav_active
 
     Templates:
         - vote.html
@@ -357,7 +357,7 @@ def document(request, abbr, session, bill_id, doc_id):
         - bill
         - version
         - metadata
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/document.html
@@ -395,7 +395,7 @@ def show_all(key):
         - metadata
         - bill
         - sources
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/bill_all_{key}.html

@@ -31,7 +31,7 @@ def committees(request, abbr):
         committees_table_template
         show_chamber_column
         sort_order
-        statenav_active
+        nav_active
 
     Templates:
         - billy/web/public/committees.html
@@ -95,7 +95,7 @@ def committee(request, abbr, committee_id):
         - abbr
         - metadata
         - sources
-        - statenav_active
+        - nav_active
         - events
 
     Tempaltes:

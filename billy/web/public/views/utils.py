@@ -35,7 +35,7 @@ class ListViewBase(TemplateView):
         - rowtemplate_name
         - description_template
         - object_list
-        - statenav_active
+        - nav_active
         - abbr
         - metadata
         - url

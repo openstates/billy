@@ -84,7 +84,7 @@ def event(request, abbr, event_id):
         - sources
         - gcal_info
         - gcal_string
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/event.html

@@ -37,7 +37,7 @@ def legislators(request, abbr):
         - sort_order
         - sort_key
         - legislator_table
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/legislators.html
@@ -129,7 +129,7 @@ def legislator(request, abbr, _id, slug=None):
         - feed_entries_count
         - feed_entries_more_count
         - has_votes
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/legislator.html
@@ -218,7 +218,7 @@ def legislator_inactive(request, abbr, legislator):
         - sponsored_bills
         - legislator_votes
         - has_votes
-        - statenav_active
+        - nav_active
 
     Templates:
         - billy/web/public/legislator.html
