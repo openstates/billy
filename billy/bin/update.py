@@ -357,7 +357,7 @@ def main():
 
             # scraper order matters
             order = ('legislators', 'committees', 'votes', 'bills',
-                     'speeches', 'events')
+                     'events', 'speeches')
             _traceback = None
             try:
                 for stype in order:
