@@ -18,7 +18,7 @@ def speeches(request, abbr, event_id):
 
     speeches = db.speeches.find({
         "event_id": event_id
-    })
+    }).sort("sequence", 1)
 
     return render(request, templatename('speeches'),
                   dict(abbr=abbr,
