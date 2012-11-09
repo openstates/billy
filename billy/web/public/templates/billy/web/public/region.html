@@ -1,5 +1,28 @@
 {% extends "billy/web/public/base.html" %}
+{% load url from future %}
+{% load billy_utiltags %}
 
 {% block content %}
-{{chambers}}
+
+<h2>{{metadata.legislature_name}}</h2>
+
+<div class="row">
+    <div class="span4">
+        <h3>{{chambers.0.legislators.count}} {{chambers.0.title}}s</h3>
+        <ul>
+            {% for party, count in chambers.0.legislators.party_counts.items %}
+            <li>{{count}} {{party}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="span4">
+        <h3>{{chambers.0.committees_count}} Committees</h3>
+    </div>
+    <div class="span4">
+        <h3>Latest Bills Passed</h3>
+        {% for bill in chambers.0.passed_bills %}
+        <li><a href="{% url 'bill' bill|level bill.session bill.bill_id %}">{{bill.bill_id}} - {{bill.title}}</a> - {{bill.action_dates.passed_lower}}</li>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

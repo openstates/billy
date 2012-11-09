@@ -1,9 +1,6 @@
-import os
-import json
 import logging
 
 from billy.scrape import Scraper, SourcedObject
-from billy.core import settings
 
 logger = logging.getLogger('billy')
 
@@ -11,16 +8,6 @@ logger = logging.getLogger('billy')
 class BillScraper(Scraper):
 
     scraper_type = 'bills'
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/bill.json')
-        schema = json.load(open(schema_path))
-        schema['properties']['session']['enum'] = self.all_sessions()
-        schema['properties'][settings.LEVEL_FIELD] = {'maxLength': 2,
-                                                      'minLength': 2,
-                                                      'type': 'string'}
-        return schema
 
     def scrape(self, chamber, session):
         """
@@ -32,16 +19,7 @@ class BillScraper(Scraper):
         """
         raise NotImplementedError('BillScrapers must define a scrape method')
 
-    def save_bill(self, bill):
-        """
-        Save a scraped :class:`~billy.scrape.bills.Bill` object.
-
-        Should be called after all data for the given bill has been collected.
-        """
-        self.log("save_bill %s %s: %s" % (bill['chamber'],
-                                          bill['session'],
-                                          bill['bill_id']))
-        self.save_object(bill)
+    save_bill = Scraper.save_object
 
 
 class Bill(SourcedObject):
@@ -239,3 +217,7 @@ class Bill(SourcedObject):
         filename = "%s_%s_%s.json" % (self['session'], self['chamber'],
                                       self['bill_id'])
         return filename.encode('ascii', 'replace')
+
+    def __unicode__(self):
+        return "%s %s: %s" % (self['chamber'], self['session'],
+                              self['bill_id'])
