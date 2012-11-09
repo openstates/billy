@@ -48,11 +48,10 @@ def keyfunc(obj):
     except ValueError:
         return obj['district']
 
-def _pass_through(f):
-    return f
 
 if django_settings.DEBUG:
-    login_required = _pass_through
+    def login_required(f):
+        return f
 
 
 @login_required

@@ -1,12 +1,18 @@
 from bson import ObjectId
 
 from django.shortcuts import render, redirect
+from django.conf import settings as django_settings
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import db, settings
 from billy.utils import metadata
+
+
+if django_settings.DEBUG:
+    def login_required(f):
+        return f
 
 
 @login_required
