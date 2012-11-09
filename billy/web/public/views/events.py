@@ -8,6 +8,7 @@ from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
+from django.contrib.sites.models import Site
 
 
 import billy
@@ -53,7 +54,7 @@ def event_ical(request, abbr, event_id):
 
     cal_event = Event()
     cal_event.add('summary', event['description'])
-    cal_event['uid'] = "%s@openstates.org" % (event['_id'])
+    cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
     cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
@@ -107,11 +108,8 @@ def event(request, abbr, event_id):
         "details": "",
         "location": event['location'].encode('utf-8'),
         "trp": "false",
-        "sprop": "http://openstates.org/%s/events/%s/" % (
-            abbr,
-            event_id
-        ),
-        "sprop": "name:Billy"
+        "sprop": "http://%s/" % Site.objects.all()[0].domain,
+        "sprop": "name:billy"
     }
     gcal_string = urllib.urlencode(gcal_info)
 

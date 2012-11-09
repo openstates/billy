@@ -3,6 +3,7 @@ from itertools import islice
 import pymongo
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
+from django.contrib.sites.models import Site
 from django.utils.html import strip_tags
 from django.template.defaultfilters import truncatewords
 
@@ -52,8 +53,8 @@ class VotesListFeed(GenericListFeed):
     sort = [('date', pymongo.DESCENDING)]
 
     def title(self, obj):
-        s = u"OpenStates.org: Votes by {0}."
-        return s.format(obj.display_name())
+        s = u"{0}: Votes by {1}."
+        return s.format(Site.objects.all().domain, obj.display_name())
 
     description = title
 
@@ -75,8 +76,8 @@ class NewsListFeed(GenericListFeed):
     query_attribute = 'feed_entries'
 
     def title(self, obj):
-        s = u"OpenStates.org: News stories mentioning {0}."
-        return s.format(obj.display_name())
+        s = u"{0}: News stories mentioning {1}."
+        return s.format(Site.objects.all()[0].domain, obj.display_name())
 
     description = title
 
@@ -100,8 +101,8 @@ class EventsFeed(GenericListFeed):
     query_attribute = 'events'
 
     def title(self, obj):
-        s = u"OpenStates.org: {0} legislative events."
-        return s.format(obj.display_name())
+        s = u"{0}: {1} legislative events."
+        return s.format(Site.objects.all()[0].domain, obj.display_name())
 
     description = title
 
