@@ -101,3 +101,9 @@ urlpatterns += patterns('billy.web.public.views.bills',
         name='bill_all_versions'),
     url(r'^(?P<abbr>[a-z]{2})/votes/(?P<vote_id>\w+)/$', 'vote', name='vote'),
 )
+
+# speeches
+urlpatterns += patterns('billy.web.public.views.speeches',
+    url(r'^(?P<abbr>[a-z]{2})/speeches/(?P<event_id>\w+)/', 'speeches',
+        name='speeches'),
+)
