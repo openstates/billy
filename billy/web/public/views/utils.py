@@ -55,7 +55,7 @@ class ListViewBase(TemplateView):
             metadata = Metadata.get_object(abbr)
 
         context = {}
-        context.update(column_headers=self.column_headers,
+        context.update(column_headers_tmplname=self.column_headers_tmplname,
                        rowtemplate_name=self.rowtemplate_name,
                        description_template=self.description_template,
                        object_list=self.get_queryset(),
