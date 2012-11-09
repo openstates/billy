@@ -23,6 +23,27 @@ from .utils import templatename, mongo_fields
 
 @pjax()
 def legislators(request, abbr):
+    '''
+    Context:
+        - metadata
+        - chamber
+        - chamber_title
+        - chamber_select_template
+        - chamber_select_collection
+        - chamber_select_chambers
+        - show_chamber_column
+        - abbr
+        - legislators
+        - sort_order
+        - sort_key
+        - legislator_table
+        - statenav_active
+
+    Templates:
+        - billy/web/public/legislators.html
+        - billy/web/public/chamber_select_form.html
+        - billy/web/public/legislator_table.html
+    '''
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -91,6 +112,31 @@ def legislators(request, abbr):
 
 
 def legislator(request, abbr, _id, slug=None):
+    '''
+    Context:
+        - feed_entry_template
+        - vote_preview_row_template
+        - roles
+        - abbr
+        - district_id
+        - metadata
+        - legislator
+        - sources
+        - sponsored_bills
+        - legislator_votes
+        - has_feed_entries
+        - feed_entries
+        - feed_entries_count
+        - feed_entries_more_count
+        - has_votes
+        - statenav_active
+
+    Templates:
+        - billy/web/public/legislator.html
+        - billy/web/public/feed_entry.html
+        - billy/web/public/vote_preview_row.html
+
+    '''
     try:
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
@@ -160,6 +206,25 @@ def legislator(request, abbr, _id, slug=None):
 
 
 def legislator_inactive(request, abbr, legislator):
+    '''
+    Context:
+        - feed_entry_template
+        - vote_preview_row_template
+        - old_roles
+        - abbr
+        - metadata
+        - legislator
+        - sources
+        - sponsored_bills
+        - legislator_votes
+        - has_votes
+        - statenav_active
+
+    Templates:
+        - billy/web/public/legislator.html
+        - billy/web/public/feed_entry.html
+        - billy/web/public/vote_preview_row.html
+    '''
     sponsored_bills = legislator.sponsored_bills(
         limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
 
