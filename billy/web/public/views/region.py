@@ -26,6 +26,18 @@ def region_selection(request):
 
 
 def region(request, abbr):
+    '''
+    Context:
+        - abbr
+        - metadata
+        - sessions
+        - chambers
+        - joint_committee_count
+        - nav_active
+
+    Templates:
+        - bill/web/public/region.html
+    '''
     report = db.reports.find_one({'_id': abbr})
     try:
         meta = Metadata.get_object(abbr)
@@ -93,6 +105,14 @@ def region(request, abbr):
 
 
 def not_active_yet(request, args, kwargs):
+    '''
+    Context:
+        - metadata
+        - nav_active
+
+    Tempaltes:
+        - billy/web/public/state_not_active_yet.html
+    '''
     try:
         metadata = Metadata.get_object(kwargs['abbr'])
     except DoesNotExist:
@@ -103,7 +123,26 @@ def not_active_yet(request, args, kwargs):
 
 
 def search(request, abbr):
+    '''
+    Context:
+        - search_text
+        - abbr
+        - metadata
+        - found_by_id
+        - bill_results
+        - more_bills_available
+        - legislators_list
+        - more_legislators_available
+        - bill_column_headers
+        - rowtemplate_name
+        - show_chamber_column
+        - nav_active
 
+    Tempaltes:
+        - billy/web/public/search_results_no_query.html
+        - billy/web/public/search_results_bills_legislators.html
+        - billy/web/public/bills_list_row_with_state_and_session.html
+    '''
     if not request.GET:
         return render(request, templatename('search_results_no_query'),
                       {'abbr': abbr})
@@ -161,6 +200,25 @@ def search(request, abbr):
 
 
 class ShowMoreLegislators(ListViewBase):
+    '''
+    Context:
+        chamber
+        committees
+        abbr
+        metadata
+        chamber_name
+        chamber_select_template
+        chamber_select_collection
+        chamber_select_chambers
+        committees_table_template
+        show_chamber_column
+        sort_order
+        nav_active
+
+    Templates:
+        - billy/web/public/object_list.html
+        - billy/web/public/legislators_list_row.html
+    '''
     template_name = templatename('object_list')
     rowtemplate_name = templatename('legislators_list_row')
     nav_active = None
