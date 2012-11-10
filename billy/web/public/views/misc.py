@@ -80,7 +80,7 @@ def find_your_legislator(request):
             billy_settings.API_BASE_URL,
             lon,
             lat,
-            billy_settings.API_KEY
+            getattr(billy_settings, 'API_KEY', '')
         )
         leg_resp = json.load(urllib2.urlopen(qurl))
         # allow limiting lookup to region for region map views
@@ -99,7 +99,7 @@ def find_your_legislator(request):
                 qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
                     billy_settings.API_BASE_URL,
                     border,
-                    billy_settings.API_KEY
+                    getattr(billy_settings, 'API_KEY', '')
                 )
                 resp = json.load(urllib2.urlopen(qurl))
                 ret[border] = resp
