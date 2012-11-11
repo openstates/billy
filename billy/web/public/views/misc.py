@@ -24,9 +24,12 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
+    spec = {}
+    if hasattr(settings, 'ACTIVE_STATES'):
+        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
+    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
     return render(request, templatename('homepage'),
-                  dict(
-              all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
+                  dict(all_metadata=all_metadata))
 
 
 def downloads(request):
