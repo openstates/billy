@@ -82,9 +82,17 @@ def scan_bills(abbr):
                 quality_exceptions['bills:no_actions'].remove(bill['_id'])
 
         # sponsors
+        none_names = db.manual.name_matchers.find({
+            "abbr": abbr,
+            "obj_id": None
+        })
+        ignored_names = [x['name'] for x in none_names]
+        manual_pool = db.manual.find({})
         for sponsor in bill['sponsors']:
             session_d['_sponsor_count'] += 1
-            if sponsor.get('leg_id') or sponsor.get('committee_id'):
+            if sponsor.get('leg_id') or sponsor.get('committee_id') \
+               or sponsor['name'] in ignored_names:
+
                 session_d['_sponsors_with_id_count'] += 1
             else:
                 # keep list of unmatched sponsors
