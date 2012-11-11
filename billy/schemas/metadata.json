@@ -30,20 +30,16 @@
         "legislature_name": {
             "type": "string"
         },
-        "lower_chamber_name": {
-            "type": "string"
-        },
-        "lower_chamber_term": {
-            "type": [
-                "integer",
-                "string"
-            ]
-        },
-        "lower_chamber_title": {
-            "type": "string"
-        },
-        "name": {
-            "type": "string"
+        "chambers": {
+            "additionalProperties": {
+                "properties": {
+                    "name": { "required": true, "type": "string" },
+                    "title": { "required": true, "type": "string" }
+                },
+                "type": "object"
+            },
+            "required": true,
+            "type": "object"
         },
         "capitol_timezone": {
             "type": "string"
@@ -97,18 +93,6 @@
             },
             "minItems": 1,
             "type": "array"
-        },
-        "upper_chamber_name": {
-            "type": "string"
-        },
-        "upper_chamber_term": {
-            "type": [
-                "integer",
-                "string"
-            ]
-        },
-        "upper_chamber_title": {
-            "type": "string"
         }
     },
     "type": "object"

@@ -47,22 +47,22 @@ def get_filter_bills_form(metadata):
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
             _status_choices = [('', '')]
-            if 'lower_chamber_name' in metadata:
-                _status_choices.append(('passed_lower',
-                                'Passed ' + metadata['lower_chamber_name']))
-            if 'upper_chamber_name' in metadata:
-                _status_choices.append(('passed_upper',
-                                'Passed ' + metadata['upper_chamber_name']))
+            _chamber_choices = []
+            for chamber_type in metadata['chambers']:
+                chamber_name = metadata['chambers'][chamber_type]['name']
+                _status_choices.append(('passed_'+ chamber_type,
+                                        'Passed ' + chamber_name))
+                _chamber_choices.append((chamber_type, chamber_name))
+            print _status_choices
             _status_choices.append(('signed', 'Signed'))
 
             if len(_status_choices) == 4:
                 chamber = forms.MultipleChoiceField(
-                            choices=(
-                                ('upper', metadata['upper_chamber_name']),
-                                ('lower', metadata['lower_chamber_name'])
-                            ),
+                            choices=_chamber_choices,
                             widget=forms.CheckboxSelectMultiple(),
                             required=False)
+
+            status = forms.ChoiceField(choices=_status_choices, required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
