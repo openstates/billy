@@ -6,22 +6,18 @@ from billy.models import db, Metadata, DoesNotExist
 
 def get_region_select_form(data):
     abbrs = [('', '')]
-    for abbr in sorted(settings.ACTIVE_STATES):
-        try:
-            obj = Metadata.get_object(abbr)
-            abbrs.append((obj['_id'], obj['name']))
-        except DoesNotExist:
-            # ignore missing
-            pass
+    spec = {}
+    if getattr(settings, 'ACTIVE_STATES'):
+        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
+    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    print spec, all_metadata.count()
+    abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
         abbr = forms.ChoiceField(choices=abbrs, label="abbr")
 
     return RegionSelectForm(data)
 
-
-class FindYourLegislatorForm(forms.Form):
-    address = forms.CharField()
 
 
 def get_filter_bills_form(metadata):

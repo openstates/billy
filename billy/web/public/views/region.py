@@ -100,24 +100,6 @@ def region(request, abbr):
                        nav_active='home'))
 
 
-def not_active_yet(request, args, kwargs):
-    '''
-    Context:
-        - metadata
-        - nav_active
-
-    Tempaltes:
-        - billy/web/public/state_not_active_yet.html
-    '''
-    try:
-        metadata = Metadata.get_object(kwargs['abbr'])
-    except DoesNotExist:
-        raise Http404
-
-    return render(request, templatename('state_not_active_yet'),
-                  dict(metadata=metadata, nav_active=None))
-
-
 def search(request, abbr):
     '''
     Context:
