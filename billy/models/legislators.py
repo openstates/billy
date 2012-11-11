@@ -67,7 +67,7 @@ class OldRole(dict):
         chamber = self['chamber']
         if chamber == 'joint':
             return 'Joint'
-        return self.document.metadata['%s_chamber_name' % self['chamber']]
+        return self.document.metadata['chambers'][chamber]['name']
 
     def committee_object(self):
         '''If the committee id no longer exists in mongo for some reason,
@@ -151,7 +151,7 @@ class Legislator(Document):
     def title(self):
         chamber = self.get('chamber')
         if chamber:
-            return self.metadata[chamber + '_chamber_title']
+            return self.metadata['chambers'][chamber]['title']
         else:
             return ''
 

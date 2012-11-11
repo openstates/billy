@@ -67,7 +67,8 @@ class RelatedBillsList(RelatedObjectsList):
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
                 if metadata:
-                    description.append(metadata[chamber[0] + '_chamber_name'])
+                    description.append(metadata['chambers'][chamber[0]]['name']
+                                      )
                 else:
                     description.extend([chamber[0].title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
@@ -75,11 +76,11 @@ class RelatedBillsList(RelatedObjectsList):
                 description.append('(%s)' %
                    metadata['session_details'][session]['display_name'])
             if status == 'passed_lower':
-                long_description.append(('which have passed the ' +
-                                         metadata['lower_chamber_name']))
+                long_description.append('which have passed the ' +
+                                         metadata['chambers']['lower']['name'])
             elif status == 'passed_upper':
-                long_description.append(('which have passed the ' +
-                                         metadata['upper_chamber_name']))
+                long_description.append('which have passed the ' +
+                                         metadata['chambers']['upper']['name'])
             elif status == 'signed':
                 long_description.append('which have been signed into law')
             if sponsor:

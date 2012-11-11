@@ -1,0 +1,77 @@
+{% extends "billy/web/public/base.html" %}
+{% load url from future %}
+{% load humanize %}
+{% load i18n %}
+{% load customtags %}
+
+{% block title %}{{event.description|trunc}}{% endblock %}
+
+{% block content %}
+<h2>{{event.description|trunc}}</h2>
+<dl>
+    <dt>{% trans "When" %}:</dt>
+    <dd>
+        {{event.when|date:"M j, Y"}}
+        <a href="{% url "event_ical" abbr event|underscore_field:"id" %}"
+            >ical</a>
+
+    </dd>
+    <dt>{% trans "Where" %}:</dt>
+    <dd>{{ event.location }}</dd>
+    <dt>{% trans "Transcript" %}:</dt>
+    <dd><a href="{% url "speeches_by_event" abbr event.id %}" >Speeches</a></dd>
+</dl>
+
+<h3>{% trans "Participants" %}</h3>
+<table>
+    <tr>
+        <th>{% trans "Who" %}</th>
+        <th>{% trans "Role" %}</th>
+    </tr>
+{% for participant in event.participants %}
+    <tr class="{% cycle odd,even %}">
+        {% if participant.id %}
+            {% if participant.participant_type == 'committee' %}
+                <td><a href="{% url 'committee' abbr participant.id %}"
+                        >{{participant.participant}}</a></td>
+            {% endif %}
+            {% if participant.participant_type == 'legislator' %}
+                <td><a href="{% url 'legislator_noslug' abbr participant.id %}"
+                        >{{participant.participant}}</a></td>
+            {% endif %}
+        {% else %}
+            <td>{{participant.participant}}</td>
+        {% endif %}
+        <td>{{participant.type|title}}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% with bills=event.related_bills %}
+    {% if bills.count %}
+        <h3>{% trans "Bills" %}</h3>
+        <ul>
+        {% for bill in bills %}
+            {% if "_scraped_bill_id" in bill %}
+            <li><a href="/{{abbr}}/bill/{{bill.bill_id}}">{{bill|underscore_field:"scraped_bill_id"}} -- {{bill.description|trunc}}</a></li>
+            {% else %}
+            <li>{{bill.bill_id}} -- {{bill.description|trunc}}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+{% if event.documents %}
+<div>
+    <h3>{% trans "Documents" %}</h3>
+    <ul>{% for document in event.documents %}
+        <li>{{ document.name }}
+        {% if "+mimetype" in document %}[{{ document|plusfield:"mimetype"}}]{% endif %}
+        {{document.url|urlize}}</li>
+    {% endfor %}</ul>
+</div>
+{% endif %}
+{% sources event %}
+
+{% endblock %}

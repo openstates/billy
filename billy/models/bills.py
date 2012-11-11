@@ -100,7 +100,7 @@ class Action(dict):
         meta = self.bill.metadata
         for s in ('upper', 'lower'):
             if s in actor:
-                chamber_name = meta['%s_chamber_name' % s]
+                chamber_name = meta['chambers'][s]['name']
                 return actor.replace(s, chamber_name)
         return actor.title()
 
@@ -299,7 +299,7 @@ class BillVote(Document):
         else:
             bill = self.bill
         metadata = bill.metadata
-        name = metadata['%s_chamber_name' % self['chamber']]
+        name = metadata['chambers'][self['chamber']]['name']
         return name
 
 
@@ -350,7 +350,7 @@ class Bill(Document):
     @property
     def chamber_name(self):
         '''"lower" --> "House of Representatives"'''
-        return self.metadata['%s_chamber_name' % self['chamber']]
+        return self.metadata['chambers'][self['chamber']]['name']
 
     @property
     def other_chamber(self):
@@ -359,7 +359,7 @@ class Bill(Document):
 
     @property
     def other_chamber_name(self):
-        return self.metadata['%s_chamber_name' % self.other_chamber]
+        return self.metadata['chambers'][self.other_chamber]['name']
 
     def type_string(self):
         return self['type'][0]
@@ -400,7 +400,7 @@ class Bill(Document):
              'date_passed_' + self['chamber']),
         ]
 
-        if 'lower_chamber_name' in self.metadata:
+        if len(self.metadata['chambers']) > 1:
             data.append(('stage3',
                          'Passed ' + self.other_chamber_name,
                          'date_passed_' + self.other_chamber))

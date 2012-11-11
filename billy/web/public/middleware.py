@@ -1,15 +1,8 @@
 from django.conf import settings
-
-from billy.web.public.views.region import not_active_yet
-
-
-class DebugMiddleware(object):
-    def process_view(self, request, func, args, kw):
-        # from django.core.urlresolvers import reverse, resolve
-        # print reverse('bills', args=('bc',))
-        # import pdb;pdb.set_trace()
-        # print resolve('/bc/bills')
-        return func(request, *args, **kw)
+from django.shortcuts import render
+from django.http import Http404
+from billy.models import Metadata, DoesNotExist
+from billy.web.public.views.utils import templatename
 
 
 class LimitStatesMiddleware(object):
@@ -27,6 +20,12 @@ class LimitStatesMiddleware(object):
         # For public views, make sure the state is active.
         if 'abbr' in kw:
             if kw['abbr'] not in settings.ACTIVE_STATES + ['all']:
-                return not_active_yet(request, args, kw)
+                try:
+                    metadata = Metadata.get_object(kw['abbr'])
+                except DoesNotExist:
+                    raise Http404
+
+                return render(request, templatename('state_not_active_yet'),
+                              dict(metadata=metadata, nav_active=None))
             else:
                 return func(request, *args, **kw)
