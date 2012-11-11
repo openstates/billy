@@ -158,22 +158,25 @@ def legislator(request, abbr, _id, slug=None):
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
 
-    qurl = "%sdistricts/%s/?apikey=%s" % (
-        billy_settings.API_BASE_URL,
-        abbr,
-        billy_settings.API_KEY
-    )
-    try:
-        f = urllib2.urlopen(qurl)
-        districts = json.load(f)
-        district_id = None
-        for district in districts:
-            legs = [x['leg_id'] for x in district['legislators']]
-            if legislator['leg_id'] in legs:
-                district_id = district['boundary_id']
-                break
-    except urllib2.URLError:
-        district_id = None
+    district_id = None
+    API_KEY = getattr(billy_settings, 'API_KEY', '')
+    if API_KEY:
+        qurl = "%sdistricts/%s/?apikey=%s" % (
+            billy_settings.API_BASE_URL,
+            abbr,
+            billy_settings.API_KEY
+        )
+        try:
+            f = urllib2.urlopen(qurl)
+            districts = json.load(f)
+            district_id = None
+            for district in districts:
+                legs = [x['leg_id'] for x in district['legislators']]
+                if legislator['leg_id'] in legs:
+                    district_id = district['boundary_id']
+                    break
+        except urllib2.URLError:
+            district_id = None
 
     sponsored_bills = legislator.sponsored_bills(
         limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
@@ -194,7 +197,7 @@ def legislator(request, abbr, _id, slug=None):
             legislator=legislator,
             sources=legislator['sources'],
             sponsored_bills=sponsored_bills,
-            legislator_votes=legislator_votes,
+            legislator_votes=list(legislator_votes),
             has_feed_entries=bool(feed_entries_list),
             feed_entries=feed_entries_list[:4],
             feed_entries_count=len(feed_entries_list),
