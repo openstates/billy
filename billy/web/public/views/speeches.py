@@ -33,7 +33,7 @@ def speeches_by_event(request, abbr, event_id):
 def speeches(request, abbr):
     events = db.events.find({
         settings.LEVEL_FIELD: abbr,
-    })
+    }).sort('when')
 
     return render(request, templatename('speeches'),
                   dict(abbr=abbr,
