@@ -35,151 +35,131 @@
                 » {{legislator.display_name}}
             </li>
         </ul>
-        <div class="fullWidth mainModule legislator">
-            <!-- <div class="medModule"> -->
-                <div class="row"><div class="span8">
-                    <img class="firstHalfModule legImgSmall" src="http://static.openstates.org/photos/small/{{legislator.leg_id}}.jpg" />
-                    <div class="eightsLg clearfix">
-                        <h2 class="withTipSm">
-                            {{legislator.full_name}}{% if not legislator.active %} ({% trans "Inactive" %}){% endif %}
-                        </h2>
-                        <dl class="inlineList clearfix">
-                            <dt class="hidden">{% trans "Role" %}</dt>
-                            <dd class="tip tipSm">
-                            {% if legislator.active %}
-                                {{legislator.party}} &mdash;
-                                {{legislator.title}} &mdash;
-                                {# if first character of district is numeric, add 'District' #}
-                                {% if legislator.district.0.isdigit %} {% trans "District" %} {% endif %}{{legislator.district}}
-                            {% else %}
-                            {{legislator.full_name}} {% trans "<b>no longer serves</b> in the" %} {{metadata.legislature_name}}.
-                            {% endif %}
-                            </dd>
-                            <dt class="clear">{% trans "Available Terms:" %}</dt>
-                            <dd> <ul>
-                            {% for term in legislator.all_terms %}
-                                <li class="clear">{{term}}</li>
-                            {% endfor %}
-                            </ul> </dd>
-                        </dl>
-                    </div>
-                </div><!--span6-->
-
-                <div class="span4">
-                    {% if legislator.active %}
-                    <div class="mapbox" id="mapbox-{{abbr}}" style="width: 100%; height: 200px"></div>
-                    {% endif %}
+            <div class="row"><div class="span6">
+                <img class="firstHalfModule legImgSmall" src="http://static.openstates.org/photos/small/{{legislator.leg_id}}.jpg" />
+                <div class="eightsLg clearfix">
+                    <h2 class="withTipSm">
+                        {{legislator.full_name}}{% if not legislator.active %} ({% trans "Inactive" %}){% endif %}
+                    </h2>
+                    <dl class="inlineList clearfix">
+                        <dt class="hidden">{% trans "Role" %}</dt>
+                        <dd class="tip tipSm">
+                        {% if legislator.active %}
+                            {{legislator.party}} &mdash;
+                            {{legislator.title}} &mdash;
+                            {# if first character of district is numeric, add 'District' #}
+                            {% if legislator.district.0.isdigit %} {% trans "District" %} {% endif %}{{legislator.district}}
+                        {% else %}
+                        {{legislator.full_name}} {% trans "<b>no longer serves</b> in the" %} {{metadata.legislature_name}}.
+                        {% endif %}
+                        </dd>
+                        <dt class="clear">{% trans "Available Terms:" %}</dt>
+                        <dd> <ul>
+                        {% for term in legislator.all_terms %}
+                            <li class="clear">{{term}}</li>
+                        {% endfor %}
+                        </ul> </dd>
+                    </dl>
                 </div>
-                <div class="clear"></div>
-                </div><!--row-->
+            </div><!--span6-->
 
-                <div class="row">
-                    <div class="span8">
-                        <ul id="legLinks">
-                            <li class="inline"><a href="#committees">{% trans "View committee membership" %}</a></li> |
-                            <li class="inline"><a href="#bills">{% trans "View sponsored bills" %}</a></li> |
-                            <li class="inline"><a href="#votes">{% trans "View recent votes" %}</a></li>
-                        </ul>
-            <!-- </div> -->
-                {% comment %}
-                We also need to test whether 'chamber' is in legislator to cover
-                the David Dewhurst situation--a Lt. Governor who's listed as a voter on
-                bills and is 'active' but not associated with a chamber.
-                {% endcomment %}
-                {% if legislator.active and 'chamber' in legislator %}
+            <div class="span6">
+                {% if legislator.active %}
+                <div class="mapbox" id="mapbox-{{abbr}}" style="width: 100%; height: 200px"></div>
+                {% endif %}
+            </div>
+            <div class="clear"></div>
+            </div><!--row-->
+
+            <div class="row">
+                <div class="span6">
+                    <ul id="legLinks">
+                        <li><a href="#committees">{% trans "View committee membership" %}</a></li>
+                        <li><a href="#bills">{% trans "View sponsored bills" %}</a></li>
+                        <li><a href="#votes">{% trans "View recent votes" %}</a></li>
+                    </ul>
+                    {% comment %}
+                    We also need to test whether 'chamber' is in legislator to cover
+                    the David Dewhurst situation--a Lt. Governor who's listed as a voter on
+                    bills and is 'active' but not associated with a chamber.
+                    {% endcomment %}
+                    {% if legislator.active and 'chamber' in legislator %}
                     <p>
                         {% include "billy/web/public/bio_blurb.html" %}
                     </p>
                 </div>
-                <div class="span4">
-                    <ul>
-                        {% for office in legislator.offices %}
-                        <li class="fourths {% cycle 'firstModule' 'secondModule' %}">
-                            <h4 class="h5 withTip">{{office.name}}:</h4>
-                            <address class="vcard">
-                                <span class="adr">
-                                    <span class="street-address">{{office.address|linebreaks}}</span>
-                                </span>
-                                {% if office.phone %}
-                                <div class="tel">
-                                    <span class="type smTitle">{% trans "Phone" %}:</span> {{office.phone}}
-                                </div>
-                                {% endif %}
-                                {% if office.fax %}
-                                <div class="fax">
-                                    <span class="type smTitle">{% trans "Fax" %}:</span> {{office.fax}}
-                                </div>
-                                {% endif %}
-                                {% if office.email %}
-                                <div class="email">
-                                    <span class="type smTitle">{% trans "Email" %}:</span> {{office.email}}
-                                </div>
-                                {% endif %}
-                            </address>
-                        </li>
-                        {% empty %}
-                        {% if not legislator.email %}
-                        <li class="fourths firstModule">
-                            <h5 class="h5" style="width:300px;">{% trans "Contact Information Not Available" %}
-                                <a class="missingInfo" title="{% trans 'Our Methodology' %}" href="/methodology/">?</a>
-                            </h5>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
-                        {% if legislator.email %}
-                        <li class="clear">
-                            <span class="email smTitle">{% trans "Email" %}: </span>
-                            <a href="mailto:{{legislator.email}}">{{legislator.email}}</a>
-                         </li>
-                        {% endif %}
-                    </ul>
-                </div>
+                <div class="span6">
+                    {% for office in legislator.offices|slice:":2" %}
+                    <div class="span2">
+                        <h4 class="h5 withTip">{{office.name}}:</h4>
+                        <address class="vcard">
+                            <span class="adr">
+                                <span class="street-address">{{office.address|linebreaks}}</span>
+                            </span>
+                            {% if office.phone %}
+                            <div class="tel">
+                                <span class="type smTitle">{% trans "Phone" %}:</span> {{office.phone}}
+                            </div>
+                            {% endif %}
+                            {% if office.fax %}
+                            <div class="fax">
+                                <span class="type smTitle">{% trans "Fax" %}:</span> {{office.fax}}
+                            </div>
+                            {% endif %}
+                            {% if office.email %}
+                            <div class="email">
+                                <span class="type smTitle">{% trans "Email" %}:</span> {{office.email}}
+                            </div>
+                            {% endif %}
+                        </address>
+                    </div>
+                    {% endfor %}
+                    {% if not legislator.email %}
+                    <div class="span6">
+                        <h5 class="h5" style="width:300px;">{% trans "Contact Information Not Available" %}
+                            <a class="missingInfo" title="{% trans 'Our Methodology' %}" href="/methodology/">?</a>
+                        </h5>
+                    </div>
+                    {% endif %}
+
+                    {% if legislator.email %}
+                    <div class="span6">
+                        <span class="email smTitle">{% trans "Email" %}: </span>
+                        <a href="mailto:{{legislator.email}}">{{legislator.email}}</a>
+                     </div>
+                    {% endif %}
                 <div class="clear"></div>
-                {% endif %}
-            </div>
-        {% if legislator.active %}
-            {% if has_feed_entries %}
-            <div class="fullWidth module clear">
-                <h3 class="moduleTitle">{% trans "Media" %}</h3>
-                <a class="textReplace rssIcon" href="{% url 'news_list_rss' abbr 'legislators' legislator.id legislator.slug %}">rss</a>
-                <h4>{% trans "News and Blog Coverage" %}</h4>
+            </div><!-- span6 -->
+        </div>
 
-                {% for obj in feed_entries %}
-                <div class="sixCol col{% cycle 'Lt' 'Rt' %}">
-                    {% include feed_entry_template %}
-                </div>
-                {% endfor %}
-
+        <hr/>
+        <div class="row">
+            <div class="span12">
+                <a name="committees"></a>
+                <h3 class="moduleTitle">{% trans "Committees" %}</h3>
+                <ul class="inlineThirds">
+                    {% for role in legislator.roles_manager %}
+                    {% if role.type == 'committee member' %}
+                    <li class="{% cycle 'one' 'two' 'three' %}">{{ role.type_display }}
+                    {% if 'committee_id' in role %}
+                    <a href="{% url 'committee' abbr role.committee_id %}">{{ role.committee_name }}</a>
+                    {% else %} {{ role.committee_name }}{% endif %}
+                    {% if role.position and role.position|lower != "member" %} ({{role.position}}) {% endif %}
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
                 <div class="clear"></div>
-                {% if feed_entries_more_count %}
-                <a class="viewMore" href="{% url 'news_list' abbr 'legislators' legislator.id legislator.slug %}">{% trans "View" %} {{feed_entries_more_count|apnumber|capfirst}} {% trans "More News Items" %}</a>
-                {% endif %}
             </div>
-            {% endif %}
-
-        <div class="fullWidth module clear"></a>
-            <a name="committees">
-            <h3 class="moduleTitle">{% trans "Committees" %}</h3>
-            <ul class="inlineThirds">
-                {% for role in legislator.roles_manager %}
-                {% if role.type == 'committee member' %}
-                <li class="{% cycle 'one' 'two' 'three' %}">{{ role.type_display }}
-                {% if 'committee_id' in role %}
-                <a href="{% url 'committee' abbr role.committee_id %}">{{ role.committee_name }}</a>
-                {% else %} {{ role.committee_name }}{% endif %}
-                {% if role.position and role.position|lower != "member" %} ({{role.position}}) {% endif %}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-            <div class="clear"></div>
         </div>
         {% endif %}
-        <div class="fullWidth module">
+
+        <hr/>
+        <div class="row">
             <a name="bills"></a>
             <h3 class="moduleTitle">{% trans "Bills" %}</h3>
-            <div class="eightCol colLt">
-                <a class="textReplace rssIcon" href="{% url 'bills_feed' abbr %}?sponsor__leg_id={{legislator.id}}">rss</a>
+            <div class="span6">
+                <span class="pull-right"><a class="textReplace rssIcon" href="{% url 'bills_feed' abbr %}?sponsor__leg_id={{legislator.id}}">rss</a></span>
                 <h4>{% trans "Sponsored Bills" %}</h4>
                 <ul>
                 {% if sponsored_bills.count %}
@@ -199,9 +179,9 @@
                 {% endif %}
 
             </div>
-            <div class="fourCol colRt">
+            <div class="span6">
                 <a name="votes"></a>
-                <a class="textReplace rssIcon" href="{% url 'votes_list' abbr 'legislators' legislator.id %}rss/">rss</a>
+                <span class="pull-right"><a class="textReplace rssIcon" href="{% url 'votes_list' abbr 'legislators' legislator.id %}rss/">rss</a></span>
                 <h4 class="withTip">{% trans "Votes" %}</h4>
                 {% if not legislator_votes %}{% trans "No votes to display." %}
                 {% else %}
@@ -241,7 +221,7 @@
                 {% endif %}
             </div>
             <div class="clear"></div>
-        </div>
+        </div> <!-- row -->
         {% sources legislator %}
 
 {% if legislator.district %}
