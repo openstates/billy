@@ -156,8 +156,10 @@
 
         <hr/>
         <div class="row">
-            <a name="bills"></a>
-            <h3 class="moduleTitle">{% trans "Bills" %}</h3>
+
+            <div class="span12"><a name="bills"></a>
+                <h3 class="moduleTitle">{% trans "Bills" %}</h3>
+            </div>
             <div class="span6">
                 <span class="pull-right"><a class="textReplace rssIcon" href="{% url 'bills_feed' abbr %}?sponsor__leg_id={{legislator.id}}">rss</a></span>
                 <h4>{% trans "Sponsored Bills" %}</h4>
