@@ -5,7 +5,7 @@
 
 {% block content %}
 
-<h2>{{metadata.legislature_name}}</h2>
+<h2>{{metadata.legislature_name}} <small><a href="{% url "event" abbr event.id %}" >Event page</a></small></h2>
 
 <table class="withFilter">
     <thead>

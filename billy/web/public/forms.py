@@ -10,7 +10,6 @@ def get_region_select_form(data):
     if getattr(settings, 'ACTIVE_STATES'):
         spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
     all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
-    print spec, all_metadata.count()
     abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
@@ -48,7 +47,6 @@ def get_filter_bills_form(metadata):
                 _status_choices.append(('passed_'+ chamber_type,
                                         'Passed ' + chamber_name))
                 _chamber_choices.append((chamber_type, chamber_name))
-            print _status_choices
             _status_choices.append(('signed', 'Signed'))
 
             if len(_status_choices) == 4:
