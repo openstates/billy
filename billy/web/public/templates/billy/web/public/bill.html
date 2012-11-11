@@ -27,9 +27,6 @@
                 » <a href="{% url 'bills' abbr %}?session={{bill.session}}">{{ bill.session_details.display_name }}</a>
             </li>
             <li>
-                » <a href="{% url 'bills' abbr %}?session={{bill.session}}&chamber={{bill.chamber}}">{{ bill.chamber_name }}</a>
-            </li>
-            <li>
                 » {{bill.bill_id}}
             </li>
         </ul>
@@ -200,7 +197,6 @@
                         <thead>
                             <tr id="titles">
                                 <th style="min-width: 6em;">{% trans "Date" %}</th>
-                                <th>{% trans "Chamber" %}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -208,7 +204,6 @@
                         {% for action in bill.actions_manager %}
                             <tr class="action {% cycle 'even' 'odd' %}" {% if 'other' in action.type %}data-actiontype="other"{% endif %}>
                                 <td class="grey">{{ action.date|date:"M j, Y"}}</td>
-                                <td>{{ action.actor_name }}</td>
                             {% if action.related_votes %}
                             <td>{{ action.action_display|safe }}
                                 {% for vote in action.related_votes %}
