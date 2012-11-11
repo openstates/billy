@@ -168,7 +168,7 @@ def _do_imports(abbrev, args):
         report['committees'] = \
                 import_committees(abbrev, settings.BILLY_DATA_DIR)
 
-    if 'events' in args.types:
+    if 'events' in args.types or 'speeches' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
 
     if 'speeches' in args.types:
