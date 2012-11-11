@@ -110,6 +110,14 @@ class BillyHandler(BaseHandler):
     allowed_methods = ('GET',)
 
 
+def _metadata_backwards_shim(metadata):
+    for chamber_type, chamber in metadata['chambers'].iteritems():
+        for field in ('name', 'title', 'term'):
+            if field in chamber:
+                metadata[chamber_type + '_chamber_' + field] = chamber[field]
+    return metadata
+
+
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
         fields = _build_field_list(request, {'abbreviation': 1,
@@ -118,7 +126,7 @@ class AllMetadataHandler(BillyHandler):
                                              '_id': 0
                                             })
         data = db.metadata.find(fields=fields).sort('name')
-        return list(data)
+        return [_metadata_backwards_shim(m) for m in data]
 
 
 class MetadataHandler(BillyHandler):
@@ -126,8 +134,10 @@ class MetadataHandler(BillyHandler):
         """
         Get metadata about a legislature.
         """
-        return db.metadata.find_one({'_id': abbr.lower()},
+        return _metadata_backwards_shim(
+            db.metadata.find_one({'_id': abbr.lower()},
                                     fields=_build_field_list(request))
+        )
 
 
 class BillHandler(BillyHandler):

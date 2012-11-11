@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 
-from billy.models import db, Metadata, DoesNotExist
+from billy.models import db
 
 
 def get_region_select_form(data):
@@ -17,7 +17,6 @@ def get_region_select_form(data):
         abbr = forms.ChoiceField(choices=abbrs, label="abbr")
 
     return RegionSelectForm(data)
-
 
 
 def get_filter_bills_form(metadata):
