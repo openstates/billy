@@ -18,14 +18,7 @@ from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 
-_chamber_aliases = {
-    'assembly': 'lower',
-    'house': 'lower',
-    'senate': 'upper',
-}
-
-
-_lower_fields = (settings.LEVEL_FIELD,)
+_lower_fields = (settings.LEVEL_FIELD, 'chamber')
 
 
 def _build_mongo_filter(request, keys, icase=True):
@@ -42,10 +35,7 @@ def _build_mongo_filter(request, keys, icase=True):
     for key in keys:
         value = request.GET.get(key)
         if value:
-            if key == 'chamber':
-                value = value.lower()
-                _filter[key] = _chamber_aliases.get(value, value)
-            elif key in _lower_fields:
+            if key in _lower_fields:
                 _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
@@ -351,8 +341,7 @@ class SubjectListHandler(BillyHandler):
         if session:
             spec['session'] = session
         if chamber:
-            chamber = chamber.lower()
-            spec['chamber'] = _chamber_aliases.get(chamber, chamber)
+            spec['chamber'] = chamber.lower()
         result = {}
         for subject in settings.BILLY_SUBJECTS:
             count = db.bills.find(dict(spec, subjects=subject)).count()
