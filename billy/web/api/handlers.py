@@ -18,14 +18,7 @@ from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 
-_chamber_aliases = {
-    'assembly': 'lower',
-    'house': 'lower',
-    'senate': 'upper',
-}
-
-
-_lower_fields = (settings.LEVEL_FIELD,)
+_lower_fields = (settings.LEVEL_FIELD, 'chamber')
 
 
 def _build_mongo_filter(request, keys, icase=True):
@@ -42,10 +35,7 @@ def _build_mongo_filter(request, keys, icase=True):
     for key in keys:
         value = request.GET.get(key)
         if value:
-            if key == 'chamber':
-                value = value.lower()
-                _filter[key] = _chamber_aliases.get(value, value)
-            elif key in _lower_fields:
+            if key in _lower_fields:
                 _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
@@ -120,6 +110,14 @@ class BillyHandler(BaseHandler):
     allowed_methods = ('GET',)
 
 
+def _metadata_backwards_shim(metadata):
+    for chamber_type, chamber in metadata['chambers'].iteritems():
+        for field in ('name', 'title', 'term'):
+            if field in chamber:
+                metadata[chamber_type + '_chamber_' + field] = chamber[field]
+    return metadata
+
+
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
         fields = _build_field_list(request, {'abbreviation': 1,
@@ -128,7 +126,7 @@ class AllMetadataHandler(BillyHandler):
                                              '_id': 0
                                             })
         data = db.metadata.find(fields=fields).sort('name')
-        return list(data)
+        return [_metadata_backwards_shim(m) for m in data]
 
 
 class MetadataHandler(BillyHandler):
@@ -136,8 +134,10 @@ class MetadataHandler(BillyHandler):
         """
         Get metadata about a legislature.
         """
-        return db.metadata.find_one({'_id': abbr.lower()},
+        return _metadata_backwards_shim(
+            db.metadata.find_one({'_id': abbr.lower()},
                                     fields=_build_field_list(request))
+        )
 
 
 class BillHandler(BillyHandler):
@@ -351,8 +351,7 @@ class SubjectListHandler(BillyHandler):
         if session:
             spec['session'] = session
         if chamber:
-            chamber = chamber.lower()
-            spec['chamber'] = _chamber_aliases.get(chamber, chamber)
+            spec['chamber'] = chamber.lower()
         result = {}
         for subject in settings.BILLY_SUBJECTS:
             count = db.bills.find(dict(spec, subjects=subject)).count()

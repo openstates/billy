@@ -117,7 +117,7 @@ class Document(dict):
         chamber = self['chamber']
         if chamber == 'joint':
             return 'Joint'
-        return self.metadata['%s_chamber_name' % self['chamber']]
+        return self.metadata['chambers'][chamber]['name']
 
     @property
     def collection_name(self):

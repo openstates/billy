@@ -92,7 +92,7 @@ def browse_index(request, template='billy/index.html'):
         report['id'] = report['_id']
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
-        report['unicameral'] = ('lower_chamber_name' not in meta)
+        report['chambers'] = meta['chambers'].keys()
         report['influence_explorer'] = ('influenceexplorer' in
                                         meta['feature_flags'])
         report['bills']['typed_actions'] = (100 -
@@ -700,19 +700,18 @@ def legislators(request, abbr):
 
     report = db.reports.find_one({'_id': abbr})['legislators']
 
-    upper_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
-                                      'active': True, 'chamber': 'upper'})
-    lower_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
-                                      'active': True, 'chamber': 'lower'})
+    chambers = meta['chambers'].copy()
+    for chamber_type, chamber in chambers.iteritems():
+        chamber['legislators'] = sorted(db.legislators.find(
+            {settings.LEVEL_FIELD: abbr.lower(), 'active': True,
+             'chamber': chamber_type}), key=keyfunc)
+
     inactive_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
                                          'active': False})
-    upper_legs = sorted(upper_legs, key=keyfunc)
-    lower_legs = sorted(lower_legs, key=keyfunc)
     inactive_legs = sorted(inactive_legs, key=lambda x: x['last_name'])
 
     return render(request, 'billy/legislators.html', {
-        'upper_legs': upper_legs,
-        'lower_legs': lower_legs,
+        'chambers': chambers.values(),
         'inactive_legs': inactive_legs,
         'metadata': meta,
         'overfilled': report['overfilled_seats'],
@@ -1043,20 +1042,15 @@ def retire_legislator(request, id):
 def committees(request, abbr):
     meta = metadata(abbr)
 
-    upper_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
-                                     'chamber': 'upper'})
-    lower_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
-                                      'chamber': 'lower'})
-    joint_coms = db.committees.find({settings.LEVEL_FIELD: abbr.lower(),
-                                      'chamber': 'joint'})
-    upper_coms = sorted(upper_coms)
-    lower_coms = sorted(lower_coms)
-    joint_coms = sorted(joint_coms)
+    chambers = meta['chambers'].copy()
+    chambers['joint'] = {'name': 'Joint'}
+
+    for chamber_type, chamber in chambers.iteritems():
+        chamber['committees'] = sorted(db.committees.find(
+            {settings.LEVEL_FIELD: abbr.lower(), 'chamber': chamber_type}))
 
     return render(request, 'billy/committees.html', {
-        'upper_coms': upper_coms,
-        'lower_coms': lower_coms,
-        'joint_coms': joint_coms,
+        'chambers': chambers.values(),
         'metadata': meta,
     })
 

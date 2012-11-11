@@ -53,36 +53,30 @@ def region(request, abbr):
         if 'chamber' in leg:    # exclude lt. governors
             party_counts[leg['chamber']][leg['party']] += 1
 
-    if 'upper_chamber_name' not in meta:
-        chambers_to_use = ('lower',)
-    elif 'lower_chamber_name' not in meta:
-        chambers_to_use = ('upper',)
-    else:
-        chambers_to_use = ('upper', 'lower')
-
     chambers = []
 
-    for chamber in chambers_to_use:
+    for chamber_type, chamber in meta['chambers'].iteritems():
         res = {}
 
         # chamber metadata
-        res['type'] = chamber
-        res['title'] = meta[chamber + '_chamber_title']
-        res['name'] = meta[chamber + '_chamber_name']
+        res['type'] = chamber_type
+        res['title'] = chamber['title']
+        res['name'] = chamber['name']
 
         # legislators
         res['legislators'] = {
-            'count': sum(party_counts[chamber].values()),
-            'party_counts': dict(party_counts[chamber]),
+            'count': sum(party_counts[chamber_type].values()),
+            'party_counts': dict(party_counts[chamber_type]),
         }
 
         # committees
-        res['committees_count'] = meta.committees({'chamber': chamber}).count()
+        res['committees_count'] = meta.committees({'chamber': chamber_type}
+                                                 ).count()
 
-        res['latest_bills'] = meta.bills({'chamber': chamber}).sort(
+        res['latest_bills'] = meta.bills({'chamber': chamber_type}).sort(
             [('action_dates.first', -1)]).limit(2)
-        res['passed_bills'] = meta.bills({'chamber': chamber}).sort(
-            [('action_dates.passed_' + chamber, -1)]).limit(2)
+        res['passed_bills'] = meta.bills({'chamber': chamber_type}).sort(
+            [('action_dates.passed_' + chamber_type, -1)]).limit(2)
 
         chambers.append(res)
 
@@ -104,24 +98,6 @@ def region(request, abbr):
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,
                        nav_active='home'))
-
-
-def not_active_yet(request, args, kwargs):
-    '''
-    Context:
-        - metadata
-        - nav_active
-
-    Tempaltes:
-        - billy/web/public/state_not_active_yet.html
-    '''
-    try:
-        metadata = Metadata.get_object(kwargs['abbr'])
-    except DoesNotExist:
-        raise Http404
-
-    return render(request, templatename('state_not_active_yet'),
-                  dict(metadata=metadata, nav_active=None))
 
 
 def search(request, abbr):
