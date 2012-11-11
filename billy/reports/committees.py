@@ -31,12 +31,17 @@ def scan_committees(abbr):
             report['joint_count'] += 1
 
         # members
+        none_names = db.manual.name_matchers.find({
+            "abbr": abbr,
+            "obj_id": None
+        })
+        ignored_names = [x['name'] for x in none_names]
         if not com['members']:
             report['empty_count'] += 1
 
         for member in com['members']:
             report['_member_count'] += 1
-            if member.get('leg_id'):
+            if member.get('leg_id') or member['name'] in ignored_names:
                 report['_members_with_leg_id_count'] += 1
             else:
                 report['unmatched_leg_ids'].add((com.get('term', ''),
