@@ -6,6 +6,7 @@
             "minLength": 2,
             "type": "string"
         },
+        "name": { "type": "string" },
         "capitol_maps": {
             "items": {
                 "properties": {

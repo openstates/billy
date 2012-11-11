@@ -92,7 +92,7 @@ def browse_index(request, template='billy/index.html'):
         report['id'] = report['_id']
         meta = db.metadata.find_one({'_id': report['_id']})
         report['name'] = meta['name']
-        report['unicameral'] = ('lower_chamber_name' not in meta)
+        report['chambers'] = meta['chambers'].keys()
         report['influence_explorer'] = ('influenceexplorer' in
                                         meta['feature_flags'])
         report['bills']['typed_actions'] = (100 -

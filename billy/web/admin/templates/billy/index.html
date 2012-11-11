@@ -127,15 +127,19 @@
             {% endif %}
             >{{row.legislators.offices|floatformat}}%</td>
         <!-- committees -->
-        <td class="{{row.committees.upper_count|yesno:"good,bad"}}">
-            {{row.committees.upper_count}}</td>
-        {% if row.unicameral %}
-            <td class="good">---</td>
+        {% if 'upper' in row.chambers %}
+            <td class="{{row.committees.upper_count|yesno:"good,bad"}}">
+                {{row.committees.upper_count}}</td>
         {% else %}
+            <td class="good">---</td>
+        {% endif %}
+        {% if 'lower' in row.chambers %}
             <td class="{{row.committees.lower_count|yesno:"good,bad"}}">
                 {{row.committees.lower_count}}</td>
+        {% else %}
+            <td class="good">---</td>
         {% endif %}
-        {% if row.unicameral %}
+        {% if row.chambers|length == 1 %}
             <td class="good">---</td>
         {% else %}
             <td class="{{row.committees.joint_count|yesno:"good,warning"}}">
