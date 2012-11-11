@@ -148,9 +148,6 @@ def setup_func():
         u'_type': u'metadata',
         u'abbreviation': u'ca',
         u'legislature_name': u'California State Legislature',
-        u'lower_chamber_name': u'Assembly',
-        u'lower_chamber_term': 2,
-        u'lower_chamber_title': u'Assemblymember',
         u'name': u'California',
         u'session_details': {
             u'20092010': {
@@ -231,10 +228,7 @@ def setup_func():
            u'sessions': [u'fake-session2'],
            u'start_year': 2011},
 
-        ],
-         u'upper_chamber_name': u'Senate',
-         u'upper_chamber_term': 4,
-         u'upper_chamber_title': u'Senator'})
+        ]})
     print db.name, db.metadata.count()
 
     # A current session bill, where current session is 20112012.
