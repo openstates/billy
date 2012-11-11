@@ -17,6 +17,7 @@
 
 {% block content %}
 <form action="{% url admin_matching_commit metadata.abbreviation %}" method="POST" >
+    {% csrf_token %}
 <table class="table table-striped table-bordered table-condensed">
     <tr>
         <th>Term / Chamber</th>
@@ -37,6 +38,7 @@
                 ({{ leg.leg_id }})
                 </option>
                 {% endfor %}
+                <option value="None">Known to be untracked</option>
             </select>
         </td>
         <td>
@@ -47,6 +49,7 @@
                     {{ committee.chamber }}/{{ committee.committee }}
                     ({{committee|key:"_id"}})
                 </option>
+                <option value="None">Known to be untracked</option>
                 {% endfor %}
             </select>
         </td>

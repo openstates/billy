@@ -74,10 +74,16 @@ def remove(request, abbr=None, id=None):
 def commit(request, abbr):
     ids = dict(request.POST)
     for eyedee in ids:
+        if eyedee == 'csrfmiddlewaretoken':
+            continue
+
         typ, term, chamber, name = eyedee.split(",", 3)
         value = ids[eyedee][0]
         if value == "Unknown":
-            continue
+            continue  # unknown known :)
+
+        if value == "None":
+            value = None  # known unknown.
 
         db.manual.name_matchers.update({"name": name, "term": term,
                                         "abbr": abbr, "chamber": chamber},
