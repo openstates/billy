@@ -111,10 +111,12 @@ class BillyHandler(BaseHandler):
 
 
 def _metadata_backwards_shim(metadata):
-    for chamber_type, chamber in metadata['chambers'].iteritems():
-        for field in ('name', 'title', 'term'):
-            if field in chamber:
-                metadata[chamber_type + '_chamber_' + field] = chamber[field]
+    if 'chambers' in metadata:
+        for chamber_type, chamber in metadata['chambers'].iteritems():
+            for field in ('name', 'title', 'term'):
+                if field in chamber:
+                    metadata[chamber_type + '_chamber_' + field] = \
+                            chamber[field]
     return metadata
 
 
@@ -123,20 +125,25 @@ class AllMetadataHandler(BillyHandler):
         fields = _build_field_list(request, {'abbreviation': 1,
                                              'name': 1,
                                              'feature_flags': 1,
+                                             'chambers': 1,
                                              '_id': 0
                                             })
+        for f in fields.copy():
+            if '_chamber_' in f:
+                fields['chambers'] = 1
         data = db.metadata.find(fields=fields).sort('name')
         return [_metadata_backwards_shim(m) for m in data]
 
 
 class MetadataHandler(BillyHandler):
     def read(self, request, abbr):
-        """
-        Get metadata about a legislature.
-        """
+        field_list = _build_field_list(request)
+        if field_list:
+            for f in field_list.copy():
+                if '_chamber_' in f:
+                    field_list['chambers'] = 1
         return _metadata_backwards_shim(
-            db.metadata.find_one({'_id': abbr.lower()},
-                                    fields=_build_field_list(request))
+            db.metadata.find_one({'_id': abbr.lower()}, fields=field_list)
         )
 
 
@@ -178,7 +185,9 @@ class BillSearchHandler(BillyHandler):
 
         # process extra attributes
         query = request.GET.get('q')
-        abbr = request.GET.get(settings.LEVEL_FIELD).lower()
+        abbr = request.GET.get(settings.LEVEL_FIELD)
+        if abbr:
+            abbr = abbr.lower()
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
