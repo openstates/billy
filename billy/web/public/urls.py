@@ -39,6 +39,9 @@ urlpatterns += patterns('',
             'template_name': 'billy/web/public/login.html'
         }
     ),
+
+    url(r'^favorites', 'billy.web.public.views.favorites.set_favorite',
+        name='set_favorite'),
 )
 
 # region specific

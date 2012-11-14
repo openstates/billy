@@ -4,6 +4,7 @@
 from django.shortcuts import render
 from django.http import Http404
 from django.template.response import TemplateResponse
+from django.views.decorators.csrf import csrf_protect
 
 from djpjax import pjax
 
@@ -12,6 +13,8 @@ from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
+from .favorites import is_favorite
+
 
 EVENT_PAGE_COUNT = 10
 
@@ -89,6 +92,7 @@ def committees(request, abbr):
                    sort_order=sort_order, nav_active='committees'))
 
 
+@csrf_protect
 def committee(request, abbr, committee_id):
     '''
     Context:
@@ -117,9 +121,16 @@ def committee(request, abbr, committee_id):
 
     popularity.counter.inc('committees', committee_id, abbr=abbr)
 
+    _is_favorite = is_favorite(committee.id, 'committee', request)
+
     return render(request, templatename('committee'),
                   dict(committee=committee, abbr=abbr,
                        metadata=Metadata.get_object(abbr),
                        sources=committee['sources'],
                        nav_active='committees',
-                       events=events))
+                       events=events,
+
+                       # Favorites data.
+                       obj_id=committee.id,
+                       obj_type="committee",
+                       is_favorite=_is_favorite))

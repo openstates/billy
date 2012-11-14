@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.feedgenerator import Rss201rev2Feed
+from django.views.decorators.csrf import csrf_protect
 
 from billy.core import settings
 from billy.utils import popularity, fix_bill_id
@@ -14,6 +15,7 @@ from billy.models.pagination import CursorPaginator, IteratorPaginator
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
+from .favorites import is_favorite
 
 EVENT_PAGE_COUNT = 10
 
@@ -267,6 +269,7 @@ def bill_noslug(request, abbr, bill_id):
                     bill_id=bill['bill_id'])
 
 
+@csrf_protect
 def bill(request, abbr, session, bill_id):
     '''
     Context:
@@ -311,6 +314,9 @@ def bill(request, abbr, session, bill_id):
         sponsors = bill.sponsors_manager
     else:
         sponsors = bill.sponsors_manager.first_fifteen
+
+    _is_favorite = is_favorite(bill.id, 'bill', request)
+
     return render(request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
@@ -320,7 +326,12 @@ def bill(request, abbr, session, bill_id):
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
-             nav_active='bills'))
+             nav_active='bills',
+
+             # FAvorites data.
+             is_favorite=_is_favorite,
+             obj_id=bill.id,
+             obj_type="bill"))
 
 
 def vote(request, abbr, vote_id):
