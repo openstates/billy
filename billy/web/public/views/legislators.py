@@ -20,7 +20,6 @@ from billy.models import db, Metadata, DoesNotExist
 from billy.core import settings as billy_settings
 
 from .utils import templatename, mongo_fields
-from .favorites import is_favorite
 
 
 @pjax()
@@ -210,12 +209,7 @@ def legislator(request, abbr, _id, slug=None):
             feed_entries_count=len(feed_entries_list),
             feed_entries_more_count=max([0, feed_entries.count() - 5]),
             has_votes=has_votes,
-            nav_active='legislators',
-
-            # Favorites data.
-            obj_id=legislator.id,
-            obj_type='legislator',
-            is_favorite=is_favorite(legislator.id, 'legislator', request)))
+            nav_active='legislators'))
 
 
 def legislator_inactive(request, abbr, legislator):

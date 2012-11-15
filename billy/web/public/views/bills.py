@@ -15,7 +15,6 @@ from billy.models.pagination import CursorPaginator, IteratorPaginator
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
-from .favorites import is_favorite
 
 EVENT_PAGE_COUNT = 10
 
@@ -315,8 +314,6 @@ def bill(request, abbr, session, bill_id):
     else:
         sponsors = bill.sponsors_manager.first_fifteen
 
-    _is_favorite = is_favorite(bill.id, 'bill', request)
-
     return render(request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
@@ -326,12 +323,7 @@ def bill(request, abbr, session, bill_id):
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
-             nav_active='bills',
-
-             # FAvorites data.
-             is_favorite=_is_favorite,
-             obj_id=bill.id,
-             obj_type="bill"))
+             nav_active='bills'))
 
 
 def vote(request, abbr, vote_id):

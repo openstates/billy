@@ -30,21 +30,20 @@ def get_user_favorites(user_id):
     return grouped
 
 
-def is_favorite(obj_id, obj_type, request, extra_spec=None):
+def is_favorite(obj_id, obj_type, user, extra_spec=None):
     '''Query database; return true or false.
     '''
-    if request.user.is_authenticated():
-        spec = dict(obj_id=obj_id, obj_type=obj_type,
-                    user_id=request.user.id)
+    spec = dict(obj_id=obj_id, obj_type=obj_type,
+                user_id=user.id)
 
-        # Enable the bill search to pass in search terms.
-        if extra_spec is not None:
-            spec.update(extra_spec)
+    # Enable the bill search to pass in search terms.
+    if extra_spec is not None:
+        spec.update(extra_spec)
 
-        doc = user_db.favorites.find_one(spec)
+    doc = user_db.favorites.find_one(spec)
 
-        if doc:
-            return doc['is_favorite']
+    if doc:
+        return doc['is_favorite']
 
     return False
 
