@@ -1,4 +1,6 @@
 import datetime
+from itertools import groupby
+from operator import itemgetter
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
@@ -6,6 +8,26 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import user_db
+from billy.core import mdb
+
+
+def _get_favorite_object(favorite):
+    collection_name = {
+        'bill': 'bills',
+        'committee': 'committees',
+        'legislator': 'legislators',
+        }[favorite['obj_type']]
+    return getattr(mdb, collection_name).find_one(favorite['obj_id'])
+
+
+def get_user_favorites(user_id):
+    faves = list(user_db.favorites.find(dict(user_id=user_id)))
+    grouped = groupby(faves, itemgetter('obj_type'))
+    grouped = dict((key, list(iterator)) for (key, iterator) in grouped)
+    for key in grouped:
+        for fave in grouped[key]:
+            fave['obj'] = _get_favorite_object(fave)
+    return grouped
 
 
 def is_favorite(obj_id, obj_type, request, extra_spec=None):

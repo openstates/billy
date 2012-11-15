@@ -14,6 +14,7 @@ from billy.models import db, Metadata, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
+from .favorites import get_user_favorites
 
 
 def homepage(request):
@@ -24,6 +25,21 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
+    if request.user.is_authenticated():
+        favorites = get_user_favorites(request.user.id)
+        return render(request, templatename('user_homepage'),
+                      dict(
+                  all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES),
+                  favorites=favorites,
+
+                  # Add a list of legislators for compatibility with the template
+                  # legislators_table.html
+                  legislators=[obj['obj'] for obj in favorites.get('legislator', [])],
+
+                  # Add a list of committees for compatibility with the template
+                  # committees_table.html
+                  committees=[obj['obj'] for obj in favorites.get('committee', [])]))
+
     return render(request, templatename('homepage'),
                   dict(
               all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
