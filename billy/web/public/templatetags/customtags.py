@@ -1,5 +1,7 @@
 from decimal import Decimal
 import re
+import json
+import urllib
 
 from django import template
 from django.utils.html import strip_tags
@@ -112,11 +114,46 @@ class SquishedWhitespaceNode(template.Node):
 
 
 @register.inclusion_tag(templatename('_favorite'), takes_context=True)
-def favorite(context, obj_id, obj_type):
+def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
+             params=None):
     '''Check whether the object with the given type and id is currently
     been favorited by the user. The test whether the user is authenticated
     currently happens in the template.
+
+    abbr is can be specified in the invocation, since it won't be in the
+    request context on the user's custom homepage.
+
+    Same for _is_favorite, which needs to be True.
+
+    Same for params, which needs to be passed as url-encoded string from
+    the user homepage.
     '''
     request = context['request']
-    _is_favorite = is_favorite(obj_id, obj_type, request.user)
-    return dict(obj_type=obj_type, obj_id=obj_id, is_favorite=_is_favorite)
+    extra_spec = {}
+
+    # If the requested page is a search results page with a query string,
+    # create an extra spec to help determine whether the search is
+    # currently favorited.
+    if request.GET and obj_type == "search":
+        extra_spec.update(search_text=request.GET['search_text'])
+    if _is_favorite is None:
+        _is_favorite = is_favorite(obj_id, obj_type, request.user,
+                                   extra_spec=extra_spec)
+    else:
+        _is_favorite = (_is_favorite == 'is_favorite')
+
+    # We need to allow the abbr to be passed in for the user homepage,
+    # to come from the request context in the case of a search results page,
+    # and to default to 'all' for the all bills search.
+    abbr = abbr or context.get('abbr', 'all')
+
+    return dict(extra_spec,
+        obj_type=obj_type, obj_id=obj_id,
+        is_favorite=_is_favorite, request=request,
+        abbr=abbr or context['abbr'],
+        params=params or urllib.urlencode(request.GET))
+
+
+@register.filter
+def json_encode(data):
+    return json.dumps(data)

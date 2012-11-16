@@ -31,14 +31,8 @@ def homepage(request):
                       dict(
                   all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES),
                   favorites=favorites,
-
-                  # Add a list of legislators for compatibility with the template
-                  # legislators_table.html
-                  legislators=[obj['obj'] for obj in favorites.get('legislator', [])],
-
-                  # Add a list of committees for compatibility with the template
-                  # committees_table.html
-                  committees=[obj['obj'] for obj in favorites.get('committee', [])]))
+                  legislators=favorites.legislator_objects(),
+                  committees=favorites.committee_objects()))
 
     return render(request, templatename('homepage'),
                   dict(

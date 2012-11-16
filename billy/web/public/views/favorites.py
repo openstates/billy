@@ -1,6 +1,8 @@
 import datetime
+import collections
 from itertools import groupby
 from operator import itemgetter
+from urlparse import parse_qsl
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
@@ -9,6 +11,87 @@ from django.views.decorators.http import require_http_methods
 
 from billy.core import user_db
 from billy.core import mdb
+import billy.utils
+
+
+class Favorites(dict):
+
+    def favorites_exist(self, type_):
+        if type_ not in self:
+            return False
+        for obj in self[type_]:
+            if obj['is_favorite']:
+                return True
+        return False
+
+    def has_bills(self):
+        return self.favorites_exist('bill')
+
+    def has_legislators(self):
+        return self.favorites_exist('legislator')
+
+    def has_committees(self):
+        return self.favorites_exist('committee')
+
+    def has_searches(self):
+        return self.favorites_exist('search')
+
+    def legislator_objects(self):
+        return [obj['obj'] for obj in self.get('legislator', [])]
+
+    def committee_objects(self):
+        return [obj['obj'] for obj in self.get('committee', [])]
+
+
+class FavoritedSearch(dict):
+
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+        self.params = dict(parse_qsl(self['search_params']))
+        self.text = self.params.pop('search_text')
+
+    def scope(self):
+        '''Return a comma-separated list of human readable equivalents
+        for things passed in the query string: California, Session 1...
+        '''
+        params = self.params
+        results = []
+        meta = None
+        abbr = self['search_abbr']
+
+        # import pdb;pdb.set_trace()
+
+        if 'search_abbr' in self:
+            if abbr == 'all':
+                results.append('All states')
+            else:
+                meta = billy.utils.metadata(abbr)
+                results.append(meta['name'])
+
+        if 'session' in params:
+            if meta:
+                session = params['session']
+                session_details = meta['session_details']
+                results.append(session_details[session]['display_name'])
+
+        if 'chamber' in params:
+            if meta:
+                results.append(params['chamber'] + ' chamber')
+
+        if 'type' in params:
+            results.append('%ss only' % params['type'].title())
+
+        if 'sponsor__leg_id' in params:
+            # Get the legislator.
+            leg = mdb.legislators.find_one(params['sponsor__leg_id'])
+            tmpl = 'Sponsored by <a href="%s">%s</a>'
+            vals = (leg.get_absolute_url(), leg.display_name())
+            results.append(tmpl % vals)
+
+        if 'subjects' in params:
+            results.append('relating to %s' % params['subjects'])
+
+        return ', '.join(results)
 
 
 def _get_favorite_object(favorite):
@@ -16,18 +99,33 @@ def _get_favorite_object(favorite):
         'bill': 'bills',
         'committee': 'committees',
         'legislator': 'legislators',
-        }[favorite['obj_type']]
-    return getattr(mdb, collection_name).find_one(favorite['obj_id'])
+        }.get(favorite['obj_type'])
+    if collection_name is not None:
+        return getattr(mdb, collection_name).find_one(favorite['obj_id'])
 
 
 def get_user_favorites(user_id):
     faves = list(user_db.favorites.find(dict(user_id=user_id)))
     grouped = groupby(faves, itemgetter('obj_type'))
-    grouped = dict((key, list(iterator)) for (key, iterator) in grouped)
-    for key in grouped:
-        for fave in grouped[key]:
-            fave['obj'] = _get_favorite_object(fave)
-    return grouped
+
+    res = collections.defaultdict(list)
+    for (key, iterator) in grouped:
+        for fave in iterator:
+            # Skip non-faves.
+            if fave['is_favorite']:
+                res[key].append(fave)
+
+    for key in res:
+        for fave in res[key]:
+            obj = _get_favorite_object(fave)
+            if obj is not None:
+                fave['obj'] = obj
+
+    # Wrap search results in helper object.
+    if 'search' in res:
+        res['search'] = map(FavoritedSearch, res['search'])
+
+    return Favorites(res)
 
 
 def is_favorite(obj_id, obj_type, user, extra_spec=None):
@@ -39,6 +137,10 @@ def is_favorite(obj_id, obj_type, user, extra_spec=None):
     # Enable the bill search to pass in search terms.
     if extra_spec is not None:
         spec.update(extra_spec)
+
+    if obj_type == 'search':
+        # Records with type 'search' have no obj_id.
+        del spec['obj_id']
 
     doc = user_db.favorites.find_one(spec)
 
@@ -58,8 +160,9 @@ def set_favorite(request):
 
         # Complain about bogus requests.
         resp400 = HttpResponse(status=400)
-        valid_keys = set(['obj_id', 'obj_type', 'is_favorite', 'search_text'])
-        if not set(request.POST) < valid_keys:
+        valid_keys = set(['obj_id', 'obj_type', 'is_favorite',
+                          'search_params', 'search_abbr'])
+        if not set(request.POST) <= valid_keys:
             return resp400
         valid_types = ['bill', 'legislator', 'committee', 'search']
         if request.POST['obj_type'] not in valid_types:
@@ -71,6 +174,13 @@ def set_favorite(request):
             obj_id=request.POST['obj_id'],
             user_id=request.user.id
             )
+
+        if request.POST['obj_type'] == 'search':
+            # Add the search text into the spec.
+            spec.update(search_params=request.POST['search_params'])
+            # 'search' docs have no obj_id.
+            del spec['obj_id']
+            spec.update(search_abbr=request.POST['search_abbr'])
 
         # Toggle the value of is_favorite.
         if request.POST['is_favorite'] == 'false':
@@ -85,8 +195,6 @@ def set_favorite(request):
             timestamp=datetime.datetime.utcnow(),
             )
         doc.update(spec)
-
         # Create the doc if missing, else update based on the spec.
         user_db.favorites.update(spec, doc, upsert=True)
-
         return HttpResponse(status=200)

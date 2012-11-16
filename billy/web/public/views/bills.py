@@ -93,7 +93,10 @@ class RelatedBillsList(RelatedObjectsList):
                     search_text))
             context.update(long_description=long_description)
         else:
-            description = [metadata['name'], 'Bills']
+            if metadata:
+                description = [metadata['name'], 'Bills']
+            else:
+                description = ['All Bills']
             context.update(form=FilterBillsForm())
 
         context.update(description=' '.join(description))
