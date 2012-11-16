@@ -266,7 +266,6 @@ def get_scraper(mod_path, scraper_type):
     return ScraperClass
 
 
-
 def check_sessions(metadata, sessions):
     all_sessions_in_terms = list(reduce(lambda x, y: x + y,
                                    [x['sessions'] for x in metadata['terms']]))

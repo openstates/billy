@@ -472,8 +472,8 @@ class BoundaryHandler(BillyHandler):
         lon_delta = abs(max_lon - min_lon)
         lat_delta = abs(max_lat - min_lat)
 
-        region = {'center_lon': (max_lon-min_lon)/2,
-                  'center_lat': (max_lat-min_lat)/2,
+        region = {'center_lon': (max_lon - min_lon) / 2,
+                  'center_lat': (max_lat - min_lat) / 2,
                   'lon_delta': lon_delta, 'lat_delta': lat_delta,
                  }
         bbox = [[min_lat, min_lon], [max_lat, max_lon]]

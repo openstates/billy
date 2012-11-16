@@ -44,7 +44,7 @@ def get_filter_bills_form(metadata):
             _chamber_choices = []
             for chamber_type in metadata['chambers']:
                 chamber_name = metadata['chambers'][chamber_type]['name']
-                _status_choices.append(('passed_'+ chamber_type,
+                _status_choices.append(('passed_' + chamber_type,
                                         'Passed ' + chamber_name))
                 _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
