@@ -1,4 +1,4 @@
-{
+metadata = {
     "abbreviation": "yz",
     "capitol_timezone": "Etc/UTC",
     "legislature_name": "WhyZee Legislature",
@@ -37,5 +37,5 @@
         "S2b": {"start_date": 1360000000.0, "type": "special",
                "display_name": "Two B"}
     },
-    "_partial_vote_bill_id": true
+    "_partial_vote_bill_id": True
 }
