@@ -479,6 +479,9 @@ class BoundaryHandler(BillyHandler):
         bbox = [[min_lat, min_lon], [max_lat, max_lon]]
 
         district = db.districts.find_one({'boundary_id': boundary_id})
+        if not district:
+            resp = rc.NOT_FOUND
+            return resp
         district['shape'] = data['coordinates']
         district['region'] = region
         district['bbox'] = bbox
