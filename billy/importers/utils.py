@@ -187,18 +187,9 @@ def convert_timestamps(obj):
             except TypeError:
                 raise TypeError("expected float for %s, got %s" % (key, value))
 
-    for key in ('sources', 'actions', 'votes'):
+    for key in ('sources', 'actions', 'votes', 'roles'):
         for child in obj.get(key, []):
             convert_timestamps(child)
-
-    for term in obj.get('terms', []):
-        convert_timestamps(term)
-
-    for details in obj.get('session_details', {}).values():
-        convert_timestamps(details)
-
-    for role in obj.get('roles', []):
-        convert_timestamps(role)
 
     return obj
 

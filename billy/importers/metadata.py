@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import datetime
-import json
+import importlib
 
 from billy.core import db
 from billy.importers.utils import prepare_obj
@@ -10,22 +10,29 @@ PRESERVED_FIELDS = ('latest_json_url', 'latest_json_date',
                     'latest_csv_url', 'latest_csv_date')
 
 
-def import_metadata(abbr, data_dir):
+def import_metadata(abbr):
     preserved = {}
     old_metadata = db.metadata.find_one({'_id': abbr}) or {}
     for field in PRESERVED_FIELDS:
         if field in old_metadata:
             preserved[field] = old_metadata[field]
 
-    data_dir = os.path.join(data_dir, abbr)
-    with open(os.path.join(data_dir, 'metadata.json')) as f:
-        data = json.load(f)
-        data['_type'] = 'metadata'
-        data = prepare_obj(data)
+    module = importlib.import_module(abbr)
+    metadata = module.metadata
+    metadata['_type'] = 'metadata'
 
-    data['_id'] = abbr
-    data.update(preserved)
+    for term in metadata['terms']:
+        for k, v in term.iteritems():
+            if isinstance(v, datetime.date):
+                term[k] = datetime.combine(v, datetime.time(0, 0))
+    for session in metadata['session_details'].values():
+        for k, v in session.iteritems():
+            if isinstance(v, datetime.date):
+                session[k] = datetime.datetime.combine(v, datetime.time(0, 0))
 
-    data['latest_update'] = datetime.datetime.utcnow()
+    metadata['_id'] = abbr
+    metadata.update(preserved)
 
-    db.metadata.save(data, safe=True)
+    metadata['latest_update'] = datetime.datetime.utcnow()
+
+    db.metadata.save(metadata, safe=True)
