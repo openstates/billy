@@ -9,11 +9,16 @@ import pymongo
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
+from billy.core import user_db
 from billy.models import db, Metadata, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
+from .favorites import get_user_favorites
 
 
 def homepage(request):
@@ -24,6 +29,15 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
+    if request.user.is_authenticated():
+        favorites = get_user_favorites(request.user.id)
+        return render(request, templatename('user_homepage'),
+                      dict(
+                  all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES),
+                  favorites=favorites,
+                  legislators=favorites.legislator_objects(),
+                  committees=favorites.committee_objects()))
+
     return render(request, templatename('homepage'),
                   dict(
               all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
@@ -218,3 +232,46 @@ class NewsList(RelatedObjectsList):
                                 leg['_id'], slug)
         return super(NewsList, self).get(request, abbr, collection_name, _id,
                                           slug)
+
+
+@login_required
+@csrf_protect
+def user_profile(request):
+    if request.method == "GET":
+        saved_changes = bool(request.GET.get('saved_changes'))
+        profile = user_db.profiles.find_one(dict(user_id=request.user.id))
+        return render(request, templatename('user_profile'),
+                      dict(saved_changes=saved_changes,
+                           profile=profile))
+
+    if request.method == "POST":
+        POST = request.POST
+        if "lat" in POST and "lng" in POST:
+            lat = POST['lat']
+            lng = POST['lng']
+
+        doc = {'$set': dict(location=dict(lat=lat, lng=lng))}
+
+        if POST['api_key']:
+            doc['$set']['api_key'] = POST['api_key']
+
+        if POST['location_text']:
+            doc['$set']['location']['text'] = POST['location_text']
+
+        spec = dict(user_id=request.user.id)
+        user_db.profiles.update(spec, doc, upsert=True)
+
+        return redirect('%s?%s' % (reverse('user_profile'), 'saved_changes=True'))
+
+
+@login_required
+def get_user_latlong(request):
+    profile = user_db.profiles.find_one(dict(user_id=request.user.id))
+    data = {}
+    location = profile.get('location')
+    if location:
+        for key in ('lat', 'lng'):
+            data[key] = location.get(key)
+    resp = HttpResponse(mimetype='application/json')
+    json.dump(data, resp)
+    return resp
