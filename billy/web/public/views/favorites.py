@@ -6,7 +6,6 @@ from urlparse import parse_qsl
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
@@ -165,7 +164,6 @@ def favorites(request):
 
 
 @login_required
-@csrf_protect
 @require_http_methods(["POST"])
 def set_favorite(request):
     '''Follow/unfollow a bill, committee, legislator.
@@ -213,7 +211,6 @@ def set_favorite(request):
 
 
 @login_required
-@csrf_protect
 @require_http_methods(["POST"])
 def set_notification_preference(request):
     '''Turn notification preferences on or off.

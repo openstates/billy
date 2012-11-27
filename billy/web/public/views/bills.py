@@ -5,7 +5,6 @@ from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.utils.feedgenerator import Rss201rev2Feed
-from django.views.decorators.csrf import csrf_protect
 
 from billy.core import settings
 from billy.utils import popularity, fix_bill_id
@@ -272,7 +271,6 @@ def bill_noslug(request, abbr, bill_id):
                     bill_id=bill['bill_id'])
 
 
-@csrf_protect
 def bill(request, abbr, session, bill_id):
     '''
     Context:

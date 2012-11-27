@@ -9,7 +9,6 @@ import pymongo
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
@@ -227,7 +226,6 @@ class NewsList(RelatedObjectsList):
 
 
 @login_required
-@csrf_protect
 def user_profile(request):
     if request.method == "GET":
         saved_changes = bool(request.GET.get('saved_changes'))
@@ -236,7 +234,7 @@ def user_profile(request):
                       dict(saved_changes=saved_changes,
                            profile=profile))
 
-    if request.method == "POST":
+    elif request.method == "POST":
         POST = request.POST
         if "lat" in POST and "lng" in POST:
             lat = POST['lat']

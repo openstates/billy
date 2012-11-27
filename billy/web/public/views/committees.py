@@ -4,7 +4,6 @@
 from django.shortcuts import render
 from django.http import Http404
 from django.template.response import TemplateResponse
-from django.views.decorators.csrf import csrf_protect
 
 from djpjax import pjax
 
@@ -87,7 +86,6 @@ def committees(request, abbr):
                    sort_order=sort_order, nav_active='committees'))
 
 
-@csrf_protect
 def committee(request, abbr, committee_id):
     '''
     Context:
