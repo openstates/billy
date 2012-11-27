@@ -8,6 +8,7 @@ import scrapelib
 
 log = logging.getLogger('billy.fulltext.elasticsearch')
 
+
 def id_to_url(id):
     abbr = id[0:2].lower()
     return 'http://{0}/{1}/{2}'.format(settings.AWS_BUCKET, abbr, id)

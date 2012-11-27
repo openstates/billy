@@ -48,7 +48,7 @@ def committees(request, abbr):
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in ('upper', 'lower'):
-        chamber_name = meta['%s_chamber_name' % chamber]
+        chamber_name = meta['chambers'][chamber]['name']
         spec = {'chamber': chamber}
         show_chamber_column = False
     elif chamber == 'joint':
@@ -61,13 +61,9 @@ def committees(request, abbr):
         show_chamber_column = True
         chamber_name = ''
 
-    chambers = {}
+    chambers = dict((k, v['name']) for k, v in meta['chambers'].iteritems())
     if meta.committees({'chamber': 'joint'}).count():
         chambers['joint'] = 'Joint'
-    if 'lower_chamber_name' in meta:
-        chambers['lower'] = meta['lower_chamber_name']
-    if 'upper_chamber_name' in meta:
-        chambers['upper'] = meta['upper_chamber_name']
 
     fields = mongo_fields('committee', 'subcommittee', 'members',
                           settings.LEVEL_FIELD, 'chamber')

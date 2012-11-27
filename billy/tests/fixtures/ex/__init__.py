@@ -1,4 +1,4 @@
-{
+metadata = {
     "abbreviation": "ex",
     "capitol_timezone": "Etc/UTC",
     "legislature_name": "Example Legislature",

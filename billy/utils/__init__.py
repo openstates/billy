@@ -33,7 +33,7 @@ def chamber_name(abbr, chamber):
     if chamber in ('joint', 'other'):
         return 'Joint'
 
-    return metadata(abbr)['%s_chamber_name' % chamber].split()[0]
+    return metadata(abbr)['chambers'][chamber]['name'].split()[0]
 
 
 def parse_param_dt(dt):

@@ -52,16 +52,12 @@ def legislators(request, abbr):
 
     spec = {'active': True, 'district': {'$exists': True}}
 
-    chambers = {}
-    if 'upper_chamber_name' in meta:
-        chambers['upper'] = meta['upper_chamber_name']
-    if 'lower_chamber_name' in meta:
-        chambers['lower'] = meta['lower_chamber_name']
+    chambers = dict((k, v['name']) for k, v in meta['chambers'].iteritems())
 
     chamber = request.GET.get('chamber', 'both')
-    if chamber in ('upper', 'lower'):
+    if chamber in chambers:
         spec['chamber'] = chamber
-        chamber_title = meta['%s_chamber_title' % chamber] + 's'
+        chamber_title = meta['chambers'][chamber]['title'] + 's'
     else:
         chamber = 'both'
         chamber_title = 'Legislators'
@@ -203,7 +199,7 @@ def legislator(request, abbr, _id, slug=None):
             legislator=legislator,
             sources=legislator['sources'],
             sponsored_bills=sponsored_bills,
-            legislator_votes=legislator_votes,
+            legislator_votes=list(legislator_votes),
             has_feed_entries=bool(feed_entries_list),
             feed_entries=feed_entries_list[:4],
             feed_entries_count=len(feed_entries_list),

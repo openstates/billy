@@ -29,18 +29,17 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
+    all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)
+
     if request.user.is_authenticated():
         favorites = get_user_favorites(request.user.id)
         return render(request, templatename('user_homepage'),
-                      dict(
-                  all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES),
-                  favorites=favorites,
-                  legislators=favorites.legislator_objects(),
-                  committees=favorites.committee_objects()))
+                      dict(all_metadata=all_metadata, favorites=favorites,
+                           legislators=favorites.legislator_objects(),
+                           committees=favorites.committee_objects()))
 
     return render(request, templatename('homepage'),
-                  dict(
-              all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)))
+                  dict(all_metadata=all_metadata))
 
 
 def downloads(request):
@@ -94,7 +93,7 @@ def find_your_legislator(request):
             billy_settings.API_BASE_URL,
             lon,
             lat,
-            billy_settings.API_KEY
+            getattr(billy_settings, 'API_KEY', '')
         )
         leg_resp = json.load(urllib2.urlopen(qurl))
         # allow limiting lookup to region for region map views
@@ -113,7 +112,7 @@ def find_your_legislator(request):
                 qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
                     billy_settings.API_BASE_URL,
                     border,
-                    billy_settings.API_KEY
+                    getattr(billy_settings, 'API_KEY', '')
                 )
                 resp = json.load(urllib2.urlopen(qurl))
                 ret[border] = resp

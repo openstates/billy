@@ -139,7 +139,7 @@ def _do_imports(abbrev, args):
     from billy.importers.speeches import import_speeches
 
     # always import metadata and districts
-    import_metadata(abbrev, settings.BILLY_DATA_DIR)
+    import_metadata(abbrev)
 
     dist_filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR, 'districts',
                                  '%s.csv' % abbrev)
@@ -168,7 +168,7 @@ def _do_imports(abbrev, args):
         report['committees'] = \
                 import_committees(abbrev, settings.BILLY_DATA_DIR)
 
-    if 'events' in args.types:
+    if 'events' in args.types or 'speeches' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
 
     if 'speeches' in args.types:
@@ -338,10 +338,6 @@ def main():
             except ValueError as e:
                 logging.getLogger('billy').warning(
                     'metadata validation error: ' + str(e))
-
-            with open(os.path.join(args.output_dir, 'metadata.json'),
-                      'w') as f:
-                json.dump(metadata, f, cls=JSONEncoderPlus)
 
             run_record = []
             exec_record = {

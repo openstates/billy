@@ -1,6 +1,29 @@
 billy changelog
 ===============
 
+1.6.0
+-----
+    * completion of move from 'state' to flexible LEVEL_FIELD
+    * new type: speeches
+    * documentation improvements
+    * beginnings of generic templates for billy.web.public
+    * change to metadata handling of chambers
+
+1.5.0
+-----
+**1 November 2012**
+    * improved committee_id matching
+    * added bounding box to district polygon API
+    * added 'other_parties' to legislator schema
+    * events: ical support
+    * merging of admin view & public view a bit
+    * introduction of billy.core for settings & dbs
+    * improved action categorization in billy.scrape.actions
+    * bring fulltext processing in to billy
+    * logging colors!
+    * lots of cleanup & deduplication of code
+    * test improvements w/ fixtures now
+
 1.4.0
 -----
 **31 August 2012**

@@ -18,14 +18,7 @@ from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 
-_chamber_aliases = {
-    'assembly': 'lower',
-    'house': 'lower',
-    'senate': 'upper',
-}
-
-
-_lower_fields = (settings.LEVEL_FIELD,)
+_lower_fields = (settings.LEVEL_FIELD, 'chamber')
 
 
 def _build_mongo_filter(request, keys, icase=True):
@@ -42,10 +35,7 @@ def _build_mongo_filter(request, keys, icase=True):
     for key in keys:
         value = request.GET.get(key)
         if value:
-            if key == 'chamber':
-                value = value.lower()
-                _filter[key] = _chamber_aliases.get(value, value)
-            elif key in _lower_fields:
+            if key in _lower_fields:
                 _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
@@ -120,24 +110,41 @@ class BillyHandler(BaseHandler):
     allowed_methods = ('GET',)
 
 
+def _metadata_backwards_shim(metadata):
+    if 'chambers' in metadata:
+        for chamber_type, chamber in metadata['chambers'].iteritems():
+            for field in ('name', 'title', 'term'):
+                if field in chamber:
+                    metadata[chamber_type + '_chamber_' + field] = \
+                            chamber[field]
+    return metadata
+
+
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
         fields = _build_field_list(request, {'abbreviation': 1,
                                              'name': 1,
                                              'feature_flags': 1,
+                                             'chambers': 1,
                                              '_id': 0
                                             })
+        for f in fields.copy():
+            if '_chamber_' in f:
+                fields['chambers'] = 1
         data = db.metadata.find(fields=fields).sort('name')
-        return list(data)
+        return [_metadata_backwards_shim(m) for m in data]
 
 
 class MetadataHandler(BillyHandler):
     def read(self, request, abbr):
-        """
-        Get metadata about a legislature.
-        """
-        return db.metadata.find_one({'_id': abbr.lower()},
-                                    fields=_build_field_list(request))
+        field_list = _build_field_list(request)
+        if field_list:
+            for f in field_list.copy():
+                if '_chamber_' in f:
+                    field_list['chambers'] = 1
+        return _metadata_backwards_shim(
+            db.metadata.find_one({'_id': abbr.lower()}, fields=field_list)
+        )
 
 
 class BillHandler(BillyHandler):
@@ -178,7 +185,9 @@ class BillSearchHandler(BillyHandler):
 
         # process extra attributes
         query = request.GET.get('q')
-        abbr = request.GET.get(settings.LEVEL_FIELD).lower()
+        abbr = request.GET.get(settings.LEVEL_FIELD)
+        if abbr:
+            abbr = abbr.lower()
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
@@ -351,8 +360,7 @@ class SubjectListHandler(BillyHandler):
         if session:
             spec['session'] = session
         if chamber:
-            chamber = chamber.lower()
-            spec['chamber'] = _chamber_aliases.get(chamber, chamber)
+            spec['chamber'] = chamber.lower()
         result = {}
         for subject in settings.BILLY_SUBJECTS:
             count = db.bills.find(dict(spec, subjects=subject)).count()
@@ -371,8 +379,9 @@ class LegislatorGeoHandler(BillyHandler):
             resp.write(': Need lat and long parameters')
             return resp
 
-        url = ("%sboundary/?shape_type=none&contains=%s,%s&sets=sldl,sldu"
-               "&limit=0" % (self.base_url, latitude, longitude))
+        url = "%sboundaries/?contains=%s,%s&sets=%s&limit=0" % (
+            self.base_url, latitude, longitude, settings.BOUNDARY_SERVICE_SETS
+        )
 
         resp = json.load(urllib2.urlopen(url))
 
@@ -380,21 +389,21 @@ class LegislatorGeoHandler(BillyHandler):
         boundary_mapping = {}
 
         for dist in resp['objects']:
-            abbr = dist['name'][0:2].lower()
-            chamber = {'/1.0/boundary-set/sldu/': 'upper',
-                       '/1.0/boundary-set/sldl/': 'lower'}[dist['set']]
-            census_name = dist['slug']
-
             # look up district slug
-            districts = db.districts.find({'chamber': chamber,
-                                           'boundary_id': census_name})
+            boundary_id = dist['url'].replace('/boundaries/', '').strip('/')
+            districts = db.districts.find({'boundary_id': boundary_id})
             count = districts.count()
-            if count:
-                filters.append({settings.LEVEL_FIELD: abbr,
-                                'district': districts[0]['name'],
-                                'chamber': chamber})
-                boundary_mapping[(abbr, districts[0]['name'],
-                                  chamber)] = census_name
+            if count == 1:
+                filters.append({'district': districts[0]['name'],
+                                'chamber': districts[0]['chamber'],
+                                settings.LEVEL_FIELD: districts[0]['abbr'],
+                               })
+                boundary_mapping[(districts[0]['abbr'],
+                                  districts[0]['name'],
+                                  districts[0]['chamber'])] = boundary_id
+            elif count != 0:
+                raise ValueError('multiple districts with boundary_id: %s' %
+                                 boundary_id)
 
         if not filters:
             return []
@@ -442,7 +451,7 @@ class BoundaryHandler(BillyHandler):
     base_url = settings.BOUNDARY_SERVICE_URL
 
     def read(self, request, boundary_id):
-        url = "%sboundary/%s/?shape_type=simple" % (self.base_url, boundary_id)
+        url = "%sboundaries/%s/simple_shape" % (self.base_url, boundary_id)
         try:
             data = json.load(urllib2.urlopen(url))
         except urllib2.HTTPError, e:
@@ -452,11 +461,9 @@ class BoundaryHandler(BillyHandler):
             else:
                 raise e
 
-        centroid = data['centroid']['coordinates']
-
         all_lon = []
         all_lat = []
-        for shape in data['simple_shape']['coordinates']:
+        for shape in data['coordinates']:
             for coord_set in shape:
                 all_lon.extend(c[0] for c in coord_set)
                 all_lat.extend(c[1] for c in coord_set)
@@ -469,13 +476,17 @@ class BoundaryHandler(BillyHandler):
         lon_delta = abs(max_lon - min_lon)
         lat_delta = abs(max_lat - min_lat)
 
-        region = {'center_lon': centroid[0], 'center_lat': centroid[1],
+        region = {'center_lon': (max_lon - min_lon) / 2,
+                  'center_lat': (max_lat - min_lat) / 2,
                   'lon_delta': lon_delta, 'lat_delta': lat_delta,
                  }
         bbox = [[min_lat, min_lon], [max_lat, max_lon]]
 
         district = db.districts.find_one({'boundary_id': boundary_id})
-        district['shape'] = data['simple_shape']['coordinates']
+        if not district:
+            resp = rc.NOT_FOUND
+            return resp
+        district['shape'] = data['coordinates']
         district['region'] = region
         district['bbox'] = bbox
 

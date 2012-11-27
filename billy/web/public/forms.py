@@ -1,27 +1,21 @@
 from django import forms
 from django.conf import settings
 
-from billy.models import db, Metadata, DoesNotExist
+from billy.models import db
 
 
 def get_region_select_form(data):
     abbrs = [('', '')]
-    for abbr in sorted(settings.ACTIVE_STATES):
-        try:
-            obj = Metadata.get_object(abbr)
-            abbrs.append((obj['_id'], obj['name']))
-        except DoesNotExist:
-            # ignore missing
-            pass
+    spec = {}
+    if hasattr(settings, 'ACTIVE_STATES'):
+        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
+    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
         abbr = forms.ChoiceField(choices=abbrs, label="abbr")
 
     return RegionSelectForm(data)
-
-
-class FindYourLegislatorForm(forms.Form):
-    address = forms.CharField()
 
 
 def get_filter_bills_form(metadata):
@@ -47,22 +41,21 @@ def get_filter_bills_form(metadata):
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
             _status_choices = [('', '')]
-            if 'lower_chamber_name' in metadata:
-                _status_choices.append(('passed_lower',
-                                'Passed ' + metadata['lower_chamber_name']))
-            if 'upper_chamber_name' in metadata:
-                _status_choices.append(('passed_upper',
-                                'Passed ' + metadata['upper_chamber_name']))
+            _chamber_choices = []
+            for chamber_type in metadata['chambers']:
+                chamber_name = metadata['chambers'][chamber_type]['name']
+                _status_choices.append(('passed_' + chamber_type,
+                                        'Passed ' + chamber_name))
+                _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
 
             if len(_status_choices) == 4:
                 chamber = forms.MultipleChoiceField(
-                            choices=(
-                                ('upper', metadata['upper_chamber_name']),
-                                ('lower', metadata['lower_chamber_name'])
-                            ),
+                            choices=_chamber_choices,
                             widget=forms.CheckboxSelectMultiple(),
                             required=False)
+
+            status = forms.ChoiceField(choices=_status_choices, required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
