@@ -198,3 +198,28 @@ def set_favorite(request):
         # Create the doc if missing, else update based on the spec.
         user_db.favorites.update(spec, doc, upsert=True)
         return HttpResponse(status=200)
+
+
+@login_required
+@csrf_protect
+@require_http_methods(["POST"])
+def set_notification_preference(request):
+    '''Turn notification preferences on or off.
+    '''
+    resp400 = HttpResponse(status=400)
+
+    # Get the obj_type
+    obj_type = request.POST.get('obj_type')
+    valid_types = ['bill', 'legislator', 'committee', 'search']
+    if obj_type not in valid_types:
+        return resp400
+
+    # Get the alerts on/off.
+    alerts_on = request.POST.get('on_off') == 'on'
+
+    # Update the database.
+    spec = dict(obj_type=obj_type, user_id=request.user.id)
+    doc = {'alerts_on': alerts_on}
+    doc.update(spec)
+    user_db.notification_preferences.update(spec, doc, upsert=True)
+    return HttpResponse(status=200)

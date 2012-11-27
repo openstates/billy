@@ -154,6 +154,13 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
         params=params or urllib.urlencode(request.GET))
 
 
+@register.inclusion_tag(templatename('_notification_preference'))
+def notification_preference(obj_type):
+    '''Display two radio buttons for turning notifactions on or off.
+    '''
+    return dict(obj_type=obj_type)
+
+
 @register.filter
 def json_encode(data):
     return json.dumps(data)
