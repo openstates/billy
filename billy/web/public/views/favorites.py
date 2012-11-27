@@ -5,6 +5,7 @@ from operator import itemgetter
 from urlparse import parse_qsl
 
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
@@ -12,6 +13,7 @@ from django.views.decorators.http import require_http_methods
 from billy.core import user_db
 from billy.core import mdb
 import billy.utils
+from .utils import templatename
 
 
 class Favorites(dict):
@@ -150,54 +152,64 @@ def is_favorite(obj_id, obj_type, user, extra_spec=None):
     return False
 
 
+########## views ##########
+
+
+@login_required
+def favorites(request):
+    favorites = get_user_favorites(request.user.id)
+    return render(request, templatename('user_homepage'),
+                  dict(favorites=favorites,
+                       legislators=favorites.legislator_objects(),
+                       committees=favorites.committee_objects()))
+
+
 @login_required
 @csrf_protect
 @require_http_methods(["POST"])
 def set_favorite(request):
     '''Follow/unfollow a bill, committee, legislator.
     '''
-    if request.method == "POST":
+    # Complain about bogus requests.
+    resp400 = HttpResponse(status=400)
+    valid_keys = set(['obj_id', 'obj_type', 'is_favorite',
+                      'search_params', 'search_abbr'])
+    if not set(request.POST) <= valid_keys:
+        return resp400
+    valid_types = ['bill', 'legislator', 'committee', 'search']
+    if request.POST['obj_type'] not in valid_types:
+        return resp400
 
-        # Complain about bogus requests.
-        resp400 = HttpResponse(status=400)
-        valid_keys = set(['obj_id', 'obj_type', 'is_favorite',
-                          'search_params', 'search_abbr'])
-        if not set(request.POST) <= valid_keys:
-            return resp400
-        valid_types = ['bill', 'legislator', 'committee', 'search']
-        if request.POST['obj_type'] not in valid_types:
-            return resp400
+    # Create the spec.
+    spec = dict(
+        obj_type=request.POST['obj_type'],
+        obj_id=request.POST['obj_id'],
+        user_id=request.user.id
+        )
 
-        # Create the spec.
-        spec = dict(
-            obj_type=request.POST['obj_type'],
-            obj_id=request.POST['obj_id'],
-            user_id=request.user.id
-            )
+    if request.POST['obj_type'] == 'search':
+        # Add the search text into the spec.
+        spec.update(search_params=request.POST['search_params'])
+        # 'search' docs have no obj_id.
+        del spec['obj_id']
+        spec.update(search_abbr=request.POST['search_abbr'])
 
-        if request.POST['obj_type'] == 'search':
-            # Add the search text into the spec.
-            spec.update(search_params=request.POST['search_params'])
-            # 'search' docs have no obj_id.
-            del spec['obj_id']
-            spec.update(search_abbr=request.POST['search_abbr'])
+    # Toggle the value of is_favorite.
+    if request.POST['is_favorite'] == 'false':
+        is_favorite = False
+    if request.POST['is_favorite'] == 'true':
+        is_favorite = True
+    is_favorite = not is_favorite
 
-        # Toggle the value of is_favorite.
-        if request.POST['is_favorite'] == 'false':
-            is_favorite = False
-        if request.POST['is_favorite'] == 'true':
-            is_favorite = True
-        is_favorite = not is_favorite
-
-        # Create the doc.
-        doc = dict(
-            is_favorite=is_favorite,
-            timestamp=datetime.datetime.utcnow(),
-            )
-        doc.update(spec)
-        # Create the doc if missing, else update based on the spec.
-        user_db.favorites.update(spec, doc, upsert=True)
-        return HttpResponse(status=200)
+    # Create the doc.
+    doc = dict(
+        is_favorite=is_favorite,
+        timestamp=datetime.datetime.utcnow(),
+        )
+    doc.update(spec)
+    # Create the doc if missing, else update based on the spec.
+    user_db.favorites.update(spec, doc, upsert=True)
+    return HttpResponse(status=200)
 
 
 @login_required
@@ -217,9 +229,8 @@ def set_notification_preference(request):
     # Get the alerts on/off.
     alerts_on = request.POST.get('on_off') == 'on'
 
-    # Update the database.
-    spec = dict(obj_type=obj_type, user_id=request.user.id)
-    doc = {'alerts_on': alerts_on}
-    doc.update(spec)
-    user_db.notification_preferences.update(spec, doc, upsert=True)
+    obj_type = 'notifications.' + obj_type
+
+    user_db.profiles.update({'user_id': request.user.id},
+                            {'$set': {obj_type: alerts_on}}, upsert=True)
     return HttpResponse(status=200)

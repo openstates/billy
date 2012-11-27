@@ -31,13 +31,6 @@ def homepage(request):
     '''
     all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)
 
-    if request.user.is_authenticated():
-        favorites = get_user_favorites(request.user.id)
-        return render(request, templatename('user_homepage'),
-                      dict(all_metadata=all_metadata, favorites=favorites,
-                           legislators=favorites.legislator_objects(),
-                           committees=favorites.committee_objects()))
-
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))
 
