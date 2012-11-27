@@ -27,7 +27,8 @@ def homepage(request):
     spec = {}
     if hasattr(settings, 'ACTIVE_STATES'):
         spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
-    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    all_metadata = db.metadata.find(spec, fields=('name','abbreviation')
+                                   ).sort('name')
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))
 

@@ -24,7 +24,7 @@ def import_metadata(abbr):
     for term in metadata['terms']:
         for k, v in term.iteritems():
             if isinstance(v, datetime.date):
-                term[k] = datetime.combine(v, datetime.time(0, 0))
+                term[k] = datetime.datetime.combine(v, datetime.time(0, 0))
     for session in metadata['session_details'].values():
         for k, v in session.iteritems():
             if isinstance(v, datetime.date):

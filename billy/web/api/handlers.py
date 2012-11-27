@@ -394,7 +394,10 @@ class LegislatorGeoHandler(BillyHandler):
             districts = db.districts.find({'boundary_id': boundary_id})
             count = districts.count()
             if count == 1:
-                filters.append({'district': districts[0]['name']})
+                filters.append({'district': districts[0]['name'],
+                                'chamber': districts[0]['chamber'],
+                                settings.LEVEL_FIELD: districts[0]['abbr'],
+                               })
                 boundary_mapping[(districts[0]['abbr'],
                                   districts[0]['name'],
                                   districts[0]['chamber'])] = boundary_id
