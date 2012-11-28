@@ -16,6 +16,9 @@ from .utils import templatename
 
 
 class Favorites(dict):
+    '''This class wraps the favorites dict and provides convenience
+    methods.
+    '''
 
     def favorites_exist(self, type_):
         if type_ not in self:
@@ -157,8 +160,10 @@ def is_favorite(obj_id, obj_type, user, extra_spec=None):
 @login_required
 def favorites(request):
     favorites = get_user_favorites(request.user.id)
-    return render(request, templatename('user_homepage'),
+    profile = user_db.profiles.find_one(request.user.id)
+    return render(request, templatename('user_favorites'),
                   dict(favorites=favorites,
+                       profile=profile,
                        legislators=favorites.legislator_objects(),
                        committees=favorites.committee_objects()))
 
@@ -228,6 +233,6 @@ def set_notification_preference(request):
 
     obj_type = 'notifications.' + obj_type
 
-    user_db.profiles.update({'user_id': request.user.id},
+    user_db.profiles.update({'_id': request.user.id},
                             {'$set': {obj_type: alerts_on}}, upsert=True)
     return HttpResponse(status=200)
