@@ -117,15 +117,15 @@ class SquishedWhitespaceNode(template.Node):
 def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
              params=None):
     '''Check whether the object with the given type and id is currently
-    been favorited by the user. The test whether the user is authenticated
+    favorited by the user. The test whether the user is authenticated
     currently happens in the template.
 
     abbr is can be specified in the invocation, since it won't be in the
-    request context on the user's custom homepage.
+    request context on the user's favorites page.
 
     Same for _is_favorite, which needs to be True.
 
-    Same for params, which needs to be passed as url-encoded string from
+    Same for params, which needs to be passed as a url-encoded string from
     the user homepage.
     '''
     request = context['request']
@@ -142,7 +142,7 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     else:
         _is_favorite = (_is_favorite == 'is_favorite')
 
-    # We need to allow the abbr to be passed in for the user homepage,
+    # We need to allow the abbr to be passed in from the user favorites page,
     # to come from the request context in the case of a search results page,
     # and to default to 'all' for the all bills search.
     abbr = abbr or context.get('abbr', 'all')
@@ -155,10 +155,17 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
 
 
 @register.inclusion_tag(templatename('_notification_preference'))
-def notification_preference(obj_type):
-    '''Display two radio buttons for turning notifactions on or off.
+def notification_preference(obj_type, profile):
+    '''Display two radio buttons for turning notifications on or off.
+    The default value is is have alerts_on = True.
     '''
-    return dict(obj_type=obj_type)
+    default_alert_value = True
+    if not profile:
+        alerts_on = True
+    else:
+        notifications = profile.get('notifications', {})
+        alerts_on = notifications.get(obj_type, default_alert_value)
+    return dict(alerts_on=alerts_on, obj_type=obj_type)
 
 
 @register.filter
