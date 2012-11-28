@@ -59,14 +59,14 @@ class Person(SourcedObject):
                                   end_date=end_date, **kwargs))
 
     def add_office(self, type, name, address=None, phone=None, fax=None,
-                   email=None):
+                   email=None, **kwargs):
         """
         Allowed office types:
             capitol
             district
         """
         office_dict = dict(type=type, address=address, name=name, phone=phone,
-                           fax=fax, email=email)
+                           fax=fax, email=email, **kwargs)
         self['offices'].append(office_dict)
 
     def get_filename(self):
