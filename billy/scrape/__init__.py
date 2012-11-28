@@ -125,7 +125,7 @@ class Scraper(scrapelib.Scraper):
                                        '../schemas/%s.json' % type)
             self._schema[type] = json.load(open(schema_path))
             self._schema[type]['properties'][settings.LEVEL_FIELD] = {
-                'maxLength': 2, 'minLength': 2, 'type': 'string'}
+                'minLength': 2, 'type': 'string'}
 
         # bills & votes
         self._schema['bill']['properties']['session']['enum'] = \
