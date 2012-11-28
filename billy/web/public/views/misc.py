@@ -17,7 +17,6 @@ from billy.models import db, Metadata, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
-from .favorites import get_user_favorites
 
 
 def homepage(request):
@@ -28,7 +27,7 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
-    all_metadata=map(Metadata.get_object, settings.ACTIVE_STATES)
+    all_metadata = map(Metadata.get_object, settings.ACTIVE_STATES)
 
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))
@@ -229,7 +228,7 @@ class NewsList(RelatedObjectsList):
 def user_profile(request):
     if request.method == "GET":
         saved_changes = bool(request.GET.get('saved_changes'))
-        profile = user_db.profiles.find_one(dict(user_id=request.user.id))
+        profile = user_db.profiles.find_one(request.user.id)
         return render(request, templatename('user_profile'),
                       dict(saved_changes=saved_changes,
                            profile=profile))
@@ -248,7 +247,7 @@ def user_profile(request):
         if POST['location_text']:
             doc['$set']['location']['text'] = POST['location_text']
 
-        spec = dict(user_id=request.user.id)
+        spec = dict(_id=request.user.id)
         user_db.profiles.update(spec, doc, upsert=True)
 
         return redirect('%s?%s' % (reverse('user_profile'), 'saved_changes=True'))
@@ -256,7 +255,7 @@ def user_profile(request):
 
 @login_required
 def get_user_latlong(request):
-    profile = user_db.profiles.find_one(dict(user_id=request.user.id))
+    profile = user_db.profiles.find_one(request.user.id)
     data = {}
     location = profile.get('location')
     if location:
