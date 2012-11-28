@@ -13,6 +13,7 @@ from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
 
+
 EVENT_PAGE_COUNT = 10
 
 

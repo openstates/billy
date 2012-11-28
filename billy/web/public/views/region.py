@@ -111,7 +111,6 @@ def search(request, abbr):
         - more_bills_available
         - legislators_list
         - more_legislators_available
-        - bill_column_headers_tmplname
         - nav_active
 
     Tempaltes:
@@ -167,7 +166,7 @@ def search(request, abbr):
              more_bills_available=more_bills_available,
              legislators_list=legislator_results,
              more_legislators_available=more_legislators_available,
-             column_headers_tmplname=templatename('search_column_headers'),
+             column_headers_tmplname=None,  # not used
              rowtemplate_name=templatename('bills_list_row_with'
                                            '_abbr_and_session'),
              show_chamber_column=True,

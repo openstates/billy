@@ -15,6 +15,7 @@ from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 from .search import search_by_bill_id
 
+
 EVENT_PAGE_COUNT = 10
 
 
@@ -24,8 +25,8 @@ class RelatedBillsList(RelatedObjectsList):
     list_item_context_name = 'bill'
     paginator = CursorPaginator
     rowtemplate_name = templatename('bills_list_row')
-    column_headers_tmplname = templatename('bills_column_headers')
     nav_active = 'bills'
+    column_headers_tmplname = None      # not used
     defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
@@ -93,7 +94,10 @@ class RelatedBillsList(RelatedObjectsList):
                     search_text))
             context.update(long_description=long_description)
         else:
-            description = [metadata['name'], 'Bills']
+            if metadata:
+                description = [metadata['name'], 'Bills']
+            else:
+                description = ['All Bills']
             context.update(form=FilterBillsForm())
 
         context.update(description=' '.join(description))
@@ -225,7 +229,6 @@ class AllBillList(RelatedBillsList):
     collection_name = 'bills'
     paginator = CursorPaginator
     use_table = True
-    column_headers_tmplname = templatename('all_bills_column_headers.html')
     description_template = '''NOT USED'''
     title_template = ('Search All Bills')
 
@@ -312,6 +315,7 @@ def bill(request, abbr, session, bill_id):
         sponsors = bill.sponsors_manager
     else:
         sponsors = bill.sponsors_manager.first_fifteen
+
     return render(request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,

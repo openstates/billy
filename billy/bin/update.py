@@ -228,7 +228,7 @@ def main():
                     'votes', 'events', 'speeches'):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
-        for arg in ('scrape', 'import', 'report'):
+        for arg in ('scrape', 'import', 'report', 'session-list'):
             parser.add_argument('--' + arg, dest='actions',
                                 action="append_const", const=arg,
                                 help='only run %s step' % arg)
@@ -296,7 +296,7 @@ def main():
             args.chambers = ['upper', 'lower']
 
         if not args.actions:
-            args.actions = ['scrape', 'import', 'report']
+            args.actions = ['scrape', 'import', 'report', 'session-list']
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
@@ -411,6 +411,12 @@ def main():
         # reports
         if 'report' in args.actions:
             _do_reports(abbrev, args)
+
+        if 'session-list' in args.actions:
+            if hasattr(module, 'session_list'):
+                print "\n".join(module.session_list())
+            else:
+                raise ScrapeError('session_list() is not defined')
 
     except ScrapeError as e:
         logging.getLogger('billy').critical('Error: %s', e)
