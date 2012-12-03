@@ -8,3 +8,4 @@ from api_tests.legislators import *
 from api_tests.committees import *
 from api_tests.events import *
 from api_tests.auth import *
+from api_tests.districts import *

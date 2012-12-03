@@ -1,5 +1,4 @@
 import json
-import datetime
 
 from django.utils import unittest
 from django.test import Client
@@ -59,6 +58,7 @@ class BaseTestCase(unittest.TestCase):
         fixtures.load_legislators()
         fixtures.load_committees()
         fixtures.load_events()
+        fixtures.load_districts()
 
     @property
     def json(self):

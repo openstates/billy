@@ -17,6 +17,8 @@ legislators = [{
         u'middle_name': u'',
         u'state': u'YZ',
         u'suffixes': u'',
+        u'chamber': u'lower',
+        u'district': u'1',
         u'roles': [{
             u'chamber': u'lower',
             u'district': u'A',

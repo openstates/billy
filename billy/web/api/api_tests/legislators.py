@@ -16,7 +16,7 @@ class LegislatorsSearchTestCase(BaseTestCase):
             u'first_name', u'last_name', u'middle_name', u'level',
             u'country', u'created_at', u'leg_id', u'state', u'offices',
             u'full_name', u'active', u'suffixes', u'id', u'photo_url'])
-        self.assertEquals(set(self.json[0]), expected_keys)
+        self.assertTrue(expected_keys < set(self.json[0]))
 
     def test_status(self):
         self.assert_200()
@@ -39,7 +39,7 @@ class LegislatorLookupTestCase(BaseTestCase):
             u'active', u'id', u'photo_url', u'first_name',
             u'middle_name', u'roles', u'level', u'country',
             u'created_at', u'state', u'offices', u'suffixes'])
-        self.assertEquals(set(self.json), expected_keys)
+        self.assertTrue(expected_keys < set(self.json))
 
     def test_id(self):
         self.assertEquals(self.json['id'], 'EXL000001')

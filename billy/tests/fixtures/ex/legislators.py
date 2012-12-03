@@ -21,6 +21,8 @@ legislators = [{
         u'sources': [{u'url': u'ftp://www.leginfo.ca.gov/pub/bill/'}],
         u'state': u'ex',
         u'suffixes': u'',
+        u'chamber': u'lower',
+        u'district': u'1',
         u'roles': [{
             u'chamber': u'lower',
             u'district': u'1',
@@ -56,6 +58,8 @@ legislators = [{
         u'middle_name': u'',
         u'state': u'ex',
         u'suffixes': u'',
+        u'chamber': u'lower',
+        u'district': u'1',
         u'roles': [{
             u'chamber': u'lower',
             u'district': u'2',
@@ -91,6 +95,8 @@ legislators = [{
         u'middle_name': u'',
         u'state': u'ex',
         u'suffixes': u'',
+        u'chamber': u'lower',
+        u'district': u'1',
         u'roles': [{
             u'chamber': u'lower',
             u'district': u'3',

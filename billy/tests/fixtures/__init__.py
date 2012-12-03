@@ -40,3 +40,10 @@ def load_events():
     from .ex import events
     for event in events.events:
         db.events.save(event)
+
+
+def load_districts():
+    db.districts.drop()
+    from .ex import districts
+    for district in districts.districts:
+        db.districts.save(district)
