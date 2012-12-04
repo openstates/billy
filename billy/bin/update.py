@@ -296,7 +296,7 @@ def main():
             args.chambers = ['upper', 'lower']
 
         if not args.actions:
-            args.actions = ['scrape', 'import', 'report', 'session-list']
+            args.actions = ['scrape', 'import', 'report']
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
