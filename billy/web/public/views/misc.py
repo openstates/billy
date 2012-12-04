@@ -250,7 +250,8 @@ def user_profile(request):
         spec = dict(_id=request.user.id)
         user_db.profiles.update(spec, doc, upsert=True)
 
-        return redirect('%s?%s' % (reverse('user_profile'), 'saved_changes=True'))
+        return redirect('%s?%s' %
+                        (reverse('user_profile'), 'saved_changes=True'))
 
 
 @login_required

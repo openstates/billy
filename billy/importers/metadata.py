@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import os
 import datetime
 import importlib
 
 from billy.core import db
-from billy.importers.utils import prepare_obj
 
 PRESERVED_FIELDS = ('latest_json_url', 'latest_json_date',
                     'latest_csv_url', 'latest_csv_date')
