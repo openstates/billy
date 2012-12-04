@@ -707,7 +707,7 @@ def legislators(request, abbr):
              'chamber': chamber_type}), key=keyfunc)
 
     inactive_legs = db.legislators.find({settings.LEVEL_FIELD: abbr.lower(),
-                                         'active': False})
+                                         'active': {'$ne': True}})
     inactive_legs = sorted(inactive_legs, key=lambda x: x['last_name'])
 
     return render(request, 'billy/legislators.html', {
