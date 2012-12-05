@@ -74,7 +74,7 @@ def activate_legislators(current_term, abbr):
              {settings.LEVEL_FIELD: abbr, 'term': current_term}}}):
         active_role = legislator['roles'][0]
 
-        if not active_role['end_date']:
+        if not active_role.get('end_date'):
             legislator['active'] = True
             legislator['party'] = active_role.get('party', None)
             legislator['district'] = active_role.get('district', None)
