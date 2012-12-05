@@ -39,7 +39,8 @@ bills = [{
              u'type': u'primary'}],
         u'state': u'ex',
         u'title': u'A fake act.',
-        u'type': [u'bill']
+        u'type': [u'bill'],
+        u'subjects': [u'Labor and Employment']
         },
 
     {
