@@ -3,11 +3,15 @@ billy changelog
 
 1.6.0
 -----
+** 5 December 2012 **
     * completion of move from 'state' to flexible LEVEL_FIELD
     * new type: speeches
     * documentation improvements
     * beginnings of generic templates for billy.web.public
     * change to metadata handling of chambers
+    * use updated represent-boundaries instead of django-boundaryservice
+    * bugfix for latest pymongo
+    * basic API tests
 
 1.5.0
 -----
