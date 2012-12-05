@@ -44,3 +44,29 @@ class BillLookupTestCase(BaseTestCase):
 
     def test_status(self):
         self.assert_200()
+
+
+class BillLookupTestCase(BaseTestCase):
+
+    url_tmpl = '/api/v1/bills/{billy_bill_id}/'
+    url_args = dict(billy_bill_id='EXB00000001')
+
+    def test_state(self):
+        '''Make sure the returned data has the correct
+        level field value.
+        '''
+        self.assertEquals(self.json['state'], 'ex')
+
+    def test_correct_keys_present(self):
+        expected_keys = set([
+            u'votes', u'title', u'alternate_titles', u'country',
+            u'companions', u'sponsors', u'actions', u'chamber',
+            u'state', u'session', u'action_dates', u'level',
+            u'type', u'id', u'bill_id'])
+        self.assertEquals(set(self.json), expected_keys)
+
+    def test_bill_id(self):
+        self.assertEquals(self.json['bill_id'], 'AB 1')
+
+    def test_status(self):
+        self.assert_200()
