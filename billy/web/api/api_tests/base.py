@@ -1,4 +1,5 @@
 import json
+import urllib
 
 from django.utils import unittest
 from django.test import Client
@@ -49,6 +50,9 @@ class BaseTestCase(unittest.TestCase):
     @property
     def _url(self):
         return self.url_tmpl.format(**self._url_args)
+
+    def _full_url(self):
+        return self._url + '?' + urllib.urlencode(self._data)
 
     def setUp(self):
         self.client = Client()
