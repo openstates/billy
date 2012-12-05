@@ -102,7 +102,8 @@ def _configure_db(host, port, db_name, user_db_name):
         mdb.add_son_manipulator(transformer)
         feeds_db.add_son_manipulator(transformer)
     # return a dummy NoDB object if we couldn't connect
-    except pymongo.errors.AutoReconnect as e:
+    except (pymongo.errors.AutoReconnect,
+            pymongo.errors.ConnectionFailure) as e:
         db = ErrorProxy(e)
         mdb = ErrorProxy(e)
         feeds_db = ErrorProxy(e)

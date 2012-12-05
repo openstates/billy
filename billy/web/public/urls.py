@@ -97,8 +97,8 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 urlpatterns += patterns('billy.web.public.views.speeches',
     url(r'^(?P<abbr>[a-z]{2})/speeches/$', 'speeches',
         name='speeches'),
-    url(r'^(?P<abbr>[a-z]{2})/speeches/(?P<event_id>\w+)/', 'speeches_by_event',
-        name='speeches_by_event'),
+    url(r'^(?P<abbr>[a-z]{2})/speeches/(?P<event_id>\w+)/',
+        'speeches_by_event', name='speeches_by_event'),
 )
 
 # bills

@@ -18,4 +18,3 @@ events = [
      u'updated_at': datetime.datetime(2012, 4, 5, 16, 11, 45, 657000),
      u'when': datetime.datetime(2012, 4, 6, 1, 0)
      }]
-

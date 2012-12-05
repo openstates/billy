@@ -86,4 +86,3 @@ class BaseTestCase(unittest.TestCase):
     def assert_200(self):
         self.json
         self.assertEquals(self.response.status_code, 200)
-

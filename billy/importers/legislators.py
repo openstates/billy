@@ -71,15 +71,14 @@ def activate_legislators(current_term, abbr):
     district/chamber/party fields for currently serving legislators.
     """
     for legislator in db.legislators.find({'roles': {'$elemMatch':
-             {settings.LEVEL_FIELD: abbr, 'type': 'member',
-              'term': current_term}}}):
+             {settings.LEVEL_FIELD: abbr, 'term': current_term}}}):
         active_role = legislator['roles'][0]
 
         if not active_role['end_date']:
             legislator['active'] = True
-            legislator['party'] = active_role['party']
-            legislator['district'] = active_role['district']
-            legislator['chamber'] = active_role['chamber']
+            legislator['party'] = active_role.get('party', None)
+            legislator['district'] = active_role.get('district', None)
+            legislator['chamber'] = active_role.get('chamber', None)
 
         legislator['updated_at'] = datetime.datetime.utcnow()
         db.legislators.save(legislator, safe=True)

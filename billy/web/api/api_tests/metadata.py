@@ -42,4 +42,3 @@ class StateMetadataTestCase(BaseTestCase):
 
     def test_status(self):
         self.assert_200()
-

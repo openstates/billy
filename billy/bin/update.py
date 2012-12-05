@@ -15,7 +15,7 @@ import datetime as dt
 from billy.core import db
 from billy.core import settings, base_arg_parser
 from billy.scrape import ScrapeError, get_scraper, check_sessions
-from billy.utils import term_for_session, JSONEncoderPlus
+from billy.utils import term_for_session
 from billy.scrape.validator import DatetimeValidator
 
 
@@ -296,7 +296,7 @@ def main():
             args.chambers = ['upper', 'lower']
 
         if not args.actions:
-            args.actions = ['scrape', 'import', 'report', 'session-list']
+            args.actions = ['scrape', 'import', 'report']
 
         if not args.types:
             args.types = ['bills', 'legislators', 'votes', 'committees',
