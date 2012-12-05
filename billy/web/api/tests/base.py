@@ -34,7 +34,7 @@ class BaseTestCase(unittest.TestCase):
         api key.
         '''
         data = getattr(self, 'data', {})
-        return dict(data, apikey=settings.API_KEY)
+        return data
 
     @property
     def _method(self):
