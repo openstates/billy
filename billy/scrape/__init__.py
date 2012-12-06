@@ -135,8 +135,9 @@ class Scraper(scrapelib.Scraper):
 
         # legislators
         terms = [t['name'] for t in self.metadata['terms']]
-        self._schema['person']['properties']['roles']['items'] \
-            ['properties']['term']['enum'] = terms
+        # ugly break here b/c this line is nearly impossible to split
+        self._schema['person']['properties']['roles'][
+            'items']['properties']['term']['enum'] = terms
 
     @property
     def object_count(self):

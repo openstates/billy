@@ -247,7 +247,7 @@ def setup_func():
             u'passed_lower': datetime.datetime(2011, 6, 2, 0, 0),
             u'passed_upper': None,
             u'signed': None},
-        u'alternate_titles': [u'An act to amend Sections 226, 3351, 3352, 3551, 3708, 3715, 6303, and 6314 of, to repeal Section 4156 of, and to add Part 4.5 (commencing with Section 1450) to Division 2 of, the Labor Code, relating to domestic work employees.'],
+        u'alternate_titles': [],
         u'bill_id': u'AB 889',
         u'chamber': u'lower',
         u'country': u'us',
@@ -255,7 +255,7 @@ def setup_func():
         u'documents': [],
         u'level': u'state',
         u'session': u'20112012',
-        u'sources': [{u'url': u'http://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=201120120AB889'}],
+        u'sources': [{u'url': u'http://leginfo.legislature.ca.gov/fake'}],
         u'sponsors': [
             {u'leg_id': u'CAL000104',
              u'name': u'Ammiano',
