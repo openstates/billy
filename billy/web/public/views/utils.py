@@ -74,7 +74,7 @@ class ListViewBase(TemplateView):
             for attr in ('title', 'description'):
                 if attr not in context:
                     context[attr] = self._render(attr, context,
-                                                    request=self.request)
+                                                 request=self.request)
 
         # Add the correct path to paginated links. Yuck.
         if self.request.GET:
@@ -114,8 +114,8 @@ class RelatedObjectsList(ListViewBase):
     defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
-        context = super(RelatedObjectsList, self).get_context_data(
-                                                        *args, **kwargs)
+        context = super(RelatedObjectsList, self).get_context_data(*args,
+                                                                   **kwargs)
         context.update(
             obj=self.get_object(),
             collection_name=self.collection_name)

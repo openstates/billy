@@ -13,7 +13,7 @@ class BillsSearchTestCase(BaseTestCase):
 
     def test_correct_keys_present(self):
         expected_keys = set([u'chamber', u'state', u'session', u'title',
-                    u'type', u'id', u'bill_id', 'subjects'])
+                             u'type', u'id', u'bill_id', 'subjects'])
         self.assertEquals(set(self.json[0]), expected_keys)
 
     def test_status(self):

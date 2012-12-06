@@ -14,8 +14,8 @@ from billy.core import default_settings
 
 base_arg_parser = argparse.ArgumentParser(add_help=False)
 
-global_group = base_arg_parser.add_argument_group('global settings',
-                              'settings that apply to all billy commands')
+global_group = base_arg_parser.add_argument_group(
+    'global settings', 'settings that apply to all billy commands')
 
 global_group.add_argument('--mongo_host', help='mongo host', dest='MONGO_HOST')
 global_group.add_argument('--mongo_port', help='mongo port', dest='MONGO_PORT')

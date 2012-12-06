@@ -17,7 +17,7 @@ def _vote_report_dict():
             'bad_vote_counts': set(),
             '_rollcall_count': 0,
             '_rollcalls_with_leg_id_count': 0,
-            'unmatched_voters': set(),
+            'unmatched_voters': set()
            }
 
 
@@ -56,22 +56,22 @@ def scan_votes(abbr):
                 session_d['unmatched_voters'].add(
                     (term_for_session(abbr, vote['session']),
                      vote['chamber'],
-                    rc['name'])
+                     rc['name'])
                 )
 
         # check counts if any rollcalls are present
         if has_rollcalls:
             if (len(vote['yes_votes']) != vote['yes_count'] and
-                vote['vote_id'] not in
-                quality_exceptions['votes:bad_yes_count']):
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_yes_count']):
                 session_d['bad_vote_counts'].add(vote['vote_id'])
             if (len(vote['no_votes']) != vote['no_count'] and
-                vote['vote_id'] not in
-                quality_exceptions['votes:bad_no_count']):
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_no_count']):
                 session_d['bad_vote_counts'].add(vote['vote_id'])
             if (len(vote['other_votes']) != vote['other_count'] and
-                vote['vote_id'] not in
-                quality_exceptions['votes:bad_other_count']):
+                    vote['vote_id'] not in
+                    quality_exceptions['votes:bad_other_count']):
                 session_d['bad_vote_counts'].add(vote['vote_id'])
 
     # do logging of unnecessary exceptions

@@ -7,7 +7,9 @@ from billy.web.public.views.region import ShowMoreLegislators
 from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 
 # misc. views
-urlpatterns = patterns('billy.web.public.views.misc',
+urlpatterns = patterns(
+    'billy.web.public.views.misc',
+
     url(r'^$', 'homepage', name='homepage'),
     url(r'^downloads/$', 'downloads', name='downloads'),
     url(r'^find_your_legislator/$', 'find_your_legislator',
@@ -22,8 +24,8 @@ urlpatterns = patterns('billy.web.public.views.misc',
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
         '(?P<slug>[^/]+)/news/rss/$',
         NewsListFeed(), name='news_list_rss'),
-    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/votes/$',
-        VotesList.as_view(), name='votes_list'),
+    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
+        '/(?P<_id>[\w-]+)/votes/$', VotesList.as_view(), name='votes_list'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
         'votes/rss/$',
         VotesListFeed(), name='votes_list_rss'),
@@ -31,13 +33,12 @@ urlpatterns = patterns('billy.web.public.views.misc',
 )
 
 # user-related views
-urlpatterns += patterns('',
-    (
-        r'^login/$',
-        'django.contrib.auth.views.login',
-        {
-            'template_name': 'billy/web/public/login.html'
-        }
+urlpatterns += patterns(
+    '',
+
+    # delete this once real login lands
+    (r'^login/$', 'django.contrib.auth.views.login',
+     {'template_name': 'billy/web/public/login.html'}
     ),
 
     url(r'^profile/$', 'billy.web.public.views.misc.user_profile',
@@ -55,7 +56,9 @@ urlpatterns += patterns('',
 )
 
 # region specific
-urlpatterns += patterns('billy.web.public.views.region',
+urlpatterns += patterns(
+    'billy.web.public.views.region',
+
     url(r'^(?P<abbr>[a-z-]+)/search/$', 'search', name='search'),
     url(r'^(?P<abbr>[a-z-]+)/search/show_more_legislators/$',
         ShowMoreLegislators.as_view(), name='show_more_legislators'),
@@ -64,7 +67,9 @@ urlpatterns += patterns('billy.web.public.views.region',
 )
 
 # events
-urlpatterns += patterns('billy.web.public.views.events',
+urlpatterns += patterns(
+    'billy.web.public.views.events',
+
     url(r'^(?P<abbr>[a-z-]+)/events/$', EventsList.as_view(),
         name='events'),
     url(r'^(?P<abbr>[a-z-]+)/events/rss/$', EventsFeed(),
@@ -76,14 +81,17 @@ urlpatterns += patterns('billy.web.public.views.events',
 )
 
 # committees
-urlpatterns += patterns('billy.web.public.views.committees',
+urlpatterns += patterns(
+    'billy.web.public.views.committees',
+
     url(r'^(?P<abbr>[a-z-]+)/committees/$', 'committees', name='committees'),
     url(r'^(?P<abbr>[a-z-]+)/committees/(?P<committee_id>[A-Z]{3}\d+)/',
         'committee', name='committee'),
 )
 
 # legislators
-urlpatterns += patterns('billy.web.public.views.legislators',
+urlpatterns += patterns(
+    'billy.web.public.views.legislators',
 
     url(r'^(?P<abbr>[a-z-]+)/legislators/$', 'legislators',
         name='legislators'),
@@ -94,7 +102,9 @@ urlpatterns += patterns('billy.web.public.views.legislators',
 )
 
 # speeches
-urlpatterns += patterns('billy.web.public.views.speeches',
+urlpatterns += patterns(
+    'billy.web.public.views.speeches',
+
     url(r'^(?P<abbr>[a-z-]+)/speeches/$', 'speeches',
         name='speeches'),
     url(r'^(?P<abbr>[a-z-]+)/speeches/(?P<event_id>[\w-]+)/',
@@ -102,7 +112,9 @@ urlpatterns += patterns('billy.web.public.views.speeches',
 )
 
 # bills
-urlpatterns += patterns('billy.web.public.views.bills',
+urlpatterns += patterns(
+    'billy.web.public.views.bills',
+
     url(r'^(?P<abbr>[a-z-]+)/bills/$', BillList.as_view(), name='bills'),
     url(r'^(?P<abbr>[a-z-]+)/bills/feed/$', BillFeed.as_view(),
         name='bills_feed'),
@@ -120,5 +132,6 @@ urlpatterns += patterns('billy.web.public.views.bills',
     url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
         r'(?P<bill_id>[^/]+)/(?P<key>versions)/$', 'all_versions',
         name='bill_all_versions'),
-    url(r'^(?P<abbr>[a-z-]+)/votes/(?P<vote_id>[\w-]+)/$', 'vote', name='vote'),
+    url(r'^(?P<abbr>[a-z-]+)/votes/(?P<vote_id>[\w-]+)/$',
+        'vote', name='vote'),
 )

@@ -38,7 +38,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
     except ScrapeError as e:
         # silence error only when alldata is present
         if ('alldata' in options.types and
-            str(e.orig_exception) == 'No module named %s' % scraper_type):
+                str(e.orig_exception) == 'No module named %s' % scraper_type):
             return None
         else:
             raise e
@@ -159,14 +159,14 @@ def _do_imports(abbrev, args):
 
     if 'legislators' in args.types:
         report['legislators'] = \
-                import_legislators(abbrev, settings.BILLY_DATA_DIR)
+            import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if 'bills' in args.types:
         report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
 
     if 'committees' in args.types:
         report['committees'] = \
-                import_committees(abbrev, settings.BILLY_DATA_DIR)
+            import_committees(abbrev, settings.BILLY_DATA_DIR)
 
     if 'events' in args.types or 'speeches' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
@@ -205,21 +205,21 @@ def _do_reports(abbrev, args):
 def main():
     try:
         parser = argparse.ArgumentParser(
-          description='update billy data',
-          parents=[base_arg_parser],
+            description='update billy data',
+            parents=[base_arg_parser],
         )
 
-        what = parser.add_argument_group('what to scrape',
-                                 'flags that help select what data to scrape')
+        what = parser.add_argument_group(
+            'what to scrape', 'flags that help select what data to scrape')
         scrape = parser.add_argument_group('scraper config',
-                                 'settings for the scraper')
+                                           'settings for the scraper')
 
         parser.add_argument('module', type=str, help='scraper module (eg. nc)')
         what.add_argument('-s', '--session', action='append',
-                            dest='sessions', default=[],
+                          dest='sessions', default=[],
                           help='session(s) to scrape')
         what.add_argument('-t', '--term', action='append', dest='terms',
-                            help='term(s) to scrape', default=[])
+                          help='term(s) to scrape', default=[])
 
         for arg in ('upper', 'lower'):
             what.add_argument('--' + arg, action='append_const',

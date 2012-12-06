@@ -12,6 +12,3 @@ class BoundaryTestCase(BaseTestCase):
             u'name', u'region', u'chamber', u'shape',
             u'abbr', u'boundary_id', u'num_seats', u'id', u'bbox'])
         self.assertEquals(set(self.json), expected_keys)
-
-
-

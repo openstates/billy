@@ -107,7 +107,7 @@ class NameMatcher(object):
 
         for row in rows:
             (term, chamber, name, obj_id) = (
-                    row['term'], row['chamber'], row['name'], row['obj_id'])
+                row['term'], row['chamber'], row['name'], row['obj_id'])
 
             if (term == self._term or not term) and obj_id:
                 self._manual[chamber][name] = obj_id
@@ -142,7 +142,7 @@ class NameMatcher(object):
         name, obj = legislator, legislator['_id']
 
         if (legislator['roles'] and legislator['roles'][0]['term'] ==
-            self._term and legislator['roles'][0]['type'] == 'member'):
+                self._term and legislator['roles'][0]['type'] == 'member'):
             chamber = legislator['roles'][0]['chamber']
         else:
             try:
@@ -150,7 +150,7 @@ class NameMatcher(object):
             except KeyError:
                 raise ValueError("no role in legislator %s [%s] for term %s" %
                                  (legislator['full_name'], legislator['_id'],
-                                   self._term))
+                                  self._term))
 
         if '_code' in name:
             code = name['_code']
@@ -182,25 +182,25 @@ class NameMatcher(object):
 
             if name['middle_name']:
                 add_form("%s, %s %s" % (name['last_name'], name['first_name'],
-                                         name['middle_name']))
+                                        name['middle_name']))
                 add_form("%s, %s %s" % (name['last_name'],
-                                         name['first_name'][0],
-                                         name['middle_name']))
+                                        name['first_name'][0],
+                                        name['middle_name']))
                 add_form("%s %s %s" % (name['first_name'],
-                                        name['middle_name'],
-                                        name['last_name']))
+                                       name['middle_name'],
+                                       name['last_name']))
                 add_form("%s, %s %s" % (name['last_name'],
-                                         name['first_name'][0],
-                                         name['middle_name'][0]))
+                                        name['first_name'][0],
+                                        name['middle_name'][0]))
                 add_form("%s %s %s" % (name['first_name'],
-                                        name['middle_name'][0],
-                                        name['last_name']))
+                                       name['middle_name'][0],
+                                       name['last_name']))
                 add_form("%s, %s %s" % (name['last_name'],
-                                         name['first_name'],
-                                         name['middle_name'][0]))
+                                        name['first_name'],
+                                        name['middle_name'][0]))
                 add_form("%s, %s.%s." % (name['last_name'],
-                                          name['first_name'][0],
-                                          name['middle_name'][0]))
+                                         name['first_name'][0],
+                                         name['middle_name'][0]))
 
         for form in forms:
             form = self._normalize(form)
@@ -260,8 +260,8 @@ class CommitteeNameMatcher(object):
         })
 
         for row in rows:
-            (term, chamber, name, obj_id) = (
-                    row['term'], row['chamber'], row['name'], row['obj_id'])
+            (term, chamber, name, obj_id) = (row['term'], row['chamber'],
+                                             row['name'], row['obj_id'])
             row['chamber'] = None  # In case the DB has gone wonky on us.
 
             if (term == self._term or not term or not self._term) and obj_id:

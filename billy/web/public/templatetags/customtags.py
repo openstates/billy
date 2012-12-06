@@ -17,7 +17,7 @@ register = template.Library()
 
 @register.inclusion_tag(templatename('region_select_form'))
 def region_select_form(abbr=None):
-    return {'form':  get_region_select_form({'abbr': abbr})}
+    return {'form': get_region_select_form({'abbr': abbr})}
 
 
 @register.inclusion_tag(templatename('sources'))
@@ -148,10 +148,10 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     abbr = abbr or context.get('abbr', 'all')
 
     return dict(extra_spec,
-        obj_type=obj_type, obj_id=obj_id,
-        is_favorite=_is_favorite, request=request,
-        abbr=abbr or context['abbr'],
-        params=params or urllib.urlencode(request.GET))
+                obj_type=obj_type, obj_id=obj_id,
+                is_favorite=_is_favorite, request=request,
+                abbr=abbr or context['abbr'],
+                params=params or urllib.urlencode(request.GET))
 
 
 @register.inclusion_tag(templatename('_notification_preference'))

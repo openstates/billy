@@ -99,8 +99,9 @@ class Vote(SourcedObject):
                 if votes != count:
                     raise ValueError('bad %s vote count for %s %s votes=%s'
                                      ' count=%s %r' %
-                         (type, self.get('bill_id', ''), self['motion'],
-                          votes, count, self[type + '_votes']))
+                                     (type, self.get('bill_id', ''),
+                                      self['motion'], votes, count,
+                                      self[type + '_votes']))
 
     def get_filename(self):
         filename = '%s_%s_%s_seq%s.json' % (self['session'],

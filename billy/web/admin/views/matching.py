@@ -11,7 +11,7 @@ from billy.utils import metadata
 
 
 if django_settings.DEBUG:
-    def login_required(f):
+    def login_required(f):      # NOQA
         return f
 
 
@@ -43,7 +43,7 @@ def edit(request, abbr):
     vote_unmatched = set(tuple(i + ['vote']) for i in
                          report['votes']['unmatched_voters'])
     com_unmatched = set(tuple(i + ['committee']) for i in
-                         report['committees']['unmatched_leg_ids'])
+                        report['committees']['unmatched_leg_ids'])
     combined_sets = bill_unmatched | vote_unmatched | com_unmatched
     unmatched_ids = []
 
@@ -81,9 +81,9 @@ def commit(request, abbr):
 
         db.manual.name_matchers.update({"name": name, "term": term,
                                         "abbr": abbr, "chamber": chamber},
-                                     {"name": name, "term": term, "abbr": abbr,
-                                      "obj_id": value, "chamber": chamber,
-                                      "type": typ},
-                                     upsert=True, safe=True)
+                                       {"name": name, "term": term,
+                                        "abbr": abbr, "obj_id": value,
+                                        "chamber": chamber, "type": typ},
+                                       upsert=True, safe=True)
 
     return redirect('admin_matching', abbr)

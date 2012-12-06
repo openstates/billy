@@ -30,10 +30,9 @@ class SyncVersions(BaseCommand):
         documents = db.tracked_versions.find(spec, timeout=False)
         doc_count = documents.count()
 
-        print 'starting {0} for {1} documents ({2})'.format(task.__name__,
-                                                            doc_count,
-                                    'immediate' if args.immediate else 'queued'
-                                                           )
+        print 'starting {0} for {1} documents ({2})'.format(
+            task.__name__, doc_count,
+            'immediate' if args.immediate else 'queued')
 
         for doc in documents:
             if args.immediate:

@@ -43,8 +43,8 @@ class RelatedBillsList(RelatedObjectsList):
         Templates:
             - Are specified in subclasses.
         '''
-        context = super(RelatedBillsList, self).get_context_data(
-                                                        *args, **kwargs)
+        context = super(RelatedBillsList, self).get_context_data(*args,
+                                                                 **kwargs)
         metadata = context['metadata']
         FilterBillsForm = get_filter_bills_form(metadata)
 
@@ -74,19 +74,21 @@ class RelatedBillsList(RelatedObjectsList):
                     description.extend([chamber[0].title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
-                description.append('(%s)' %
-                   metadata['session_details'][session]['display_name'])
+                description.append(
+                    '(%s)' %
+                    metadata['session_details'][session]['display_name']
+                )
             if status == 'passed_lower':
                 long_description.append('which have passed the ' +
-                                         metadata['chambers']['lower']['name'])
+                                        metadata['chambers']['lower']['name'])
             elif status == 'passed_upper':
                 long_description.append('which have passed the ' +
-                                         metadata['chambers']['upper']['name'])
+                                        metadata['chambers']['upper']['name'])
             elif status == 'signed':
                 long_description.append('which have been signed into law')
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},
-                                          fields=('full_name', '_id'))
+                                              fields=('full_name', '_id'))
                 leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
             if search_text:
@@ -242,11 +244,12 @@ class BillFeed(BillList):
         context = self.get_context_data(*args, **kwargs)
         queryset = self.get_queryset()
         link = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
-                            reverse('bills', args=args, kwargs=kwargs),
-                            request.META['QUERY_STRING'])
+                                   reverse('bills', args=args, kwargs=kwargs),
+                                   request.META['QUERY_STRING'])
         feed_url = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
-                            reverse('bills_feed', args=args, kwargs=kwargs),
-                            request.META['QUERY_STRING'])
+                                       reverse('bills_feed', args=args,
+                                               kwargs=kwargs),
+                                       request.META['QUERY_STRING'])
         feed = Rss201rev2Feed(title=context['description'], link=link,
                               feed_url=feed_url, ttl=360,
                               description=context['description'] +
@@ -316,7 +319,8 @@ def bill(request, abbr, session, bill_id):
     else:
         sponsors = bill.sponsors_manager.first_fifteen
 
-    return render(request, templatename('bill'),
+    return render(
+        request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
@@ -418,11 +422,9 @@ def show_all(key):
             raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
                                                              bill_id))
         return render(request, templatename('bill_all_%s' % key),
-        dict(abbr=abbr,
-             metadata=Metadata.get_object(abbr),
-             bill=bill,
-             sources=bill['sources'],
-             nav_active='bills'))
+                      dict(abbr=abbr, metadata=Metadata.get_object(abbr),
+                           bill=bill, sources=bill['sources'],
+                           nav_active='bills'))
     return func
 
 all_documents = show_all('documents')

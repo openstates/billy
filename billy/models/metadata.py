@@ -150,7 +150,7 @@ class Metadata(Document):
             return self._term_dict
         except AttributeError:
             term_dict = itertools.groupby(self['terms'],
-                                         operator.itemgetter('name'))
+                                          operator.itemgetter('name'))
             term_dict = dict((name, list(data)) for (name, data) in term_dict)
             self._term_dict = term_dict
             return term_dict
@@ -171,7 +171,8 @@ class Metadata(Document):
         '''
         committees = list(self.committees(*args, **kwargs))
         legislators = self.legislators({'active': True},
-                    fields=['full_name', settings.LEVEL_FIELD])
+                                       fields=['full_name',
+                                               settings.LEVEL_FIELD])
         _legislators = {}
 
         # This will be a cache of legislator objects used in

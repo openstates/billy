@@ -103,7 +103,7 @@ def _get_favorite_object(favorite):
         'bill': 'bills',
         'committee': 'committees',
         'legislator': 'legislators',
-        }.get(favorite['obj_type'])
+    }.get(favorite['obj_type'])
     if collection_name is not None:
         return getattr(mdb, collection_name).find_one(favorite['obj_id'])
 
@@ -188,7 +188,7 @@ def set_favorite(request):
         obj_type=request.POST['obj_type'],
         obj_id=request.POST['obj_id'],
         user_id=request.user.id
-        )
+    )
 
     if request.POST['obj_type'] == 'search':
         # Add the search text into the spec.
@@ -208,7 +208,7 @@ def set_favorite(request):
     doc = dict(
         is_favorite=is_favorite,
         timestamp=datetime.datetime.utcnow(),
-        )
+    )
     doc.update(spec)
     # Create the doc if missing, else update based on the spec.
     user_db.favorites.update(spec, doc, upsert=True)

@@ -6,7 +6,7 @@ from django.test import Client
 
 import billy.tests
 from billy.tests import fixtures
-from billy.core import settings, db
+from billy.core import db
 
 
 class BaseTestCase(unittest.TestCase):

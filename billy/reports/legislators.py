@@ -24,7 +24,7 @@ def scan_legislators(abbr):
     district_seats = {'upper': defaultdict(int), 'lower': defaultdict(int)}
     for district in db.districts.find({'abbr': abbr}):
         district_seats[district['chamber']][district['name']] = \
-                district['num_seats']
+            district['num_seats']
 
     for leg in db.legislators.find({settings.LEVEL_FIELD: abbr}):
 

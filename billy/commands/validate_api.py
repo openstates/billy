@@ -17,10 +17,10 @@ class ValidateApi(BaseCommand):
     help = 'validate data from the API'
 
     def add_args(self):
-        self.add_argument('--apikey', dest='API_KEY',
-                  help='the API key to use')
+        self.add_argument('--apikey', dest='API_KEY', help='the API key to use'
+                         )
         self.add_argument('--schema_dir', default=None,
-                  help='directory to use for API schemas (optional)')
+                          help='directory to use for API schemas (optional)')
 
     def handle(self, args):
         for meta in db.metadata.find():
@@ -66,7 +66,7 @@ def validate_api(abbr, schema_dir=None):
 
         json_response = scrapelib.urlopen(url)
         validictory.validate(json.loads(json_response), bill_schema,
-                                 validator_cls=APIValidator)
+                             validator_cls=APIValidator)
 
     legislator_schema = get_json_schema("legislator", schema_dir)
     for legislator in db.legislators.find(spec):

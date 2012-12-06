@@ -22,7 +22,7 @@ def _upload(fname, bucket):
     headers = {'Cache-Control': 'max-age=2592000'}
 
     # optimize JPEG
-    subprocess.check_call(['jpegoptim',  '--strip-all', fname])
+    subprocess.check_call(['jpegoptim', '--strip-all', fname])
 
     k = Key(bucket)
     k.key = fname

@@ -71,19 +71,20 @@ def committees(request, abbr):
     sort_order = int(request.GET.get('order', 1))
 
     committees = meta.committees_legislators(spec, fields=fields,
-                                 sort=[(sort_key, sort_order)])
+                                             sort=[(sort_key, sort_order)])
 
     sort_order = -sort_order
 
-    return TemplateResponse(request, templatename('committees'),
-                  dict(chamber=chamber, committees=committees, abbr=abbr,
-                       metadata=meta, chamber_name=chamber_name,
-                   chamber_select_template=templatename('chamber_select_form'),
-                   chamber_select_collection='committees',
-                   chamber_select_chambers=chambers,
-                   committees_table_template=templatename('committees_table'),
-                   show_chamber_column=show_chamber_column,
-                   sort_order=sort_order, nav_active='committees'))
+    return TemplateResponse(
+        request, templatename('committees'),
+        dict(chamber=chamber, committees=committees, abbr=abbr, metadata=meta,
+             chamber_name=chamber_name,
+             chamber_select_template=templatename('chamber_select_form'),
+             chamber_select_collection='committees',
+             chamber_select_chambers=chambers,
+             committees_table_template=templatename('committees_table'),
+             show_chamber_column=show_chamber_column, sort_order=sort_order,
+             nav_active='committees'))
 
 
 def committee(request, abbr, committee_id):

@@ -116,7 +116,7 @@ def _metadata_backwards_shim(metadata):
             for field in ('name', 'title', 'term'):
                 if field in chamber:
                     metadata[chamber_type + '_chamber_' + field] = \
-                            chamber[field]
+                        chamber[field]
     return metadata
 
 
@@ -165,7 +165,7 @@ class BillHandler(BillyHandler):
         # if subfields are specified
         if not fields or 'votes' in fields or vote_fields:
             bill['votes'] = list(db.votes.find({'bill_id': bill['_id']},
-                                          fields=vote_fields))
+                                               fields=vote_fields))
         return bill
 
 

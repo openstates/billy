@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import patterns, url
 
-urlpatterns = patterns('billy.web.admin.views',
+urlpatterns = patterns(
+    'billy.web.admin.views',
+
     url(r'^$', 'browse_index', name='admin_index'),
 
     # Quality exceptions (need to be above loose-matching bill view rule)
@@ -43,9 +45,9 @@ urlpatterns = patterns('billy.web.admin.views',
     url(r'^legislators/(?P<id>[\w-]+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
     url(r'^legislators-edit/(?P<id>[\w-]+)/$', 'legislator_edit',
-            name='admin_legislator_edit'),
+        name='admin_legislator_edit'),
     url(r'^legislators-edit-commit/$', 'legislator_edit_commit',
-            name='admin_legislator_edit_commit'),
+        name='admin_legislator_edit_commit'),
 
 
     # bills

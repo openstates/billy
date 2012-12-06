@@ -17,7 +17,8 @@ if getattr(settings, 'USE_LOCKSMITH', False):
     class Authorizer(PistonKeyAuthentication):
         def challenge(self):
             resp = HttpResponse("Authorization Required: \n"
-        "obtain a key at http://services.sunlightlabs.com/accounts/register/")
+                                "obtain a key at http://services."
+                                "sunlightlabs.com/accounts/register/")
             resp.status_code = 401
             return resp
 
@@ -70,13 +71,14 @@ events_handler = Resource(handlers.EventsHandler,
 subject_list_handler = Resource(handlers.SubjectListHandler,
                                 authentication=authorizer)
 legislator_geo_handler = Resource(handlers.LegislatorGeoHandler,
-                                      authentication=authorizer)
+                                  authentication=authorizer)
 district_handler = Resource(handlers.DistrictHandler,
                             authentication=authorizer)
 boundary_handler = Resource(handlers.BoundaryHandler,
                             authentication=authorizer)
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # metadata
     url(r'^v1/metadata/$', all_metadata_handler),
     url(r'^v1/metadata/(?P<abbr>[a-zA-Z-]+)/$', metadata_handler),

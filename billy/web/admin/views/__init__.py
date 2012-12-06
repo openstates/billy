@@ -50,7 +50,7 @@ def keyfunc(obj):
 
 
 if django_settings.DEBUG:
-    def login_required(f):
+    def login_required(f):      # NOQA
         return f
 
 
@@ -95,8 +95,8 @@ def browse_index(request, template='billy/index.html'):
         report['chambers'] = meta['chambers'].keys()
         report['influence_explorer'] = ('influenceexplorer' in
                                         meta['feature_flags'])
-        report['bills']['typed_actions'] = (100 -
-            report['bills']['actions_per_type'].get('other', 100))
+        report['bills']['typed_actions'] = (
+            100 - report['bills']['actions_per_type'].get('other', 100))
         rows.append(report)
 
     rows.sort(key=lambda x: x['name'])
@@ -116,7 +116,8 @@ def overview(request, abbr):
     def _add_time_delta(runlog):
         time_delta = runlog['scraped']['ended'] - runlog['scraped']['started']
         runlog['scraped']['time_delta'] = datetime.timedelta(time_delta.days,
-                                                         time_delta.seconds)
+                                                             time_delta.seconds
+                                                            )
     try:
         runlog = db.billy_runs.find({"abbr": abbr}).sort(
             "scraped.started", direction=pymongo.DESCENDING)[0]
@@ -143,9 +144,8 @@ def run_detail_graph_data(request, abbr):
         to factor the oldAverageCount back in, it's because new values will
         have as much weight as the last sum combined if you put it over 2.
         """
-        return float(
-            (newItem + (oldAverageCount * (oldAverage))) /
-                        (oldAverageCount + 1))
+        return float((newItem + (oldAverageCount * (oldAverage))) /
+                     (oldAverageCount + 1))
 
     def _do_pie(runs):
         excs = {}
@@ -215,10 +215,10 @@ def run_detail_graph_data(request, abbr):
 
     speck = {
         "default-stacked": {"run": _do_stacked,
-            "title": "Last %s runs" % (history_count),
-            "type": "stacked",
-            "spec": {}
-        },
+                            "title": "Last %s runs" % (history_count),
+                            "type": "stacked",
+                            "spec": {}
+                           },
         #"default": {"run": _do_digest,
         #    "title": "Last %s runs" % (history_count),
         #    "type": "lines",
@@ -239,12 +239,10 @@ def run_detail_graph_data(request, abbr):
         #    }
         #},
         "falure-pie": {"run": _do_pie,
-            "title": "Digest of what exceptions have been thrown",
-            "type": "pies",
-            "spec": {
-                "failure": {"$exists": True}
-            }
-        },
+                       "title": "Digest of what exceptions have been thrown",
+                       "type": "pies",
+                       "spec": {"failure": {"$exists": True}}
+                      },
     }
 
     for line in speck:
@@ -268,7 +266,7 @@ def run_detail(request, obj=None):
     except IndexError as e:
         return render(request, 'billy/run_detail.html', {
             "warning": "No records exist. Fetch returned a(n) %s" % (
-                    e.__class__.__name__)})
+                e.__class__.__name__)})
     return render(request, 'billy/run_detail.html', {
         "run": run,
         "metadata": {"abbreviation": run['abbr'], "name": run['abbr']}
@@ -284,7 +282,7 @@ def run_detail_list(request, abbr):
     except IndexError as e:
         return render(request, 'billy/run_detail.html', {
             "warning": "No records exist. Fetch returned a(n) %s" % (
-                    e.__class__.__name__)})
+                e.__class__.__name__)})
 
     # pre-process goodies for the template
     runlog['scraped']['t_delta'] = (
@@ -338,42 +336,32 @@ def bills(request, abbr):
                                       'version_count']}),
 
         ('Bill Types', {
-            'keypath': ['bill_types'],
-                'summary': {
-                'object_type': 'bills',
-                'key': 'type',
-                },
-            }),
+            'keypath': ['bill_types'], 'summary': {
+                'object_type': 'bills', 'key': 'type',
+            },
+        }),
 
         ('Actions by Type', {
-            'keypath': ['actions_per_type'],
-            'summary': {
+            'keypath': ['actions_per_type'], 'summary': {
                 'object_type': 'actions',
                 'key': 'type',
-                },
-            }),
+            },
+        }),
 
         ('Actions by Actor', {
-            'keypath': ['actions_per_actor'],
-            'summary': {
+            'keypath': ['actions_per_actor'], 'summary': {
                 'object_type': 'actions',
                 'key': 'actor',
-                },
-            }),
+            },
+        }),
 
-        ('Quality Issues',   {'rownames': [
-                                'sponsorless_count', 'actionless_count',
-                                'actions_unsorted', 'bad_vote_counts',
-                                'version_count', 'versionless_count',
-
-                                'sponsors_with_id',
-                                'rollcalls_with_leg_id',
-                                'have_subjects',
-                                'updated_this_year',
-                                'updated_this_month',
-                                'updated_today',
-                                'vote_passed']}),
-        ]
+        ('Quality Issues', {'rownames': [
+            'sponsorless_count', 'actionless_count', 'actions_unsorted',
+            'bad_vote_counts', 'version_count', 'versionless_count',
+            'sponsors_with_id', 'rollcalls_with_leg_id', 'have_subjects',
+            'updated_this_year', 'updated_this_month', 'updated_today',
+            'vote_passed']}),
+    ]
 
     format_as_percent = [
         'sponsors_with_id',
@@ -419,7 +407,7 @@ def bills(request, abbr):
                 use_percent = any([
                     r in format_as_percent,
                     name in ['Actions by Actor', 'Actions by Type'],
-                    ])
+                ])
 
                 if use_percent and (val != 0):
                     val = decimal_format(val)
@@ -540,8 +528,9 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
 
 
 @login_required
-def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
-                        collections=("bills", "legislators", "committees")):
+def summary_object_key_vals(
+        request, abbr, urlencode=urllib.urlencode,
+        collections=("bills", "legislators", "committees")):
     meta = metadata(abbr)
     session = request.GET['session']
     object_type = request.GET['object_type']
@@ -572,7 +561,7 @@ def summary_object_key_vals(request, abbr, urlencode=urllib.urlencode,
         objects=objects,
         spec=spec,
         meta=meta
-        ))
+    ))
 
 
 @login_required
@@ -1104,10 +1093,10 @@ def mom_commit(request, abbr):
         merged[attr] = _mom_mangle(merged[attr])
 
     return render(request, 'billy/mom_commit.html', {
-            "merged": merged,
-            "actions": actions,
-            "abbr": abbr
-        })
+        "merged": merged,
+        "actions": actions,
+        "abbr": abbr
+    })
 
 
 def _mom_attr_diff(merge, leg1, leg2):
@@ -1244,7 +1233,8 @@ def newsblogs(request):
         spec.update(abbr=abbr)
 
     entries = db.feed_entries.find(spec, skip=skip, limit=limit,
-        sort=[('published_parsed', pymongo.DESCENDING)])
+                                   sort=[('published_parsed',
+                                          pymongo.DESCENDING)])
     _entries = []
     entity_types = {'L': 'legislators',
                     'C': 'committees',
@@ -1272,8 +1262,8 @@ def newsblogs(request):
                                            args=[entity_type, _id])
                 _entity_urls.append(url)
                 summary = summary.replace(entity_string,
-                                '<b><a href="%s">%s</a></b>' % (url,
-                                                                entity_string))
+                                          '<b><a href="%s">%s</a></b>' % (
+                                              url, entity_string))
             entity_data = zip(_entity_strings, _entity_ids, _entity_urls)
             entry['summary'] = summary
             entry['entity_data'] = entity_data
@@ -1308,7 +1298,7 @@ def newsblogs(request):
         'next_': next_,
         'pagination_truncated': pagination_truncated,
         'page': page,
-        })
+    })
 
 
 @login_required

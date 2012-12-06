@@ -439,9 +439,9 @@ class Bill(Document):
                status=None, type_=None, session=None):
         _filter = {}
         for key, value in [(settings.LEVEL_FIELD, abbr),
-                            ('chamber', chamber),
-                            ('subjects', subjects),
-                            ('bill_id', bill_id),
+                           ('chamber', chamber),
+                           ('subjects', subjects),
+                           ('bill_id', bill_id),
                           ]:
             if value is not None:
                 _filter[key] = value
@@ -501,8 +501,8 @@ class Bill(Document):
             # take terms from mongo query
             es_terms = []
             if settings.LEVEL_FIELD in _filter:
-                es_terms.append(pyes.TermFilter(settings.LEVEL_FIELD,
-                                            _filter.pop(settings.LEVEL_FIELD)))
+                es_terms.append(pyes.TermFilter(
+                    settings.LEVEL_FIELD, _filter.pop(settings.LEVEL_FIELD)))
             if 'session' in _filter:
                 es_terms.append(pyes.TermFilter('session',
                                                 _filter.pop('session')))
@@ -510,11 +510,11 @@ class Bill(Document):
                 es_terms.append(pyes.TermFilter('chamber',
                                                 _filter.pop('chamber')))
             if 'subjects' in _filter:
-                es_terms.append(pyes.TermFilter('subjects',
-                                           _filter.pop('subjects')['$all']))
+                es_terms.append(pyes.TermFilter(
+                    'subjects', _filter.pop('subjects')['$all']))
             if 'sponsors.leg_id' in _filter:
-                es_terms.append(pyes.TermFilter('sponsors',
-                                            _filter.pop('sponsors.leg_id')))
+                es_terms.append(pyes.TermFilter(
+                    'sponsors', _filter.pop('sponsors.leg_id')))
 
             # add terms
             if es_terms:

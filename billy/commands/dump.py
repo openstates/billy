@@ -90,7 +90,7 @@ def dump_legislator_csvs(abbr):
     leg_fields = ('leg_id', 'full_name', 'first_name', 'middle_name',
                   'last_name', 'suffixes', 'nickname', 'active',
                   settings.LEVEL_FIELD, 'chamber', 'district', 'party',
-                   'transparencydata_id', 'photo_url', 'created_at',
+                  'transparencydata_id', 'photo_url', 'created_at',
                   'updated_at')
     leg_csv_fname, leg_csv = _make_csv(abbr, 'legislators.csv', leg_fields)
 
@@ -155,8 +155,8 @@ def dump_bill_csvs(abbr):
     for bill in db.bills.find({settings.LEVEL_FIELD: abbr}):
         bill_csv.writerow(extract_fields(bill, bill_fields))
 
-        bill_info = extract_fields(bill,
-                   ('bill_id', settings.LEVEL_FIELD, 'session', 'chamber'))
+        bill_info = extract_fields(
+            bill, ('bill_id', settings.LEVEL_FIELD, 'session', 'chamber'))
         _bill_info[bill['_id']] = bill_info
 
         # basically same behavior for actions, sponsors and votes:
@@ -181,9 +181,9 @@ def dump_bill_csvs(abbr):
         for vtype in ('yes', 'no', 'other'):
             for leg_vote in vote[vtype + '_votes']:
                 legvote_csv.writerow({'vote_id': vote['vote_id'],
-                                  'leg_id': leg_vote['leg_id'],
-                                  'name': leg_vote['name'].encode('utf8'),
-                                  'vote': vtype})
+                                      'leg_id': leg_vote['leg_id'],
+                                      'name': leg_vote['name'].encode('utf8'),
+                                      'vote': vtype})
 
     return (bill_csv_fname, action_csv_fname, sponsor_csv_fname,
             vote_csv_fname, legvote_csv_fname)
@@ -195,11 +195,12 @@ class DumpCSV(BaseCommand):
 
     def add_args(self):
         self.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
-                  help='the two-letter abbreviation for the data to export')
+                          help='the abbreviation for the data to export')
         self.add_argument('--file', '-f',
-                  help='filename to output to (defaults to <abbr>.zip)')
+                          help='filename to output to (defaults to <abbr>.zip)'
+                         )
         self.add_argument('--upload', '-u', action='store_true', default=False,
-                  help='upload the created archives to S3')
+                          help='upload the created archives to S3')
 
     def handle(self, args):
         for abbr in args.abbrs:
@@ -227,17 +228,18 @@ class DumpJSON(BaseCommand):
 
     def add_args(self):
         self.add_argument('abbrs', metavar='ABBR', type=str, nargs='+',
-                  help='the two-letter abbreviation for the data to export')
+                          help='the abbreviation for the data to export')
         self.add_argument('--file', '-f',
-                  help='filename to output to (defaults to <abbr>.zip)')
+                          help='filename to output to (defaults to <abbr>.zip)'
+                         )
         self.add_argument('--upload', '-u', action='store_true', default=False,
-                  help='upload the created archives to S3')
+                          help='upload the created archives to S3')
         self.add_argument('--apikey', dest='API_KEY',
-                  help='the API key to use')
+                          help='the API key to use')
         self.add_argument('--schema_dir', default=None,
-                  help='directory to use for API schemas (optional)')
+                          help='directory to use for API schemas (optional)')
         self.add_argument('--novalidate', action='store_true', default=False,
-                  help="don't run validation")
+                          help="don't run validation")
 
     def handle(self, args):
         for abbr in args.abbrs:

@@ -22,7 +22,7 @@ class ScrapeError(Exception):
     def __str__(self):
         if self.orig_exception:
             return '%s\nOriginal Exception: %s' % (self.msg,
-                                        self.orig_exception)
+                                                   self.orig_exception)
         else:
             return self.msg
 
@@ -129,14 +129,14 @@ class Scraper(scrapelib.Scraper):
 
         # bills & votes
         self._schema['bill']['properties']['session']['enum'] = \
-                self.all_sessions()
+            self.all_sessions()
         self._schema['vote']['properties']['session']['enum'] = \
-                self.all_sessions()
+            self.all_sessions()
 
         # legislators
         terms = [t['name'] for t in self.metadata['terms']]
         self._schema['person']['properties']['roles']['items'] \
-                ['properties']['term']['enum'] = terms
+            ['properties']['term']['enum'] = terms
 
     @property
     def object_count(self):
@@ -261,14 +261,14 @@ def get_scraper(mod_path, scraper_type):
     try:
         ScraperClass = _scraper_registry[scraper_type]
     except KeyError as e:
-        raise ScrapeError("no %s scraper found in module %s" %
-                           (scraper_type, mod_path))
+        raise ScrapeError("no %s scraper found in module %s" % (
+            scraper_type, mod_path))
     return ScraperClass
 
 
 def check_sessions(metadata, sessions):
     all_sessions_in_terms = list(reduce(lambda x, y: x + y,
-                                   [x['sessions'] for x in metadata['terms']]))
+                                 [x['sessions'] for x in metadata['terms']]))
     # copy the list to avoid modifying it
     metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
                                                  []))

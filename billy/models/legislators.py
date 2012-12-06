@@ -37,7 +37,7 @@ class Role(dict):
         ignored_role_types = [
             'member',
             'committee member',
-            ]
+        ]
         if self['type'] in ignored_role_types:
             return ''
         else:
@@ -111,8 +111,8 @@ class Legislator(Document):
 
     def votes_5_sorted(self):
         _id = self['_id']
-        votes = self.votes_manager(limit=5,
-            sort=[('date', pymongo.DESCENDING)])
+        votes = self.votes_manager(
+            limit=5, sort=[('date', pymongo.DESCENDING)])
         for vote in votes:
             vote_value = 'other'
             for obj in vote['yes_votes']:

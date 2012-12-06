@@ -46,8 +46,10 @@ class UpdateMissingIds(BaseCommand):
             abbrev = meta['_id'].upper()
 
             for leg in db.legislators.find(query):
-                query = urllib.urlencode({'apikey': settings.API_KEY,
-                                  'search': leg['full_name'].encode('utf8')})
+                query = urllib.urlencode({
+                    'apikey': settings.API_KEY,
+                    'search': leg['full_name'].encode('utf8')
+                })
                 url = ('http://transparencydata.com/api/1.0/entities.json?' +
                        query)
                 data = urllib2.urlopen(url).read()
@@ -55,8 +57,8 @@ class UpdateMissingIds(BaseCommand):
                 matches = []
                 for result in results:
                     if (result['state'] == abbrev and
-                        result['seat'][6:] == leg['chamber'] and
-                        result['type'] == 'politician'):
+                            result['seat'][6:] == leg['chamber'] and
+                            result['type'] == 'politician'):
                         matches.append(result)
 
                 if len(matches) == 1:
@@ -64,7 +66,7 @@ class UpdateMissingIds(BaseCommand):
                     db.legislators.save(leg, safe=True)
                     updated += 1
 
-            print 'Updated %s of %s missing transparencydata ids' % (updated,
-                                                             initial_count)
+            print 'Updated %s of %s missing transparencydata ids' % (
+                updated, initial_count)
 
             time.sleep(30)

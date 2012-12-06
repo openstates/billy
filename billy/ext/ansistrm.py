@@ -64,7 +64,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
             self.handleError(record)
 
     if os.name != 'nt':
-        def output_colorized(self, message):
+        def output_colorized(self, message):    # NOQA
             self.stream.write(message)
     else:
         import re
@@ -81,7 +81,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
             7: 0x07,    # white
         }
 
-        def output_colorized(self, message):
+        def output_colorized(self, message):            # NOQA
             parts = self.ansi_esc.split(message)
             write = self.stream.write
             h = None

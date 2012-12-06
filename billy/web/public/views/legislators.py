@@ -93,20 +93,17 @@ def legislators(request, abbr):
     sort_order = {1: -1, -1: 1}[sort_order]
     legislators = list(legislators)
 
-    return TemplateResponse(request, templatename('legislators'),
-                  dict(metadata=meta,
-                   chamber=chamber,
-                   chamber_title=chamber_title,
-                   chamber_select_template=templatename('chamber_select_form'),
-                   chamber_select_collection='legislators',
-                   chamber_select_chambers=chambers,
-                   show_chamber_column=True,
-                   abbr=abbr,
-                   legislators=legislators,
-                   sort_order=sort_order,
-                   sort_key=sort_key,
-                   legislator_table=templatename('legislator_table'),
-                   nav_active='legislators'))
+    return TemplateResponse(
+        request, templatename('legislators'),
+        dict(metadata=meta, chamber=chamber,
+             chamber_title=chamber_title,
+             chamber_select_template=templatename('chamber_select_form'),
+             chamber_select_collection='legislators',
+             chamber_select_chambers=chambers, show_chamber_column=True,
+             abbr=abbr, legislators=legislators, sort_order=sort_order,
+             sort_key=sort_key,
+             legislator_table=templatename('legislator_table'),
+             nav_active='legislators'))
 
 
 def legislator(request, abbr, _id, slug=None):
@@ -186,24 +183,21 @@ def legislator(request, abbr, _id, slug=None):
     has_votes = bool(legislator_votes)
     feed_entries = legislator.feed_entries()
     feed_entries_list = list(feed_entries.limit(5))
-    return render(request, templatename('legislator'),
-        dict(
-            feed_entry_template=templatename('feed_entry'),
-            vote_preview_row_template=templatename('vote_preview_row'),
-            roles=legislator.roles_manager,
-            abbr=abbr,
-            district_id=district_id,
-            metadata=meta,
-            legislator=legislator,
-            sources=legislator['sources'],
-            sponsored_bills=sponsored_bills,
-            legislator_votes=list(legislator_votes),
-            has_feed_entries=bool(feed_entries_list),
-            feed_entries=feed_entries_list[:4],
-            feed_entries_count=len(feed_entries_list),
-            feed_entries_more_count=max([0, feed_entries.count() - 5]),
-            has_votes=has_votes,
-            nav_active='legislators'))
+    return render(
+        request, templatename('legislator'),
+        dict(feed_entry_template=templatename('feed_entry'),
+             vote_preview_row_template=templatename('vote_preview_row'),
+             roles=legislator.roles_manager, abbr=abbr,
+             district_id=district_id, metadata=meta, legislator=legislator,
+             sources=legislator['sources'],
+             sponsored_bills=sponsored_bills,
+             legislator_votes=list(legislator_votes),
+             has_feed_entries=bool(feed_entries_list),
+             feed_entries=feed_entries_list[:4],
+             feed_entries_count=len(feed_entries_list),
+             feed_entries_more_count=max([0, feed_entries.count() - 5]),
+             has_votes=has_votes,
+             nav_active='legislators'))
 
 
 def legislator_inactive(request, abbr, legislator):
@@ -232,15 +226,16 @@ def legislator_inactive(request, abbr, legislator):
     legislator_votes = legislator.votes_5_sorted()
     has_votes = bool(legislator_votes)
 
-    return render(request, templatename('legislator'),
+    return render(
+        request, templatename('legislator'),
         dict(feed_entry_template=templatename('feed_entry'),
-            vote_preview_row_template=templatename('vote_preview_row'),
-            old_roles=legislator.old_roles_manager,
-            abbr=abbr,
-            metadata=legislator.metadata,
-            legislator=legislator,
-            sources=legislator['sources'],
-            sponsored_bills=sponsored_bills,
-            legislator_votes=legislator_votes,
-            has_votes=has_votes,
-            nav_active='legislators'))
+             vote_preview_row_template=templatename('vote_preview_row'),
+             old_roles=legislator.old_roles_manager,
+             abbr=abbr,
+             metadata=legislator.metadata,
+             legislator=legislator,
+             sources=legislator['sources'],
+             sponsored_bills=sponsored_bills,
+             legislator_votes=legislator_votes,
+             has_votes=has_votes,
+             nav_active='legislators'))

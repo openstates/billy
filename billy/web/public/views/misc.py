@@ -221,7 +221,7 @@ class NewsList(RelatedObjectsList):
                 return redirect('news_list', abbr, collection_name,
                                 leg['_id'], slug)
         return super(NewsList, self).get(request, abbr, collection_name, _id,
-                                          slug)
+                                         slug)
 
 
 @login_required

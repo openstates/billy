@@ -34,7 +34,7 @@ def _bill_report_dict():
             'version_count': 0,
             'unmatched_sponsors': set(),
             'progress_meter_gaps': set(),
-           }
+            }
 
 
 def scan_bills(abbr):
@@ -90,7 +90,7 @@ def scan_bills(abbr):
                 # keep list of unmatched sponsors
                 session_d['unmatched_sponsors'].add(
                     (term_for_session(abbr, bill['session']), bill['chamber'],
-                    sponsor['name'])
+                     sponsor['name'])
                 )
             session_d['sponsors_per_type'][sponsor['type']] += 1
 
@@ -172,7 +172,7 @@ def scan_bills(abbr):
             'other_actions': other_actions.items(),
             'uncategorized_subjects': uncategorized_subjects.items(),
             'sessions': sessions,
-            'progress_meter_gaps': [],
+            'progress_meter_gaps': []
            }
 
 
@@ -210,7 +210,7 @@ def calculate_percentages(report):
 def bill_report(abbr):
     report = scan_bills(abbr)
     combined_report = combine_reports(report['sessions'],
-                                           _bill_report_dict())
+                                      _bill_report_dict())
     for session in report['sessions'].itervalues():
         calculate_percentages(session)
     calculate_percentages(combined_report)

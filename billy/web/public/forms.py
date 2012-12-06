@@ -51,9 +51,9 @@ def get_filter_bills_form(metadata):
 
             if len(_status_choices) == 4:
                 chamber = forms.MultipleChoiceField(
-                            choices=_chamber_choices,
-                            widget=forms.CheckboxSelectMultiple(),
-                            required=False)
+                    choices=_chamber_choices,
+                    widget=forms.CheckboxSelectMultiple(),
+                    required=False)
 
             status = forms.ChoiceField(choices=_status_choices, required=False)
 
@@ -70,25 +70,20 @@ def get_filter_bills_form(metadata):
             BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
 
             chamber = forms.MultipleChoiceField(
-                        choices=(('upper', 'upper'),
-                                 ('lower', 'lower')),
-                        widget=forms.CheckboxSelectMultiple(),
-                        required=False)
+                choices=(('upper', 'upper'), ('lower', 'lower')),
+                widget=forms.CheckboxSelectMultiple(), required=False)
 
             status = forms.ChoiceField(
-                        choices=(
-                            ('', ''),
-                            ('passed_lower', 'Passed lower'),
-                            ('passed_upper', 'Passed upper'),
-                            ('signed', 'Signed'),
-                        ), required=False)
+                choices=(
+                    ('', ''),
+                    ('passed_lower', 'Passed lower'),
+                    ('passed_upper', 'Passed upper'),
+                    ('signed', 'Signed')
+                ), required=False)
 
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 
         subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
-                                             required=False,
-                #widget=forms.CheckboxSelectMultiple()
-                #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
-                    )
+                                             required=False)
 
     return FilterBillsForm

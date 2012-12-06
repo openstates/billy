@@ -157,7 +157,8 @@ def search(request, abbr):
     else:
         metadata = None
 
-    return render(request, templatename('search_results_bills_legislators'),
+    return render(
+        request, templatename('search_results_bills_legislators'),
         dict(search_text=search_text,
              abbr=abbr,
              metadata=metadata,

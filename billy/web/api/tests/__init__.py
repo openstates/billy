@@ -1,3 +1,4 @@
+# flake8: noqa  (because we import * for a decent reason)
 '''
 The django test runner looks for unittest.TestCase subclasses
 defined in this file, so import any testcases here.
