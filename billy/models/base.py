@@ -369,7 +369,7 @@ class CursorWrapper(object):
     In English, this enables:
 
     for vote in legislator.votes_manager():
-        print vote.legislator
+        print(vote.legislator)
 
     This was the only way I could think of to do this without
     a huge rewrite. The solution in the AttrManager classes is

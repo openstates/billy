@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import traceback
 
@@ -30,9 +31,9 @@ class SyncVersions(BaseCommand):
         documents = db.tracked_versions.find(spec, timeout=False)
         doc_count = documents.count()
 
-        print 'starting {0} for {1} documents ({2})'.format(
+        print('starting {0} for {1} documents ({2})'.format(
             task.__name__, doc_count,
-            'immediate' if args.immediate else 'queued')
+            'immediate' if args.immediate else 'queued'))
 
         for doc in documents:
             if args.immediate:
@@ -44,6 +45,6 @@ class SyncVersions(BaseCommand):
             else:
                 task.delay(doc['_id'])
 
-        print '{0} {1} for {2} documents, {3} errors'.format(
+        print('{0} {1} for {2} documents, {3} errors'.format(
             'ran' if args.immediate else 'queued', task.__name__, doc_count,
-            errors)
+            errors))

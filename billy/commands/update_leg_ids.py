@@ -1,3 +1,4 @@
+from __future__ import print_function
 from billy.core import db
 from billy.commands import BaseCommand
 from billy.utils import metadata
@@ -20,7 +21,7 @@ class UpdateLegIds(BaseCommand):
                 sessions = t['sessions']
                 break
         else:
-            print 'No such term for %s: %s' % (args.abbr, args.term)
+            print('No such term for %s: %s' % (args.abbr, args.term))
             return
 
         for session in sessions:

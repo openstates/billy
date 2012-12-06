@@ -12,7 +12,7 @@ events = [
      u'location': u'CAPITOL 120',
      u'participants': [],
      u'session': u'27',
-     u'sources': [{u'url': u'http://www.ex.cow/s34FF4G32yz'}],
+     u'sources': [{u'url': u'http://www.ex.com/s34FF4G32yz'}],
      u'state': u'ex',
      u'type': u'committee:meeting',
      u'updated_at': datetime.datetime(2012, 4, 5, 16, 11, 45, 657000),

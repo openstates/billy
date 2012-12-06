@@ -1,3 +1,4 @@
+from __future__ import print_function
 from billy.importers.utils import merge_legislators
 
 import json
@@ -17,10 +18,7 @@ def _load_test_data(test_name):
 
 def _check_results(one, two):
     if one != two:
-        print ""
-        print one
-        print two
-        print ""
+        print('\n', one, '\n', two, '\n', sep='')
     return one == two
 
 

@@ -455,7 +455,7 @@ class BoundaryHandler(BillyHandler):
         url = "%sboundaries/%s/simple_shape" % (self.base_url, boundary_id)
         try:
             data = json.load(urllib2.urlopen(url))
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if 400 <= e.code < 500:
                 resp = rc.NOT_FOUND
                 return resp

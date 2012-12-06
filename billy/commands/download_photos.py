@@ -98,4 +98,4 @@ class DownloadPhotos(BaseCommand):
                                            '150x200', fname])
                     _upload(fname, bucket)
                 except subprocess.CalledProcessError:
-                    print 'convert failed for ', fname
+                    print('convert failed for ', fname)

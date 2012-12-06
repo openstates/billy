@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import urllib2
 import importlib
@@ -30,4 +31,4 @@ class TextExtract(BaseCommand):
             filedata = open(args.filename).read()
 
         doc = {}
-        print extract_text(doc, filedata)
+        print(extract_text(doc, filedata))

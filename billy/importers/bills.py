@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import glob
 import json
@@ -132,14 +133,14 @@ def git_add_bill(data):
     git_active_repo.object_store.add_object(spam)
     git_active_tree[bid] = (0100644, spam.id)
     git_active_tree.check()
-    print "added %s - %s" % (data['_id'], spam.id)
+    print("added %s - %s" % (data['_id'], spam.id))
 
 
 def git_commit(message):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
 
-    print "Commiting import as '%s'" % (message)
+    print("Commiting import as '%s'" % message)
 
     global git_active_repo
     global git_active_tree
@@ -150,7 +151,7 @@ def git_commit(message):
 
     if git_old_tree == git_active_tree.id:
         # We don't wait t commit twice.
-        print "Nothing new here. Bailing out."
+        print("Nothing new here. Bailing out.")
         return
 
     c = git_active_commit

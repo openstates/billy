@@ -63,8 +63,6 @@ class FavoritedSearch(dict):
         meta = None
         abbr = self['search_abbr']
 
-        # import pdb;pdb.set_trace()
-
         if 'search_abbr' in self:
             if abbr == 'all':
                 results.append('All states')

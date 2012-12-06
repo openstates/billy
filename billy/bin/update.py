@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import sys
 import json
@@ -414,7 +415,7 @@ def main():
 
         if 'session-list' in args.actions:
             if hasattr(module, 'session_list'):
-                print "\n".join(module.session_list())
+                print("\n".join(module.session_list()))
             else:
                 raise ScrapeError('session_list() is not defined')
 

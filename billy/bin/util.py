@@ -22,7 +22,7 @@ COMMAND_MODULES = (
 def import_command_module(mod):
     try:
         importlib.import_module(mod)
-    except ImportError, e:
+    except ImportError as e:
         logger.warning(
             'error "{0}" prevented loading of {1} module'.format(e, mod))
 
