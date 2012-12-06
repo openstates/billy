@@ -75,7 +75,7 @@ def legislators(request, abbr):
     legislators = meta.legislators(extra_spec=spec, fields=fields)
 
     def sort_by_district(obj):
-        matchobj = re.search(r'\d+', obj.get('district', ''))
+        matchobj = re.search(r'\d+', obj.get('district', '') or '')
         if matchobj:
             return int(matchobj.group())
         else:
