@@ -16,9 +16,13 @@ if getattr(settings, 'USE_LOCKSMITH', False):
 
     class Authorizer(PistonKeyAuthentication):
         def challenge(self):
-            resp = HttpResponse("Authorization Required: \n"
-                                "obtain a key at http://services."
-                                "sunlightlabs.com/accounts/register/")
+            response = 'Authorization Required'
+            locksmith_url = getattr(settings, 'LOCKSMITH_REGISTRATION_URL',
+                                    None)
+            if locksmith_url:
+                response = '{0}:\n obtain a key at {1}'.format(response,
+                                                               locksmith_url)
+            resp = HttpResponse(response)
             resp.status_code = 401
             return resp
 
