@@ -117,6 +117,8 @@ class Document(dict):
         chamber = self['chamber']
         if chamber == 'joint':
             return 'Joint'
+        elif chamber is None:
+            return ''
         return self.metadata['chambers'][chamber]['name']
 
     @property
