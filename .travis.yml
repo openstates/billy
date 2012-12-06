@@ -1,9 +1,10 @@
 language: python
 python:
     - "2.7"
-install: pip install pymongo nose name_tools validictory scrapelib jellyfish unicodecsv Django pyes pytz celery boto --use-mirrors
-script: nosetests
 services: mongodb
+install: pip install pymongo nose name_tools validictory scrapelib jellyfish unicodecsv Django pyes pytz celery icalendar boto -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston --use-mirrors
+before_script: echo -e "BOUNDARY_SERVICE_URL = 'http://ec2-184-73-61-66.compute-1.amazonaws.com/'\nBOUNDARY_SERVICE_SETS='sldl,sldu'" > billy_settings.py
+script: nosetests && django-admin.py test api --settings=billy.tests.django_settings --pythonpath=.
 notifications:
     email:
         - jturk@sunlightfoundation.com

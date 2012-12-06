@@ -46,3 +46,20 @@ class LegislatorLookupTestCase(BaseTestCase):
 
     def test_status(self):
         self.assert_200()
+
+
+class LegislatorGeoTestCase(BaseTestCase):
+
+    url_tmpl = '/api/v1/legislators/geo/'
+    data = {'lat': +42.35670, 'long': -71.05690, 'fields': 'id'}
+
+    def test_correct_keys_present(self):
+        expected_keys = set([
+            u'chamber', u'state', u'id', u'district', u'boundary_id'])
+
+        for result in self.json:
+            self.assertEquals(set(result), expected_keys)
+
+    def test_status(self):
+        self.assert_200()
+

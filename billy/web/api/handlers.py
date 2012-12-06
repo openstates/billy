@@ -409,7 +409,8 @@ class LegislatorGeoHandler(BillyHandler):
             return []
 
         fields = _build_field_list(request)
-        fields['state'] = fields['district'] = fields['chamber'] = 1
+        if fields is not None:
+            fields['state'] = fields['district'] = fields['chamber'] = 1
         legislators = list(db.legislators.find({'$or': filters}, fields))
         for leg in legislators:
             leg['boundary_id'] = boundary_mapping[(leg[settings.LEVEL_FIELD],

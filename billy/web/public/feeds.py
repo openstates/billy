@@ -54,7 +54,7 @@ class VotesListFeed(GenericListFeed):
 
     def title(self, obj):
         s = u"{0}: Votes by {1}."
-        return s.format(Site.objects.all().domain, obj.display_name())
+        return s.format(Site.objects.all()[0].domain, obj.display_name())
 
     description = title
 
