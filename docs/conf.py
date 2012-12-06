@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import sys, os
+# flake8:  noqa
+import sys
+import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -8,10 +10,9 @@ sys.path.append(os.path.abspath('..'))
 
 from billy import __version__
 
-# -- General configuration -----------------------------------------------------
+# -- General configuration ----------------------------------------------------
 
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+# Add any Sphinx extension module names here, as strings.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'sphinx.ext.intersphinx', 'sphinx.ext.todo',
               'sphinx.ext.coverage', 'sphinx.ext.pngmath',

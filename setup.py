@@ -19,24 +19,23 @@ setup(name='billy',
       description='scraping, storing, and sharing legislative information',
       long_description=long_description,
       platforms=['any'],
-      entry_points="""
-[console_scripts]
+      entry_points="""[console_scripts]
 billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
-    install_requires=[
-        "Django>=1.4.2",
-        "boto",
-        "django-piston",
-        "icalendar",
-        "lxml>=2.2",
-        "name_tools>=0.1.2",
-        "nose",
-        "pymongo>=2.2",
-        "scrapelib>=0.7.0",
-        "unicodecsv",
-        "validictory>=0.7.1",
-        "pyes",
-        "celery",
-    ]
+      install_requires=[
+          "Django>=1.4.2",
+          "boto",
+          "django-piston",
+          "icalendar",
+          "lxml>=2.2",
+          "name_tools>=0.1.2",
+          "nose",
+          "pymongo>=2.2",
+          "scrapelib>=0.7.0",
+          "unicodecsv",
+          "validictory>=0.7.1",
+          "pyes",
+          "celery",
+      ]
 )
