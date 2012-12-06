@@ -48,7 +48,7 @@ class ScraperMeta(type):
     def __new__(meta, classname, bases, classdict):
         cls = type.__new__(meta, classname, bases, classdict)
 
-        abbr = getattr(cls, 'abbreviation', None)
+        abbr = getattr(cls, 'jurisdiction', None)
         scraper_type = getattr(cls, 'scraper_type', None)
 
         if abbr and scraper_type:
@@ -198,8 +198,8 @@ class Scraper(scrapelib.Scraper):
     def save_object(self, obj):
         self.log('save %s %s', obj['_type'], unicode(obj))
 
-        # copy over LEVEL_FIELD
-        obj[settings.LEVEL_FIELD] = getattr(self, 'abbreviation')
+        # copy jurisdiction to LEVEL_FIELD
+        obj[settings.LEVEL_FIELD] = getattr(self, 'jurisdiction')
 
         filename = obj.get_filename()
         self.output_names.add(filename)     # keep tally of all output names
