@@ -29,13 +29,13 @@ metadata = {
     ],
     "session_details": {
         "S1a": {"start_date": 1250000000.0, "type": "primary",
-               "display_name": "One A"},
+                "display_name": "One A"},
         "S1b": {"start_date": 1300000000.0, "type": "primary",
-               "display_name": "One B"},
+                "display_name": "One B"},
         "S2a": {"start_date": 1350000000.0, "type": "primary",
-               "display_name": "Two A"},
+                "display_name": "Two A"},
         "S2b": {"start_date": 1360000000.0, "type": "special",
-               "display_name": "Two B"}
+                "display_name": "Two B"}
     },
     "_partial_vote_bill_id": True
 }

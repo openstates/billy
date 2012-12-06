@@ -33,15 +33,11 @@ def setup_func():
 @with_setup(setup_func)
 def test_import_bill():
     companion_data = {'_type': 'bill', 'state': 'ex', 'bill_id': 'A1',
-            'chamber': 'upper', 'session': 'S1',
-            'title': 'companion',
-            'sponsors': [],
-            'versions': [],
-            'documents': [],
-            'votes': [],
-            'actions': [],
-            'companions': [],
-           }
+                      'chamber': 'upper', 'session': 'S1',
+                      'title': 'companion', 'sponsors': [], 'versions': [],
+                      'documents': [], 'votes': [], 'actions': [],
+                      'companions': [],
+                     }
     data = {'_type': 'bill', 'state': 'ex', 'bill_id': 'S1',
             'chamber': 'upper', 'session': 'S1',
             'subjects': ['Pigs', 'Sheep', 'Horses'],
@@ -60,10 +56,12 @@ def test_import_bill():
                           'url': 'http://example.com/fn'}],
             'actions': [{'action': 'Introduced', 'type': ['bill:introduced'],
                          'actor': 'upper', 'date': 1331000000},
-            {'action': 'Referred to committee', 'type': ['committee:referred'],
-                         'actor': 'upper', 'date': 1332000000},
-            {'action': 'Passed by voice vote', 'type': ['bill:passed'],
-                         'actor': 'upper', 'date': 1333000000},
+                        {'action': 'Referred to committee',
+                         'type': ['committee:referred'], 'actor': 'upper',
+                         'date': 1332000000},
+                        {'action': 'Passed by voice vote',
+                         'type': ['bill:passed'], 'actor': 'upper',
+                         'date': 1333000000},
                         {'action': 'Signed', 'type': ['governor:signed'],
                          'actor': 'governor', 'date': 1334000000},
                        ],
@@ -82,10 +80,10 @@ def test_import_bill():
     standalone_votes = {
         # chamber, session, bill id -> vote list
         ('upper', 'S1', 'S 1'): [
-          {'motion': 'house passage', 'chamber': 'lower', 'date': None,
-           'yes_count': 1, 'no_count': 0, 'other_count': 0,
-           'yes_votes': [], 'no_votes': [], 'other_votes': [],
-          }
+            {'motion': 'house passage', 'chamber': 'lower', 'date': None,
+             'yes_count': 1, 'no_count': 0, 'other_count': 0,
+             'yes_votes': [], 'no_votes': [], 'other_votes': [],
+            }
         ]
     }
 
@@ -180,10 +178,10 @@ def test_import_bill_with_partial_bill_vote_id():
     standalone_votes = {
         # chamber, session, bill id -> vote list
         ('upper', 'S1a', '1'): [
-          {'motion': 'house passage', 'chamber': 'lower', 'date': None,
-           'yes_count': 1, 'no_count': 0, 'other_count': 0,
-           'yes_votes': [], 'no_votes': [], 'other_votes': [],
-          }
+            {'motion': 'house passage', 'chamber': 'lower', 'date': None,
+             'yes_count': 1, 'no_count': 0, 'other_count': 0,
+             'yes_votes': [], 'no_votes': [], 'other_votes': [],
+            }
         ]
     }
 
@@ -259,7 +257,7 @@ def test_votematcher():
     for v in votes:
         v.pop('vote_id', None)
     votes.insert(2, {'motion': 'f', 'chamber': 'g', 'date': 'h',
-                  'yes_count': 5, 'no_count': 5, 'other_count': 5})
+                     'yes_count': 5, 'no_count': 5, 'other_count': 5})
 
     # setting ids now should restore old ids & give the new vote a new id
     vm.set_ids(votes)

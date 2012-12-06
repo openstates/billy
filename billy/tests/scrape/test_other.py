@@ -14,13 +14,13 @@ import datetime
 def test_legislator():
     l = Legislator('T1', 'upper', '1', 'Adam Smith', 'Adam', 'Smith')
     assert_equal(l, {'_type': 'person', 'full_name': 'Adam Smith',
-                            'first_name': 'Adam', 'last_name': 'Smith',
-                            'middle_name': '', 'suffixes': '', 'roles': [
-                                {'chamber': 'upper', 'term': 'T1',
-                                'role': 'member', 'start_date': None,
-                                'end_date': None, 'district': '1',
-                                'party': ''}],
-                            'offices': [], 'sources': []})
+                     'first_name': 'Adam', 'last_name': 'Smith',
+                     'middle_name': '', 'suffixes': '', 'roles': [
+                         {'chamber': 'upper', 'term': 'T1',
+                          'role': 'member', 'start_date': None,
+                          'end_date': None, 'district': '1',
+                          'party': ''}],
+                     'offices': [], 'sources': []})
 
     l.add_role('committee member', 'T1', committee='Some Committee',
                position='chairman')

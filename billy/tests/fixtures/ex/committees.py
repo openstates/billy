@@ -1,7 +1,8 @@
 import datetime
 
 
-committees = [{
+committees = [
+    {
         u'_all_ids': [u'EXC000001'],
         u'_id': u'EXC000001',
         u'_type': u'committee',
@@ -21,8 +22,8 @@ committees = [{
         u'parent_id': None,
         u'state': u'ex',
         u'subcommittee': None,
-        u'updated_at': datetime.datetime(2012, 8, 26, 0, 37, 49, 402000)},
-
+        u'updated_at': datetime.datetime(2012, 8, 26, 0, 37, 49, 402000)
+    },
     {
         u'_all_ids': [u'EXC000002'],
         u'_id': u'EXC000002',
@@ -39,5 +40,6 @@ committees = [{
         u'parent_id': None,
         u'state': u'ex',
         u'subcommittee': None,
-        u'updated_at': datetime.datetime(2012, 8, 26, 0, 37, 49, 402000)}
-    ]
+        u'updated_at': datetime.datetime(2012, 8, 26, 0, 37, 49, 402000)
+    }
+]

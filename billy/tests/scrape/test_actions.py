@@ -8,7 +8,7 @@ from billy.scrape.actions import Rule, BaseCategorizer
 test_actions = (
     'Referred to Committee on Bats; also referred to Fake Committee',
     'Goat action: walk around, eat grass.',
-    )
+)
 
 rules = (
 
@@ -34,7 +34,7 @@ rules = (
     Rule(r'Sponsored by (?P<legislators>.+)'),
 
     Rule(r'Thom', actor='weirdo'),
-    )
+)
 
 
 class Categorizer(BaseCategorizer):

@@ -46,13 +46,13 @@ def setup_func():
             u'type': u'member'},
 
             {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Phony',
-            u'committee_id': u'EXC000001',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        })
+             u'committee': u'Standing Committee on Phony',
+             u'committee_id': u'EXC000001',
+             u'state': u'ex',
+             u'subcommittee': None,
+             u'term': u'T1',
+             u'type': u'committee member'}],
+    })
 
     db.legislators.insert({
         u'_all_ids': [u'EXL000002'],
@@ -70,24 +70,25 @@ def setup_func():
         u'middle_name': u'',
         u'state': u'ex',
         u'suffixes': u'',
-        u'roles': [{
-            u'chamber': u'lower',
-            u'district': u'2',
-            u'end_date': None,
-            u'party': u'Democratic',
-            u'start_date': None,
-            u'state': u'ex',
-            u'term': u'T1',
-            u'type': u'member'},
-
-            {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Phony',
-            u'committee_id': u'EXC000001',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        })
+        u'roles': [
+            {
+                u'chamber': u'lower',
+                u'district': u'2',
+                u'end_date': None,
+                u'party': u'Democratic',
+                u'start_date': None,
+                u'state': u'ex',
+                u'term': u'T1',
+                u'type': u'member'},
+            {
+                u'chamber': u'lower',
+                u'committee': u'Standing Committee on Phony',
+                u'committee_id': u'EXC000001',
+                u'state': u'ex',
+                u'subcommittee': None,
+                u'term': u'T1',
+                u'type': u'committee member'}],
+    })
 
     db.legislators.insert({
         u'_all_ids': [u'EXL000003'],
@@ -115,14 +116,17 @@ def setup_func():
             u'term': u'T1',
             u'type': u'member'},
 
-            {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Fakeness',
-            u'committee_id': u'EXC000002',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        })
+            {
+                u'chamber': u'lower',
+                u'committee': u'Standing Committee on Fakeness',
+                u'committee_id': u'EXC000002',
+                u'state': u'ex',
+                u'subcommittee': None,
+                u'term': u'T1',
+                u'type': u'committee member'
+            }
+        ],
+    })
 
     # Insert an extra LOL legislator, to confirm model methods are
     # only returning a subset of the mongo records.
@@ -153,13 +157,13 @@ def setup_func():
             u'type': u'member'},
 
             {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Fakeness',
-            u'committee_id': u'EXC000002',
-            u'state': u'LO',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        })
+             u'committee': u'Standing Committee on Fakeness',
+             u'committee_id': u'EXC000002',
+             u'state': u'LO',
+             u'subcommittee': None,
+             u'term': u'T1',
+             u'type': u'committee member'}],
+    })
 
     db.committees.insert({
         u'_all_ids': [u'EXC000001'],
@@ -204,11 +208,7 @@ def setup_func():
     db.votes.insert({
         u'_id': u'EXV00000001',
         u'_type': u'vote',
-        u'_voters': [
-            u'EXL000001',
-            u'EXL000002',
-            u'EXL000003',
-            ],
+        u'_voters': [u'EXL000001', u'EXL000002', u'EXL000003'],
         u'bill_id': u'EXB00000001',
         u'chamber': u'upper',
         u'date': datetime.datetime(2011, 3, 7, 0, 0),
@@ -225,8 +225,7 @@ def setup_func():
         u'yes_votes': [
             {u'leg_id': u'EXL000001', u'name': u'FakeLegislator1'},
             {u'leg_id': u'EXL000002', u'name': u'FakeLegislator2'},
-            ]
-        })
+        ]})
 
     db.bills.insert({
         u'_all_ids': [u'EXB00000001'],
@@ -241,7 +240,7 @@ def setup_func():
             u'passed_lower': datetime.datetime(2011, 4, 15, 0, 0),
             u'passed_upper': None,
             u'signed': None
-            },
+        },
         u'actions': [
             {u'action': u'Fake Passed',
              u'actor': u'lower',
@@ -267,7 +266,7 @@ def setup_func():
         u'state': u'ex',
         u'title': u'A fake act.',
         u'type': [u'bill']
-        })
+    })
 
     db.bills.insert({
         u'_all_ids': [u'LOB00000001'],
@@ -282,7 +281,7 @@ def setup_func():
             u'passed_lower': datetime.datetime(2011, 4, 15, 0, 0),
             u'passed_upper': None,
             u'signed': None
-            },
+        },
         u'actions': [
             {u'action': u'LOL Passed',
              u'actor': u'lower',
@@ -308,4 +307,4 @@ def setup_func():
         u'state': u'ex',
         u'title': u'A fake act.',
         u'type': [u'bill']
-        })
+    })

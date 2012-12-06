@@ -1,7 +1,8 @@
 import datetime
 
 
-bills = [{
+bills = [
+    {
         u'_all_ids': [u'EXB00000001'],
         u'_current_session': True,
         u'_current_term': True,
@@ -14,7 +15,7 @@ bills = [{
             u'passed_lower': datetime.datetime(2011, 4, 15, 0, 0),
             u'passed_upper': None,
             u'signed': None
-            },
+        },
         u'actions': [
             {u'action': u'Fake Passed',
              u'actor': u'lower',
@@ -24,7 +25,8 @@ bills = [{
             {u'action': u'Fake introduced',
              u'actor': u'lower',
              u'date': datetime.datetime(2012, 1, 23, 0, 0),
-             u'related_entities': []}],
+             u'related_entities': []}
+        ],
         u'type': [u'bill:introduced'],
         u'alternate_titles': [],
         u'bill_id': u'AB 1',
@@ -41,7 +43,7 @@ bills = [{
         u'title': u'A fake act.',
         u'type': [u'bill'],
         u'subjects': [u'Labor and Employment']
-        },
+    },
 
     {
         u'_all_ids': [u'LOB00000001'],
@@ -56,7 +58,7 @@ bills = [{
             u'passed_lower': datetime.datetime(2011, 4, 15, 0, 0),
             u'passed_upper': None,
             u'signed': None
-            },
+        },
         u'actions': [
             {u'action': u'LOL Passed',
              u'actor': u'lower',
@@ -82,4 +84,5 @@ bills = [{
         u'state': u'ex',
         u'title': u'A fake act.',
         u'type': [u'bill']
-        }]
+    }
+]

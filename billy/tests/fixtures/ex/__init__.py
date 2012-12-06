@@ -41,10 +41,10 @@ metadata = {
         "S1": {"start_date": 1300000000.0, "type": "primary",
                "display_name": "Session One"},
         "Special1": {"start_date": 1330000000.0, "type": "special",
-               "display_name": "Special Session One"},
+                     "display_name": "Special Session One"},
         "S2": {"start_date": 1350000000.0, "type": "primary",
                "display_name": "Session Two"},
         "Special2": {"start_date": 1360000000.0, "type": "special",
-               "display_name": "Special Session Two"}
+                     "display_name": "Special Session Two"}
     }
 }

@@ -6,7 +6,7 @@ import os
 
 def _load_test_data(test_name):
     test_data = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-        "leg_merge_test_data")
+                             "leg_merge_test_data")
     folder = "%s/%s/" % (test_data, test_name)
     leg1 = json.loads(open(folder + "1.json", 'r').read())
     leg2 = json.loads(open(folder + "2.json", 'r').read())

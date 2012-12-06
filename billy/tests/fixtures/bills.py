@@ -11,9 +11,9 @@ b.add_document('fiscal note', 'http://example.com/fn1.doc',
 b.add_document('fiscal note', 'http://example.com/fn1.html',
                mimetype='text/html')
 b.add_version('introduced', 'http://example.com/v1.doc',
-               mimetype='application/msword')
+              mimetype='application/msword')
 b.add_version('introduced', 'http://example.com/v1.html',
-               mimetype='text/html')
+              mimetype='text/html')
 b.add_action('lower', 'introduced', datetime.date(2012, 1, 1),
              type='bill:introduced', legislators='Washington')
 b.add_action('lower', 'passed house without vote', datetime.date(2012, 1, 2),
@@ -29,4 +29,5 @@ b.add_companion('SB200')
 
 bill_with_multiple_types = Bill('S1', 'upper', 'SJR1',
                                 'Division of State - Consitutional Amendment',
-                        type=['joint resolution', 'constitutional amendment'])
+                                type=['joint resolution',
+                                      'constitutional amendment'])

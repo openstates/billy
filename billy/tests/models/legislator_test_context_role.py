@@ -42,16 +42,16 @@ def setup_func():
         u'yes_count': 47,
         u'yes_votes': [
             {u'leg_id': u'CAL000104', u'name': u'Ammiano'},
-            ]
-        }
+        ]
+    }
 
     # Add a vote for the current session bill.
     db.votes.insert(dict(vote, bill_id='CAB00007468',
-                               date=datetime.datetime(2011, 12, 6, 0, 0)))
+                         date=datetime.datetime(2011, 12, 6, 0, 0)))
 
     # Add a vote for the prior session bill.
     db.votes.insert(dict(vote, bill_id='CAB00005131',
-                               date=datetime.datetime(2009, 12, 6, 0, 0)))
+                         date=datetime.datetime(2009, 12, 6, 0, 0)))
 
     # Insert some test records.
     db.legislators.insert({
@@ -141,7 +141,7 @@ def setup_func():
             }
         ],
         "state": "ca",
-        })
+    })
 
     db.metadata.insert({
         u'_id': u'ca',
@@ -194,7 +194,8 @@ def setup_func():
                 u'display_name': u'2011-2012, 1st Special Session',
                 u'type': u'special'}},
 
-        u'terms': [{
+        u'terms': [
+            {
             u'+start_date': datetime.datetime(2008, 12, 1, 0, 0),
             u'end_year': 2010,
             u'name': u'20092010',
@@ -208,28 +209,31 @@ def setup_func():
                 u'20092010 Special Session 6',
                 u'20092010 Special Session 7',
                 u'20092010 Special Session 8'],
-           u'start_year': 2009},
-
-          {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
-           u'end_year': 2012,
-           u'name': u'20112012',
-           u'sessions': [u'20112012 Special Session 1', u'20112012'],
-           u'start_year': 2011},
-
-          {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
-           u'end_year': 2012,
-           u'name': u'fake-term',
-           u'sessions': [u'fake-session'],
-           u'start_year': 2011},
-
-          {u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
-           u'end_year': 2012,
-           u'name': u'fake-term2',
-           u'sessions': [u'fake-session2'],
-           u'start_year': 2011},
-
-        ]})
-    print db.name, db.metadata.count()
+            u'start_year': 2009
+            },
+            {
+                u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
+                u'end_year': 2012,
+                u'name': u'20112012',
+                u'sessions': [u'20112012 Special Session 1', u'20112012'],
+                u'start_year': 2011
+            },
+            {
+                u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
+                u'end_year': 2012,
+                u'name': u'fake-term',
+                u'sessions': [u'fake-session'],
+                u'start_year': 2011
+            },
+            {
+                u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),
+                u'end_year': 2012,
+                u'name': u'fake-term2',
+                u'sessions': [u'fake-session2'],
+                u'start_year': 2011
+            },
+        ]
+    })
 
     # A current session bill, where current session is 20112012.
     db.bills.insert({
@@ -257,9 +261,9 @@ def setup_func():
              u'name': u'Ammiano',
              u'official_type': u'LEAD_AUTHOR',
              u'type': u'primary'},
-             ],
+        ],
         u'state': u'ca',
-        })
+    })
 
     # A prior session bill, where prior is 20092010.
     db.bills.insert({
@@ -277,10 +281,11 @@ def setup_func():
         u'country': u'us',
         u'session': u'20092010 Special Session 4',
         u'sponsors': [
-            {u'leg_id': u'CAL000104', u'name': u'Ammiano', u'type': u'cosponsor'},
-            ],
+            {u'leg_id': u'CAL000104', u'name': u'Ammiano',
+             u'type': u'cosponsor'}
+        ],
         u'state': u'ca',
-        })
+    })
 
 
 '''

@@ -24,11 +24,11 @@ def setup_func():
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
                   'type': 'member'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'type': 'committee member',  'committee': 'Agriculture'},
+                  'type': 'committee member', 'committee': 'Agriculture'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'type': 'committee member',  'committee': 'Agriculture',
+                  'type': 'committee member', 'committee': 'Agriculture',
                   'subcommittee': 'Tractors'},
-              ],
+             ],
              'sources': [{'url': 'http://example.com/feynman'}],
             }
     leg_b = {'full_name': 'Albert Einstein', 'leg_id': 'EXL000002',
@@ -42,13 +42,13 @@ def setup_func():
                   'type': 'member'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
                   'position': 'chairman',
-                  'type': 'committee member',  'committee': 'Agriculture'},
+                  'type': 'committee member', 'committee': 'Agriculture'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                 'type': 'committee member',  'committee': 'Agriculture',
+                  'type': 'committee member', 'committee': 'Agriculture',
                   'subcommittee': 'Tractors'},
                  {'state': 'ex', 'term': 'T1', 'chamber': 'upper',
-                  'type': 'committee member',  'committee': 'Appropriations'},
-              ],
+                  'type': 'committee member', 'committee': 'Appropriations'},
+             ],
              'sources': [{'url': 'http://example.com/einstein'}],
             }
     # in a different term
@@ -68,7 +68,7 @@ def setup_func():
                   'subcommittee': 'Tractors'},
                  {'state': 'ex', 'term': 'T0', 'chamber': 'upper',
                   'type': 'committee member', 'committee': 'Appropriations'},
-              ],
+             ],
              'sources': [{'url': 'http://example.com/einstein'}],
             }
 

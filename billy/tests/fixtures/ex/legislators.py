@@ -1,7 +1,8 @@
 import datetime
 
 
-legislators = [{
+legislators = [
+    {
         u'_all_ids': [u'EXL000001'],
         u'_id': u'EXL000001',
         u'_locked_fields': [u'full_name'],
@@ -23,24 +24,28 @@ legislators = [{
         u'suffixes': u'',
         u'chamber': u'lower',
         u'district': u'1',
-        u'roles': [{
-            u'chamber': u'lower',
-            u'district': u'1',
-            u'end_date': None,
-            u'party': u'Democratic',
-            u'start_date': None,
-            u'state': u'ex',
-            u'term': u'T1',
-            u'type': u'member'},
-
-            {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Phony',
-            u'committee_id': u'EXC000001',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        },
+        u'roles': [
+            {
+                u'chamber': u'lower',
+                u'district': u'1',
+                u'end_date': None,
+                u'party': u'Democratic',
+                u'start_date': None,
+                u'state': u'ex',
+                u'term': u'T1',
+                u'type': u'member'
+            },
+            {
+                u'chamber': u'lower',
+                u'committee': u'Standing Committee on Phony',
+                u'committee_id': u'EXC000001',
+                u'state': u'ex',
+                u'subcommittee': None,
+                u'term': u'T1',
+                u'type': u'committee member'
+            }
+        ],
+    },
 
     {
         u'_all_ids': [u'EXL000002'],
@@ -60,24 +65,27 @@ legislators = [{
         u'suffixes': u'',
         u'chamber': u'lower',
         u'district': u'1',
-        u'roles': [{
-            u'chamber': u'lower',
-            u'district': u'2',
-            u'end_date': None,
-            u'party': u'Democratic',
-            u'start_date': None,
-            u'state': u'ex',
-            u'term': u'T1',
-            u'type': u'member'},
-
-            {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Phony',
-            u'committee_id': u'EXC000001',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        },
+        u'roles': [
+            {
+                u'chamber': u'lower',
+                u'district': u'2',
+                u'end_date': None,
+                u'party': u'Democratic',
+                u'start_date': None,
+                u'state': u'ex',
+                u'term': u'T1',
+                u'type': u'member'},
+            {
+                u'chamber': u'lower',
+                u'committee': u'Standing Committee on Phony',
+                u'committee_id': u'EXC000001',
+                u'state': u'ex',
+                u'subcommittee': None,
+                u'term': u'T1',
+                u'type': u'committee member'
+            }
+        ],
+    },
 
     {
         u'_all_ids': [u'EXL000003'],
@@ -97,21 +105,24 @@ legislators = [{
         u'suffixes': u'',
         u'chamber': u'lower',
         u'district': u'1',
-        u'roles': [{
-            u'chamber': u'lower',
-            u'district': u'3',
-            u'end_date': None,
-            u'party': u'Democratic',
-            u'start_date': None,
-            u'state': u'ex',
-            u'term': u'T1',
-            u'type': u'member'},
-
-            {u'chamber': u'lower',
-            u'committee': u'Standing Committee on Fakeness',
-            u'committee_id': u'EXC000002',
-            u'state': u'ex',
-            u'subcommittee': None,
-            u'term': u'T1',
-            u'type': u'committee member'}],
-        }]
+        u'roles': [
+            {
+                u'chamber': u'lower',
+                u'district': u'3',
+                u'end_date': None,
+                u'party': u'Democratic',
+                u'start_date': None,
+                u'state': u'ex',
+                u'term': u'T1',
+                u'type': u'member'},
+            {
+                u'chamber': u'lower',
+                u'committee': u'Standing Committee on Fakeness',
+                u'committee_id': u'EXC000002',
+                u'state': u'ex',
+                u'subcommittee': None,
+                u'term': u'T1',
+                u'type': u'committee member'}
+        ],
+    }
+]
