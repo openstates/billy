@@ -3,31 +3,6 @@
 {% load humanize %}
 {% load billy_utiltags %}
 
-{% block style %}
-<style>
-    /* Style the flag drop-down menu.*/
-    img.flag {
-        height: 10px;
-        width: 15px;
-        padding-right: 10px;
-        padding-left: 0px;
-        padding-top: 0px;
-        padding-bottom: 0px;
-        border: 0;
-        clear: right;
-    }
-
-    #mainFilter .select2-container {
-        width: 200px;
-    }
-
-    #mainFilter li {
-        float: None;
-        margin-right: 0px;
-    }
-</style>
-{% endblock %}
-
 {% block script %}
 <link rel="stylesheet" type="text/css" href="{% static 'select2-2.0/select2.css' %}"/>
 <script src="{% static 'select2-2.0/select2.min.js' %}"></script>

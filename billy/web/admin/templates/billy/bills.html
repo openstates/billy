@@ -4,18 +4,6 @@
 
 {% block title %}Bills{% endblock %}
 
-{% block style %}
-<style>
-.table th {
-	text-align: center;
-} 
-
-.table td {
-    text-align: right;
-}
-</style>
-{% endblock %}
-
 {% block content %}
 
 <div class="container-fluid">
@@ -41,7 +29,7 @@
 <div>
 {% for session, data in sessions.items %}
 <div class="pull-left">
-<table class="table-bordered table-striped table-condensed">
+<table class="table-bordered table-striped table-condensed bill-table">
   <tr><th style="text-align: center;" colspan="2">{{session}}</th></tr>
   {% for name, num in data.actions_per_month|sorted_items %}
     <tr><td>{{name}}</td><td>{{num|decimal_format}}</td></tr>

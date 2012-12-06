@@ -458,7 +458,7 @@ def bills(request, abbr):
 @login_required
 def summary_index(request, abbr, session):
 
-    object_types = 'votes actions versions sponsors documents sources'.split()
+    object_types = 'actions versions sponsors documents sources'.split()
 
     def build(context_set):
         summary = defaultdict(int)
