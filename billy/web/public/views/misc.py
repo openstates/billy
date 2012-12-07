@@ -8,7 +8,7 @@ import pymongo
 
 from django.shortcuts import render, redirect
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
@@ -121,7 +121,10 @@ def get_district(request, district_id):
         district_id,
         billy_settings.API_KEY
     )
-    f = urllib2.urlopen(qurl)
+    try:
+        f = urllib2.urlopen(qurl)
+    except urllib2.HTTPError:
+        return Http404('no such district')
     return HttpResponse(f)
 
 
