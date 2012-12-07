@@ -27,7 +27,7 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
-    all_metadata = map(Metadata.get_object, settings.ACTIVE_STATES)
+    all_metadata = db.metadata.find()
 
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))
