@@ -124,7 +124,7 @@ def get_district(request, district_id):
     try:
         f = urllib2.urlopen(qurl)
     except urllib2.HTTPError:
-        return Http404('no such district')
+        raise Http404('no such district')
     return HttpResponse(f)
 
 
