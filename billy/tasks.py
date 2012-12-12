@@ -2,14 +2,13 @@ import logging
 from celery.task.base import Task
 
 from billy.core import db, elasticsearch
-from . import plaintext
-
-log = logging.getLogger('billy.fulltext.elasticsearch')
+from billy.fulltext import plaintext
 
 
 class ElasticSearchPush(Task):
     # results go into ES
     ignore_result = True
+    _log = logging.getLogger('billy.fulltext.elasticsearch')
 
     def run(self, doc_id):
         doc = db.tracked_versions.find_one(doc_id)
@@ -22,9 +21,9 @@ class ElasticSearchPush(Task):
             db.tracked_versions.update({'_id': doc_id},
                                        {'$set': {'_elasticsearch': True}},
                                        safe=True)
-            log.info('pushed %s to ElasticSearch', doc_id)
+            self._log.info('pushed %s to ElasticSearch', doc_id)
 
         except Exception:
-            log.warning('error pushing %s to ElasticSearch', doc_id,
-                        exc_info=True)
+            self._log.warning('error pushing %s to ElasticSearch', doc_id,
+                              exc_info=True)
             raise

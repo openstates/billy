@@ -6,7 +6,7 @@ from billy.core import settings, db, s3bucket
 import boto.s3
 import scrapelib
 
-log = logging.getLogger('billy.fulltext.elasticsearch')
+log = logging.getLogger('billy.fulltext')
 
 
 def id_to_url(id):

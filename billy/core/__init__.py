@@ -130,7 +130,7 @@ def _configure_s3(aws_key, aws_secret, bucket):
 
 def _configure_celery():
     global celery
-    celery = Celery(include=['billy.fulltext.elasticsearch'])
+    celery = Celery(include=['billy.tasks'])
 
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
