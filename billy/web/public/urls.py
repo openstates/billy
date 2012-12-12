@@ -1,7 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
-from billy.web.public.views.events import EventsList
 from billy.web.public.views.bills import BillList, AllBillList, BillFeed
 from billy.web.public.views.region import ShowMoreLegislators
 from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
@@ -70,7 +69,7 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'billy.web.public.views.events',
 
-    url(r'^(?P<abbr>[a-z-]+)/events/$', EventsList.as_view(),
+    url(r'^(?P<abbr>[a-z-]+)/events/$', 'events',
         name='events'),
     url(r'^(?P<abbr>[a-z-]+)/events/rss/$', EventsFeed(),
         name='events_rss'),
