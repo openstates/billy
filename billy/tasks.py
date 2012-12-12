@@ -2,7 +2,7 @@ import logging
 from celery.task.base import Task
 
 from billy.core import db, elasticsearch
-from billy.fulltext import plaintext
+from billy.utils.fulltext import plaintext
 
 
 class ElasticSearchPush(Task):
