@@ -12,33 +12,11 @@ from django.contrib.sites.models import Site
 
 
 import billy
+from billy.core import settings
 from billy.models import db, Metadata
 from billy.models.pagination import IteratorPaginator
 
 from .utils import templatename, RelatedObjectsList
-
-
-class EventsList(RelatedObjectsList):
-    '''
-    Context:
-        - See RelatedObjectsList.get_context_data
-
-    Templates:
-        - billy/web/public/object_list.html
-        - billy/web/public/events_list_row.html
-    '''
-    collection_name = 'metadata'
-    sort_func = operator.itemgetter('when')
-    sort_reversed = True
-    paginator = IteratorPaginator
-    query_attr = 'events'
-    use_table = True
-    rowtemplate_name = templatename('events_list_row')
-    column_headers_tmplname = templatename('_events_column_headers')
-    show_per_page = 15
-    nav_active = 'events'
-    description_template = '{{obj.legislature_name}} Events'
-    title_template = 'Events - {{obj.legislature_name}}'
 
 
 def event_ical(request, abbr, event_id):
@@ -120,4 +98,22 @@ def event(request, abbr, event_id):
                        sources=event['sources'],
                        gcal_info=gcal_info,
                        gcal_string=gcal_string,
+                       nav_active='events'))
+
+
+def events(request, abbr):
+    '''
+    Context:
+      - XXX: FIXME
+
+    Templates:
+        - billy/web/public/events.html
+    '''
+    events = db.events.find({settings.LEVEL_FIELD: abbr})
+
+    return render(request,
+                  templatename('events'),
+                  dict(abbr=abbr,
+                       metadata=Metadata.get_object(abbr),
+                       events=events,
                        nav_active='events'))
