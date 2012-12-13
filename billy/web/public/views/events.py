@@ -109,11 +109,16 @@ def events(request, abbr):
     Templates:
         - billy/web/public/events.html
     '''
-    events = db.events.find({settings.LEVEL_FIELD: abbr})
+    recent_events = db.events.find({
+        settings.LEVEL_FIELD: abbr
+    }).sort("when", -1)
+    events = recent_events[:30]
+    recent_events.rewind()
 
     return render(request,
                   templatename('events'),
                   dict(abbr=abbr,
                        metadata=Metadata.get_object(abbr),
                        events=events,
-                       nav_active='events'))
+                       nav_active='events',
+                       recent_events=recent_events))
