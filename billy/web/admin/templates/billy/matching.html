@@ -45,6 +45,7 @@
                 {% for committee in committees %}
                 <option value="{{ committee|key:"_id" }}" >
                     {{ committee.chamber }}/{{ committee.committee }}
+                    {{committee.subcommittee}}
                     ({{committee|key:"_id"}})
                 </option>
                 {% endfor %}
