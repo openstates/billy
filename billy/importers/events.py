@@ -76,10 +76,8 @@ def import_events(abbr, data_dir, import_actions=False):
             entity['id'] = id
 
         for bill in data['related_bills']:
-            bill['_scraped_bill_id'] = bill['bill_id']
             bill_id = bill['bill_id']
             bill_id = fix_bill_id(bill_id)
-            bill['bill_id'] = ""
             db_bill = db.bills.find_one({
                 "$or": [
                     {
@@ -103,7 +101,7 @@ def import_events(abbr, data_dir, import_actions=False):
             # Events are really hard to pin to a chamber. Some of these are
             # also a committee considering a bill from the other chamber, or
             # something like that.
-            bill['bill_id'] = db_bill['_id']
+            bill['id'] = db_bill['_id']
         import_event(data)
     ensure_indexes()
 
