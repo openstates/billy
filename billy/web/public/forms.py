@@ -40,7 +40,7 @@ def get_filter_bills_form(metadata):
 
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
-            _status_choices = [('', '')]
+            _status_choices = []
             _chamber_choices = []
             for chamber_type in metadata['chambers']:
                 chamber_name = metadata['chambers'][chamber_type]['name']
@@ -49,13 +49,16 @@ def get_filter_bills_form(metadata):
                 _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
 
-            if len(_status_choices) == 4:
+            if len(_status_choices) == 3:
                 chamber = forms.MultipleChoiceField(
                     choices=_chamber_choices,
                     widget=forms.CheckboxSelectMultiple(),
                     required=False)
 
-            status = forms.ChoiceField(choices=_status_choices, required=False)
+            status = forms.MultipleChoiceField(
+                choices=_status_choices,
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
@@ -73,13 +76,14 @@ def get_filter_bills_form(metadata):
                 choices=(('upper', 'upper'), ('lower', 'lower')),
                 widget=forms.CheckboxSelectMultiple(), required=False)
 
-            status = forms.ChoiceField(
+            status = forms.MultipleChoiceField(
                 choices=(
-                    ('', ''),
                     ('passed_lower', 'Passed lower'),
                     ('passed_upper', 'Passed upper'),
-                    ('signed', 'Signed')
-                ), required=False)
+                    ('signed', 'Signed'),
+                    ),
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 
