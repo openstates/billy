@@ -64,7 +64,7 @@ class RelatedBillsList(RelatedObjectsList):
             chamber = form.data.getlist('chamber')
             session = form.data.get('session')
             type = form.data.get('type')
-            status = form.data.get('status')
+            status = form.data.getlist('status')
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
                 if metadata:
@@ -78,13 +78,13 @@ class RelatedBillsList(RelatedObjectsList):
                     '(%s)' %
                     metadata['session_details'][session]['display_name']
                 )
-            if status == 'passed_lower':
+            if 'passed_lower' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['lower']['name'])
-            elif status == 'passed_upper':
+            elif 'passed_upper' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['upper']['name'])
-            elif status == 'signed':
+            elif 'signed' in status:
                 long_description.append('which have been signed into law')
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},

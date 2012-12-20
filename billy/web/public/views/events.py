@@ -1,22 +1,24 @@
 """
     views specific to events
 """
-import operator
+import json
 import urllib
-import datetime as dt
+import datetime
 from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.contrib.sites.models import Site
+from django.template.response import TemplateResponse
 
+from djpjax import pjax
 
 import billy
 from billy.core import settings
 from billy.models import db, Metadata
-from billy.models.pagination import IteratorPaginator
+from billy.utils import JSONEncoderPlus
 
-from .utils import templatename, RelatedObjectsList
+from .utils import templatename
 
 
 def event_ical(request, abbr, event_id):
@@ -35,7 +37,7 @@ def event_ical(request, abbr, event_id):
     cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
-    cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
+    cal_event.add('dtend', (event['when'] + datetime.timedelta(hours=1)))
     cal_event.add('dtstamp', event['updated_at'])
 
     if "participants" in event:
@@ -75,7 +77,7 @@ def event(request, abbr, event_id):
     fmt = "%Y%m%dT%H%M%SZ"
 
     start_date = event['when'].strftime(fmt)
-    duration = dt.timedelta(hours=1)
+    duration = datetime.timedelta(hours=1)
     ed = (event['when'] + duration)
     end_date = ed.strftime(fmt)
 
@@ -100,7 +102,7 @@ def event(request, abbr, event_id):
                        gcal_string=gcal_string,
                        nav_active='events'))
 
-
+@pjax()
 def events(request, abbr):
     '''
     Context:
@@ -114,11 +116,33 @@ def events(request, abbr):
     }).sort("when", -1)
     events = recent_events[:30]
     recent_events.rewind()
+    now = datetime.datetime.now()
 
-    return render(request,
+    return TemplateResponse(request,
                   templatename('events'),
                   dict(abbr=abbr,
+                       now=now,
                        metadata=Metadata.get_object(abbr),
                        events=events,
                        nav_active='events',
                        recent_events=recent_events))
+
+
+def events_json_for_date(request, abbr, year, month):
+    spec = {
+        settings.LEVEL_FIELD: abbr,
+        }
+
+    # # Update the spec with month/year specific data.
+    # month = int(month)
+    # year = int(year)
+    # next_month = month + 1
+    # if month == 12:
+    #     next_month = 1
+    # month_start = datetime.datetime(month=month, year=year, day=1)
+    # month_end = datetime.datetime(month=next_month, year=year, day=1)
+    # spec['when'] = {'$gte': month_start, '$lt': month_end}
+
+    events = db.events.find(spec)
+    content = json.dumps(list(events), cls=JSONEncoderPlus)
+    return HttpResponse(content)
