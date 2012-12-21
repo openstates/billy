@@ -34,6 +34,7 @@
                 {% for leg in legs %}
                 <option value="{{ leg.leg_id }}" >
                 {{ leg.first_name }} {{ leg.last_name }}
+                {{leg.chamber}}
                 ({{ leg.leg_id }})
                 </option>
                 {% endfor %}
@@ -45,6 +46,7 @@
                 {% for committee in committees %}
                 <option value="{{ committee|key:"_id" }}" >
                     {{ committee.chamber }}/{{ committee.committee }}
+                    {{committee.subcommittee}}
                     ({{committee|key:"_id"}})
                 </option>
                 {% endfor %}
