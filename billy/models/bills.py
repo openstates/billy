@@ -404,7 +404,7 @@ class Bill(Document):
             data.append(('stage3',
                          'Passed ' + self.other_chamber_name,
                          'date_passed_' + self.other_chamber))
-        data.append(('stage4', 'Governor Signs', 'date_signed'))
+        data.append(('stage4', 'Signed into Law', 'date_signed'))
 
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()

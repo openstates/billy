@@ -1,22 +1,25 @@
 """
     views specific to events
 """
-import operator
+import json
 import urllib
-import datetime as dt
+import datetime
+import operator
 from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.contrib.sites.models import Site
+from django.template.response import TemplateResponse
 
+from djpjax import pjax
 
 import billy
 from billy.core import settings
 from billy.models import db, Metadata
-from billy.models.pagination import IteratorPaginator
+from billy.utils import JSONEncoderPlus
 
-from .utils import templatename, RelatedObjectsList
+from .utils import templatename
 
 
 def event_ical(request, abbr, event_id):
@@ -35,7 +38,7 @@ def event_ical(request, abbr, event_id):
     cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
-    cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
+    cal_event.add('dtend', (event['when'] + datetime.timedelta(hours=1)))
     cal_event.add('dtstamp', event['updated_at'])
 
     if "participants" in event:
@@ -75,7 +78,7 @@ def event(request, abbr, event_id):
     fmt = "%Y%m%dT%H%M%SZ"
 
     start_date = event['when'].strftime(fmt)
-    duration = dt.timedelta(hours=1)
+    duration = datetime.timedelta(hours=1)
     ed = (event['when'] + duration)
     end_date = ed.strftime(fmt)
 
@@ -101,24 +104,68 @@ def event(request, abbr, event_id):
                        nav_active='events'))
 
 
-def events(request, abbr):
+def _get_events(abbr, year, month):
+    spec = {
+        settings.LEVEL_FIELD: abbr,
+        }
+
+    # Update the spec with month/year specific data.
+    month = int(month)
+
+    # Increment the month to account for 0-based months in javascript.
+    month += 1
+
+    year = int(year)
+    next_month = month + 1
+    if month == 12:
+        next_month = 1
+    month_start = datetime.datetime(month=month, year=year, day=1)
+    month_end = datetime.datetime(month=next_month, year=year, day=1)
+    spec['when'] = {'$gte': month_start, '$lt': month_end}
+
+    events = list(db.events.find(spec))
+    events.sort(key=operator.itemgetter('when'), reverse=True)
+    return events
+
+
+def events_json_for_date(request, abbr, year, month):
+    events = _get_events(abbr, year, month)
+    content = json.dumps(list(events), cls=JSONEncoderPlus)
+    return HttpResponse(content)
+
+
+def events_html_for_date(request, abbr, year, month):
     '''
     Context:
-      - XXX: FIXME
+        now: current timedelta
+        events: list of events
 
     Templates:
         - billy/web/public/events.html
     '''
-    recent_events = db.events.find({
-        settings.LEVEL_FIELD: abbr
-    }).sort("when", -1)
-    events = recent_events[:30]
-    recent_events.rewind()
-
-    return render(request,
-                  templatename('events'),
+    events = _get_events(abbr, year, month)
+    display_date = datetime.datetime(year=int(year), month=int(month), day=1)
+    return render(request, templatename('events_list'),
                   dict(abbr=abbr,
+                       display_date=display_date,
                        metadata=Metadata.get_object(abbr),
                        events=events,
-                       nav_active='events',
-                       recent_events=recent_events))
+                       nav_active='events'))
+
+
+def events(request, abbr):
+    display_date = datetime.datetime.now()
+    return render(request, templatename('events'),
+                  dict(abbr=abbr,
+                       display_date=display_date,
+                       metadata=Metadata.get_object(abbr),
+                       nav_active='events'))
+
+
+def events_for_date(request, abbr, year=None, month=None):
+    display_date = datetime.datetime(year=int(year), month=int(month), day=1)
+    return render(request, templatename('events'),
+                  dict(abbr=abbr,
+                       display_date=display_date,
+                       metadata=Metadata.get_object(abbr),
+                       nav_active='events'))

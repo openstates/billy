@@ -1,9 +1,14 @@
+import datetime
+import urllib
+
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
+from django.contrib.sites.models import Site
 
 from billy.core import mdb as db, settings
 from .base import Document
 from .metadata import Metadata
+from .utils import CachedAttribute
 
 
 class Event(Document):
@@ -14,12 +19,29 @@ class Event(Document):
     def metadata(self):
         return Metadata.get_object(self[settings.LEVEL_FIELD])
 
-    def bills(self):
+    def bill_objects(self):
+        '''Returns a cursor of full bill objects for any bills that have
+        ids. Not in use anyware as of 12/18/12, but handy to have around.
+        '''
         bills = []
         for bill in self['related_bills']:
             if 'bill_id' in bill:
                 bills.append(bill['bill_id'])
         return db.bills.find({"_id": {"$in": bills}})
+
+    def bills(self):
+        '''Aliases the inaccesible underscore names and mislabed "bill_id"
+        field on event['related_bills'], which points to the mongo id,
+        whereas everywhere else bill_id refers to the human id like "HB 123."
+
+        The names were updated by 1f24792 on 12/18/12.
+        '''
+        for bill in self['related_bills']:
+            # If the old key name is present, rename the ids, else nothing.
+            if '_scraped_bill_id' in bill:
+                bill['id'] = bill['bill_id']
+                bill['bill_id'] = bill['_scraped_bill_id']
+            yield bill
 
     def committees(self):
         committees = []
@@ -28,8 +50,76 @@ class Event(Document):
                 committees.append(committee['committee_id'])
         return db.committees.find({"_id": {"$in": committees}})
 
+    @CachedAttribute
+    def committees_dict(self):
+        return dict((cmt['_id'], cmt) for cmt in self.committees())
+
     def get_absolute_url(self):
         slug = slugify(truncatewords(self['description'], 10))
         url = urlresolvers.reverse('event', args=[self[settings.LEVEL_FIELD],
                                                   self['_id']])
         return '%s%s/' % (url, slug)
+
+    def host(self):
+        '''Return the host committee.
+        '''
+        for participant in self['participants']:
+            if participant['type'] == 'host':
+                if 'committee_id' in participant:
+                    _id = participant['committee_id']
+                    return self.committees_dict[_id]
+
+    def other_committees(self):
+        comms = self.committees_dict.values()
+        comms.remove(self.host())
+        return comms
+
+    def host_chairs(self):
+        '''Returns a list of members that chair the host committee,
+        including "co-chair" and "chairperson." This could concievalby
+        yield a false positive if the person's title is 'dunce chair'.
+        '''
+        chairs = []
+        # Host is guaranteed to be a committe or none.
+        host = self.host()
+        if host is None:
+            return
+        for member, full_member in host.members_objects:
+            if 'chair' in member.get('role', '').lower():
+                chairs.append((member, full_member))
+        return chairs
+
+    def host_has_multiple_chairs(self):
+        '''True or false: are there multiple chairs in the host committee?
+        '''
+        return 1 < len(self.host_chairs())
+
+    def host_members(self):
+        '''Return the members of the host committee.
+        '''
+        host = self.host()
+        if host is None:
+            return
+        for member, full_member in host.members_objects:
+            yield full_member
+
+    def gcal_string(self):
+
+        dt_format = "%Y%m%dT%H%M%SZ"
+        start_date = self['when'].strftime(dt_format)
+        duration = datetime.timedelta(hours=1)
+        end_data = (self['when'] + duration)
+        end_date = end_data.strftime(dt_format)
+
+        gcal_info = {
+            "action": "TEMPLATE",
+            "text": self['description'].encode('utf-8'),
+            "dates": "%s/%s" % (start_date, end_date),
+            "details": "",
+            "location": self['location'].encode('utf-8'),
+            "trp": "false",
+            "sprop": "http://%s/" % Site.objects.all()[0].domain,
+            "sprop": "name:billy"
+        }
+        gcal_string = urllib.urlencode(gcal_info)
+        return gcal_string
