@@ -153,17 +153,12 @@ def events_html_for_date(request, abbr, year, month):
                        nav_active='events'))
 
 
-def events(request, abbr):
-    display_date = datetime.datetime.now()
-    return render(request, templatename('events'),
-                  dict(abbr=abbr,
-                       display_date=display_date,
-                       metadata=Metadata.get_object(abbr),
-                       nav_active='events'))
-
-
-def events_for_date(request, abbr, year=None, month=None):
-    display_date = datetime.datetime(year=int(year), month=int(month), day=1)
+def events(request, abbr, year=None, month=None):
+    if year and month:
+        display_date = datetime.datetime(year=int(year), month=int(month),
+                                         day=1)
+    else:
+        display_date = datetime.datetime.now()
     return render(request, templatename('events'),
                   dict(abbr=abbr,
                        display_date=display_date,
