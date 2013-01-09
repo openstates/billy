@@ -113,7 +113,6 @@ class SquishedWhitespaceNode(template.Node):
         return output
 
 
-@register.inclusion_tag(templatename('_favorite'), takes_context=True)
 def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
              params=None):
     '''Check whether the object with the given type and id is currently
@@ -152,6 +151,13 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
                 is_favorite=_is_favorite, request=request,
                 abbr=abbr or context['abbr'],
                 params=params or urllib.urlencode(request.GET))
+
+
+register.inclusion_tag(
+    templatename('_favorite'), takes_context=True)(favorite)
+register.inclusion_tag(
+    templatename('_favorite_short'),
+    takes_context=True, name='favorite_short')(favorite)
 
 
 @register.inclusion_tag(templatename('_notification_preference'))
