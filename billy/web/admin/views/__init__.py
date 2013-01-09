@@ -687,7 +687,11 @@ def bad_vote_list(request, abbr):
 def legislators(request, abbr):
     meta = metadata(abbr)
 
-    report = db.reports.find_one({'_id': abbr})['legislators']
+    report = db.reports.find_one({'_id': abbr})
+    if not report:
+        raise Http404('No report was found for abbr %r.' % abbr)
+    else:
+        report = report['legislators']
 
     chambers = meta['chambers'].copy()
     for chamber_type, chamber in chambers.iteritems():

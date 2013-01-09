@@ -6,10 +6,7 @@ from billy.models import db
 
 def get_region_select_form(data):
     abbrs = [('', '')]
-    spec = {}
-    if hasattr(settings, 'ACTIVE_STATES'):
-        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
-    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
     abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
