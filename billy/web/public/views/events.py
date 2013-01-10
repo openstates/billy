@@ -105,6 +105,9 @@ def event(request, abbr, event_id):
 
 
 def _get_events(abbr, year, month):
+    '''Get events that occur during the specified year-month. The month
+    is 0-based to match the input from javascript.
+    '''
     spec = {
         settings.LEVEL_FIELD: abbr,
         }
@@ -144,7 +147,7 @@ def events_html_for_date(request, abbr, year, month):
         - billy/web/public/events.html
     '''
     events = _get_events(abbr, year, month)
-    display_date = datetime.datetime(year=int(year), month=int(month), day=1)
+    display_date = datetime.datetime(year=int(year), month=int(month) + 1, day=1)
     return render(request, templatename('events_list'),
                   dict(abbr=abbr,
                        display_date=display_date,
@@ -155,6 +158,8 @@ def events_html_for_date(request, abbr, year, month):
 
 def events(request, abbr, year=None, month=None):
     if year and month:
+        if month == "0":
+            month = 1
         display_date = datetime.datetime(year=int(year), month=int(month),
                                          day=1)
     else:
