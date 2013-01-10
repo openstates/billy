@@ -660,7 +660,7 @@ def bill_list(request, abbr):
     if exceptions:
         spec['_id'] = {'$nin': list(exceptions)}
         query_text += ' (excluding {0} exceptions)'.format(len(exceptions))
-    bills = list(db.bills.find(spec))
+    bills = list(mdb.bills.find(spec))
 
     bill_ids = [b['_id'] for b in bills if b['_id'] not in exceptions]
 
