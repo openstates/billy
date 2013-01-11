@@ -10,49 +10,15 @@ A few notes from our initial tests of this (Thom 12/20/2012)
   set of contstraints, but will get (ie.,
 
 '''
-# import sys, os
-# sys.path.append('/home/thom/sunlight/openstates/site')
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'openstates_site.settings'
-
 import json
 import logging
 import urlparse
-#from celery.task.base import Task
+from celery.task.base import Task
 from django.contrib.auth.models import User
-from billy.core import db, elasticsearch, settings, user_db
+from billy.core import settings, user_db
 from billy.utils import JSONEncoderPlus
-from billy.utils.fulltext import plaintext
 
 import requests
-
-
-class Task(object):
-    '''A dummy task to temporarily remove celery from the equation.
-    '''
-
-
-class ElasticSearchPush(Task):
-    # results go into ES
-    ignore_result = True
-    _log = logging.getLogger('billy.tasks.ElasticSearchPush')
-
-    def run(self, doc_id):
-        doc = db.tracked_versions.find_one(doc_id)
-
-        try:
-            text = plaintext(doc_id)
-
-            elasticsearch.index(dict(doc, text=text), 'bills', 'version',
-                                id=doc_id)
-            db.tracked_versions.update({'_id': doc_id},
-                                       {'$set': {'_elasticsearch': True}},
-                                       safe=True)
-            self._log.info('pushed %s to ElasticSearch', doc_id)
-
-        except Exception:
-            self._log.warning('error pushing %s to ElasticSearch', doc_id,
-                              exc_info=True)
-            raise
 
 
 class ScoutPush(Task):
@@ -101,7 +67,6 @@ class ScoutPush(Task):
         payload = json.dumps(payload, cls=JSONEncoderPlus)
         resp = requests.post(url, data=payload)
 
-
     def _translate_filter_data(self, params):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
@@ -118,7 +83,7 @@ class ScoutPush(Task):
             'search_state': 'state',
             'session': 'search_window',
             'sponsor__leg_id': 'spnosor_id'
-            }
+        }
 
         for k, v in params.items():
             print k, v
@@ -142,13 +107,3 @@ class ScoutPush(Task):
                 result[api_param_name] = v
 
         return result
-
-
-
-def main():
-    for user in user_db.profiles.find():
-        ScoutPush().run(user['_id'])
-
-
-if __name__ == '__main__':
-    main()

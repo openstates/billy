@@ -4,7 +4,7 @@ import traceback
 
 from billy.core import db, settings
 from billy.commands import BaseCommand
-from billy.tasks import ElasticSearchPush
+from billy.tasks.fulltext import ElasticSearchPush
 
 
 class SyncVersions(BaseCommand):
