@@ -81,6 +81,8 @@ class ListViewBase(TemplateView):
             params = dict(self.request.GET.items())
             if 'page' in params:
                 del params['page']
+            for k, v in params.iteritems():
+                params[k] = unicode(v).encode('utf8')
             context.update(get_params=urllib.urlencode(params))
 
         return context

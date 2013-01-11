@@ -147,11 +147,17 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     # and to default to 'all' for the all bills search.
     abbr = abbr or context.get('abbr', 'all')
 
+    # use request.GET for params if not present
+    if not params:
+        params = dict(request.GET)
+        for k, v in params.iteritems():
+            params[k] = unicode(v).encode('utf8')
+
     return dict(extra_spec,
                 obj_type=obj_type, obj_id=obj_id,
                 is_favorite=_is_favorite, request=request,
                 abbr=abbr or context['abbr'],
-                params=params or urllib.urlencode(request.GET))
+                params=params)
 
 
 @register.inclusion_tag(templatename('_notification_preference'))
