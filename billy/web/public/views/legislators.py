@@ -176,10 +176,10 @@ def legislator(request, abbr, _id, slug=None):
             district_id = None
 
     sponsored_bills = legislator.sponsored_bills(
-        limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
+        limit=6, sort=[('action_dates.first', pymongo.DESCENDING)])
 
     # Note to self: Another slow query
-    legislator_votes = legislator.votes_5_sorted()
+    legislator_votes = legislator.votes_6_sorted()
     has_votes = bool(legislator_votes)
     feed_entries = legislator.feed_entries()
     feed_entries_list = list(feed_entries.limit(5))
@@ -190,7 +190,7 @@ def legislator(request, abbr, _id, slug=None):
              roles=legislator.roles_manager, abbr=abbr,
              district_id=district_id, metadata=meta, legislator=legislator,
              sources=legislator['sources'],
-             sponsored_bills=sponsored_bills,
+             sponsored_bills=list(sponsored_bills),
              legislator_votes=list(legislator_votes),
              has_feed_entries=bool(feed_entries_list),
              feed_entries=feed_entries_list[:4],
