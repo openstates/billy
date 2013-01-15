@@ -1,5 +1,6 @@
 import urllib
 import pymongo
+import itertools
 
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -319,12 +320,17 @@ def bill(request, abbr, session, bill_id):
     else:
         sponsors = bill.sponsors_manager.first_fifteen
 
+    votes = bill.votes_manager()
+    div, mod = divmod(votes.count(), 2)
+
     return render(
         request, templatename('bill'),
         dict(vote_preview_row_template=templatename('vote_preview_row'),
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
+             votes_col1=itertools.islice(votes, div + 1),
+             votes_col2=itertools.islice(votes, div),
              events=events,
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
