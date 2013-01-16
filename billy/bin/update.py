@@ -2,6 +2,7 @@
 from __future__ import print_function
 import os
 import sys
+import pdb
 import json
 import glob
 import logging
@@ -216,6 +217,8 @@ def main():
                                            'settings for the scraper')
 
         parser.add_argument('module', type=str, help='scraper module (eg. nc)')
+        parser.add_argument('--pdb', action='store_true', default=False,
+                            help='invoke PDB when exception is raised')
         what.add_argument('-s', '--session', action='append',
                           dest='sessions', default=[],
                           help='session(s) to scrape')
@@ -252,6 +255,15 @@ def main():
                             dest='SCRAPELIB_RETRY_WAIT_SECONDS')
 
         args = parser.parse_args()
+
+        if args.pdb:
+            # turn on PDB-on-error mode
+            # stolen from http://stackoverflow.com/questions/1237379/
+            # if this causes problems in interactive mode check that page
+            def _tb_info(type, value, tb):
+                traceback.print_exception(type, value, tb)
+                pdb.pm()
+            sys.excepthook = _tb_info
 
         # inject scraper paths so scraper module can be found
         for newpath in settings.SCRAPER_PATHS:
