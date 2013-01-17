@@ -489,7 +489,7 @@ class Bill(Document):
             if re.findall('\d+', query):
                 _id_filter = dict(_filter)
                 _id_filter['bill_id'] = fix_bill_id(query).upper()
-                result = db.bills.find(_id_filter)
+                result = db.bills.find(_id_filter, fields=bill_fields)
                 if result:
                     return result
 
@@ -529,4 +529,4 @@ class Bill(Document):
             _filter['title'] = {'$regex': query, '$options': 'i'}
 
         # return query
-        return db.bills.find(_filter, bill_fields)
+        return db.bills.find(_filter, fields=bill_fields)
