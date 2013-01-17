@@ -13,7 +13,6 @@ from billy.models.pagination import CursorPaginator, IteratorPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
-from .search import search_by_bill_id
 
 
 EVENT_PAGE_COUNT = 10
@@ -140,13 +139,7 @@ class RelatedBillsList(RelatedObjectsList):
         # If search params are given:
         form = FilterBillsForm(self.request.GET)
 
-        # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        if search_text:
-            found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
-                                                 search_text)
-            if found_by_bill_id:
-                return IteratorPaginator(found_by_bill_id)
 
         chamber = form.data.get('chamber')
         if chamber:

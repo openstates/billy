@@ -237,7 +237,7 @@ class BillSearchHandler(BillyHandler):
         # attach votes if necessary
         bills = list(query)
         bill_ids = [bill['_id'] for bill in bills]
-        vote_fields = _get_vote_fields(bill_fields)
+        vote_fields = _get_vote_fields(bill_fields) or []
         if 'votes' in bill_fields or vote_fields:
             # add bill_id to vote_fields for relating back
             votes = list(db.votes.find({'bill_id': {'$in': bill_ids}},
