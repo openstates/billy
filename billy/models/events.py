@@ -3,9 +3,9 @@ import urllib
 
 from django.core import urlresolvers
 from django.template.defaultfilters import slugify, truncatewords
-from django.contrib.sites.models import Site
 
 from billy.core import mdb as db, settings
+from billy.utils import get_domain
 from .base import Document
 from .metadata import Metadata
 from .utils import CachedAttribute
@@ -118,7 +118,7 @@ class Event(Document):
             "details": "",
             "location": self['location'].encode('utf-8'),
             "trp": "false",
-            "sprop": "http://%s/" % Site.objects.all()[0].domain,
+            "sprop": "http://%s/" % get_domain(),
             "sprop": "name:billy"
         }
         gcal_string = urllib.urlencode(gcal_info)

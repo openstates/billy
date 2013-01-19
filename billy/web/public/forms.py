@@ -1,5 +1,4 @@
 from django import forms
-from django.conf import settings
 
 from billy.models import db
 
@@ -78,7 +77,7 @@ def get_filter_bills_form(metadata):
                     ('passed_lower', 'Passed lower'),
                     ('passed_upper', 'Passed upper'),
                     ('signed', 'Signed'),
-                    ),
+                ),
                 widget=forms.CheckboxSelectMultiple(),
                 required=False)
 

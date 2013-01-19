@@ -101,7 +101,6 @@ class ScoutPush(Task):
         payload = json.dumps(payload, cls=JSONEncoderPlus)
         resp = requests.post(url, data=payload)
 
-
     def _translate_filter_data(self, params):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
@@ -118,7 +117,7 @@ class ScoutPush(Task):
             'search_state': 'state',
             'session': 'search_window',
             'sponsor__leg_id': 'spnosor_id'
-            }
+        }
 
         for k, v in params.items():
             print k, v
@@ -142,7 +141,6 @@ class ScoutPush(Task):
                 result[api_param_name] = v
 
         return result
-
 
 
 def main():

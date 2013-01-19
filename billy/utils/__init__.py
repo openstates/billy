@@ -123,3 +123,12 @@ def find_bill(query, fields=None):
         query['alternate_bill_ids'] = bill_id
         bill = db.bills.find_one(query, fields=fields)
     return bill
+
+try:
+    from django.contrib.sites.models import Site
+
+    def get_domain():
+        return Site.objects.all()[0].domain
+except ImportError:
+    def get_domain():           # noqa
+        return 'example.com'

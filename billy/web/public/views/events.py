@@ -9,15 +9,11 @@ from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
-from django.contrib.sites.models import Site
-from django.template.response import TemplateResponse
-
-from djpjax import pjax
 
 import billy
 from billy.core import settings
 from billy.models import db, Metadata
-from billy.utils import JSONEncoderPlus
+from billy.utils import JSONEncoderPlus, get_domain
 
 from .utils import templatename
 
@@ -35,7 +31,7 @@ def event_ical(request, abbr, event_id):
 
     cal_event = Event()
     cal_event.add('summary', event['description'])
-    cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
+    cal_event['uid'] = "%s@%s" % (event['_id'], get_domain())
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
     cal_event.add('dtend', (event['when'] + datetime.timedelta(hours=1)))
@@ -89,7 +85,7 @@ def event(request, abbr, event_id):
         "details": "",
         "location": event['location'].encode('utf-8'),
         "trp": "false",
-        "sprop": "http://%s/" % Site.objects.all()[0].domain,
+        "sprop": "http://%s/" % get_domain(),
         "sprop": "name:billy"
     }
     gcal_string = urllib.urlencode(gcal_info)
@@ -110,7 +106,7 @@ def _get_events(abbr, year, month):
     '''
     spec = {
         settings.LEVEL_FIELD: abbr,
-        }
+    }
 
     # Update the spec with month/year specific data.
     month = int(month)
@@ -147,7 +143,8 @@ def events_html_for_date(request, abbr, year, month):
         - billy/web/public/events.html
     '''
     events = _get_events(abbr, year, month)
-    display_date = datetime.datetime(year=int(year), month=int(month) + 1, day=1)
+    display_date = datetime.datetime(year=int(year), month=int(month) + 1,
+                                     day=1)
     return render(request, templatename('events_list'),
                   dict(abbr=abbr,
                        display_date=display_date,

@@ -96,7 +96,7 @@ def deactivate_legislators(current_term, abbr):
                     'term': current_term,
                     'type': 'member',
                     settings.LEVEL_FIELD: abbr,
-                    'end_date': {'$ne':None}}}}
+                    'end_date': {'$ne': None}}}}
             ]}):
 
         if 'old_roles' not in leg:

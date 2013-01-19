@@ -1,6 +1,5 @@
 import urllib
 import pymongo
-import itertools
 
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -319,8 +318,6 @@ def bill(request, abbr, session, bill_id):
         sponsors = bill.sponsors_manager
     else:
         sponsors = bill.sponsors_manager.first_fifteen
-
-    votes = bill.votes_manager()
 
     return render(
         request, templatename('bill'),
