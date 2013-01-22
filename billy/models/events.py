@@ -25,8 +25,8 @@ class Event(Document):
         '''
         bills = []
         for bill in self['related_bills']:
-            if 'bill_id' in bill:
-                bills.append(bill['bill_id'])
+            if 'id' in bill:
+                bills.append(bill['id'])
         return db.bills.find({"_id": {"$in": bills}})
 
     def bills(self):
