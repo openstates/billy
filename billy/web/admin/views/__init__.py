@@ -570,6 +570,9 @@ def object_json(request, collection, _id):
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
     obj = getattr(db, collection).find_one(_id)
+    if obj is None:
+        raise Http404('No objected was found with _id: %r' % _id)
+
     obj = OrderedDict(sorted(obj.items()))
 
     obj_id = obj['_id']
