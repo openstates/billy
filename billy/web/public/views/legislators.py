@@ -223,7 +223,7 @@ def legislator_inactive(request, abbr, legislator):
     sponsored_bills = legislator.sponsored_bills(
         limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
 
-    legislator_votes = legislator.votes_5_sorted()
+    legislator_votes = legislator.votes_6_sorted()
     has_votes = bool(legislator_votes)
 
     return render(

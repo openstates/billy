@@ -3,11 +3,11 @@ from itertools import islice
 import pymongo
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
-from django.contrib.sites.models import Site
 from django.utils.html import strip_tags
 from django.template.defaultfilters import truncatewords
 
 from billy.models import db
+from billy.utils import get_domain
 
 
 def take(n, iterable):
@@ -54,7 +54,7 @@ class VotesListFeed(GenericListFeed):
 
     def title(self, obj):
         s = u"{0}: Votes by {1}."
-        return s.format(Site.objects.all()[0].domain, obj.display_name())
+        return s.format(get_domain(), obj.display_name())
 
     description = title
 
@@ -77,7 +77,7 @@ class NewsListFeed(GenericListFeed):
 
     def title(self, obj):
         s = u"{0}: News stories mentioning {1}."
-        return s.format(Site.objects.all()[0].domain, obj.display_name())
+        return s.format(get_domain(), obj.display_name())
 
     description = title
 
@@ -102,7 +102,7 @@ class EventsFeed(GenericListFeed):
 
     def title(self, obj):
         s = u"{0}: {1} legislative events."
-        return s.format(Site.objects.all()[0].domain, obj.display_name())
+        return s.format(get_domain(), obj.display_name())
 
     description = title
 
