@@ -35,11 +35,6 @@ urlpatterns = patterns(
 urlpatterns += patterns(
     '',
 
-    # delete this once real login lands
-    (r'^login/$', 'django.contrib.auth.views.login',
-     {'template_name': 'billy/web/public/login.html'}
-    ),
-
     url(r'^profile/$', 'billy.web.public.views.misc.user_profile',
         name='user_profile'),
     url(r'^get_user_latlong/$', 'billy.web.public.views.misc.get_user_latlong',
