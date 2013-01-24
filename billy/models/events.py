@@ -46,8 +46,9 @@ class Event(Document):
     def committees(self):
         committees = []
         for committee in self['participants']:
-            if 'committee_id' in committee:
-                committees.append(committee['committee_id'])
+            _id = committee['id']
+            if _id:
+                committees.append(_id)
         return db.committees.find({"_id": {"$in": committees}})
 
     @CachedAttribute
@@ -65,9 +66,10 @@ class Event(Document):
         '''
         for participant in self['participants']:
             if participant['type'] == 'host':
-                if 'committee_id' in participant:
-                    _id = participant['committee_id']
-                    return self.committees_dict[_id]
+                if participant['participant_type'] == 'committee':
+                    _id = participant['id']
+                    if _id:
+                        return self.committees_dict.get(_id)
 
     def other_committees(self):
         comms = self.committees_dict.values()
