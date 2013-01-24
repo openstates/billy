@@ -128,7 +128,7 @@ try:
     from django.contrib.sites.models import Site
 
     def get_domain():
-        return Site.objects.all()[0].domain
+        return Site.objects.get_current().domain
 except ImportError:
     def get_domain():           # noqa
         return 'example.com'
