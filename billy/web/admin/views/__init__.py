@@ -478,15 +478,18 @@ def summary_index(request, abbr, session):
         res.update(bills=build(bills))
 
         return res
-    summary = build_summary(abbr)
 
-    return render(request, 'billy/summary_index.html', {'summary': summary})
+    summary = build_summary(abbr)
+    context = {'summary': summary, 'object_types': object_types,
+               'abbr': abbr, 'session': session}
+    return render(request, 'billy/summary_index.html', context)
 
 
 @login_required
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                        collections=("bills", "legislators", "committees"),
                        dumps=json.dumps, Decimal=decimal.Decimal):
+
     session = request.GET['session']
     object_type = request.GET['object_type']
     key = request.GET['key']
@@ -570,6 +573,10 @@ def object_json(request, collection, _id):
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
     obj = getattr(db, collection).find_one(_id)
+    if obj is None:
+        msg = 'No object found with id %r in collection %r'
+        raise Http404(msg % (_id, collection))
+
     obj = OrderedDict(sorted(obj.items()))
 
     obj_id = obj['_id']
