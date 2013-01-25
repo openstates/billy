@@ -158,12 +158,13 @@ class BillHandler(BillyHandler):
                      'bill_id': bill_id}
             if chamber:
                 query['chamber'] = chamber.lower()
+
         fields = _build_field_list(request)
         bill = find_bill(query, fields=fields)
         vote_fields = _get_vote_fields(fields)
         # include votes if no fields are specified, if it is specified, or
         # if subfields are specified
-        if not fields or 'votes' in fields or vote_fields:
+        if bill and (not fields or 'votes' in fields or vote_fields):
             bill['votes'] = list(db.votes.find({'bill_id': bill['_id']},
                                                fields=vote_fields))
         return bill
@@ -236,7 +237,7 @@ class BillSearchHandler(BillyHandler):
         # attach votes if necessary
         bills = list(query)
         bill_ids = [bill['_id'] for bill in bills]
-        vote_fields = _get_vote_fields(bill_fields)
+        vote_fields = _get_vote_fields(bill_fields) or []
         if 'votes' in bill_fields or vote_fields:
             # add bill_id to vote_fields for relating back
             votes = list(db.votes.find({'bill_id': {'$in': bill_ids}},

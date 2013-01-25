@@ -122,7 +122,7 @@ def search(request, abbr):
         return render(request, templatename('search_results_no_query'),
                       {'abbr': abbr})
 
-    search_text = request.GET['search_text']
+    search_text = unicode(request.GET['search_text']).encode('utf8')
 
     # First try to get by bill_id.
     if re.search(r'\d', search_text):

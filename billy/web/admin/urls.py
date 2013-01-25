@@ -29,6 +29,12 @@ urlpatterns = patterns(
     url(r'^(?P<abbr>[a-z-]+)/matching-remove/(?P<id>.+)/$', 'matching.remove',
         name='admin_matching_remove'),
 
+    # Edit a Legislator
+    url(r'^legislators-edit/(?P<id>[\w-]+)/$', 'legislator_edit',
+        name='admin_legislator_edit'),
+    url(r'^legislators-edit-commit/$', 'legislator_edit_commit',
+        name='admin_legislator_edit_commit'),
+
 
     # admin overview pages
     url(r'^(?P<abbr>[a-z-]+)/$', 'overview', name='admin_overview'),
@@ -44,11 +50,6 @@ urlpatterns = patterns(
         name='admin_legislators'),
     url(r'^legislators/(?P<id>[\w-]+)/retire/$', 'retire_legislator',
         name='retire_legislator'),
-    url(r'^legislators-edit/(?P<id>[\w-]+)/$', 'legislator_edit',
-        name='admin_legislator_edit'),
-    url(r'^legislators-edit-commit/$', 'legislator_edit_commit',
-        name='admin_legislator_edit_commit'),
-
 
     # bills
     url(r'^(?P<abbr>[a-z-]+)/bills/$', 'bills', name='admin_bills'),

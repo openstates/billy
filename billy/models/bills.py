@@ -486,11 +486,20 @@ class Bill(Document):
             if '<a href' in query:
                 return db.bills.find({settings.LEVEL_FIELD: None})
 
+            # if query is numeric convert to an id filter
             if re.findall('\d+', query):
                 _id_filter = dict(_filter)
-                _id_filter['bill_id'] = fix_bill_id(query).upper()
-                result = db.bills.find(_id_filter)
-                if result:
+
+                # if query is entirely numeric make it a regex
+                if not re.findall('\D', query):
+                    _id_filter['bill_id'] = {'$regex':
+                                             fix_bill_id(query).upper()}
+                else:
+                    _id_filter['bill_id'] = fix_bill_id(query).upper()
+
+                # check for a result
+                result = db.bills.find(_id_filter, fields=bill_fields)
+                if result.count():
                     return result
 
             query = {"query_string": {"fields": ["text", "title"],
@@ -529,4 +538,4 @@ class Bill(Document):
             _filter['title'] = {'$regex': query, '$options': 'i'}
 
         # return query
-        return db.bills.find(_filter, bill_fields)
+        return db.bills.find(_filter, fields=bill_fields)

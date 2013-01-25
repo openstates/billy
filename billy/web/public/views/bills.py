@@ -13,7 +13,6 @@ from billy.models.pagination import CursorPaginator, IteratorPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
-from .search import search_by_bill_id
 
 
 EVENT_PAGE_COUNT = 10
@@ -92,7 +91,7 @@ class RelatedBillsList(RelatedObjectsList):
                 leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
             if search_text:
-                long_description.append('containing the term "{0}"'.format(
+                long_description.append(u'containing the term "{0}"'.format(
                     search_text))
             context.update(long_description=long_description)
         else:
@@ -108,6 +107,8 @@ class RelatedBillsList(RelatedObjectsList):
         params = dict(self.request.GET.items())
         if 'page' in params:
             del params['page']
+        for k, v in params.iteritems():
+            params[k] = unicode(v).encode('utf8')
         context.update(get_params=urllib.urlencode(params))
 
         # Add the abbr.
@@ -138,13 +139,7 @@ class RelatedBillsList(RelatedObjectsList):
         # If search params are given:
         form = FilterBillsForm(self.request.GET)
 
-        # First try to get by bill_id.
         search_text = form.data.get('search_text')
-        if search_text:
-            found_by_bill_id = search_by_bill_id(self.kwargs['abbr'],
-                                                 search_text)
-            if found_by_bill_id:
-                return IteratorPaginator(found_by_bill_id)
 
         chamber = form.data.get('chamber')
         if chamber:
