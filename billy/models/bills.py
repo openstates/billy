@@ -40,13 +40,28 @@ class SponsorsManager(AttrManager):
                 for _id in obj['_all_ids']:
                     self._legislators[_id] = obj
 
+        if not hasattr(self, '_committees'):
+            # build a mapping from all _ids to committees
+            self._committees = {}
+            ids = [s.get('committee_id')
+                   for s in sponsors if s.get('committee_id') is not None]
+            committees = db.committees.find({'_id': {'$in': ids}})
+            for obj in committees:
+                self._committees[obj['_id']] = obj
+
         for sponsor in sponsors:
-            leg_id = sponsor['leg_id']
+            leg_id = sponsor.get('leg_id')
+            committee_id = sponsor.get('committee_id', None)
             if leg_id is not None and leg_id in self._legislators:
-                legislator = self._legislators[sponsor['leg_id']]
+                legislator = self._legislators[leg_id]
                 legislator.update(sponsor)
                 legislator.bill = bill
                 yield legislator
+            elif committee_id is not None and committee_id in self._committees:
+                committee = self._committees[committee_id]
+                committee.update(sponsor)
+                committee.bill = bill
+                yield committee
             else:
                 spons = dictwrapper(sponsor)
                 spons.bill = bill
