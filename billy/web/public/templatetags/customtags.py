@@ -6,6 +6,8 @@ import urllib
 from django import template
 from django.utils.html import strip_tags
 
+import pytz
+
 from billy.core import settings
 from billy.web.public.forms import get_region_select_form
 from billy.web.public.views.utils import templatename
@@ -183,3 +185,19 @@ def notification_preference(obj_type, profile):
 @register.filter
 def json_encode(data):
     return json.dumps(data)
+
+
+@register.filter
+def event_time(event):
+    tz = pytz.timezone(event['timezone'])
+    localized = tz.localize(event['when'])
+
+    display_time = (localized + localized.utcoffset())
+    hours, minutes = display_time.hour, display_time.minute
+
+    # If the event's time is midnight, there was probably no
+    # exact time listed on the site, so don't display likely bogus time.
+    if (hours, minutes) == (0, 0):
+        return display_time.strftime('%A, %B %d, %Y')
+
+    return display_time.strftime('%A, %B %d, %Y, %I:%M %p %Z')
