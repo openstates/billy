@@ -102,6 +102,7 @@ def import_events(abbr, data_dir, import_actions=False):
             # also a committee considering a bill from the other chamber, or
             # something like that.
             bill['id'] = db_bill['_id']
+            bill['bill_id'] = bill_id
         import_event(data)
     ensure_indexes()
 
