@@ -30,7 +30,7 @@ def get_filter_bills_form(metadata):
 
             BILL_TYPES = [('', '')] + zip(_bill_types, [s.title()
                                                         for s in _bill_types])
-            BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
+            BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
             BILL_SPONSORS = [('', '')] + _bill_sponsors
             SESSIONS = [('', '')] + _sessions
 

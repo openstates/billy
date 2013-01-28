@@ -64,6 +64,7 @@ class RelatedBillsList(RelatedObjectsList):
             session = form.data.get('session')
             type = form.data.get('type')
             status = form.data.getlist('status')
+            subjects = form.data.getlist('subjects')
             sponsor = form.data.get('sponsor__leg_id')
             if len(chamber) == 1:
                 if metadata:
@@ -92,6 +93,8 @@ class RelatedBillsList(RelatedObjectsList):
                                               fields=('full_name', '_id'))
                 leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
+            if subjects:
+                long_description.append('related to ' + ', '.join(subjects))
             if search_text:
                 long_description.append(u'containing the term "{0}"'.format(
                     search_text))
@@ -155,15 +158,16 @@ class RelatedBillsList(RelatedObjectsList):
         if sponsor_id:
             spec['sponsor_id'] = sponsor_id
 
-        status_choices = form.data.getlist('status')
-        status_spec = []
-        for status in status_choices:
-            status_spec.append({'action_dates.%s' % status: {'$ne': None}})
+        if 'status' in form.data:
+            status_choices = form.data.getlist('status')
+            status_spec = []
+            for status in status_choices:
+                status_spec.append({'action_dates.%s' % status: {'$ne': None}})
 
-        if len(status_spec) == 1:
-            spec['status'] = status_spec[0]
-        elif len(status_spec) > 1:
-            spec['status'] = {'$and': status_spec}
+            if len(status_spec) == 1:
+                spec['status'] = status_spec[0]
+            elif len(status_spec) > 1:
+                spec['status'] = {'$and': status_spec}
 
         type_ = form.data.get('type')
         if type_:
