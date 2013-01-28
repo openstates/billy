@@ -127,9 +127,6 @@
         },
         "when": {
             "type": "datetime"
-        },
-        "timezone": {
-            "type": "string"
         }
     },
     "type": "object"
