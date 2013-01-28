@@ -93,20 +93,21 @@ def _run_scraper(scraper_type, options, metadata):
     # run scraper against year/session/term
     for time in times:
         # old style
+        chambers = options.chambers
+        if scraper_type == 'events' and len(options.chambers) == 2:
+            chambers.append('other')
+
         if _is_old_scrape(scraper.scrape):
-            for chamber in options.chambers:
+            for chamber in chambers:
                 scraper.scrape(chamber, time)
         else:
-            scraper.scrape(time, chambers=options.chambers)
+            scraper.scrape(time, chambers=chambers)
 
         # error out if events or votes don't scrape anything
         if not scraper.object_count and scraper_type not in ('events',
                                                              'votes'):
             raise ScrapeError("%s scraper didn't save any objects" %
                               scraper_type)
-
-        if scraper_type == 'events' and len(options.chambers) == 2:
-            scraper.scrape('other', time)
 
     scrape['end_time'] = dt.datetime.utcnow()
     runs.append(scrape)
