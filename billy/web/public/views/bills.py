@@ -77,14 +77,16 @@ class RelatedBillsList(RelatedObjectsList):
                     '(%s)' %
                     metadata['session_details'][session]['display_name']
                 )
-            if 'passed_lower' in status:
+            if 'signed' in status:
+                long_description.append('which have been signed into law')
+            elif 'passed_upper' in status and 'passed_lower' in status:
+                long_description.append('which have passed both chambers')
+            elif 'passed_lower' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['lower']['name'])
             elif 'passed_upper' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['upper']['name'])
-            elif 'signed' in status:
-                long_description.append('which have been signed into law')
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},
                                               fields=('full_name', '_id'))
@@ -153,9 +155,15 @@ class RelatedBillsList(RelatedObjectsList):
         if sponsor_id:
             spec['sponsor_id'] = sponsor_id
 
-        status = form.data.get('status')
-        if status:
-            spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
+        status_choices = form.data.getlist('status')
+        status_spec = []
+        for status in status_choices:
+            status_spec.append({'action_dates.%s' % status: {'$ne': None}})
+
+        if len(status_spec) == 1:
+            spec['status'] = status_spec[0]
+        elif len(status_spec) > 1:
+            spec['status'] = {'$and': status_spec}
 
         type_ = form.data.get('type')
         if type_:
