@@ -123,7 +123,7 @@ def _get_events(abbr, year, month):
     spec['when'] = {'$gte': month_start, '$lt': month_end}
 
     events = list(db.events.find(spec))
-    events.sort(key=operator.itemgetter('when'), reverse=True)
+    events.sort(key=operator.itemgetter('when'))
     return events
 
 
