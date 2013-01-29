@@ -72,33 +72,13 @@ def event(request, abbr, event_id):
     event = db.events.find_one({'_id': event_id})
     if event is None:
         raise Http404
-
-    fmt = "%Y%m%dT%H%M%SZ"
-
-    start_date = event['when'].strftime(fmt)
-    duration = datetime.timedelta(hours=1)
-    ed = (event['when'] + duration)
-    end_date = ed.strftime(fmt)
-
-    gcal_info = {
-        "action": "TEMPLATE",
-        "text": event['description'].encode('utf-8'),
-        "dates": "%s/%s" % (start_date, end_date),
-        "details": "",
-        "location": event['location'].encode('utf-8'),
-        "trp": "false",
-        "sprop": "http://%s/" % get_domain(),
-        "sprop": "name:billy"
-    }
-    gcal_string = urllib.urlencode(gcal_info)
-
     return render(request, templatename('event'),
                   dict(abbr=abbr,
                        metadata=Metadata.get_object(abbr),
+                       events=[event],
                        event=event,
-                       sources=event['sources'],
-                       gcal_info=gcal_info,
-                       gcal_string=gcal_string,
+                       event_template=templatename('_event'),
+                       events_list_template=templatename('events-pjax'),
                        nav_active='events'))
 
 
@@ -155,5 +135,6 @@ def events(request, abbr):
                        display_date=display_date,
                        metadata=Metadata.get_object(abbr),
                        events=events,
+                       event_template=templatename('_event'),
                        events_list_template=templatename('events-pjax'),
                        nav_active='events'))
