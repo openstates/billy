@@ -9,6 +9,7 @@ from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
+from djpjax import pjax
 
 import billy
 from billy.core import settings
@@ -127,33 +128,19 @@ def _get_events(abbr, year, month):
     return events
 
 
-def events_json_for_date(request, abbr, year, month):
+def events_json_for_date(request, abbr):
+    year = request.GET.get('year')
+    month = request.GET.get('month')
     events = _get_events(abbr, year, month)
     content = json.dumps(list(events), cls=JSONEncoderPlus)
     return HttpResponse(content)
 
 
-def events_html_for_date(request, abbr, year, month):
-    '''
-    Context:
-        now: current timedelta
-        events: list of events
+@pjax()
+def events(request, abbr):
 
-    Templates:
-        - billy/web/public/events.html
-    '''
-    events = _get_events(abbr, year, month)
-    display_date = datetime.datetime(year=int(year), month=int(month) + 1,
-                                     day=1)
-    return render(request, templatename('events_list'),
-                  dict(abbr=abbr,
-                       display_date=display_date,
-                       metadata=Metadata.get_object(abbr),
-                       events=events,
-                       nav_active='events'))
-
-
-def events(request, abbr, year=None, month=None):
+    year = request.GET.get('year')
+    month = request.GET.get('month')
     if year and month:
         if month == "0":
             month = 1
@@ -161,8 +148,11 @@ def events(request, abbr, year=None, month=None):
                                          day=1)
     else:
         display_date = datetime.datetime.now()
+    events = _get_events(abbr, display_date.year, display_date.month)
     return render(request, templatename('events'),
                   dict(abbr=abbr,
                        display_date=display_date,
                        metadata=Metadata.get_object(abbr),
+                       events=events,
+                       events_list_template=templatename('events-pjax'),
                        nav_active='events'))
