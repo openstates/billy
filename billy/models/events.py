@@ -62,22 +62,16 @@ class Event(Document):
     def host(self):
         '''Return the host committee.
         '''
+        _id = None
         for participant in self['participants']:
             if participant['type'] == 'host':
-
                 if set(['participant_type', 'id']) < set(participant):
                     # This event uses the id keyname "id".
                     if participant['participant_type'] == 'committee':
                         _id = participant['id']
-
-                if _id is None:
-                    # If id is None, this committee id was probably old
-                    # and was purged. Just return the committee so the
-                    # un-hyperlinked host name can be displayed.
-                    if 'participant' in participant:
-                        return participant['participant']
-                    elif 'committee' in participant:
-                        return participant['committee']
+                        if _id is None:
+                            continue
+                        return self.committees_dict.get(_id)
 
     def other_committees(self):
         comms = self.committees_dict.values()
