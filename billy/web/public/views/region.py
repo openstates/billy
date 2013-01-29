@@ -13,7 +13,7 @@ from billy.core import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from billy.models.pagination import CursorPaginator
 from ..forms import get_region_select_form
-from .utils import templatename, ListViewBase
+from .utils import templatename
 
 
 def region_selection(request):
@@ -110,7 +110,6 @@ def search(request, abbr):
         - bill_results
         - more_bills_available
         - legislators_list
-        - more_legislators_available
         - nav_active
 
     Tempaltes:
@@ -148,9 +147,8 @@ def search(request, abbr):
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
         if abbr != 'all':
             spec[settings.LEVEL_FIELD] = abbr
-        legislator_results = db.legislators.find(spec)
-        more_legislators_available = (5 < legislator_results.count())
-        legislator_results = legislator_results.limit(5)
+        legislator_results = list(db.legislators.find(spec).sort(
+            [('active', -1)]))
 
     if abbr != 'all':
         metadata = Metadata.get_object(abbr)
@@ -166,51 +164,8 @@ def search(request, abbr):
              bill_results=bill_results,
              more_bills_available=more_bills_available,
              legislators_list=legislator_results,
-             more_legislators_available=more_legislators_available,
              column_headers_tmplname=None,  # not used
              rowtemplate_name=templatename('bills_list_row_with'
                                            '_abbr_and_session'),
              show_chamber_column=True,
              nav_active=None))
-
-
-class ShowMoreLegislators(ListViewBase):
-    '''
-    Context:
-        chamber
-        committees
-        abbr
-        metadata
-        chamber_name
-        chamber_select_template
-        chamber_select_collection
-        chamber_select_chambers
-        committees_table_template
-        show_chamber_column
-        sort_order
-        nav_active
-
-    Templates:
-        - billy/web/public/object_list.html
-        - billy/web/public/legislators_list_row.html
-    '''
-    template_name = templatename('object_list')
-    rowtemplate_name = templatename('legislators_list_row')
-    nav_active = None
-    column_headers_tmplname = templatename('legislators_list_headers')
-    description_template = '''
-        <a href={{metadata.get_absolute_url}}>{{metadata.name}}</a>
-        legislator names containing "{{request.GET.search_text}}"'''
-    title_template = striptags(description_template)
-
-    def get_queryset(self):
-        abbr = self.kwargs['abbr']
-        search_text = self.request.GET['search_text']
-
-        # See if any legislator names match.
-        spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
-        if abbr != 'all':
-            spec[settings.LEVEL_FIELD] = abbr
-        legislator_results = db.legislators.find(spec)
-        return CursorPaginator(legislator_results, show_per_page=10,
-                               page=int(self.request.GET.get('page', 1)))
