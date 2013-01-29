@@ -9,6 +9,7 @@ from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
+from django.template.response import TemplateResponse
 from djpjax import pjax
 
 import billy
@@ -136,18 +137,20 @@ def events_json_for_date(request, abbr, year, month):
 
 @pjax()
 def events(request, abbr):
-
     year = request.GET.get('year')
     month = request.GET.get('month')
     if year and month:
         if month == "0":
             month = 1
-        display_date = datetime.datetime(year=int(year), month=int(month),
-                                         day=1)
+
+        month = int(month)
+        display_date = datetime.datetime(year=int(year), month=month, day=1)
     else:
         display_date = datetime.datetime.now()
-    events = _get_events(abbr, display_date.year, display_date.month)
-    return render(request, templatename('events'),
+
+    # Compensate for js dates.
+    events = _get_events(abbr, display_date.year, display_date.month - 1)
+    return TemplateResponse(request, templatename('events'),
                   dict(abbr=abbr,
                        display_date=display_date,
                        metadata=Metadata.get_object(abbr),
