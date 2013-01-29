@@ -72,6 +72,8 @@ class Event(Document):
                         if _id is None:
                             continue
                         return self.committees_dict.get(_id)
+                else:
+                    return participant['participant']
 
     def other_committees(self):
         comms = self.committees_dict.values()
