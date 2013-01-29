@@ -2,7 +2,6 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.bills import BillList, AllBillList, BillFeed
-from billy.web.public.views.region import ShowMoreLegislators
 from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 
 # misc. views
@@ -54,8 +53,6 @@ urlpatterns += patterns(
     'billy.web.public.views.region',
 
     url(r'^(?P<abbr>[a-z-]+)/search/$', 'search', name='search'),
-    url(r'^(?P<abbr>[a-z-]+)/search/show_more_legislators/$',
-        ShowMoreLegislators.as_view(), name='show_more_legislators'),
     url(r'^(?P<abbr>[a-z-]+)/$', 'region', name='region'),
     url(r'^region_selection/$', 'region_selection', name='region_selection'),
 )
