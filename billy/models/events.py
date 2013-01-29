@@ -42,12 +42,10 @@ class Event(Document):
     def committees(self):
         committees = []
         for committee in self['participants']:
-            for id_key in 'id', 'committee_id':
-                if id_key in committee:
-                    _id = committee[id_key]
-                    if _id:
-                        committees.append(_id)
-                        break
+            if 'id' in committee:
+                _id = committee['id']
+                if _id:
+                    committees.append(_id)
 
         return db.committees.find({"_id": {"$in": committees}})
 
@@ -71,9 +69,6 @@ class Event(Document):
                     # This event uses the id keyname "id".
                     if participant['participant_type'] == 'committee':
                         _id = participant['id']
-                else:
-                    # This event uses the old id keyname 'committee_id'
-                    _id = participant['committee_id']
 
                 if _id is None:
                     # If id is None, this committee id was probably old
@@ -83,15 +78,6 @@ class Event(Document):
                         return participant['participant']
                     elif 'committee' in participant:
                         return participant['committee']
-                else:
-                    comm = self.committees_dict.get(_id)
-                    if not comm:
-                        # If we don't have an id for this committee,
-                        # just return the participant dict. We should only
-                        # reach this branch if there are dangling/old committee
-                        # ids in the event that haven't been purged yet.
-                        return participant
-                    return comm
 
     def other_committees(self):
         comms = self.committees_dict.values()
