@@ -37,10 +37,6 @@ class Event(Document):
         The names were updated by 1f24792 on 12/18/12.
         '''
         for bill in self['related_bills']:
-            # If the old key name is present, rename the ids, else nothing.
-            if '_scraped_bill_id' in bill:
-                bill['id'] = bill['bill_id']
-                bill['bill_id'] = bill['_scraped_bill_id']
             yield bill
 
     def committees(self):
