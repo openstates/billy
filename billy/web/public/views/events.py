@@ -128,9 +128,7 @@ def _get_events(abbr, year, month):
     return events
 
 
-def events_json_for_date(request, abbr):
-    year = request.GET.get('year')
-    month = request.GET.get('month')
+def events_json_for_date(request, abbr, year, month):
     events = _get_events(abbr, year, month)
     content = json.dumps(list(events), cls=JSONEncoderPlus)
     return HttpResponse(content)

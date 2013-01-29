@@ -66,7 +66,6 @@ urlpatterns += patterns(
 
     url(r'^(?P<abbr>[a-z-]+)/events/$', 'events',
         name='events'),
-    url(r'^(?P<abbr>[a-z-]+)/events/', 'events', name='events_relative'),
     url(r'^(?P<abbr>[a-z-]+)/events/rss/$', EventsFeed(),
         name='events_rss'),
     url(r'^(?P<abbr>[a-z-]+)/events/json_for_date/(?P<year>\d+)/(?P<month>\d+)/',
