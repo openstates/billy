@@ -2,7 +2,6 @@
     views specific to events
 """
 import json
-import urllib
 import datetime
 import operator
 from icalendar import Calendar, Event

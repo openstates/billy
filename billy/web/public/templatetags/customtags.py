@@ -1,7 +1,6 @@
 from decimal import Decimal
 import re
 import json
-import urllib
 
 from django import template
 from django.utils.html import strip_tags

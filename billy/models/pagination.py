@@ -202,24 +202,3 @@ class CursorPaginator(PaginatorBase):
 
         self._cached = True
         self._cache = cache
-
-
-class IteratorPaginator(PaginatorBase):
-    'Huh huh...that rhymes.'
-
-    def __init__(self, iterable, *args, **kwargs):
-        super(IteratorPaginator, self).__init__(*args, **kwargs)
-        iterable = list(iterable)
-        self.count = len(iterable)
-        self.iterable = iterable
-
-    def __iter__(self):
-        return iter(self.iterable[self.skip: (self.skip + self.limit)])
-
-    def __len__(self):
-        count = self.count
-        limit = self.limit
-        if limit < count:
-            return limit
-        else:
-            return count
