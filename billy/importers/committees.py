@@ -54,6 +54,9 @@ def import_committees_from_legislators(current_term, abbr):
                         committee['subcommittee'] = None
                     insert_with_id(committee)
 
+                # clear sources before we reimport (in case someone has left)
+                committee['sources'] = []
+
                 for member in committee['members']:
                     if member['leg_id'] == legislator['leg_id']:
                         break
