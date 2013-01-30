@@ -3,19 +3,19 @@ import logging
 import importlib
 
 from billy.core import settings, base_arg_parser
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 
 logger = logging.getLogger('billy')
 
 COMMAND_MODULES = (
     # lots of these commands can go away as billy matures
-    'billy.commands.textextract',       # useful for development
-    'billy.commands.download_photos',
-    'billy.commands.dump',
-    'billy.commands.update_external_ids',
-    'billy.commands.update_leg_ids',
-    'billy.commands.validate_api',
-    'billy.commands.sync_versions',
+    'billy.bin.commands.textextract',       # useful for development
+    'billy.bin.commands.download_photos',
+    'billy.bin.commands.dump',
+    'billy.bin.commands.update_external_ids',
+    'billy.bin.commands.update_leg_ids',
+    'billy.bin.commands.validate_api',
+    'billy.bin.commands.sync_versions',
 )
 
 

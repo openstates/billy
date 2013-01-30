@@ -4,7 +4,7 @@ import urllib2
 import importlib
 
 from billy.core import settings
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 
 
 class TextExtract(BaseCommand):
