@@ -9,7 +9,7 @@ from django.utils.feedgenerator import Rss201rev2Feed
 from billy.core import settings
 from billy.utils import popularity, fix_bill_id
 from billy.models import db, Metadata, Bill
-from billy.models.pagination import CursorPaginator, IteratorPaginator
+from billy.models.pagination import CursorPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
@@ -187,7 +187,6 @@ class RelatedBillsList(RelatedObjectsList):
 
         # do sorting on the cursor
         cursor.sort([(sort_key, pymongo.DESCENDING)])
-
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
 
