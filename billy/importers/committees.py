@@ -25,6 +25,10 @@ def ensure_indexes():
 def import_committees_from_legislators(current_term, abbr):
     """ create committees from legislators that have committee roles """
 
+    # first, clear committee sources (ones that aren't updated won't be saved)
+    for com in db.committees.find({settings.LEVEL_FIELD: abbr}):
+        com['sources'] = []
+
     # for all current legislators
     for legislator in db.legislators.find({'roles': {'$elemMatch': {
             'term': current_term, settings.LEVEL_FIELD: abbr}}}):
@@ -53,9 +57,6 @@ def import_committees_from_legislators(current_term, abbr):
                     if 'subcommittee' not in committee:
                         committee['subcommittee'] = None
                     insert_with_id(committee)
-
-                # clear sources before we reimport (in case someone has left)
-                committee['sources'] = []
 
                 for member in committee['members']:
                     if member['leg_id'] == legislator['leg_id']:
