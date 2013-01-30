@@ -114,12 +114,16 @@ def normalize_dates(event):
     tz = pytz.timezone(meta['capitol_timezone'])
 
     # right now, we just need to update when the event is.
-    for attr in ['when']:
-        if not event[attr].tzinfo:
-            localtime = tz.localize(event[attr])
+    attr = "when"
+    if not event[attr].tzinfo:
+        localtime = tz.localize(event[attr])
 
-        utctime = datetime.datetime(*localtime.utctimetuple()[:6])
-        event[attr] = utctime
+    tzdb_name = localtime.tzinfo.zone
+
+    utctime = datetime.datetime(*localtime.utctimetuple()[:6])
+    event[attr] = utctime
+    event["timezone"] = tzdb_name
+
     return event
 
 

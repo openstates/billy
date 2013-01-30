@@ -312,7 +312,7 @@ def merge_legislators(leg1, leg2):
         #      old_roles & roles!! There's a potenital for data loss, but it's
         #      not that big of a thing.
         #   -- paultag & jamesturk, 02-02-2012
-        if len(leg1[roles]) > 0:
+        if len(leg1[roles]) > 0 and leg2[roles][0] != leg1[roles][0]:
             crole = leg1[roles][0]
             try:
                 leg1[old_roles][crole['term']].append(crole)

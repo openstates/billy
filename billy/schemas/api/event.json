@@ -12,6 +12,7 @@
    "notes": {"type": ["string", "null"], "required": false},
    "status": {"type": "string", "required": false},
    "link": {"type": ["string", "null"], "required": false},
+   "timezone": {"type": "string"},
    "participants": {"type": "array", "items":
      {"type": "object", "properties": {
        "type": {"type": "string"},
