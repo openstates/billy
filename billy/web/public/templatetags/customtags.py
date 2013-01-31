@@ -27,6 +27,15 @@ def sources(obj):
 
 
 @register.filter
+def sources_urlize(url):
+    '''Django's urlize built-in template tag does a lot of other things,
+    like linking domain-only links, but it won't hyperlink ftp links,
+    so this is a more liberal replacement for source links.
+    '''
+    return '<a href="%s" rel="nofollow">%s</a>' % (url, url)
+
+
+@register.filter
 def plusfield(obj, key):
     return obj.get('+' + key)
 
