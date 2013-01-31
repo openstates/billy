@@ -50,6 +50,6 @@ class ElasticSearchPush(Task):
             _log.info('pushed %s to ElasticSearch', doc_id)
 
         except Exception:
-            self._log.warning('error pushing %s to ElasticSearch', doc_id,
-                              exc_info=True)
+            _log.warning('error pushing %s to ElasticSearch', doc_id,
+                         exc_info=True)
             raise
