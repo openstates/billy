@@ -208,6 +208,8 @@ def test_fix_bill_id():
     assert bills.fix_bill_id('HB 12S-0041') == 'HB 12S-0041'
     assert bills.fix_bill_id(' 999') == '999'
     assert bills.fix_bill_id('999') == '999'
+    assert bills.fix_bill_id('SJR AA') == 'SJR AA'
+    assert bills.fix_bill_id('SJRAA') == 'SJR AA'
 
 
 @with_setup(setup_func)
