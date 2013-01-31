@@ -47,7 +47,7 @@ class ElasticSearchPush(Task):
 
             doc['_elasticsearch'] = True
             db.tracked_versions.save(doc, safe=True)
-            self._log.info('pushed %s to ElasticSearch', doc_id)
+            _log.info('pushed %s to ElasticSearch', doc_id)
 
         except Exception:
             self._log.warning('error pushing %s to ElasticSearch', doc_id,
