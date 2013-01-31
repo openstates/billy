@@ -7,11 +7,9 @@ from collections import defaultdict
 
 from django.shortcuts import redirect, render
 from django.http import Http404
-from django.template.defaultfilters import striptags
 
 from billy.core import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
-from billy.models.pagination import CursorPaginator
 from ..forms import get_region_select_form
 from .utils import templatename
 

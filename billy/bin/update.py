@@ -261,39 +261,21 @@ def main():
 
         args = parser.parse_args()
 
-        if args.pdb:
+        if args.pdb or args.pudb or args.ipdb:
             _debugger = pdb
-            # turn on PDB-on-error mode
-            # stolen from http://stackoverflow.com/questions/1237379/
-            # if this causes problems in interactive mode check that page
-            def _tb_info(type, value, tb):
-                traceback.print_exception(type, value, tb)
-                _debugger.pm()
-            sys.excepthook = _tb_info
+            if args.pudb:
+                try:
+                    import pudb
+                    _debugger = pudb
+                except ImportError:
+                    pass
+            if args.ipdb:
+                try:
+                    import ipdb
+                    _debugger = ipdb
+                except ImportError:
+                    pass
 
-        if args.pudb:
-            try:
-                import pudb
-            except ImportError:
-                pass
-            else:
-                _debugger = pudb
-            # turn on PDB-on-error mode
-            # stolen from http://stackoverflow.com/questions/1237379/
-            # if this causes problems in interactive mode check that page
-            def _tb_info(type, value, tb):
-                traceback.print_exception(type, value, tb)
-                _debugger.pm()
-            sys.excepthook = _tb_info
-
-        if args.ipdb:
-            _debugger = pdb
-            try:
-                import ipdb
-            except ImportError:
-                pass
-            else:
-                _debugger = ipdb
             # turn on PDB-on-error mode
             # stolen from http://stackoverflow.com/questions/1237379/
             # if this causes problems in interactive mode check that page
