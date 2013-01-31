@@ -16,14 +16,17 @@ def s3_get(doc):
     try:
         return k.get_contents_as_string()
     except:
-        doc = db.tracked_versions.find_one(id)
-        if not doc:
-            return None
         data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
-        content_type = data.response.headers['content-type']
+        content_type = data.response.headers.get('content-type')
+        if not content_type:
+            url = doc['url'].lower()
+            if url.endswith('htm') or doc['url'].endswith('html'):
+                content_type = 'text/html'
+            elif url.endswith('pdf'):
+                content_type = 'application/pdf'
         headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
         k.set_contents_from_string(data.bytes, headers=headers)
-        _log.debug('pushed %s to s3 as %s', doc['url'], id)
+        _log.debug('pushed %s to s3 as %s', doc['url'], doc['_id'])
         return data.bytes
 
 
@@ -47,9 +50,9 @@ class ElasticSearchPush(Task):
 
             doc['_elasticsearch'] = True
             db.tracked_versions.save(doc, safe=True)
-            self._log.info('pushed %s to ElasticSearch', doc_id)
+            _log.info('pushed %s to ElasticSearch', doc_id)
 
         except Exception:
-            self._log.warning('error pushing %s to ElasticSearch', doc_id,
-                              exc_info=True)
+            _log.warning('error pushing %s to ElasticSearch', doc_id,
+                         exc_info=True)
             raise

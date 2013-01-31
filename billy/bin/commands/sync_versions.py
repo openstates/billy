@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from billy.core import db, settings
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 from billy.tasks.fulltext import ElasticSearchPush
 
 

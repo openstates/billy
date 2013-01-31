@@ -10,7 +10,7 @@ import unicodecsv
 
 from billy.core import settings
 from billy.utils import metadata
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 from billy.core import db
 
 import scrapelib
