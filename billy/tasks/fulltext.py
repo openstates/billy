@@ -16,14 +16,11 @@ def s3_get(doc):
     try:
         return k.get_contents_as_string()
     except:
-        doc = db.tracked_versions.find_one(id)
-        if not doc:
-            return None
         data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
         content_type = data.response.headers['content-type']
         headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
         k.set_contents_from_string(data.bytes, headers=headers)
-        _log.debug('pushed %s to s3 as %s', doc['url'], id)
+        _log.debug('pushed %s to s3 as %s', doc['url'], doc['_id'])
         return data.bytes
 
 
