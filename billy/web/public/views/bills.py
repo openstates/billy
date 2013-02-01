@@ -391,6 +391,9 @@ def document(request, abbr, session, bill_id, doc_id):
     else:
         raise Http404('No such document.')
 
+    if not settings.ENABLE_DOCUMENT_VIEW.get(abbr, False):
+        return redirect(version['url'])
+
     return render(request, templatename('document'),
                   dict(abbr=abbr, session=session, bill=bill, version=version,
                        metadata=bill.metadata, nav_active='bills'))

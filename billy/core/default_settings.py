@@ -18,6 +18,8 @@ BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
 BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
 
+ENABLE_DOCUMENT_VIEW = {}
+
 BILL_FILTERS = {}
 LEGISLATOR_FILTERS = {}
 EVENT_FILTERS = {}
