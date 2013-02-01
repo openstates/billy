@@ -257,7 +257,7 @@ class DumpJSON(BaseCommand):
 
         if not schema_dir:
             cwd = os.path.split(__file__)[0]
-            schema_dir = os.path.join(cwd, "../schemas/api/")
+            schema_dir = os.path.join(cwd, "../../schemas/api/")
 
         with open(os.path.join(schema_dir, "bill.json")) as f:
             bill_schema = json.load(f)
