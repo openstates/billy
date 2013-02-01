@@ -226,7 +226,7 @@ class BillSearchHandler(BillyHandler):
                 return resp
 
         # sorting
-        sort = request.GET.get('sort')
+        sort = request.GET.get('sort', 'last_action')
         if sort == 'updated_at':
             query = query.sort([('updated_at', -1)])
         elif sort == 'created_at':
