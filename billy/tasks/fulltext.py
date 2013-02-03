@@ -8,26 +8,6 @@ from billy.utils.fulltext import plaintext
 _log = logging.getLogger('billy.tasks.fulltext')
 
 
-def s3_get(doc):
-    k = boto.s3.key.Key(s3bucket)
-    k.key = 'documents/{0}/{1}'.format(doc[settings.LEVEL_FIELD], doc['_id'])
-
-    # try and get the object, if it doesn't exist- pull it down
-    try:
-        return k.get_contents_as_string()
-    except:
-        data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
-        content_type = data.response.headers.get('content-type')
-        if not content_type:
-            url = doc['url'].lower()
-            if url.endswith('htm') or doc['url'].endswith('html'):
-                content_type = 'text/html'
-            elif url.endswith('pdf'):
-                content_type = 'application/pdf'
-        headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
-        k.set_contents_from_string(data.bytes, headers=headers)
-        _log.debug('pushed %s to s3 as %s', doc['url'], doc['_id'])
-        return data.bytes
 
 
 class ElasticSearchPush(Task):

@@ -5,8 +5,11 @@ import tempfile
 import importlib
 import subprocess
 
+import scrapelib
+import boto.s3.key
+
 from billy.scrape.utils import convert_pdf
-from billy.core import settings
+from billy.core import settings, s3bucket
 
 
 def pdfdata_to_text(data):
@@ -52,12 +55,37 @@ def id_to_url(id):
     return 'http://{0}/{1}/{2}'.format(settings.AWS_BUCKET, abbr, id)
 
 
+def s3_get(abbr, doc):
+    if settings.AWS_BUCKET:
+        k = boto.s3.key.Key(s3bucket)
+        k.key = 'documents/{0}/{1}'.format(abbr, doc['doc_id'])
+
+        # try and get the object, if it doesn't exist- pull it down
+        try:
+            return k.get_contents_as_string()
+        except:
+            data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
+            content_type = data.response.headers.get('content-type')
+            if not content_type:
+                url = doc['url'].lower()
+                if url.endswith('htm') or doc['url'].endswith('html'):
+                    content_type = 'text/html'
+                elif url.endswith('pdf'):
+                    content_type = 'application/pdf'
+            headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
+            k.set_contents_from_string(data.bytes, headers=headers)
+            _log.debug('pushed %s to s3 as %s', doc['url'], doc['doc_id'])
+            return data.bytes
+    else:
+        return scrapelib.urlopen(doc['url'].replace(' ', '%20')).bytes
+
+
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 
-def plaintext(doc, doc_bytes):
+def plaintext(abbr, doc, doc_bytes):
     # use module to pull text out of the bytes
-    module = importlib.import_module(doc[settings.LEVEL_FIELD])
+    module = importlib.import_module(abbr)
     text = module.extract_text(doc, doc_bytes)
 
     if isinstance(text, unicode):
@@ -68,3 +96,22 @@ def plaintext(doc, doc_bytes):
     text = PUNCTUATION.sub(' ', text)   # strip punctuation
     text = re.sub('\s+', ' ', text)     # collapse spaces
     return text
+
+
+def bill_to_elasticsearch(bill):
+    esbill = {}
+    copy_fields = ('chamber', 'bill_id', 'session', '_term', 'type',
+                   'subjects', '_current_session', '_current_term')
+    time_format = '%Y-%m-%dT%H:%M:%S'
+    for field in copy_fields:
+        esbill[field] = bill[field]
+    esbill['title'] = [bill['title']] + bill['alternate_titles']
+    abbr = esbill['jurisdiction'] = bill[settings.LEVEL_FIELD]
+    esbill['sponsor_ids'] = [s['leg_id'] for s in bill['sponsors']]
+    esbill['updated_at'] = bill['updated_at'].strftime(time_format)
+    esbill['created_at'] = bill['created_at'].strftime(time_format)
+    esbill['action_dates'] = {k: v.strftime(time_format)
+                              for k, v in bill['action_dates'].iteritems()}
+    esbill['text'] = [plaintext(abbr, doc, s3_get(abbr, doc))
+                      for doc in bill['versions']]
+    return esbill
