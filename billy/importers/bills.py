@@ -7,9 +7,10 @@ import datetime
 from time import time
 from collections import defaultdict
 
-from billy.core import settings, db
+from billy.core import settings, db, elasticsearch
 from billy.utils import (metadata, term_for_session, fix_bill_id,
                          JSONEncoderPlus)
+from billy.utils.fulltext import bill_to_elasticsearch
 from billy.importers.names import get_legislator_id
 from billy.importers.filters import apply_filters
 
@@ -110,6 +111,12 @@ def load_standalone_votes(data_dir):
 
     logger.info('imported %s vote files' % len(paths))
     return votes
+
+
+def elasticsearch_push(bill):
+    if settings.ENABLE_ELASTICSEARCH:
+        esdoc = bill_to_elasticsearch(bill)
+        elasticsearch.index(esdoc, 'billy', 'bills', id=bill['_id'])
 
 
 git_active_repo = None
@@ -443,11 +450,13 @@ def import_bill(data, standalone_votes, categorizer):
 
     if not bill:
         insert_with_id(data)
+        elasticsearch_push(data)
         git_add_bill(data)
         save_votes(data, bill_votes)
         return "insert"
     else:
         update(bill, data, db.bills)
+        elasticsearch_push(bill)
         git_add_bill(bill)
         save_votes(bill, bill_votes)
         return "update"
