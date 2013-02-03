@@ -15,7 +15,6 @@ COMMAND_MODULES = (
     'billy.bin.commands.update_external_ids',
     'billy.bin.commands.update_leg_ids',
     'billy.bin.commands.validate_api',
-    'billy.bin.commands.sync_versions',
 )
 
 

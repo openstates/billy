@@ -1,6 +1,7 @@
 import os
 import re
 import string
+import logging
 import tempfile
 import importlib
 import subprocess
@@ -10,6 +11,9 @@ import boto.s3.key
 
 from billy.scrape.utils import convert_pdf
 from billy.core import settings, s3bucket
+
+
+_log = logging.getLogger('billy.utils.fulltext')
 
 
 def pdfdata_to_text(data):
@@ -72,7 +76,8 @@ def s3_get(abbr, doc):
                     content_type = 'text/html'
                 elif url.endswith('pdf'):
                     content_type = 'application/pdf'
-            headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
+            headers = {'x-amz-acl': 'public-read',
+                       'Content-Type': content_type}
             k.set_contents_from_string(data.bytes, headers=headers)
             _log.debug('pushed %s to s3 as %s', doc['url'], doc['doc_id'])
             return data.bytes
