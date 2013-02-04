@@ -71,8 +71,7 @@ class ScoutPush(Task):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
         '''
-        # Two api params have no analog in the front-end search: bill_id__in
-        # and updated_since
+        # some api params have no analog in the front-end search: updated_since
         api_param_names = 'q state search_window chamber subjects sponsor_id'
         api_param_name_set = set(api_param_names.split())
 
