@@ -8,8 +8,6 @@ from billy.bin.commands import BaseCommand
 logger = logging.getLogger('billy')
 
 COMMAND_MODULES = (
-    # lots of these commands can go away as billy matures
-    'billy.bin.commands.textextract',       # useful for development
     'billy.bin.commands.download_photos',
     'billy.bin.commands.elasticsearch_push',
     'billy.bin.commands.dump',
