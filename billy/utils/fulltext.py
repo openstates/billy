@@ -118,6 +118,11 @@ def bill_to_elasticsearch(bill):
     esbill['action_dates'] = {k: v.strftime(time_format)
                               for k, v in bill['action_dates'].iteritems()
                               if v}
-    esbill['text'] = [plaintext(abbr, doc, s3_get(abbr, doc))
-                      for doc in bill['versions']]
+    esbill['text'] = []
+    for doc in bill['versions']:
+        try:
+            esbill['text'].append(plaintext(abbr, doc, s3_get(abbr, doc)))
+        except Exception as e:
+            _log.debug('exception %s while processing %s', e, doc['url'])
+
     return esbill
