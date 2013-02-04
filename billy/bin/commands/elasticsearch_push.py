@@ -1,3 +1,5 @@
+import sys
+
 from billy.core import db, settings
 from billy.importers.bills import elasticsearch_push
 from billy.bin.commands import BaseCommand
