@@ -177,16 +177,10 @@ class RelatedBillsList(RelatedObjectsList):
         if session:
             spec['session'] = session
 
-        cursor = Bill.search(search_text, **spec)
-
         sort = self.request.GET.get('sort', 'last')
-        if sort not in ('first', 'last', 'signed', 'passed_upper',
-                        'passed_lower'):
-            sort = 'last'
-        sort_key = 'action_dates.{0}'.format(sort)
 
-        # do sorting on the cursor
-        cursor.sort([(sort_key, pymongo.DESCENDING)])
+        cursor = Bill.search(search_text, sort=sort, **spec)
+
         return self.paginator(cursor, page=page,
                               show_per_page=show_per_page)
 

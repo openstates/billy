@@ -318,6 +318,44 @@ class BillVote(Document):
         return name
 
 
+class BillSearchResults(object):
+
+    def __init__(self, es_search, mongo_query, sort):
+        self.es_search = es_search
+        self.mongo_query = mongo_query
+        self.sort = sort
+
+    def __count__(self):
+        if es_search:
+            return elasticsearch.search(self.es_search).total
+        else:
+            return db.bills.find(mongo_query).count()
+
+    def __getitem__(self, key):
+        start = 0
+        one = False
+        if isinstance(key, slice):
+            start = slice.start or 0
+            stop = slice.stop
+            if slice.step:
+                raise KeyError('step is not permitted')
+        elif isinstance(key, int):
+            start = key
+            stop = key + 1
+            one = True
+
+        if self.es_search:
+            es_result = elasticsearch.search(self.es_search,
+                                             sort=self.sort+':desc')
+            _mongo_query = {'_id': {'$in': [r.get_id()
+                                            for r in es_result[start:stop]]}}
+        else:
+            _mongo_query = self.mongo_filter
+
+        return db.bills.find(mongo_filter, fields=self.fields).sort(
+            [(self.sort, pymongo.DESCENDING)])
+
+
 class Bill(Document):
 
     collection = db.bills
@@ -450,8 +488,8 @@ class Bill(Document):
     @staticmethod
     def search(query=None, abbr=None, chamber=None, subjects=None,
                bill_id=None, search_window=None, updated_since=None,
-               sponsor_id=None, bill_fields=None, status=None, type_=None,
-               session=None):
+               sponsor_id=None, status=None, type_=None, session=None,
+               bill_fields=None, sort=None, limit=None):
 
         use_elasticsearch = False
         numeric_query = False
@@ -536,21 +574,30 @@ class Bill(Document):
         elif status:
             mongo_filter.update(**status)
 
+        # preprocess sort
+        if sort in ('first', 'last', 'signed', 'passed_lower', 'passed_upper'):
+            sort = 'action_dates.' + sort
+        elif sort not in ('updated_at', 'created_at'):
+            sort = 'action_dates.last'
+
         # do the actual ES query
         if query and use_elasticsearch:
             query = {"query_string": {"fields": ["text", "title"],
                                       "default_operator": "AND",
                                       "query": query}}
+            # query for one more than limit to figure out if there are more
             search = pyes.Search(query, fields=[])
             if es_terms:
                 search.filter = pyes.ANDFilter(es_terms)
 
             # page size is a guess, could use tweaks
-            es_result = elasticsearch.search(search)
+            es_result = elasticsearch.search(search, sort=sort+':desc')
             bill_ids = [r.get_id() for r in es_result]
             assert not mongo_filter     # shouldn't have any other conditions
             mongo_filter['_id'] = {'$in': bill_ids}
         elif query and not numeric_query:
             mongo_filter['title'] = {'$regex': query, '$options': 'i'}
 
-        return db.bills.find(mongo_filter, fields=bill_fields)
+        return db.bills.find(mongo_filter, fields=bill_fields).sort(
+            [(sort, pymongo.DESCENDING)])
+

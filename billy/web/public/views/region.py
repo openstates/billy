@@ -132,10 +132,8 @@ def search(request, abbr):
         kwargs = {}
         if abbr != 'all':
             kwargs['abbr'] = abbr
-        bill_results = Bill.search(search_text, **kwargs)
-
-        # add sorting
-        bill_results = bill_results.sort([('action_dates.last', -1)])
+        bill_results = Bill.search(search_text, sort='last', limit=5,
+                                   **kwargs)
 
         # Limit the bills if it's a search.
         more_bills_available = (5 < bill_results.count())
