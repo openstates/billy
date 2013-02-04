@@ -228,22 +228,6 @@ def git_prelod(abbr):
     git_active_tree = tree
 
 
-def track_version(bill, version):
-    doc = {'titles': [bill['title']] + bill.get('alternate_titles', []),
-           'url': version['url'],
-           'type': 'version',
-           'mimetype': version.get('mimetype', None),
-           settings.LEVEL_FIELD: bill[settings.LEVEL_FIELD],
-           'session': bill['session'],
-           'chamber': bill['chamber'],
-           'bill_id': bill['bill_id'],
-           'subjects': bill.get('subjects', []),
-           'sponsors': [s['leg_id'] for s in bill['sponsors'] if s['leg_id']]}
-    # insert or update this document
-    db.tracked_versions.update({'_id': version['doc_id']}, {'$set': doc},
-                               upsert=True)
-
-
 def import_bill(data, standalone_votes, categorizer):
     """
         insert or update a bill
@@ -431,9 +415,6 @@ def import_bill(data, standalone_votes, categorizer):
     alt_titles = set(data.get('alternate_titles', []))
 
     for version in data['versions']:
-        # add/update tracked_versions collection
-        track_version(data, version)
-
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
             alt_titles.add(version['title'])
