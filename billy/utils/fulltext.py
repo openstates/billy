@@ -93,6 +93,9 @@ def plaintext(abbr, doc, doc_bytes):
     module = importlib.import_module(abbr)
     text = module.extract_text(doc, doc_bytes)
 
+    if not text:
+        return
+
     if isinstance(text, unicode):
         text = text.encode('ascii', 'ignore')
     else:
