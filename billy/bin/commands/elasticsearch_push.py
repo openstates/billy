@@ -17,6 +17,8 @@ class ElasticsearchPush(BaseCommand):
                           help='abbreviations for bills to update')
 
     def handle(self, args):
+        for newpath in settings.SCRAPER_PATHS:
+            sys.path.insert(0, newpath)
         for abbr in args.abbrs:
             for bill in db.bills.find({settings.LEVEL_FIELD: abbr.lower()},
                                       timeout=False):
