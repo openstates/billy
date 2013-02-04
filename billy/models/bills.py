@@ -339,7 +339,7 @@ class BillSearchResults(object):
         start = 0
         if isinstance(key, slice):
             start = key.start or 0
-            stop = key.stop
+            stop = key.stop or len(self)
             if key.step:
                 raise KeyError('step of %s is not permitted' % key.step)
         elif isinstance(key, int):
