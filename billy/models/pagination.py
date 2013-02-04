@@ -202,3 +202,28 @@ class CursorPaginator(PaginatorBase):
 
         self._cached = True
         self._cache = cache
+
+
+class BillSearchPaginator(PaginatorBase):
+
+    def __init__(self, result, *args, **kwargs):
+        super(BillSearchPaginator, self).__init__(*args, **kwargs)
+        self.result = result
+        self.count = len(result)
+        self._cached = False
+
+    def __iter__(self):
+        'The specific page of records.'
+        if self._cached:
+            for record in self._cache:
+                yield record
+            return
+        else:
+            cache = []
+
+        for record in self.result[self.skip:self.skip + self.limit]:
+            yield record
+            cache.append(record)
+
+        self._cached = True
+        self._cache = cache

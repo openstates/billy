@@ -132,12 +132,12 @@ def search(request, abbr):
         kwargs = {}
         if abbr != 'all':
             kwargs['abbr'] = abbr
-        bill_results = Bill.search(search_text, sort='last', limit=5,
-                                   **kwargs)
+        bill_results = Bill.search(search_text, sort='last', **kwargs)
 
         # Limit the bills if it's a search.
-        more_bills_available = (5 < bill_results.count())
-        bill_results = bill_results.limit(5)
+        more_bills_available = (len(bill_results) > 5)
+        bill_result_count = len(bill_results)
+        bill_results = bill_results[:5]
 
         # See if any legislator names match.
         spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
@@ -158,6 +158,7 @@ def search(request, abbr):
              metadata=metadata,
              found_by_id=found_by_id,
              bill_results=bill_results,
+             bill_result_count=bill_result_count,
              more_bills_available=more_bills_available,
              legislators_list=legislator_results,
              column_headers_tmplname=None,  # not used

@@ -320,40 +320,43 @@ class BillVote(Document):
 
 class BillSearchResults(object):
 
-    def __init__(self, es_search, mongo_query, sort):
+    def __init__(self, es_search, mongo_query, sort, fields):
         self.es_search = es_search
         self.mongo_query = mongo_query
         self.sort = sort
+        self.fields = fields
+        self._len = None
 
-    def __count__(self):
-        if es_search:
-            return elasticsearch.search(self.es_search).total
-        else:
-            return db.bills.find(mongo_query).count()
+    def __len__(self):
+        if not self._len:
+            if self.es_search:
+                self._len = elasticsearch.search(self.es_search).total
+            else:
+                self._len = db.bills.find(self.mongo_query).count()
+        return self._len
 
     def __getitem__(self, key):
         start = 0
-        one = False
         if isinstance(key, slice):
-            start = slice.start or 0
-            stop = slice.stop
-            if slice.step:
-                raise KeyError('step is not permitted')
+            start = key.start or 0
+            stop = key.stop
+            if key.step:
+                raise KeyError('step of %s is not permitted' % key.step)
         elif isinstance(key, int):
             start = key
             stop = key + 1
-            one = True
 
         if self.es_search:
             es_result = elasticsearch.search(self.es_search,
-                                             sort=self.sort+':desc')
-            _mongo_query = {'_id': {'$in': [r.get_id()
-                                            for r in es_result[start:stop]]}}
+                                             sort=self.sort + ':desc,bill_id',
+                                             start=start,
+                                             size=stop - start)
+            _mongo_query = {'_id': {'$in': [r.get_id() for r in es_result]}}
         else:
             _mongo_query = self.mongo_filter
 
-        return db.bills.find(mongo_filter, fields=self.fields).sort(
-            [(self.sort, pymongo.DESCENDING)])
+        return db.bills.find(_mongo_query, fields=self.fields).sort(
+            [(self.sort, pymongo.DESCENDING), ('bill_id', pymongo.ASCENDING)])
 
 
 class Bill(Document):
@@ -590,14 +593,9 @@ class Bill(Document):
             if es_terms:
                 search.filter = pyes.ANDFilter(es_terms)
 
-            # page size is a guess, could use tweaks
-            es_result = elasticsearch.search(search, sort=sort+':desc')
-            bill_ids = [r.get_id() for r in es_result]
-            assert not mongo_filter     # shouldn't have any other conditions
-            mongo_filter['_id'] = {'$in': bill_ids}
+            return BillSearchResults(search, None, sort, bill_fields)
+
         elif query and not numeric_query:
             mongo_filter['title'] = {'$regex': query, '$options': 'i'}
 
-        return db.bills.find(mongo_filter, fields=bill_fields).sort(
-            [(sort, pymongo.DESCENDING)])
-
+        return BillSearchResults(None, mongo_filter, sort, bill_fields)

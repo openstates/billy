@@ -1,5 +1,4 @@
 import urllib
-import pymongo
 
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -9,7 +8,7 @@ from django.utils.feedgenerator import Rss201rev2Feed
 from billy.core import settings
 from billy.utils import popularity, fix_bill_id
 from billy.models import db, Metadata, Bill
-from billy.models.pagination import CursorPaginator
+from billy.models.pagination import BillSearchPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
@@ -22,7 +21,7 @@ class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
     use_table = True
     list_item_context_name = 'bill'
-    paginator = CursorPaginator
+    paginator = BillSearchPaginator
     rowtemplate_name = templatename('bills_list_row')
     nav_active = 'bills'
     column_headers_tmplname = None      # not used
@@ -179,10 +178,9 @@ class RelatedBillsList(RelatedObjectsList):
 
         sort = self.request.GET.get('sort', 'last')
 
-        cursor = Bill.search(search_text, sort=sort, **spec)
+        result = Bill.search(search_text, sort=sort, **spec)
 
-        return self.paginator(cursor, page=page,
-                              show_per_page=show_per_page)
+        return self.paginator(result, page=page, show_per_page=show_per_page)
 
     def get(self, request, *args, **kwargs):
         # hack to redirect to proper legislator if sponsor_id is an alias
@@ -211,7 +209,6 @@ class BillList(RelatedBillsList):
     template_name = templatename('bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
-    paginator = CursorPaginator
     description_template = '''NOT USED'''
     title_template = 'Search bills - {{ metadata.legislature_name }}'
 
@@ -229,7 +226,6 @@ class AllBillList(RelatedBillsList):
     template_name = templatename('bills_list')
     rowtemplate_name = templatename('bills_list_row_with_abbr_and_session')
     collection_name = 'bills'
-    paginator = CursorPaginator
     use_table = True
     description_template = '''NOT USED'''
     title_template = ('Search All Bills')
