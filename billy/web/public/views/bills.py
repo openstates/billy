@@ -152,7 +152,7 @@ class RelatedBillsList(RelatedObjectsList):
 
         subjects = form.data.get('subjects')
         if subjects:
-            spec['subjects'] = {'$all': [filter(None, subjects)]}
+            spec['subjects'] = subjects
 
         sponsor_id = form.data.get('sponsor__leg_id')
         if sponsor_id:

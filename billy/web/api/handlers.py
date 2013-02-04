@@ -25,13 +25,6 @@ def _build_mongo_filter(request, keys, icase=True):
     _filter = {}
     keys = set(keys) - set(['fields'])
 
-    try:
-        keys.remove('subjects')
-        if 'subject' in request.GET:
-            _filter['subjects'] = {'$all': request.GET.getlist('subject')}
-    except KeyError:
-        pass
-
     for key in keys:
         value = request.GET.get(key)
         if value:
@@ -181,8 +174,7 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        base_fields = _build_mongo_filter(request, ('chamber', 'subjects',
-                                                    'bill_id', 'bill_id__in'))
+        base_fields = _build_mongo_filter(request, ('chamber', 'bill_id'))
 
         # process extra attributes
         query = request.GET.get('q')
@@ -192,13 +184,14 @@ class BillSearchHandler(BillyHandler):
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
+        subjects = request.GET.getlist('subjects')
 
         try:
             query = Bill.search(query,
                                 abbr=abbr,
                                 search_window=search_window,
                                 updated_since=since, sponsor_id=sponsor_id,
-                                bill_fields=bill_fields,
+                                subjects=subjects, bill_fields=bill_fields,
                                 **base_fields)
         except ValueError as e:
             resp = rc.BAD_REQUEST
