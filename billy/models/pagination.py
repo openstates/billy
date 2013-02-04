@@ -60,10 +60,7 @@ class PaginatorBase(object):
                     ^
         '''
         start = (self.current_page - 1) * self.show_per_page
-        if start == 0:
-            return 1
-        else:
-            return start
+        return start + 1
 
     @property
     def range_end(self):
