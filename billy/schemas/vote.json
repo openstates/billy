@@ -2,7 +2,7 @@
  "type": "object",
  "properties": {
     "_type": {"type": "string", "enum":["vote"]},
-    "chamber": {"type": "string", "enum": ["upper", "lower"]},
+    "chamber": {"type": "string", "enum": ["upper", "lower", "joint"]},
     "bill_chamber": {"type": "string", "enum": ["upper", "lower"]},
     "session": {"type": "string"},
     "bill_id": {"type": "string"},

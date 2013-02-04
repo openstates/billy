@@ -229,7 +229,8 @@
                     "chamber": {
                         "enum": [
                             "upper",
-                            "lower"
+                            "lower",
+                            "joint"
                         ],
                         "type": "string"
                     },
