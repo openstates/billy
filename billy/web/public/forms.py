@@ -37,7 +37,7 @@ def get_filter_bills_form(metadata):
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
             _status_choices = []
-            _chamber_choices = []
+            _chamber_choices = [('', 'Both Chambers')]
             for chamber_type in metadata['chambers']:
                 chamber_name = metadata['chambers'][chamber_type]['name']
                 _status_choices.append(('passed_' + chamber_type,
@@ -45,10 +45,10 @@ def get_filter_bills_form(metadata):
                 _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
 
-            if len(_status_choices) == 3:
+            if len(_chamber_choices) > 2:
                 chamber = forms.MultipleChoiceField(
                     choices=_chamber_choices,
-                    widget=forms.CheckboxSelectMultiple(),
+                    widget=forms.RadioSelect(),
                     required=False)
 
             status = forms.MultipleChoiceField(

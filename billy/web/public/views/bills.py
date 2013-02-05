@@ -59,18 +59,18 @@ class RelatedBillsList(RelatedObjectsList):
             else:
                 description = ['Search All']
             long_description = []
-            chamber = form.data.getlist('chamber')
+            chamber = form.data.get('chamber')
             session = form.data.get('session')
             type = form.data.get('type')
             status = form.data.getlist('status')
             subjects = form.data.getlist('subjects')
             sponsor = form.data.get('sponsor__leg_id')
-            if len(chamber) == 1:
+            if chamber:
                 if metadata:
-                    description.append(metadata['chambers'][chamber[0]]['name']
+                    description.append(metadata['chambers'][chamber]['name']
                                       )
                 else:
-                    description.extend([chamber[0].title(), 'Chamber'])
+                    description.extend([chamber.title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
                 description.append(
