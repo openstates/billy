@@ -352,11 +352,14 @@ class BillSearchResults(object):
                                              start=start,
                                              size=stop - start)
             _mongo_query = {'_id': {'$in': [r.get_id() for r in es_result]}}
+            return db.bills.find(_mongo_query, fields=self.fields).sort(
+                [(self.sort, pymongo.DESCENDING),
+                 ('bill_id', pymongo.ASCENDING)])
         else:
-            _mongo_query = self.mongo_filter
+            return db.bills.find(self.mongo_query, fields=self.fields).sort(
+                [(self.sort, pymongo.DESCENDING)]
+            ).skip(start).limit(stop-start)
 
-        return db.bills.find(_mongo_query, fields=self.fields).sort(
-            [(self.sort, pymongo.DESCENDING), ('bill_id', pymongo.ASCENDING)])
 
 
 class Bill(Document):
