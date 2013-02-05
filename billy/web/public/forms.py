@@ -26,7 +26,10 @@ def get_filter_bills_form(metadata):
             _bill_subjects = metadata.distinct_bill_subjects()
             _bill_sponsors = [(leg['_id'], leg.display_name()) for leg in
                               metadata.legislators()]
-            _sessions = [(s['id'], s['name']) for s in metadata.sessions()]
+
+            _sessions = metadata.bills().cursor.distinct('session')
+            _sessions = [(s['id'], s['name']) for s in metadata.sessions()
+                         if s['id'] in _sessions]
 
             BILL_TYPES = [('', '')] + zip(_bill_types, [s.title()
                                                         for s in _bill_types])
