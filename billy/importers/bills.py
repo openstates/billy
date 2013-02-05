@@ -118,7 +118,7 @@ def load_standalone_votes(data_dir):
 
 
 def elasticsearch_push(bill):
-    if settings.ENABLE_ELASTICSEARCH:
+    if settings.ENABLE_ELASTICSEARCH_PUSH:
         esdoc = bill_to_elasticsearch(bill)
         elasticsearch.index(esdoc, 'billy', 'bills', id=bill['_id'])
 
