@@ -25,13 +25,6 @@ def _build_mongo_filter(request, keys, icase=True):
     _filter = {}
     keys = set(keys) - set(['fields'])
 
-    try:
-        keys.remove('subjects')
-        if 'subject' in request.GET:
-            _filter['subjects'] = {'$all': request.GET.getlist('subject')}
-    except KeyError:
-        pass
-
     for key in keys:
         value = request.GET.get(key)
         if value:
@@ -181,8 +174,7 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        base_fields = _build_mongo_filter(request, ('chamber', 'subjects',
-                                                    'bill_id', 'bill_id__in'))
+        base_fields = _build_mongo_filter(request, ('chamber', 'bill_id'))
 
         # process extra attributes
         query = request.GET.get('q')
@@ -192,13 +184,20 @@ class BillSearchHandler(BillyHandler):
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
+        subjects = request.GET.getlist('subjects')
+
+        # sorting
+        sort = request.GET.get('sort', 'last')
+        if sort == 'last_action':
+            sort = 'last'
 
         try:
             query = Bill.search(query,
                                 abbr=abbr,
                                 search_window=search_window,
                                 updated_since=since, sponsor_id=sponsor_id,
-                                bill_fields=bill_fields,
+                                subjects=subjects,
+                                sort=sort, bill_fields=bill_fields,
                                 **base_fields)
         except ValueError as e:
             resp = rc.BAD_REQUEST
@@ -216,26 +215,20 @@ class BillSearchHandler(BillyHandler):
         if page:
             page = int(page)
             per_page = int(per_page)
-            query = query.limit(per_page).skip(per_page * (page - 1))
+            start = per_page * (page - 1)
+            end = start + per_page
+            bills = query[start:end]
         else:
             # limit response size
-            if query.count() > 10000:
+            if len(query) > 10000:
                 resp = rc.BAD_REQUEST
                 resp.write(': request too large, try narrowing your search by '
                            'adding more filters.')
                 return resp
+            bills = query[:]
 
-        # sorting
-        sort = request.GET.get('sort')
-        if sort == 'updated_at':
-            query = query.sort([('updated_at', -1)])
-        elif sort == 'created_at':
-            query = query.sort([('created_at', -1)])
-        elif sort == 'last_action':
-            query = query.sort([('action_dates.last', -1)])
-
+        bills = list(bills)
         # attach votes if necessary
-        bills = list(query)
         bill_ids = [bill['_id'] for bill in bills]
         vote_fields = _get_vote_fields(bill_fields) or []
         if 'votes' in bill_fields or vote_fields:

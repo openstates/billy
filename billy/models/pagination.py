@@ -60,10 +60,7 @@ class PaginatorBase(object):
                     ^
         '''
         start = (self.current_page - 1) * self.show_per_page
-        if start == 0:
-            return 1
-        else:
-            return start
+        return start + 1
 
     @property
     def range_end(self):
@@ -204,22 +201,26 @@ class CursorPaginator(PaginatorBase):
         self._cache = cache
 
 
-class IteratorPaginator(PaginatorBase):
-    'Huh huh...that rhymes.'
+class BillSearchPaginator(PaginatorBase):
 
-    def __init__(self, iterable, *args, **kwargs):
-        super(IteratorPaginator, self).__init__(*args, **kwargs)
-        iterable = list(iterable)
-        self.count = len(iterable)
-        self.iterable = iterable
+    def __init__(self, result, *args, **kwargs):
+        super(BillSearchPaginator, self).__init__(*args, **kwargs)
+        self.result = result
+        self.count = len(result)
+        self._cached = False
 
     def __iter__(self):
-        return iter(self.iterable[self.skip: (self.skip + self.limit)])
-
-    def __len__(self):
-        count = self.count
-        limit = self.limit
-        if limit < count:
-            return limit
+        'The specific page of records.'
+        if self._cached:
+            for record in self._cache:
+                yield record
+            return
         else:
-            return count
+            cache = []
+
+        for record in self.result[self.skip:self.skip + self.limit]:
+            yield record
+            cache.append(record)
+
+        self._cached = True
+        self._cache = cache

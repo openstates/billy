@@ -3,10 +3,10 @@ import json
 import random
 
 from billy.core import db
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 from billy.core import settings
 
-from billy.commands.dump import APIValidator, api_url
+from billy.bin.commands.dump import APIValidator, api_url
 
 import scrapelib
 import validictory

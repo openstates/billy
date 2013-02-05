@@ -210,7 +210,7 @@ def set_favorite(request):
     doc.update(spec)
     # Create the doc if missing, else update based on the spec.
     user_db.favorites.update(spec, doc, upsert=True)
-    return HttpResponse(status=200)
+    return HttpResponse(content='{}', status=200)
 
 
 @login_required

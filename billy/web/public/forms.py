@@ -1,15 +1,11 @@
 from django import forms
-from django.conf import settings
 
 from billy.models import db
 
 
 def get_region_select_form(data):
     abbrs = [('', '')]
-    spec = {}
-    if hasattr(settings, 'ACTIVE_STATES'):
-        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
-    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
     abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
@@ -34,14 +30,14 @@ def get_filter_bills_form(metadata):
 
             BILL_TYPES = [('', '')] + zip(_bill_types, [s.title()
                                                         for s in _bill_types])
-            BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
+            BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
             BILL_SPONSORS = [('', '')] + _bill_sponsors
             SESSIONS = [('', '')] + _sessions
 
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
-            _status_choices = [('', '')]
-            _chamber_choices = []
+            _status_choices = []
+            _chamber_choices = [('', 'Both Chambers')]
             for chamber_type in metadata['chambers']:
                 chamber_name = metadata['chambers'][chamber_type]['name']
                 _status_choices.append(('passed_' + chamber_type,
@@ -49,13 +45,16 @@ def get_filter_bills_form(metadata):
                 _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
 
-            if len(_status_choices) == 4:
+            if len(_chamber_choices) > 2:
                 chamber = forms.MultipleChoiceField(
                     choices=_chamber_choices,
-                    widget=forms.CheckboxSelectMultiple(),
+                    widget=forms.RadioSelect(),
                     required=False)
 
-            status = forms.ChoiceField(choices=_status_choices, required=False)
+            status = forms.MultipleChoiceField(
+                choices=_status_choices,
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
@@ -73,13 +72,14 @@ def get_filter_bills_form(metadata):
                 choices=(('upper', 'upper'), ('lower', 'lower')),
                 widget=forms.CheckboxSelectMultiple(), required=False)
 
-            status = forms.ChoiceField(
+            status = forms.MultipleChoiceField(
                 choices=(
-                    ('', ''),
                     ('passed_lower', 'Passed lower'),
                     ('passed_upper', 'Passed upper'),
-                    ('signed', 'Signed')
-                ), required=False)
+                    ('signed', 'Signed'),
+                ),
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
         type = forms.ChoiceField(choices=BILL_TYPES, required=False)
 

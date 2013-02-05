@@ -7,6 +7,7 @@ MONGO_USER_DATABASE = 'billy_userdata'
 
 BOUNDARY_SERVICE_URL = 'http://localhost:8001/1.0/'
 ENABLE_ELASTICSEARCH = False
+ENABLE_ELASTICSEARCH_PUSH = False
 ELASTICSEARCH_HOST = '127.0.0.1:9200'
 ELASTICSEARCH_TIMEOUT = 10   # seconds
 
@@ -17,6 +18,8 @@ SCRAPER_PATHS = []
 BILLY_DATA_DIR = os.path.join(os.getcwd(), 'data')
 BILLY_CACHE_DIR = os.path.join(os.getcwd(), 'cache')
 BILLY_MANUAL_DATA_DIR = os.path.join(os.getcwd(), 'manual_data')
+
+ENABLE_DOCUMENT_VIEW = {}
 
 BILL_FILTERS = {}
 LEGISLATOR_FILTERS = {}

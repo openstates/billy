@@ -6,7 +6,7 @@ import sys
 
 from billy.core import db
 from billy.core import settings
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 
 
 class UpdateMissingIds(BaseCommand):

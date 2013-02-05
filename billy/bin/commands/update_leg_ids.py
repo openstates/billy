@@ -1,6 +1,6 @@
 from __future__ import print_function
 from billy.core import db
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 from billy.utils import metadata
 from billy.importers.names import get_legislator_id
 from billy.importers.bills import match_sponsor_ids

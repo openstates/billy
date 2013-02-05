@@ -7,13 +7,12 @@ import urllib2
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
 from billy.core import user_db
-from billy.models import db, Metadata, Legislator
+from billy.models import db, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
@@ -27,7 +26,7 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
-    all_metadata = map(Metadata.get_object, settings.ACTIVE_STATES)
+    all_metadata = db.metadata.find()
 
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))

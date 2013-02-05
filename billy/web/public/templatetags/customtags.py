@@ -1,10 +1,11 @@
 from decimal import Decimal
 import re
 import json
-import urllib
 
 from django import template
 from django.utils.html import strip_tags
+
+import pytz
 
 from billy.core import settings
 from billy.web.public.forms import get_region_select_form
@@ -23,6 +24,15 @@ def region_select_form(abbr=None):
 @register.inclusion_tag(templatename('sources'))
 def sources(obj):
     return {'sources': obj['sources']}
+
+
+@register.filter
+def sources_urlize(url):
+    '''Django's urlize built-in template tag does a lot of other things,
+    like linking domain-only links, but it won't hyperlink ftp links,
+    so this is a more liberal replacement for source links.
+    '''
+    return '<a href="%s" rel="nofollow">%s</a>' % (url, url)
 
 
 @register.filter
@@ -113,7 +123,6 @@ class SquishedWhitespaceNode(template.Node):
         return output
 
 
-@register.inclusion_tag(templatename('_favorite'), takes_context=True)
 def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
              params=None):
     '''Check whether the object with the given type and id is currently
@@ -160,6 +169,13 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
                 params=params)
 
 
+register.inclusion_tag(
+    templatename('_favorite'), takes_context=True)(favorite)
+register.inclusion_tag(
+    templatename('_favorite_short'),
+    takes_context=True, name='favorite_short')(favorite)
+
+
 @register.inclusion_tag(templatename('_notification_preference'))
 def notification_preference(obj_type, profile):
     '''Display two radio buttons for turning notifications on or off.
@@ -177,3 +193,19 @@ def notification_preference(obj_type, profile):
 @register.filter
 def json_encode(data):
     return json.dumps(data)
+
+
+@register.filter
+def event_time(event):
+    tz = pytz.timezone(event['timezone'])
+    localized = tz.localize(event['when'])
+
+    display_time = (localized + localized.utcoffset())
+    hours, minutes = display_time.hour, display_time.minute
+
+    # If the event's time is midnight, there was probably no
+    # exact time listed on the site, so don't display likely bogus time.
+    if (hours, minutes) == (0, 0):
+        return display_time.strftime('%A, %B %d, %Y')
+
+    return display_time.strftime('%A, %B %d, %Y, %I:%M %p %Z')

@@ -7,9 +7,10 @@ import datetime
 from time import time
 from collections import defaultdict
 
-from billy.core import settings, db
+from billy.core import settings, db, elasticsearch
 from billy.utils import (metadata, term_for_session, fix_bill_id,
                          JSONEncoderPlus)
+from billy.utils.fulltext import bill_to_elasticsearch
 from billy.importers.names import get_legislator_id
 from billy.importers.filters import apply_filters
 
@@ -40,14 +41,14 @@ def ensure_indexes():
                            ('bill_id', pymongo.ASCENDING)],
                           unique=True)
 
-    # doc_id is used for search in conjunction with ElasticSearch
+    # bill_id is used for search in conjunction with ElasticSearch
     #  sort field (date) comes first, followed by field that we do an $in on
     db.bills.ensure_index([('created_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('updated_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
 
     # common search indices
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
@@ -59,13 +60,17 @@ def ensure_indexes():
 
     # generic sort-assist indices on the action_dates
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.first', pymongo.DESCENDING)])
+                           ('action_dates.first', pymongo.DESCENDING),
+                          ])
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
+                           ('action_dates.last', pymongo.DESCENDING),
+                          ])
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_upper', pymongo.DESCENDING)])
+                           ('action_dates.passed_upper', pymongo.DESCENDING),
+                          ])
     db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_lower', pymongo.DESCENDING)])
+                           ('action_dates.passed_lower', pymongo.DESCENDING),
+                          ])
 
     # votes index
     db.votes.ensure_index([('bill_id', pymongo.ASCENDING),
@@ -110,6 +115,12 @@ def load_standalone_votes(data_dir):
 
     logger.info('imported %s vote files' % len(paths))
     return votes
+
+
+def elasticsearch_push(bill):
+    if settings.ENABLE_ELASTICSEARCH_PUSH:
+        esdoc = bill_to_elasticsearch(bill)
+        elasticsearch.index(esdoc, 'billy', 'bills', id=bill['_id'])
 
 
 git_active_repo = None
@@ -219,22 +230,6 @@ def git_prelod(abbr):
     tree = git_active_repo.tree(commit.tree)
     git_old_tree = tree.id
     git_active_tree = tree
-
-
-def track_version(bill, version):
-    doc = {'titles': [bill['title']] + bill.get('alternate_titles', []),
-           'url': version['url'],
-           'type': 'version',
-           'mimetype': version.get('mimetype', None),
-           settings.LEVEL_FIELD: bill[settings.LEVEL_FIELD],
-           'session': bill['session'],
-           'chamber': bill['chamber'],
-           'bill_id': bill['bill_id'],
-           'subjects': bill.get('subjects', []),
-           'sponsors': [s['leg_id'] for s in bill['sponsors'] if s['leg_id']]}
-    # insert or update this document
-    db.tracked_versions.update({'_id': version['doc_id']}, {'$set': doc},
-                               upsert=True)
 
 
 def import_bill(data, standalone_votes, categorizer):
@@ -424,9 +419,6 @@ def import_bill(data, standalone_votes, categorizer):
     alt_titles = set(data.get('alternate_titles', []))
 
     for version in data['versions']:
-        # add/update tracked_versions collection
-        track_version(data, version)
-
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
             alt_titles.add(version['title'])
@@ -443,11 +435,13 @@ def import_bill(data, standalone_votes, categorizer):
 
     if not bill:
         insert_with_id(data)
+        elasticsearch_push(data)
         git_add_bill(data)
         save_votes(data, bill_votes)
         return "insert"
     else:
         update(bill, data, db.bills)
+        elasticsearch_push(bill)
         git_add_bill(bill)
         save_votes(bill, bill_votes)
         return "update"

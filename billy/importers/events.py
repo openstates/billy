@@ -102,6 +102,7 @@ def import_events(abbr, data_dir, import_actions=False):
             # also a committee considering a bill from the other chamber, or
             # something like that.
             bill['id'] = db_bill['_id']
+            bill['bill_id'] = bill_id
         import_event(data)
     ensure_indexes()
 
@@ -113,12 +114,16 @@ def normalize_dates(event):
     tz = pytz.timezone(meta['capitol_timezone'])
 
     # right now, we just need to update when the event is.
-    for attr in ['when']:
-        if not event[attr].tzinfo:
-            localtime = tz.localize(event[attr])
+    attr = "when"
+    if not event[attr].tzinfo:
+        localtime = tz.localize(event[attr])
 
-        utctime = datetime.datetime(*localtime.utctimetuple()[:6])
-        event[attr] = utctime
+    tzdb_name = localtime.tzinfo.zone
+
+    utctime = datetime.datetime(*localtime.utctimetuple()[:6])
+    event[attr] = utctime
+    event["timezone"] = tzdb_name
+
     return event
 
 

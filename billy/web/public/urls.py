@@ -2,7 +2,6 @@ from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.bills import BillList, AllBillList, BillFeed
-from billy.web.public.views.region import ShowMoreLegislators
 from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 
 # misc. views
@@ -35,11 +34,6 @@ urlpatterns = patterns(
 urlpatterns += patterns(
     '',
 
-    # delete this once real login lands
-    (r'^login/$', 'django.contrib.auth.views.login',
-     {'template_name': 'billy/web/public/login.html'}
-    ),
-
     url(r'^profile/$', 'billy.web.public.views.misc.user_profile',
         name='user_profile'),
     url(r'^get_user_latlong/$', 'billy.web.public.views.misc.get_user_latlong',
@@ -59,8 +53,6 @@ urlpatterns += patterns(
     'billy.web.public.views.region',
 
     url(r'^(?P<abbr>[a-z-]+)/search/$', 'search', name='search'),
-    url(r'^(?P<abbr>[a-z-]+)/search/show_more_legislators/$',
-        ShowMoreLegislators.as_view(), name='show_more_legislators'),
     url(r'^(?P<abbr>[a-z-]+)/$', 'region', name='region'),
     url(r'^region_selection/$', 'region_selection', name='region_selection'),
 )
@@ -73,6 +65,8 @@ urlpatterns += patterns(
         name='events'),
     url(r'^(?P<abbr>[a-z-]+)/events/rss/$', EventsFeed(),
         name='events_rss'),
+    url(r'^(?P<abbr>[a-z-]+)/events/json_for_date/(?P<year>\d+)/(?P<month>\d+)/',
+        'events_json_for_date', name='events_json_for_date'),
     url(r'^(?P<abbr>[a-z-]+)/events/(?P<event_id>[\w-]+)/', 'event',
         name='event'),
     url(r'^(?P<abbr>[a-z-]+)/ical/(?P<event_id>[\w-]+)/', 'event_ical',

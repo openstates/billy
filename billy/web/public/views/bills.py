@@ -1,5 +1,4 @@
 import urllib
-import pymongo
 
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -9,7 +8,7 @@ from django.utils.feedgenerator import Rss201rev2Feed
 from billy.core import settings
 from billy.utils import popularity, fix_bill_id
 from billy.models import db, Metadata, Bill
-from billy.models.pagination import CursorPaginator, IteratorPaginator
+from billy.models.pagination import BillSearchPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
@@ -22,7 +21,7 @@ class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
     use_table = True
     list_item_context_name = 'bill'
-    paginator = CursorPaginator
+    paginator = BillSearchPaginator
     rowtemplate_name = templatename('bills_list_row')
     nav_active = 'bills'
     column_headers_tmplname = None      # not used
@@ -60,36 +59,41 @@ class RelatedBillsList(RelatedObjectsList):
             else:
                 description = ['Search All']
             long_description = []
-            chamber = form.data.getlist('chamber')
+            chamber = form.data.get('chamber')
             session = form.data.get('session')
             type = form.data.get('type')
-            status = form.data.get('status')
+            status = form.data.getlist('status')
+            subjects = form.data.getlist('subjects')
             sponsor = form.data.get('sponsor__leg_id')
-            if len(chamber) == 1:
+            if chamber:
                 if metadata:
-                    description.append(metadata['chambers'][chamber[0]]['name']
+                    description.append(metadata['chambers'][chamber]['name']
                                       )
                 else:
-                    description.extend([chamber[0].title(), 'Chamber'])
+                    description.extend([chamber.title(), 'Chamber'])
             description.append((type or 'Bill') + 's')
             if session:
                 description.append(
                     '(%s)' %
                     metadata['session_details'][session]['display_name']
                 )
-            if status == 'passed_lower':
+            if 'signed' in status:
+                long_description.append('which have been signed into law')
+            elif 'passed_upper' in status and 'passed_lower' in status:
+                long_description.append('which have passed both chambers')
+            elif 'passed_lower' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['lower']['name'])
-            elif status == 'passed_upper':
+            elif 'passed_upper' in status:
                 long_description.append('which have passed the ' +
                                         metadata['chambers']['upper']['name'])
-            elif status == 'signed':
-                long_description.append('which have been signed into law')
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},
                                               fields=('full_name', '_id'))
                 leg = leg['full_name']
                 long_description.append('sponsored by ' + leg)
+            if subjects:
+                long_description.append('related to ' + ', '.join(subjects))
             if search_text:
                 long_description.append(u'containing the term "{0}"'.format(
                     search_text))
@@ -147,15 +151,22 @@ class RelatedBillsList(RelatedObjectsList):
 
         subjects = form.data.get('subjects')
         if subjects:
-            spec['subjects'] = {'$all': [filter(None, subjects)]}
+            spec['subjects'] = subjects
 
         sponsor_id = form.data.get('sponsor__leg_id')
         if sponsor_id:
             spec['sponsor_id'] = sponsor_id
 
-        status = form.data.get('status')
-        if status:
-            spec['status'] = {'action_dates.%s' % status: {'$ne': None}}
+        if 'status' in form.data:
+            status_choices = form.data.getlist('status')
+            status_spec = []
+            for status in status_choices:
+                status_spec.append({'action_dates.%s' % status: {'$ne': None}})
+
+            if len(status_spec) == 1:
+                spec['status'] = status_spec[0]
+            elif len(status_spec) > 1:
+                spec['status'] = {'$and': status_spec}
 
         type_ = form.data.get('type')
         if type_:
@@ -165,19 +176,11 @@ class RelatedBillsList(RelatedObjectsList):
         if session:
             spec['session'] = session
 
-        cursor = Bill.search(search_text, **spec)
-
         sort = self.request.GET.get('sort', 'last')
-        if sort not in ('first', 'last', 'signed', 'passed_upper',
-                        'passed_lower'):
-            sort = 'last'
-        sort_key = 'action_dates.{0}'.format(sort)
 
-        # do sorting on the cursor
-        cursor.sort([(sort_key, pymongo.DESCENDING)])
+        result = Bill.search(search_text, sort=sort, **spec)
 
-        return self.paginator(cursor, page=page,
-                              show_per_page=show_per_page)
+        return self.paginator(result, page=page, show_per_page=show_per_page)
 
     def get(self, request, *args, **kwargs):
         # hack to redirect to proper legislator if sponsor_id is an alias
@@ -206,7 +209,6 @@ class BillList(RelatedBillsList):
     template_name = templatename('bills_list')
     collection_name = 'metadata'
     query_attr = 'bills'
-    paginator = CursorPaginator
     description_template = '''NOT USED'''
     title_template = 'Search bills - {{ metadata.legislature_name }}'
 
@@ -224,7 +226,6 @@ class AllBillList(RelatedBillsList):
     template_name = templatename('bills_list')
     rowtemplate_name = templatename('bills_list_row_with_abbr_and_session')
     collection_name = 'bills'
-    paginator = CursorPaginator
     use_table = True
     description_template = '''NOT USED'''
     title_template = ('Search All Bills')
@@ -379,6 +380,9 @@ def document(request, abbr, session, bill_id, doc_id):
             break
     else:
         raise Http404('No such document.')
+
+    if not settings.ENABLE_DOCUMENT_VIEW.get(abbr, False):
+        return redirect(version['url'])
 
     return render(request, templatename('document'),
                   dict(abbr=abbr, session=session, bill=bill, version=version,

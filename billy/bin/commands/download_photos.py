@@ -8,7 +8,7 @@ import scrapelib
 
 from billy.core import db
 from billy.core import settings
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 
 scraper = scrapelib.Scraper(follow_robots=False)
 
@@ -61,7 +61,8 @@ class DownloadPhotos(BaseCommand):
                     os.makedirs(d)
 
             for leg in db.legislators.find({settings.LEVEL_FIELD: abbr,
-                                            'photo_url': {'$exists': True}}):
+                                            'photo_url': {'$exists': True}},
+                                           timeout=False):
 
                 fname = os.path.join(orig_dir, '{0}.jpg'.format(leg['_id']))
 

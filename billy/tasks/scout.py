@@ -1,14 +1,9 @@
 '''
 A few notes from our initial tests of this (Thom 12/20/2012)
-- the user search page allows chamber to be a checkbox with multiple values
-  but the api requires a string (upper or lower)
 - Some keys don't appear to be supported in the api:
   - type
   - status (checkbox/list)
-  So we lose them in the post to Scout unless we add them to the api. this
-  just means people will think they're getting alerts for a narrower
-  set of contstraints, but will get (ie.,
-
+  So we lose them in the post to Scout unless we add them to the api.
 '''
 import json
 import logging
@@ -71,8 +66,7 @@ class ScoutPush(Task):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
         '''
-        # Two api params have no analog in the front-end search: bill_id__in
-        # and updated_since
+        # some api params have no analog in the front-end search: updated_since
         api_param_names = 'q state search_window chamber subjects sponsor_id'
         api_param_name_set = set(api_param_names.split())
 
@@ -86,18 +80,12 @@ class ScoutPush(Task):
         }
 
         for k, v in params.items():
-            print k, v
+
             if k == 'session':
                 v = 'session:' + v.pop()
-
             elif k == 'search_state':
                 # Scout expects uppercase.
                 v = v.upper()
-
-            elif k == 'chamber':
-                # XXX Hack: the front-end search allows users to select
-                # multiple chambers, but the api method only accepts one.
-                v = v.pop()
 
             api_param_name = api_param_names.get(k)
             if api_param_name is None:

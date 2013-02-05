@@ -1,22 +1,22 @@
 """
     views specific to events
 """
+import json
+import datetime
 import operator
-import urllib
-import datetime as dt
 from icalendar import Calendar, Event
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
-from django.contrib.sites.models import Site
-
+from django.template.response import TemplateResponse
+from djpjax import pjax
 
 import billy
 from billy.core import settings
 from billy.models import db, Metadata
-from billy.models.pagination import IteratorPaginator
+from billy.utils import JSONEncoderPlus, get_domain
 
-from .utils import templatename, RelatedObjectsList
+from .utils import templatename
 
 
 def event_ical(request, abbr, event_id):
@@ -32,10 +32,10 @@ def event_ical(request, abbr, event_id):
 
     cal_event = Event()
     cal_event.add('summary', event['description'])
-    cal_event['uid'] = "%s@%s" % (event['_id'], Site.objects.all()[0].domain)
+    cal_event['uid'] = "%s@%s" % (event['_id'], get_domain())
     cal_event.add('priority', 5)
     cal_event.add('dtstart', event['when'])
-    cal_event.add('dtend', (event['when'] + dt.timedelta(hours=1)))
+    cal_event.add('dtend', (event['when'] + datetime.timedelta(hours=1)))
     cal_event.add('dtstamp', event['updated_at'])
 
     if "participants" in event:
@@ -71,54 +71,68 @@ def event(request, abbr, event_id):
     event = db.events.find_one({'_id': event_id})
     if event is None:
         raise Http404
-
-    fmt = "%Y%m%dT%H%M%SZ"
-
-    start_date = event['when'].strftime(fmt)
-    duration = dt.timedelta(hours=1)
-    ed = (event['when'] + duration)
-    end_date = ed.strftime(fmt)
-
-    gcal_info = {
-        "action": "TEMPLATE",
-        "text": event['description'].encode('utf-8'),
-        "dates": "%s/%s" % (start_date, end_date),
-        "details": "",
-        "location": event['location'].encode('utf-8'),
-        "trp": "false",
-        "sprop": "http://%s/" % Site.objects.all()[0].domain,
-        "sprop": "name:billy"
-    }
-    gcal_string = urllib.urlencode(gcal_info)
-
     return render(request, templatename('event'),
                   dict(abbr=abbr,
                        metadata=Metadata.get_object(abbr),
+                       events=[event],
                        event=event,
-                       sources=event['sources'],
-                       gcal_info=gcal_info,
-                       gcal_string=gcal_string,
+                       event_template=templatename('_event'),
+                       events_list_template=templatename('events-pjax'),
                        nav_active='events'))
 
 
+def _get_events(abbr, year, month):
+    '''Get events that occur during the specified year-month. The month
+    is 0-based to match the input from javascript.
+    '''
+    spec = {
+        settings.LEVEL_FIELD: abbr,
+    }
+
+    # Update the spec with month/year specific data.
+    month = int(month)
+
+    # Increment the month to account for 0-based months in javascript.
+    month += 1
+
+    year = int(year)
+    next_month = month + 1
+    if month == 12:
+        next_month = 1
+    month_start = datetime.datetime(month=month, year=year, day=1)
+    month_end = datetime.datetime(month=next_month, year=year, day=1)
+    spec['when'] = {'$gte': month_start, '$lt': month_end}
+
+    events = list(db.events.find(spec))
+    events.sort(key=operator.itemgetter('when'))
+    return events
+
+
+def events_json_for_date(request, abbr, year, month):
+    events = _get_events(abbr, year, month)
+    content = json.dumps(list(events), cls=JSONEncoderPlus)
+    return HttpResponse(content)
+
+
+@pjax()
 def events(request, abbr):
-    '''
-    Context:
-      - XXX: FIXME
+    year = request.GET.get('year')
+    month = request.GET.get('month')
+    if year and month:
+        if month == "0":
+            month = 1
 
-    Templates:
-        - billy/web/public/events.html
-    '''
-    recent_events = db.events.find({
-        settings.LEVEL_FIELD: abbr
-    }).sort("when", -1)
-    events = recent_events[:30]
-    recent_events.rewind()
+        month = int(month)
+        display_date = datetime.datetime(year=int(year), month=month, day=1)
+    else:
+        display_date = datetime.datetime.now()
 
-    return render(request,
-                  templatename('events'),
-                  dict(abbr=abbr,
-                       metadata=Metadata.get_object(abbr),
-                       events=events,
-                       nav_active='events',
-                       recent_events=recent_events))
+    # Compensate for js dates.
+    events = _get_events(abbr, display_date.year, display_date.month - 1)
+    return TemplateResponse(
+        request, templatename('events'),
+        dict(abbr=abbr, display_date=display_date,
+             metadata=Metadata.get_object(abbr), events=events,
+             event_template=templatename('_event'),
+             events_list_template=templatename('events-pjax'),
+             nav_active='events'))
