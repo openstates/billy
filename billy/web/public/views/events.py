@@ -129,11 +129,10 @@ def events(request, abbr):
 
     # Compensate for js dates.
     events = _get_events(abbr, display_date.year, display_date.month - 1)
-    return TemplateResponse(request, templatename('events'),
-                  dict(abbr=abbr,
-                       display_date=display_date,
-                       metadata=Metadata.get_object(abbr),
-                       events=events,
-                       event_template=templatename('_event'),
-                       events_list_template=templatename('events-pjax'),
-                       nav_active='events'))
+    return TemplateResponse(
+        request, templatename('events'),
+        dict(abbr=abbr, display_date=display_date,
+             metadata=Metadata.get_object(abbr), events=events,
+             event_template=templatename('_event'),
+             events_list_template=templatename('events-pjax'),
+             nav_active='events'))

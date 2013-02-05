@@ -111,6 +111,7 @@ def textual_diff(l1, l2):
 _bill_id_re = re.compile(r'([A-Z]*)\s*0*([-\d]+)')
 _mi_bill_id_re = re.compile(r'(SJR|HJR)\s*([A-Z]+)')
 
+
 def fix_bill_id(bill_id):
     bill_id = bill_id.replace('.', '')
     # special case for MI Joint Resolutions

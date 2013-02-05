@@ -358,8 +358,7 @@ class BillSearchResults(object):
         else:
             return db.bills.find(self.mongo_query, fields=self.fields).sort(
                 [(self.sort, pymongo.DESCENDING)]
-            ).skip(start).limit(stop-start)
-
+            ).skip(start).limit(stop - start)
 
 
 class Bill(Document):
