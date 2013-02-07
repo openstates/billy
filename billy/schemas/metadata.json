@@ -27,9 +27,8 @@
             },
             "type": "array"
         },
-        "legislature_name": {
-            "type": "string"
-        },
+        "legislature_name": { "type": "string" },
+        "legislature_url": { "type": "string" },
         "chambers": {
             "additionalProperties": {
                 "properties": {
