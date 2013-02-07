@@ -4,6 +4,7 @@
 from django.shortcuts import render
 from django.http import Http404
 from django.template.response import TemplateResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from djpjax import pjax
 
@@ -87,6 +88,7 @@ def committees(request, abbr):
              nav_active='committees'))
 
 
+@ensure_csrf_cookie
 def committee(request, abbr, committee_id):
     '''
     Context:

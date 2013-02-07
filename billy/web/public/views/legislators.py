@@ -9,6 +9,7 @@ import urllib2
 from django.shortcuts import render, redirect
 from django.http import Http404
 from django.template.response import TemplateResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from djpjax import pjax
 import pymongo
@@ -106,6 +107,7 @@ def legislators(request, abbr):
              nav_active='legislators'))
 
 
+@ensure_csrf_cookie
 def legislator(request, abbr, _id, slug=None):
     '''
     Context:
