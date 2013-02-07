@@ -1,6 +1,7 @@
 from decimal import Decimal
 import re
 import json
+import urllib
 
 from django import template
 from django.utils.html import strip_tags
@@ -137,6 +138,7 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     Same for params, which needs to be passed as a url-encoded string from
     the user homepage.
     '''
+
     request = context['request']
     extra_spec = {}
 
@@ -158,9 +160,9 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
 
     # use request.GET for params if not present
     if not params:
-        params = dict(request.GET)
-        for k, v in params.iteritems():
-            params[k] = unicode(v).encode('utf8')
+        params = [(k, unicode(v).encode('utf8'))
+                  for k, v in request.GET.items()]
+        params = urllib.urlencode(params)
 
     return dict(extra_spec,
                 obj_type=obj_type, obj_id=obj_id,
