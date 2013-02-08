@@ -73,9 +73,8 @@ class DownloadPhotos(BaseCommand):
                 # error retrieving photo, skip it
                 try:
                     tmpname, resp = scraper.urlretrieve(leg['photo_url'])
-                except scrapelib.HTTPError:
-                    continue
-                except Exception:
+                except Exception as e:
+                    log.critical('error fetching %s: %s', leg['photo_url'], e)
                     continue
 
                 try:
