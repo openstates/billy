@@ -30,6 +30,7 @@
 
 <div class="span8">
     <form method = 'POST' action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
+        {% csrf_token %}
         <fieldset>
             <div class="control-group">
                 <label class="control-label" for="focusedInput">Exception Type</label>
