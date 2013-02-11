@@ -5,7 +5,7 @@
 {% block content %}
 
 <form action="{% url delete_committees %}" method="POST">
-
+{% csrf_token %}
 <div>
     <h3>Permanently Delete these Committees?</h3>
     <dl>
