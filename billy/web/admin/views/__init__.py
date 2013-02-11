@@ -776,6 +776,8 @@ def subjects_commit(request, abbr):
     catd_subjects = defaultdict(dict)
 
     for idex in payload:
+        if idex == 'csrfmiddlewaretoken':
+            continue
         key, val = idex.split("-", 1)
         if val == 'remote' and not 'normal' in catd_subjects[key]:
             catd_subjects[key]['normal'] = []

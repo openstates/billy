@@ -74,6 +74,8 @@ def remove(request, abbr=None, id=None):
 def commit(request, abbr):
     ids = dict(request.POST)
     for eyedee in ids:
+        if eyedee == 'csrfmiddlewaretoken':
+            continue
         typ, term, chamber, name = eyedee.split(",", 3)
         value = ids[eyedee][0]
         if value == "Unknown":

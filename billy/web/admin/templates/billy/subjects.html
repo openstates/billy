@@ -69,6 +69,7 @@
 <br />
 
 <form action="{% url admin_subjects_commit metadata.abbreviation %}" method = "POST" >
+    {% csrf_token %}
 <table class="table table-striped table-bordered table-condensed" id="target">
     <tr>
         <th>"Foreign" subject</th>
