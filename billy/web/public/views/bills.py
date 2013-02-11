@@ -137,7 +137,10 @@ class RelatedBillsList(RelatedObjectsList):
         get = self.request.GET.get
         show_per_page = getattr(self, 'show_per_page', 10)
         show_per_page = int(get('show_per_page', show_per_page))
-        page = int(get('page', 1))
+        try:
+            page = int(get('page', 1))
+        except ValueError:
+            raise Http404('no such page')
         if show_per_page > 100:
             show_per_page = 100
 
