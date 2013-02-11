@@ -109,12 +109,12 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'billy.web.public.views.bills',
 
+    url(r'^(?P<abbr>all)/bills/$', ensure_csrf_cookie(AllBillList.as_view()),
+        name='all_bills'),
     url(r'^(?P<abbr>[a-z-]+)/bills/$', ensure_csrf_cookie(BillList.as_view()),
         name='bills'),
     url(r'^(?P<abbr>[a-z-]+)/bills/feed/$', BillFeed.as_view(),
         name='bills_feed'),
-    url(r'^(?P<abbr>all)/bills/$', ensure_csrf_cookie(AllBillList.as_view()),
-        name='all_bills'),
     url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/(?P<bill_id>[^/]+)/$',
         'bill', name='bill'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<bill_id>[^/]+)/$',
