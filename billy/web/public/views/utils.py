@@ -149,9 +149,6 @@ class RelatedObjectsList(ListViewBase):
         collection = getattr(db, collection_name)
 
         obj = collection.find_one(_id)
-        if obj is None:
-            msg = 'Not found in %s collection: %r'
-            raise Http404(msg % (collection_name, _id))
 
         self.obj = obj
         return obj
@@ -167,7 +164,10 @@ class RelatedObjectsList(ListViewBase):
         if 100 < show_per_page:
             show_per_page = 100
 
-        objects = getattr(self.get_object(), self.query_attr)
+        obj = self.get_object()
+        if obj is None:
+            raise Http404('RelatedObjectsList.get_object returned None.')
+        objects = getattr(obj, self.query_attr)
 
         # The related collection of objects might be a
         # function or a manager class.
