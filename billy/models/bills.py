@@ -314,8 +314,10 @@ class BillVote(Document):
         else:
             bill = self.bill
         metadata = bill.metadata
-        name = metadata['chambers'][self['chamber']]['name']
-        return name
+        if self['chamber'] in metadata['chambers']:
+            return metadata['chambers'][self['chamber']]['name']
+        else:
+            return self['chamber'].title()
 
 
 class BillSearchResults(object):
