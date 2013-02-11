@@ -148,10 +148,10 @@ class RelatedObjectsList(ListViewBase):
         # Get the related object.
         collection = getattr(db, collection_name)
 
-        try:
-            obj = collection.find_one(_id)
-        except DoesNotExist:
-            raise Http404
+        obj = collection.find_one(_id)
+        if obj is None:
+            msg = 'Not found in %s collection: %r'
+            raise Http404(msg % (collection_name, _id))
 
         self.obj = obj
         return obj
