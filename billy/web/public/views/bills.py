@@ -149,6 +149,10 @@ class RelatedBillsList(RelatedObjectsList):
 
         search_text = form.data.get('search_text')
 
+        form_abbr = form.data.get('abbr')
+        if form_abbr:
+            spec['abbr'] = form_abbr
+
         chamber = form.data.get('chamber')
         if chamber:
             spec['chamber'] = chamber

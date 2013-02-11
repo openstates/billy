@@ -2,14 +2,14 @@ from django import forms
 
 from billy.models import db
 
+_all_abbrs = [('', '')]
+_all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
+_all_abbrs += [(m['_id'], m['name']) for m in _all_metadata]
 
 def get_region_select_form(data):
-    abbrs = [('', '')]
-    all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
-    abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
-        abbr = forms.ChoiceField(choices=abbrs, label="abbr")
+        abbr = forms.ChoiceField(choices=_all_abbrs, label="abbr")
 
     return RegionSelectForm(data)
 
@@ -68,6 +68,7 @@ def get_filter_bills_form(metadata):
                                           [s.title() for s in _bill_types])
             BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
 
+            abbr = forms.ChoiceField(choices=_all_abbrs, label="abbr")
             chamber = forms.MultipleChoiceField(
                 choices=(('upper', 'upper'), ('lower', 'lower')),
                 widget=forms.CheckboxSelectMultiple(), required=False)
