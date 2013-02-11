@@ -1,21 +1,15 @@
 from bson import ObjectId
 
 from django.shortcuts import render, redirect
-from django.conf import settings as django_settings
 from django.http import Http404
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import db, settings
 from billy.utils import metadata
+from billy.web.admin.decorators import is_superuser
 
 
-if django_settings.DEBUG:
-    def login_required(f):      # NOQA
-        return f
-
-
-@login_required
+@is_superuser
 def edit(request, abbr):
     meta = metadata(abbr)
     report = db.reports.find_one({'_id': abbr})
@@ -63,13 +57,13 @@ def edit(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def remove(request, abbr=None, id=None):
     db.manual.name_matchers.remove({"_id": ObjectId(id)}, safe=True)
     return redirect('admin_matching', abbr)
 
 
-@login_required
+@is_superuser
 @require_http_methods(["POST"])
 def commit(request, abbr):
     ids = dict(request.POST)

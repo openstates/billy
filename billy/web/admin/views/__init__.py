@@ -17,12 +17,10 @@ from itertools import chain, imap
 from collections import defaultdict, OrderedDict
 
 from django.core import urlresolvers
-from django.conf import settings as django_settings
 from django.shortcuts import render, redirect
 from django.http import Http404, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from billy.core import db, mdb, settings
@@ -30,6 +28,7 @@ from billy.utils import metadata, JSONEncoderPlus
 from billy.importers.utils import merge_legislators
 from billy.importers.legislators import deactivate_legislators
 from billy.reports.utils import get_quality_exceptions, QUALITY_EXCEPTIONS
+from billy.web.admin.decorators import is_superuser
 
 
 def _meta_and_report(abbr):
@@ -49,12 +48,7 @@ def keyfunc(obj):
         return obj['district']
 
 
-if django_settings.DEBUG:
-    def login_required(f):      # NOQA
-        return f
-
-
-@login_required
+@is_superuser
 def _csv_response(request, csv_name, columns, data, abbr):
     if 'csv' in request.REQUEST:
         resp = HttpResponse(mimetype="text/plain")
@@ -70,7 +64,7 @@ def _csv_response(request, csv_name, columns, data, abbr):
                        'data': data, 'metadata': metadata(abbr)})
 
 
-@login_required
+@is_superuser
 def browse_index(request, template='billy/index.html'):
     rows = []
 
@@ -104,7 +98,7 @@ def browse_index(request, template='billy/index.html'):
     return render(request, template, {'rows': rows})
 
 
-@login_required
+@is_superuser
 def overview(request, abbr):
     meta, report = _meta_and_report(abbr)
     context = {}
@@ -135,7 +129,7 @@ def overview(request, abbr):
     return render(request, 'billy/overview.html', context)
 
 
-@login_required
+@is_superuser
 def run_detail_graph_data(request, abbr):
 
     def rolling_average(oldAverage, newItem, oldAverageCount):
@@ -259,7 +253,7 @@ def run_detail_graph_data(request, abbr):
         content_type="text/plain")
 
 
-@login_required
+@is_superuser
 def run_detail(request, obj=None):
     try:
         run = db.billy_runs.find({"_id": ObjectId(obj)})[0]
@@ -273,7 +267,7 @@ def run_detail(request, obj=None):
     })
 
 
-@login_required
+@is_superuser
 def run_detail_list(request, abbr):
     try:
         allruns = db.billy_runs.find({"abbr": abbr}
@@ -307,7 +301,7 @@ for the exception and error message.
 
 
 @never_cache
-@login_required
+@is_superuser
 def bills(request, abbr):
     meta, report = _meta_and_report(abbr)
 
@@ -455,7 +449,7 @@ def bills(request, abbr):
                        tablespecs=tablespecs))
 
 
-@login_required
+@is_superuser
 def summary_index(request, abbr, session):
 
     object_types = 'actions versions sponsors documents sources'.split()
@@ -485,7 +479,7 @@ def summary_index(request, abbr, session):
     return render(request, 'billy/summary_index.html', context)
 
 
-@login_required
+@is_superuser
 def summary_object_key(request, abbr, urlencode=urllib.urlencode,
                        collections=("bills", "legislators", "committees"),
                        dumps=json.dumps, Decimal=decimal.Decimal):
@@ -530,7 +524,7 @@ def summary_object_key(request, abbr, urlencode=urllib.urlencode,
     return render(request, 'billy/summary_object_key.html', locals())
 
 
-@login_required
+@is_superuser
 def summary_object_key_vals(
         request, abbr, urlencode=urllib.urlencode,
         collections=("bills", "legislators", "committees")):
@@ -567,7 +561,7 @@ def summary_object_key_vals(
     ))
 
 
-@login_required
+@is_superuser
 def object_json(request, collection, _id):
 
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
@@ -604,7 +598,7 @@ def object_json(request, collection, _id):
     ))
 
 
-@login_required
+@is_superuser
 def other_actions(request, abbr):
     report = db.reports.find_one({'_id': abbr})
     if not report:
@@ -613,7 +607,7 @@ def other_actions(request, abbr):
                          sorted(report['bills']['other_actions']), abbr)
 
 
-@login_required
+@is_superuser
 def duplicate_versions(request, abbr):
     meta, report = _meta_and_report(abbr)
 
@@ -648,7 +642,7 @@ def _bill_spec(meta, limit):
     return spec
 
 
-@login_required
+@is_superuser
 def bill_list(request, abbr):
     meta = metadata(abbr)
     if not meta:
@@ -676,7 +670,7 @@ def bill_list(request, abbr):
     return render(request, 'billy/bill_list.html', context)
 
 
-@login_required
+@is_superuser
 def bad_vote_list(request, abbr):
     meta = metadata(abbr)
     if not meta:
@@ -690,7 +684,7 @@ def bad_vote_list(request, abbr):
     return render(request, 'billy/vote_list.html', context)
 
 
-@login_required
+@is_superuser
 def legislators(request, abbr):
     meta = metadata(abbr)
 
@@ -719,7 +713,7 @@ def legislators(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def subjects(request, abbr):
     meta = metadata(abbr)
 
@@ -756,13 +750,13 @@ def subjects(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def subjects_remove(request, abbr=None, id=None):
     db.subjects.remove({"_id": id}, safe=True)
     return redirect('admin_subjects', abbr)
 
 
-@login_required
+@is_superuser
 @require_http_methods(["POST"])
 def subjects_commit(request, abbr):
 
@@ -810,7 +804,7 @@ def subjects_commit(request, abbr):
     return redirect('admin_subjects', abbr)
 
 
-@login_required
+@is_superuser
 def quality_exceptions(request, abbr):
     meta = metadata(abbr)
 
@@ -827,7 +821,7 @@ def quality_exceptions(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def quality_exception_remove(request, abbr, obj):
     meta = metadata(abbr)
     errors = []
@@ -843,7 +837,7 @@ def quality_exception_remove(request, abbr, obj):
     return redirect('quality_exceptions', abbr)
 
 
-@login_required
+@is_superuser
 def quality_exception_commit(request, abbr):
     def classify_object(oid):
         oid = oid.upper()
@@ -909,7 +903,7 @@ def quality_exception_commit(request, abbr):
     return redirect('quality_exceptions', abbr)
 
 
-@login_required
+@is_superuser
 def events(request, abbr):
     meta = metadata(abbr)
 
@@ -924,7 +918,7 @@ def events(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def event(request, abbr, event_id):
     meta = metadata(abbr)
     event = db.events.find_one(event_id)
@@ -934,7 +928,7 @@ def event(request, abbr, event_id):
     })
 
 
-@login_required
+@is_superuser
 def legislator_edit(request, id):
     leg = db.legislators.find_one({'_all_ids': id})
     if not leg:
@@ -960,7 +954,7 @@ def legislator_edit(request, id):
     })
 
 
-@login_required
+@is_superuser
 @require_http_methods(["POST"])
 def legislator_edit_commit(request):
     payload = dict(request.POST)
@@ -1006,7 +1000,7 @@ def legislator_edit_commit(request):
     return redirect('admin_legislator_edit', legislator['leg_id'])
 
 
-@login_required
+@is_superuser
 def retire_legislator(request, id):
     legislator = db.legislators.find_one({'_all_ids': id})
     if not legislator:
@@ -1038,7 +1032,7 @@ def retire_legislator(request, id):
                                                           'alert': alert})
 
 
-@login_required
+@is_superuser
 def committees(request, abbr):
     meta = metadata(abbr)
 
@@ -1055,7 +1049,7 @@ def committees(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def delete_committees(request):
     ids = request.POST.getlist('committees')
     committees = db.committees.find({'_id': {'$in': ids}})
@@ -1068,7 +1062,7 @@ def delete_committees(request):
         return redirect('admin_committees', abbr)
 
 
-@login_required
+@is_superuser
 def mom_index(request, abbr):
     legislators = list(db.legislators.find({settings.LEVEL_FIELD: abbr}))
     return render(request, 'billy/mom_index.html', {
@@ -1077,7 +1071,7 @@ def mom_index(request, abbr):
     })
 
 
-@login_required
+@is_superuser
 def mom_commit(request, abbr):
     actions = []
 
@@ -1145,7 +1139,7 @@ def _mom_mangle(attr):
     return attr
 
 
-@login_required
+@is_superuser
 def mom_merge(request, abbr):
     leg1 = "leg1"
     leg2 = "leg2"
@@ -1185,7 +1179,7 @@ def mom_merge(request, abbr):
         'remove': toRemove, 'merge_view_info': mv_info, "abbr": abbr})
 
 
-@login_required
+@is_superuser
 def newsblogs(request):
     '''
     Demo view for news/blog aggregation.
@@ -1312,7 +1306,7 @@ def newsblogs(request):
     })
 
 
-@login_required
+@is_superuser
 def progress_meter_gaps(request, abbr):
     '''List all bills that have been signed but haven't passed
     their house of origin. See billy.importers.bills for the
