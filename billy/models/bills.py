@@ -45,7 +45,10 @@ class SponsorsManager(AttrManager):
             self._committees = {}
             ids = [s.get('committee_id')
                    for s in sponsors if s.get('committee_id') is not None]
-            committees = db.committees.find({'_id': {'$in': ids}})
+            if ids:
+                committees = db.committees.find({'_id': {'$in': ids}})
+            else:
+                committees = []
             for obj in committees:
                 self._committees[obj['_id']] = obj
 
