@@ -148,37 +148,31 @@ class RelatedBillsList(RelatedObjectsList):
         form = FilterBillsForm(self.request.GET)
 
         search_text = form.data.get('search_text')
+        if form.data:
 
-        chamber = form.data.get('chamber')
-        if chamber:
-            spec['chamber'] = chamber
+            chamber = form.data.get('chamber')
+            if chamber:
+                spec['chamber'] = chamber
 
-        subjects = form.data.get('subjects')
-        if subjects:
-            spec['subjects'] = subjects
+            subjects = form.data.getlist('subjects')
+            if subjects:
+                spec['subjects'] = subjects
 
-        sponsor_id = form.data.get('sponsor__leg_id')
-        if sponsor_id:
-            spec['sponsor_id'] = sponsor_id
+            sponsor_id = form.data.get('sponsor__leg_id')
+            if sponsor_id:
+                spec['sponsor_id'] = sponsor_id
 
-        if 'status' in form.data:
-            status_choices = form.data.getlist('status')
-            status_spec = []
-            for status in status_choices:
-                status_spec.append({'action_dates.%s' % status: {'$ne': None}})
+            if 'status' in form.data:
+                status_choices = form.data.getlist('status')
+                spec['status'] = status_choices
 
-            if len(status_spec) == 1:
-                spec['status'] = status_spec[0]
-            elif len(status_spec) > 1:
-                spec['status'] = {'$and': status_spec}
+            type_ = form.data.get('type')
+            if type_:
+                spec['type_'] = type_
 
-        type_ = form.data.get('type')
-        if type_:
-            spec['type_'] = type_
-
-        session = form.data.get('session')
-        if session:
-            spec['session'] = session
+            session = form.data.get('session')
+            if session:
+                spec['session'] = session
 
         sort = self.request.GET.get('sort', 'last')
 

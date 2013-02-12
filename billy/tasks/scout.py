@@ -5,6 +5,11 @@ A few notes from our initial tests of this (Thom 12/20/2012)
   - status (checkbox/list)
   So we lose them in the post to Scout unless we add them to the api.
 '''
+import sys
+sys.path.insert(0, '/home/thom/sunlight/openstates/site/openstates_site')
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'local_settings'
+
 import json
 import logging
 import urlparse
@@ -36,14 +41,14 @@ class ScoutPush(Task):
                            }
             elif favorite['obj_type'] == 'search':
                 params = urlparse.parse_qs(favorite['search_params'])
-                search_text = params.pop('search_text').pop()
                 interest = {
                     'interest_type': 'search',
                     'search_type': 'state_bills',
                     'query_type': 'advanced',
-                    'in': search_text,
                     'filters': self._translate_filter_data(params)
                 }
+                if 'search_text' in params:
+                    interest['in'] = params.get('search_text').pop()
 
             else:
                 self._log.warning('Unknown favorite type: %s',
@@ -60,23 +65,32 @@ class ScoutPush(Task):
 
         url = 'http://scout.sunlightlabs.com/remote/service/sync'
         payload = json.dumps(payload, cls=JSONEncoderPlus)
-        resp = requests.post(url, data=payload)
+        # resp = requests.post(url, data=payload)
 
     def _translate_filter_data(self, params):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
         '''
         # some api params have no analog in the front-end search: updated_since
-        api_param_names = 'q state search_window chamber subjects sponsor_id'
-        api_param_name_set = set(api_param_names.split())
+        api_param_name_set = set([
+            'q',
+            'state',
+            'search_window',
+            'chamber',
+            'subjects',
+            'sponsor_id',
+            'session',
+            'type',
+            'status'])
 
         result = {}
 
+        # Rename certain front-end parameters to their api equivalents.
         api_param_names = {
             'search_text': 'q',
             'search_state': 'state',
             'session': 'search_window',
-            'sponsor__leg_id': 'spnosor_id'
+            'sponsor__leg_id': 'sponsor_id'
         }
 
         for k, v in params.items():
@@ -87,11 +101,21 @@ class ScoutPush(Task):
                 # Scout expects uppercase.
                 v = v.upper()
 
-            api_param_name = api_param_names.get(k)
-            if api_param_name is None:
-                api_param_name = k
+            api_param_name = api_param_names.get(k, k)
 
             if api_param_name in api_param_name_set:
                 result[api_param_name] = v
 
+        import urllib
+        import pprint
+        pprint.pprint(result)
+        result['apikey'] = 'testkey12'
+        print urllib.urlencode(result, doseq=True)
+        import pdb; pdb.set_trace()
         return result
+
+
+if __name__ == '__main__':
+    from billy.core import user_db
+    for profile in user_db.profiles.find():
+        ScoutPush().run(profile['_id'])

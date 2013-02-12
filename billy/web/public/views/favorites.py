@@ -52,7 +52,10 @@ class FavoritedSearch(dict):
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
         self.params = dict(parse_qsl(self['search_params']))
-        self.text = self.params.pop('search_text')
+        if 'search_text' in self.params:
+            self.text = self.params.pop('search_text')
+        else:
+            self.text = None
 
     def scope(self):
         '''Return a comma-separated list of human readable equivalents
