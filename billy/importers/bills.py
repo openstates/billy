@@ -65,12 +65,13 @@ def ensure_indexes():
         sort_indices = ['action_dates.first', 'action_dates.last',
                         'updated_at']
         # chamber-abbr gets indexed w/ every possible sort
-        if index_keys == ('chamber', settings.LEVEL_FIELD):
+        if (index_keys == ('chamber', settings.LEVEL_FIELD) or
+            index_keys == (settings.LEVEL_FIELD,)):
             sort_indices += ['action_dates.passed_upper',
                              'action_dates.passed_lower']
         for sort_index in sort_indices:
-            index = [(sort_index, pymongo.DESCENDING)]
-            index += [(ikey, pymongo.ASCENDING) for ikey in index_keys]
+            index = [(ikey, pymongo.ASCENDING) for ikey in index_keys]
+            index += [(sort_index, pymongo.DESCENDING)]
             db.bills.ensure_index(index)
 
     # primary sponsors index
