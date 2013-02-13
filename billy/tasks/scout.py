@@ -1,18 +1,19 @@
 '''
-A few notes from our initial tests of this (Thom 12/20/2012)
-- Some keys don't appear to be supported in the api:
-  - type
-  - status (checkbox/list)
-  So we lose them in the post to Scout unless we add them to the api.
+Pushes stored user favorites to Scout for alert tracking.
+
+To run stand-alone for debugging, openstates_site has to be on sys.path and
+DJANGO_SETTINGS_MODULE has to be set to openstates_site/localsettings.py.
+See commented-out lines below for example.
 '''
-import sys
-sys.path.insert(0, '/home/thom/sunlight/openstates/site/openstates_site')
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'local_settings'
+# import sys
+# sys.path.insert(0, '/home/thom/sunlight/openstates/site/openstates_site')
+# import os
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'local_settings'
 
 import json
 import logging
 import urlparse
+
 from celery.task.base import Task
 from django.contrib.auth.models import User
 from billy.core import settings, user_db
@@ -45,10 +46,12 @@ class ScoutPush(Task):
                     'interest_type': 'search',
                     'search_type': 'state_bills',
                     'query_type': 'advanced',
-                    'filters': self._translate_filter_data(params)
+                    'filters': self._translate_filter_data(favorite, params)
                 }
                 if 'search_text' in params:
                     interest['in'] = params.get('search_text').pop()
+                else:
+                    interest['in'] = ''
 
             else:
                 self._log.warning('Unknown favorite type: %s',
@@ -63,18 +66,16 @@ class ScoutPush(Task):
         self._log.info('pushing %s interests for %s', len(interests),
                        payload['email'])
 
-        url = 'http://scout.sunlightlabs.com/remote/service/sync'
+        url = 'http://scout.sunlightfoundation.com/remote/service/sync'
         payload = json.dumps(payload, cls=JSONEncoderPlus)
-        # import pdb; pdb.set_trace()
-        resp = requests.post(url, data=payload)
+        requests.post(url, data=payload)
 
-    def _translate_filter_data(self, params):
+    def _translate_filter_data(self, favorite, params):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
         '''
         # some api params have no analog in the front-end search: updated_since
         api_param_name_set = set([
-            'q',
             'state',
             'search_window',
             'chamber',
@@ -88,8 +89,6 @@ class ScoutPush(Task):
 
         # Rename certain front-end parameters to their api equivalents.
         api_param_names = {
-            'search_text': 'q',
-            'search_state': 'state',
             'session': 'search_window',
             'sponsor__leg_id': 'sponsor_id'
         }
@@ -98,24 +97,21 @@ class ScoutPush(Task):
 
             if k == 'session':
                 v = 'session:' + v.pop()
-            elif k == 'search_state':
-                # Scout expects uppercase.
-                v = v.upper()
 
             api_param_name = api_param_names.get(k, k)
 
             if api_param_name in api_param_name_set:
+
+                # Flatten any single-item param arrays into strings.
+                if isinstance(v, list) and k not in ['status', 'subjects']:
+                    if len(v) == 1:
+                        v = v.pop()
+
                 result[api_param_name] = v
 
-        # import urllib
-        # import pprint
-        # pprint.pprint(result)
-        # # print urllib.urlencode(result, doseq=True)
-        # import pdb; pdb.set_trace()
+        # Add the state abbreviation.
+        if 'search_abbr' in favorite:
+            result['state'] = favorite['search_abbr'].upper()
+
         return result
 
-
-if __name__ == '__main__':
-    from billy.core import user_db
-    for profile in user_db.profiles.find():
-        ScoutPush().run(profile['_id'])
