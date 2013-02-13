@@ -145,6 +145,9 @@ class RelatedObjectsList(ListViewBase):
         except KeyError:
             _id = self.kwargs['abbr']
 
+        if _id == 'all':
+            return None
+
         # Get the related object.
         collection = getattr(db, collection_name)
 

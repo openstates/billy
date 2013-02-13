@@ -32,6 +32,7 @@ def ensure_indexes():
     db.legislators.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                                  ('active', pymongo.ASCENDING),
                                  ('chamber', pymongo.ASCENDING), ])
+    db.districts.ensure_index('boundary_id')
 
 
 def import_legislators(abbr, data_dir):

@@ -1,5 +1,13 @@
 import datetime
 from billy.core import db
+import pymongo
+
+
+db.popularity_counts.ensure_index([
+    ('type', pymongo.ASCENDING),
+    ('date', pymongo.ASCENDING),
+    ('obj_id', pymongo.ASCENDING),
+])
 
 
 class Counter(object):

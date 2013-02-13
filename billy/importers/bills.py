@@ -50,26 +50,32 @@ def ensure_indexes():
     db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
                            ('bill_id', pymongo.ASCENDING)])
 
-    # common search indices
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('subjects', pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('sponsors.leg_id', pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
+    search_indices = [
+        ('sponsors.leg_id', settings.LEVEL_FIELD),
+        ('chamber', settings.LEVEL_FIELD),
+        ('session', settings.LEVEL_FIELD),
+        ('session', 'chamber', settings.LEVEL_FIELD),
+        ('_term', 'chamber', settings.LEVEL_FIELD),
+        ('status', settings.LEVEL_FIELD),
+        ('type', settings.LEVEL_FIELD),
+        (settings.LEVEL_FIELD,),
+    ]
+    for index_keys in search_indices:
+        sort_indices = ['action_dates.first', 'action_dates.last',
+                        'updated_at']
+        # chamber-abbr gets indexed w/ every possible sort
+        if index_keys == ('chamber', settings.LEVEL_FIELD):
+            sort_indices += ['action_dates.passed_upper',
+                             'action_dates.passed_lower']
+        for sort_index in sort_indices:
+            index = [(sort_index, pymongo.DESCENDING)]
+            index += [(ikey, pymongo.ASCENDING) for ikey in index_keys]
+            db.bills.ensure_index(index)
 
-    # generic sort-assist indices on the action_dates
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.first', pymongo.DESCENDING),
-                          ])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING),
-                          ])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_upper', pymongo.DESCENDING),
-                          ])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_lower', pymongo.DESCENDING),
+    # primary sponsors index
+    db.bills.ensure_index([('sponsors.leg_id', pymongo.ASCENDING),
+                           ('sponsors.type', pymongo.ASCENDING),
+                           ('state', pymongo.ASCENDING),
                           ])
 
     # votes index
