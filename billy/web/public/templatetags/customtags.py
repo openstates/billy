@@ -138,20 +138,8 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     Same for params, which needs to be passed as a url-encoded string from
     the user homepage.
     '''
-
     request = context['request']
     extra_spec = {}
-
-    # If the requested page is a search results page with a query string,
-    # create an extra spec to help determine whether the search is
-    # currently favorited.
-    if request.GET and obj_type == "search":
-        extra_spec.update(search_text=request.GET.get('search_text'))
-    if _is_favorite is None:
-        _is_favorite = is_favorite(obj_id, obj_type, request.user,
-                                   extra_spec=extra_spec)
-    else:
-        _is_favorite = (_is_favorite == 'is_favorite')
 
     # We need to allow the abbr to be passed in from the user favorites page,
     # to come from the request context in the case of a search results page,
@@ -160,9 +148,33 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
 
     # use request.GET for params if not present
     if not params:
-        params = [(k, unicode(v).encode('utf8'))
-                  for k, v in request.GET.items()]
-        params = urllib.urlencode(params)
+        _params = {}
+        params = [
+            (k, [unicode(v).encode('utf-8') for v in vv])
+            for (k, vv) in dict(request.GET).items()]
+        for k, v in params:
+            print k, v
+            if len(v) == 1:
+                _params[k] = v.pop()
+            elif len(v) > 1:
+                _params[k] = v
+        params = urllib.urlencode(_params, doseq=True)
+
+
+    # If the requested page is a search results page with a query string,
+    # create an extra spec to help determine whether the search is
+    # currently favorited.
+    if request.GET and obj_type == "search":
+        search_text = request.GET.get('search_text')
+        if search_text:
+            extra_spec['search_text'] = search_text
+        extra_spec['search_params'] = params
+
+    if _is_favorite is None:
+        _is_favorite = is_favorite(obj_id, obj_type, request.user,
+                                   extra_spec=extra_spec)
+    else:
+        _is_favorite = (_is_favorite == 'is_favorite')
 
     return dict(extra_spec,
                 obj_type=obj_type, obj_id=obj_id,

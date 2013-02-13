@@ -161,7 +161,7 @@ class RelatedBillsList(RelatedObjectsList):
         if chamber:
             spec['chamber'] = chamber
 
-        subjects = form.data.get('subjects')
+        subjects = form.data.getlist('subjects')
         if subjects:
             spec['subjects'] = subjects
 
@@ -171,14 +171,7 @@ class RelatedBillsList(RelatedObjectsList):
 
         if 'status' in form.data:
             status_choices = form.data.getlist('status')
-            status_spec = []
-            for status in status_choices:
-                status_spec.append({'action_dates.%s' % status: {'$ne': None}})
-
-            if len(status_spec) == 1:
-                spec['status'] = status_spec[0]
-            elif len(status_spec) > 1:
-                spec['status'] = {'$and': status_spec}
+            spec['status'] = status_choices
 
         type_ = form.data.get('type')
         if type_:

@@ -498,7 +498,7 @@ class Bill(Document):
     @staticmethod
     def search(query=None, abbr=None, chamber=None, subjects=None,
                bill_id=None, search_window=None, updated_since=None,
-               sponsor_id=None, status=None, type_=None, session=None,
+               sponsor_id=None, status=[], type_=None, session=None,
                bill_fields=None, sort=None, limit=None):
 
         use_elasticsearch = False
@@ -563,7 +563,7 @@ class Bill(Document):
             for subject in subjects:
                 es_terms.append(pyes.TermFilter('subjects', subject))
         elif subjects:
-            mongo_filter['subjects'] = {'$all': [filter(None, subjects)]}
+            mongo_filter['subjects'] = {'$all': filter(None, subjects)}
 
         if updated_since and use_elasticsearch:
             es_terms.append(pyes.RangeFilter(
@@ -576,13 +576,22 @@ class Bill(Document):
                 raise ValueError('invalid updated_since parameter. '
                                  'please supply date in YYYY-MM-DD format')
 
-        # Status is slightly different: it's a dict like--
+        # Status comes in as a list and needs to become:
         # {'action_dates.signed': {'$ne': None}}
-        if status and use_elasticsearch:
+        status_spec = []
+        for _status in status:
+            status_spec.append({'action_dates.%s' % _status: {'$ne': None}})
+
+        if len(status_spec) == 1:
+            status_spec = status_spec[0]
+        elif len(status_spec) > 1:
+            status_spec = {'$and': status_spec}
+
+        if status_spec and use_elasticsearch:
             for key in status:
                 es_terms.append(pyes.ExistsFilter(key))
-        elif status:
-            mongo_filter.update(**status)
+        elif status_spec:
+            mongo_filter.update(**status_spec)
 
         # preprocess sort
         if sort in ('first', 'last', 'signed', 'passed_lower', 'passed_upper'):

@@ -49,10 +49,14 @@ class FeedEntry(Document):
                 collection = getattr(billy_db, collection_name)
                 if collection_name == 'legislators':
                     cursor = collection.find({'_all_ids': _id})
+                    if cursor.count() != 1:
+                        import pdb; pdb.set_trace()
                     assert cursor.count() == 1
                     instance = cursor.next()
                 else:
                     instance = collection.find_one(_id)
+                    if instance is None:
+                        import pdb; pdb.set_trace()
                 url = instance.get_absolute_url()
                 _entity_urls.append(url)
 

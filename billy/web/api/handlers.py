@@ -165,7 +165,6 @@ class BillHandler(BillyHandler):
 
 class BillSearchHandler(BillyHandler):
     def read(self, request):
-
         bill_fields = {'title': 1, 'created_at': 1, 'updated_at': 1,
                        'bill_id': 1, 'type': 1, settings.LEVEL_FIELD: 1,
                        'session': 1, 'chamber': 1, 'subjects': 1, '_type': 1,
@@ -185,6 +184,8 @@ class BillSearchHandler(BillyHandler):
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
         subjects = request.GET.getlist('subjects')
+        type_ = request.GET.get('type')
+        status = request.GET.getlist('status')
 
         # sorting
         sort = request.GET.get('sort', 'last')
@@ -196,7 +197,7 @@ class BillSearchHandler(BillyHandler):
                                 abbr=abbr,
                                 search_window=search_window,
                                 updated_since=since, sponsor_id=sponsor_id,
-                                subjects=subjects,
+                                subjects=subjects, type_=type_, status=status,
                                 sort=sort, bill_fields=bill_fields,
                                 **base_fields)
         except ValueError as e:

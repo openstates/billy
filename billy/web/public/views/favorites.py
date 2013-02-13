@@ -2,7 +2,7 @@ import datetime
 import collections
 from itertools import groupby
 from operator import itemgetter
-from urlparse import parse_qsl
+from urlparse import parse_qs
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -51,8 +51,11 @@ class FavoritedSearch(dict):
 
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
-        self.params = dict(parse_qsl(self['search_params']))
-        self.text = self.params.pop('search_text')
+        self.params = parse_qs(self['search_params'])
+        if 'search_text' in self.params:
+            self.text = self.params.pop('search_text')
+        else:
+            self.text = None
 
     def scope(self):
         '''Return a comma-separated list of human readable equivalents
@@ -72,26 +75,26 @@ class FavoritedSearch(dict):
 
         if 'session' in params:
             if meta:
-                session = params['session']
+                session = params['session'][0]
                 session_details = meta['session_details']
                 results.append(session_details[session]['display_name'])
 
         if 'chamber' in params:
             if meta:
-                results.append(params['chamber'] + ' chamber')
+                results.append(params['chamber'][0] + ' chamber')
 
         if 'type' in params:
-            results.append('%ss only' % params['type'].title())
+            results.append('%ss only' % params['type'][0].title())
 
         if 'sponsor__leg_id' in params:
             # Get the legislator.
-            leg = mdb.legislators.find_one(params['sponsor__leg_id'])
+            leg = mdb.legislators.find_one(params['sponsor__leg_id'][0])
             tmpl = 'Sponsored by <a href="%s">%s</a>'
             vals = (leg.get_absolute_url(), leg.display_name())
             results.append(tmpl % vals)
 
         if 'subjects' in params:
-            results.append('relating to %s' % params['subjects'])
+            results.append('relating to %s' % ', '.join(params['subjects']))
 
         return ', '.join(results)
 
