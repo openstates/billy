@@ -148,9 +148,18 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
 
     # use request.GET for params if not present
     if not params:
-        params = [(k, unicode(v).encode('utf8'))
-                  for k, v in request.GET.items()]
-        params = urllib.urlencode(params)
+        _params = {}
+        params = [
+            (k, [unicode(v).encode('utf-8') for v in vv])
+            for (k, vv) in dict(request.GET).items()]
+        for k, v in params:
+            print k, v
+            if len(v) == 1:
+                _params[k] = v.pop()
+            elif len(v) > 1:
+                _params[k] = v
+        params = urllib.urlencode(_params, doseq=True)
+
 
     # If the requested page is a search results page with a query string,
     # create an extra spec to help determine whether the search is
