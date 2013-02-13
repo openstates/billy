@@ -223,7 +223,7 @@ def legislator_inactive(request, abbr, legislator):
         - billy/web/public/vote_preview_row.html
     '''
     sponsored_bills = legislator.sponsored_bills(
-        limit=5, sort=[('action_dates.first', pymongo.DESCENDING)])
+        limit=6, sort=[('action_dates.first', pymongo.DESCENDING)])
 
     legislator_votes = list(legislator.votes_6_sorted())
     has_votes = bool(legislator_votes)
@@ -237,7 +237,7 @@ def legislator_inactive(request, abbr, legislator):
              metadata=legislator.metadata,
              legislator=legislator,
              sources=legislator['sources'],
-             sponsored_bills=sponsored_bills,
+             sponsored_bills=list(sponsored_bills),
              legislator_votes=legislator_votes,
              has_votes=has_votes,
              nav_active='legislators'))
