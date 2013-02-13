@@ -153,33 +153,34 @@ class RelatedBillsList(RelatedObjectsList):
 
         search_text = form.data.get('search_text')
 
-        form_abbr = form.data.get('abbr')
-        if form_abbr:
-            spec['abbr'] = form_abbr
+        if form.data:
+            form_abbr = form.data.get('abbr')
+            if form_abbr:
+                spec['abbr'] = form_abbr
 
-        chamber = form.data.get('chamber')
-        if chamber:
-            spec['chamber'] = chamber
+            chamber = form.data.get('chamber')
+            if chamber:
+                spec['chamber'] = chamber
 
-        subjects = form.data.getlist('subjects')
-        if subjects:
-            spec['subjects'] = subjects
+            subjects = form.data.getlist('subjects')
+            if subjects:
+                spec['subjects'] = subjects
 
-        sponsor_id = form.data.get('sponsor__leg_id')
-        if sponsor_id:
-            spec['sponsor_id'] = sponsor_id
+            sponsor_id = form.data.get('sponsor__leg_id')
+            if sponsor_id:
+                spec['sponsor_id'] = sponsor_id
 
-        if 'status' in form.data:
-            status_choices = form.data.getlist('status')
-            spec['status'] = status_choices
+            if 'status' in form.data:
+                status_choices = form.data.getlist('status')
+                spec['status'] = status_choices
 
-        type_ = form.data.get('type')
-        if type_:
-            spec['type_'] = type_
+            type_ = form.data.get('type')
+            if type_:
+                spec['type_'] = type_
 
-        session = form.data.get('session')
-        if session:
-            spec['session'] = session
+            session = form.data.get('session')
+            if session:
+                spec['session'] = session
 
         sort = self.request.GET.get('sort', 'last')
 
