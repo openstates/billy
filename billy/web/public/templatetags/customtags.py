@@ -146,7 +146,7 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
     # create an extra spec to help determine whether the search is
     # currently favorited.
     if request.GET and obj_type == "search":
-        extra_spec.update(search_text=request.GET['search_text'])
+        extra_spec.update(search_text=request.GET.get('search_text'))
     if _is_favorite is None:
         _is_favorite = is_favorite(obj_id, obj_type, request.user,
                                    extra_spec=extra_spec)
