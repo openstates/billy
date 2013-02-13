@@ -83,11 +83,15 @@ class RelatedBillsList(RelatedObjectsList):
             elif 'passed_upper' in status and 'passed_lower' in status:
                 long_description.append('which have passed both chambers')
             elif 'passed_lower' in status:
+                chamber_name = (metadata['chambers']['lower']['name']
+                                if metadata else 'lower chamber')
                 long_description.append('which have passed the ' +
-                                        metadata['chambers']['lower']['name'])
+                                        chamber_name)
             elif 'passed_upper' in status:
+                chamber_name = (metadata['chambers']['upper']['name']
+                                if metadata else 'upper chamber')
                 long_description.append('which have passed the ' +
-                                        metadata['chambers']['upper']['name'])
+                                        chamber_name)
             if sponsor:
                 leg = db.legislators.find_one({'_all_ids': sponsor},
                                               fields=('full_name', '_id'))
