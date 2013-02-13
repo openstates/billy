@@ -65,7 +65,8 @@ class ScoutPush(Task):
 
         url = 'http://scout.sunlightlabs.com/remote/service/sync'
         payload = json.dumps(payload, cls=JSONEncoderPlus)
-        # resp = requests.post(url, data=payload)
+        # import pdb; pdb.set_trace()
+        resp = requests.post(url, data=payload)
 
     def _translate_filter_data(self, params):
         '''Edit the favorite['search_params'] object and make them
@@ -106,12 +107,11 @@ class ScoutPush(Task):
             if api_param_name in api_param_name_set:
                 result[api_param_name] = v
 
-        import urllib
-        import pprint
-        pprint.pprint(result)
-        result['apikey'] = 'testkey12'
-        print urllib.urlencode(result, doseq=True)
-        import pdb; pdb.set_trace()
+        # import urllib
+        # import pprint
+        # pprint.pprint(result)
+        # # print urllib.urlencode(result, doseq=True)
+        # import pdb; pdb.set_trace()
         return result
 
 
