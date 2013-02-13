@@ -53,7 +53,7 @@ class FavoritedSearch(dict):
         dict.__init__(self, *args, **kwargs)
         self.params = parse_qs(self['search_params'])
         if 'search_text' in self.params:
-            self.text = self.params.pop('search_text')
+            self.text = self.params.pop('search_text').pop()
         else:
             self.text = None
 
