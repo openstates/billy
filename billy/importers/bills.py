@@ -57,6 +57,7 @@ def ensure_indexes():
         ('session', 'chamber', settings.LEVEL_FIELD),
         ('_term', 'chamber', settings.LEVEL_FIELD),
         ('status', settings.LEVEL_FIELD),
+        ('subjects', settings.LEVEL_FIELD),
         ('type', settings.LEVEL_FIELD),
         (settings.LEVEL_FIELD,),
     ]
