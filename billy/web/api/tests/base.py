@@ -84,5 +84,8 @@ class BaseTestCase(unittest.TestCase):
         return json.loads(http_response.content)
 
     def assert_200(self):
-        self.json
+        try:
+            self.json
+        except ValueError:
+            raise ValueError('no json object: ' + self.response)
         self.assertEquals(self.response.status_code, 200)
