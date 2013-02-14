@@ -382,6 +382,9 @@ def document(request, abbr, session, bill_id, doc_id):
     bill = db.bills.find_one({settings.LEVEL_FIELD: abbr, 'session': session,
                               'bill_id': fixed_bill_id})
 
+    if not bill:
+        raise Http404('No such bill.')
+
     for version in bill['versions']:
         if version['doc_id'] == doc_id:
             break
