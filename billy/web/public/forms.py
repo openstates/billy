@@ -1,6 +1,7 @@
 from django import forms
 
 from billy.models import db
+from billy.core import settings
 
 _all_abbrs = [('', '')]
 _all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
@@ -60,14 +61,11 @@ def get_filter_bills_form(metadata):
                                                 required=False,
                                                 label='Sponsor name')
 
+            type = forms.ChoiceField(choices=BILL_TYPES, required=False)
+
+            subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
+                                                 required=False)
         else:
-            _bill_types = db.bills.distinct('type')
-            _bill_subjects = db.bills.distinct('subjects')
-
-            BILL_TYPES = [('', '')] + zip(_bill_types,
-                                          [s.title() for s in _bill_types])
-            BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
-
             abbr = forms.ChoiceField(choices=_all_abbrs, label="abbr")
             chamber = forms.MultipleChoiceField(
                 choices=(('upper', 'upper'), ('lower', 'lower')),
@@ -82,9 +80,5 @@ def get_filter_bills_form(metadata):
                 widget=forms.CheckboxSelectMultiple(),
                 required=False)
 
-        type = forms.ChoiceField(choices=BILL_TYPES, required=False)
-
-        subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
-                                             required=False)
 
     return FilterBillsForm
