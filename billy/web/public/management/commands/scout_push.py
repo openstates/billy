@@ -1,33 +1,36 @@
 '''
 Pushes stored user favorites to Scout for alert tracking.
-
-To run stand-alone for debugging, openstates_site has to be on sys.path and
-DJANGO_SETTINGS_MODULE has to be set to openstates_site/localsettings.py.
-See commented-out lines below for example.
 '''
-# import sys
-# sys.path.insert(0, '/home/thom/sunlight/openstates/site/openstates_site')
-# import os
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'local_settings'
-
 import json
 import logging
 import urlparse
+from optparse import make_option
 
-from celery.task.base import Task
 from django.contrib.auth.models import User
+from django.core.management.base import NoArgsCommand
+
 from billy.core import settings, user_db
 from billy.utils import JSONEncoderPlus
 
 import requests
 
+_log = logging.getLogger('billy.web.public.management.commands.scout_push')
 
-class ScoutPush(Task):
-    # no results needed
-    ignore_result = True
-    _log = logging.getLogger('billy.tasks.ScoutPush')
+class Command(NoArgsCommand):
+    option_list = NoArgsCommand.option_list + (
+        make_option('--dry-run', action='store_true', dest='dry_run',
+                    default=False, help='dry run'),
+    )
 
-    def run(self, user_id):
+    def handle_noargs(self, **options):
+        # TODO: this would be nicer if it were by email address
+        user_ids = user_db.favorites.distinct('user_id')
+
+        for user_id in user_ids:
+            self.push_user(user_id, options['dry_run'])
+
+
+    def push_user(self, user_id, dry_run):
         user = User.objects.get(pk=user_id)
         payload = {'email': user.email,
                    'secret_key': settings.SCOUT_SECRET_KEY,
@@ -54,8 +57,7 @@ class ScoutPush(Task):
                     interest['in'] = ''
 
             else:
-                self._log.warning('Unknown favorite type: %s',
-                                  favorite['obj_type'])
+                _log.warning('Unknown favorite type: %s', favorite['obj_type'])
                 continue
 
             interest['active'] = favorite['is_favorite']
@@ -63,12 +65,13 @@ class ScoutPush(Task):
             interests.append(interest)
 
         payload['interests'] = interests
-        self._log.info('pushing %s interests for %s', len(interests),
-                       payload['email'])
+        _log.info('pushing %s interests for %s', len(interests),
+                  payload['email'])
 
-        url = 'http://scout.sunlightfoundation.com/remote/service/sync'
-        payload = json.dumps(payload, cls=JSONEncoderPlus)
-        requests.post(url, data=payload)
+        if not dry_run:
+            url = 'http://scout.sunlightfoundation.com/remote/service/sync'
+            payload = json.dumps(payload, cls=JSONEncoderPlus)
+            requests.post(url, data=payload)
 
     def _translate_filter_data(self, favorite, params):
         '''Edit the favorite['search_params'] object and make them
