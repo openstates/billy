@@ -24,20 +24,20 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         # TODO: this would be nicer if it were by email address
-        user_ids = user_db.favorites.distinct('user_id')
+        usernames = user_db.favorites.distinct('username')
 
-        for user_id in user_ids:
-            self.push_user(user_id, options['dry_run'])
+        for user in usernames:
+            self.push_user(username, options['dry_run'])
 
 
-    def push_user(self, user_id, dry_run):
-        user = User.objects.get(pk=user_id)
+    def push_user(self, username, dry_run):
+        user = User.objects.get(username=username)
         payload = {'email': user.email,
                    'secret_key': settings.SCOUT_SECRET_KEY,
                    'service': settings.SCOUT_SERVICE,
                    'notifications': 'email_daily'}
         interests = []
-        for favorite in user_db.favorites.find({'user_id': user_id}):
+        for favorite in user_db.favorites.find({'username': username}):
             if favorite['obj_type'] in ('legislator', 'bill', 'committee'):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
