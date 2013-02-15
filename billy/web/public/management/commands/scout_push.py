@@ -26,6 +26,11 @@ class Command(NoArgsCommand):
         # TODO: this would be nicer if it were by email address
         usernames = user_db.favorites.distinct('username')
 
+        if options['dry_run']:
+            print 'Dry Run'
+        else:
+            print 'Pushing to Scout'
+
         for username in usernames:
             self.push_user(username, options['dry_run'])
 
@@ -71,7 +76,9 @@ class Command(NoArgsCommand):
         if not dry_run:
             url = 'http://scout.sunlightfoundation.com/remote/service/sync'
             payload = json.dumps(payload, cls=JSONEncoderPlus)
-            requests.post(url, data=payload)
+            resp = requests.post(url, data=payload)
+            print resp.content
+
 
     def _translate_filter_data(self, favorite, params):
         '''Edit the favorite['search_params'] object and make them
