@@ -5,25 +5,10 @@
 {% block script %}
 {% endblock %}
 
-{% block style %}
-<style>
-    .table tr:hover {color: black}
-    .table tr:hover > td.good { background-color: green; }
-    .table tr:hover > td.bad { background-color: red; }
-    .table  tr:hover > td.warning { background-color: yellow; }
-    .table  td.good { background-color: #b0ff66; }
-    .table  td.bad { background-color: #fc7c7d; }
-    .table  td.warning { background-color: #fcde7c; }
-    /* collapse left margin */
-    .container-fluid { padding-left: 0px; }
-    .container-fluid > .content { margin-left: 10px; }
-</style>
-{% endblock %}
-
 {% block content-nocontainer %}
 <div class="container-fluid">
 <div class="content">
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed index-table">
     <thead>
     <tr>
         <th>&nbsp;</th>

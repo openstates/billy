@@ -5,6 +5,7 @@
 {% block content %}
 
 <form action="{% url delete_committees %}" method="POST">
+{% csrf_token %}
 
 {% for chamber in chambers %}
 <div>

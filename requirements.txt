@@ -8,8 +8,7 @@ name_tools>=0.1.2
 nose
 pymongo>=2.2
 scrapelib>=0.7.0
-unicodecsv
+unicodecsv!=0.9.3
 validictory
 pyes
-celery
 

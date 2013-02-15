@@ -1,4 +1,3 @@
-import os
 from billy.core import db
 from billy.importers.metadata import import_metadata, PRESERVED_FIELDS
 
@@ -11,9 +10,7 @@ def drop_metadata():
 
 @with_setup(drop_metadata)
 def test_import_metadata():
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            "fixtures/data")
-    import_metadata("ex", data_dir)
+    import_metadata("ex")
     metadata = db.metadata.find_one({"_id": "ex"})
     assert metadata
     assert metadata['_type'] == 'metadata'
@@ -24,7 +21,7 @@ def test_import_metadata():
     metadata['junk'] = 'goes away'
     db.metadata.save(metadata, safe=True)
 
-    import_metadata("ex", data_dir)
+    import_metadata("ex")
     metadata = db.metadata.find_one({"_id": "ex"})
     for f in PRESERVED_FIELDS:
         assert f in metadata

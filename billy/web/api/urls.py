@@ -16,8 +16,13 @@ if getattr(settings, 'USE_LOCKSMITH', False):
 
     class Authorizer(PistonKeyAuthentication):
         def challenge(self):
-            resp = HttpResponse("Authorization Required: \n"
-        "obtain a key at http://services.sunlightlabs.com/accounts/register/")
+            response = 'Authorization Required'
+            locksmith_url = getattr(settings, 'LOCKSMITH_REGISTRATION_URL',
+                                    None)
+            if locksmith_url:
+                response = '{0}:\n obtain a key at {1}'.format(response,
+                                                               locksmith_url)
+            resp = HttpResponse(response)
             resp.status_code = 401
             return resp
 
@@ -70,45 +75,46 @@ events_handler = Resource(handlers.EventsHandler,
 subject_list_handler = Resource(handlers.SubjectListHandler,
                                 authentication=authorizer)
 legislator_geo_handler = Resource(handlers.LegislatorGeoHandler,
-                                      authentication=authorizer)
+                                  authentication=authorizer)
 district_handler = Resource(handlers.DistrictHandler,
                             authentication=authorizer)
 boundary_handler = Resource(handlers.BoundaryHandler,
                             authentication=authorizer)
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # metadata
     url(r'^v1/metadata/$', all_metadata_handler),
-    url(r'^v1/metadata/(?P<abbr>[a-zA-Z]{2,2})/$', metadata_handler),
+    url(r'^v1/metadata/(?P<abbr>[a-zA-Z-]+)/$', metadata_handler),
 
     # two urls for bill handler
-    url(r'^v1/bills/(?P<abbr>[a-zA-Z]{2})/(?P<session>.+)/'
+    url(r'^v1/bills/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
         r'(?P<chamber>upper|lower)/(?P<bill_id>.+)/$', bill_handler),
-    url(r'^v1/bills/(?P<abbr>[a-zA-Z]{2})/(?P<session>.+)/'
+    url(r'^v1/bills/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
         r'(?P<bill_id>.+)/$', bill_handler),
-    url(r'^v1/bills/(?P<billy_bill_id>[A-Z]{2}B\d{8})/', bill_handler),
+    url(r'^v1/bills/(?P<billy_bill_id>[A-Z-]+B\d{8})/', bill_handler),
     url(r'^v1/bills/$', bill_search_handler),
 
-    url(r'^v1/legislators/(?P<id>[A-Z]{2,2}L\d{6,6})/$', legislator_handler),
+    url(r'^v1/legislators/(?P<id>[A-Z-]+L\d{6})/$', legislator_handler),
     url(r'^v1/legislators/$', legsearch_handler),
 
-    url(r'^v1/committees/(?P<id>[A-Z]{2,2}C\d{6,6})/$', committee_handler),
+    url(r'^v1/committees/(?P<id>[A-Z-]+C\d{6})/$', committee_handler),
     url(r'^v1/committees/$', committee_search_handler),
 
     url(r'^v1/events/$', events_handler),
-    url(r'^v1/events/(?P<id>[A-Z]{2,2}E\d{8,8})/$', events_handler),
+    url(r'^v1/events/(?P<id>[A-Z-]+E\d{8})/$', events_handler),
 
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z]{2,2})/(?P<session>.+)/'
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
         '(?P<chamber>upper|lower)/', subject_list_handler),
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z]{2,2})/(?P<session>.+)/',
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/',
         subject_list_handler),
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z]{2,2})/', subject_list_handler),
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/', subject_list_handler),
     url(r'v1/legislators/geo/$', legislator_geo_handler),
 
     # districts & boundaries
-    url(r'v1/districts/(?P<abbr>[a-zA-Z]{2})/$',
+    url(r'v1/districts/(?P<abbr>[a-zA-Z-]+)/$',
         district_handler),
-    url(r'v1/districts/(?P<abbr>[a-zA-Z]{2})/(?P<chamber>upper|lower)/$',
+    url(r'v1/districts/(?P<abbr>[a-zA-Z-]+)/(?P<chamber>upper|lower)/$',
         district_handler),
     url(r'v1/districts/boundary/(?P<boundary_id>.+)/$', boundary_handler),
 )

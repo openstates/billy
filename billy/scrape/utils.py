@@ -12,7 +12,7 @@ def url_xpath(url, path):
 def convert_pdf(filename, type='xml'):
     commands = {'text': ['pdftotext', '-layout', filename, '-'],
                 'text-nolayout': ['pdftotext', filename, '-'],
-                'xml':  ['pdftohtml', '-xml', '-stdout', filename],
+                'xml': ['pdftohtml', '-xml', '-stdout', filename],
                 'html': ['pdftohtml', '-stdout', filename]}
     try:
         pipe = subprocess.Popen(commands[type], stdout=subprocess.PIPE,

@@ -2,8 +2,9 @@
  "type": "object",
  "properties": {
    "name": {"type": "string"},
-   "abbreviation": {"type": "string", "pattern": "^[a-z]{2}$"},
+   "abbreviation": {"type": "string", "pattern": "^[a-z-]+$"},
    "legislature_name": {"type": "string"},
+   "legislature_url": {"type": "string"},
    "lower_chamber_name": {"type": "string"},
    "upper_chamber_name": {"type": "string"},
    "lower_chamber_title": {"type": "string"},

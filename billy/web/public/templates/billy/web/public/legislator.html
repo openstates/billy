@@ -9,7 +9,6 @@
 {% block title %}
   {{legislator.full_name }} -
   {{metadata.legislature_name}} -
-  Open States
 {% endblock %}
 
 {% block description %}
@@ -226,27 +225,4 @@
         </div> <!-- row -->
         {% sources legislator %}
 
-{% if legislator.district %}
-<script>
-    var map_url = 'http://a.tiles.mapbox.com/v3/mapbox.mapbox-light,sunlight.{{legislator.state}}{{legislator.chamber}}.jsonp';
-    var map = new L.Map('mapbox-{{metadata.abbr}}',
-      { attributionControl:true, dragging:false, touchZoom: false,
-        scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false,
-        keyboard: false, zoomControl: false, attributionControl: false
-    });
-    //map.attributionControl.setPrefix('');
-
-    var wax_cb = function(tilejson) {
-        // add to map
-        var layer = new wax.leaf.connector(tilejson);
-        map.addLayer(layer);
-        $.getJSON('/get_district/{{district_id}}/', function(payload) {
-            map.fitBounds(payload.bbox);
-            new L.Marker([payload.region.center_lat,
-                          payload.region.center_lon]).addTo(map);
-        });
-    }
-    wax.tilejson(map_url, wax_cb);
-</script>
-{% endif %}
 {% endblock %}

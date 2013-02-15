@@ -31,8 +31,8 @@ def ensure_indexes():
                                 name='role_and_name_parts')
     db.legislators.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
                                  ('active', pymongo.ASCENDING),
-                                 ('chamber', pymongo.ASCENDING),
-                                ])
+                                 ('chamber', pymongo.ASCENDING), ])
+    db.districts.ensure_index('boundary_id')
 
 
 def import_legislators(abbr, data_dir):
@@ -70,16 +70,16 @@ def activate_legislators(current_term, abbr):
     Sets the 'active' flag on legislators and populates top-level
     district/chamber/party fields for currently serving legislators.
     """
-    for legislator in db.legislators.find({'roles': {'$elemMatch':
-             {settings.LEVEL_FIELD: abbr, 'type': 'member',
-              'term': current_term}}}):
+    for legislator in db.legislators.find(
+        {'roles': {'$elemMatch':
+                   {settings.LEVEL_FIELD: abbr, 'term': current_term}}}):
         active_role = legislator['roles'][0]
 
-        if not active_role['end_date']:
+        if not active_role.get('end_date') and active_role['type'] == 'member':
             legislator['active'] = True
-            legislator['party'] = active_role['party']
-            legislator['district'] = active_role['district']
-            legislator['chamber'] = active_role['chamber']
+            legislator['party'] = active_role.get('party', None)
+            legislator['district'] = active_role.get('district', None)
+            legislator['chamber'] = active_role.get('chamber', None)
 
         legislator['updated_at'] = datetime.datetime.utcnow()
         db.legislators.save(legislator, safe=True)
@@ -89,21 +89,16 @@ def deactivate_legislators(current_term, abbr):
 
     # legislators without a current term role or with an end_date
     for leg in db.legislators.find(
-        {'$or': [
-            {'roles': {'$elemMatch':
-                       {'term': {'$ne': current_term},
-                        'type': 'member',
-                          settings.LEVEL_FIELD: abbr,
-                       }},
-            },
-            {'roles': {'$elemMatch':
-                       {'term': current_term,
-                        'type': 'member',
-                          settings.LEVEL_FIELD: abbr,
-                        'end_date': {'$ne':None}}},
-            },
-
-        ]}):
+            {'$or': [
+                {'roles': {'$elemMatch': {
+                    'term': {'$ne': current_term},
+                    'type': 'member', settings.LEVEL_FIELD: abbr}}},
+                {'roles': {'$elemMatch': {
+                    'term': current_term,
+                    'type': 'member',
+                    settings.LEVEL_FIELD: abbr,
+                    'end_date': {'$ne': None}}}}
+            ]}):
 
         if 'old_roles' not in leg:
             leg['old_roles'] = {}

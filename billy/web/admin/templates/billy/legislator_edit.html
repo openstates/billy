@@ -61,6 +61,7 @@ $(document).ready(function() {
 {% if leg_url %} | <a href="{{leg_url}}" >public</a> {% endif %}
 
 <form action="{% url admin_legislator_edit_commit %}" method = 'post' >
+    {% csrf_token %}
     <input type="hidden" value="{{ leg.leg_id }}" name="leg_id" />
 <table>
 {% for field in fields %}

@@ -4,6 +4,7 @@
 from django.shortcuts import render
 from django.http import Http404
 from django.template.response import TemplateResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from djpjax import pjax
 
@@ -12,6 +13,7 @@ from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
+
 
 EVENT_PAGE_COUNT = 10
 
@@ -70,21 +72,23 @@ def committees(request, abbr):
     sort_order = int(request.GET.get('order', 1))
 
     committees = meta.committees_legislators(spec, fields=fields,
-                                 sort=[(sort_key, sort_order)])
+                                             sort=[(sort_key, sort_order)])
 
     sort_order = -sort_order
 
-    return TemplateResponse(request, templatename('committees'),
-                  dict(chamber=chamber, committees=committees, abbr=abbr,
-                       metadata=meta, chamber_name=chamber_name,
-                   chamber_select_template=templatename('chamber_select_form'),
-                   chamber_select_collection='committees',
-                   chamber_select_chambers=chambers,
-                   committees_table_template=templatename('committees_table'),
-                   show_chamber_column=show_chamber_column,
-                   sort_order=sort_order, nav_active='committees'))
+    return TemplateResponse(
+        request, templatename('committees'),
+        dict(chamber=chamber, committees=committees, abbr=abbr, metadata=meta,
+             chamber_name=chamber_name,
+             chamber_select_template=templatename('chamber_select_form'),
+             chamber_select_collection='committees',
+             chamber_select_chambers=chambers,
+             committees_table_template=templatename('committees_table'),
+             show_chamber_column=show_chamber_column, sort_order=sort_order,
+             nav_active='committees'))
 
 
+@ensure_csrf_cookie
 def committee(request, abbr, committee_id):
     '''
     Context:

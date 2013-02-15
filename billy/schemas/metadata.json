@@ -2,7 +2,6 @@
     "description": "metadata",
     "properties": {
         "abbreviation": {
-            "maxLength": 2,
             "minLength": 2,
             "type": "string"
         },
@@ -28,9 +27,8 @@
             },
             "type": "array"
         },
-        "legislature_name": {
-            "type": "string"
-        },
+        "legislature_name": { "type": "string" },
+        "legislature_url": { "type": "string" },
         "chambers": {
             "additionalProperties": {
                 "properties": {

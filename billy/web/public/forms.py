@@ -1,19 +1,16 @@
 from django import forms
-from django.conf import settings
 
 from billy.models import db
+from billy.core import settings
 
+_all_abbrs = [('', '')]
+_all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
+_all_abbrs += [(m['_id'], m['name']) for m in _all_metadata]
 
 def get_region_select_form(data):
-    abbrs = [('', '')]
-    spec = {}
-    if hasattr(settings, 'ACTIVE_STATES'):
-        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
-    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
-    abbrs += [(m['_id'], m['name']) for m in all_metadata]
 
     class RegionSelectForm(forms.Form):
-        abbr = forms.ChoiceField(choices=abbrs, label="abbr")
+        abbr = forms.ChoiceField(choices=_all_abbrs, label="abbr")
 
     return RegionSelectForm(data)
 
@@ -34,61 +31,54 @@ def get_filter_bills_form(metadata):
 
             BILL_TYPES = [('', '')] + zip(_bill_types, [s.title()
                                                         for s in _bill_types])
-            BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
+            BILL_SUBJECTS = zip(_bill_subjects, _bill_subjects)
             BILL_SPONSORS = [('', '')] + _bill_sponsors
             SESSIONS = [('', '')] + _sessions
 
             session = forms.ChoiceField(choices=SESSIONS, required=False)
 
-            _status_choices = [('', '')]
-            _chamber_choices = []
+            _status_choices = []
+            _chamber_choices = [('', 'Both Chambers')]
             for chamber_type in metadata['chambers']:
                 chamber_name = metadata['chambers'][chamber_type]['name']
-                _status_choices.append(('passed_'+ chamber_type,
+                _status_choices.append(('passed_' + chamber_type,
                                         'Passed ' + chamber_name))
                 _chamber_choices.append((chamber_type, chamber_name))
             _status_choices.append(('signed', 'Signed'))
 
-            if len(_status_choices) == 4:
+            if len(_chamber_choices) > 2:
                 chamber = forms.MultipleChoiceField(
-                            choices=_chamber_choices,
-                            widget=forms.CheckboxSelectMultiple(),
-                            required=False)
+                    choices=_chamber_choices,
+                    widget=forms.RadioSelect(),
+                    required=False)
 
-            status = forms.ChoiceField(choices=_status_choices, required=False)
+            status = forms.MultipleChoiceField(
+                choices=_status_choices,
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
             sponsor__leg_id = forms.ChoiceField(choices=BILL_SPONSORS,
                                                 required=False,
                                                 label='Sponsor name')
 
+            type = forms.ChoiceField(choices=BILL_TYPES, required=False)
+
+            subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
+                                                 required=False)
         else:
-            _bill_types = db.bills.distinct('type')
-            _bill_subjects = db.bills.distinct('subjects')
-
-            BILL_TYPES = [('', '')] + zip(_bill_types,
-                                          [s.title() for s in _bill_types])
-            BILL_SUBJECTS = [('', '')] + zip(_bill_subjects, _bill_subjects)
-
+            abbr = forms.ChoiceField(choices=_all_abbrs, label="abbr")
             chamber = forms.MultipleChoiceField(
-                        choices=(('upper', 'upper'),
-                                 ('lower', 'lower')),
-                        widget=forms.CheckboxSelectMultiple(),
-                        required=False)
+                choices=(('upper', 'upper'), ('lower', 'lower')),
+                widget=forms.CheckboxSelectMultiple(), required=False)
 
-            status = forms.ChoiceField(
-                        choices=(
-                            ('', ''),
-                            ('passed_lower', 'Passed lower'),
-                            ('passed_upper', 'Passed upper'),
-                            ('signed', 'Signed'),
-                        ), required=False)
+            status = forms.MultipleChoiceField(
+                choices=(
+                    ('passed_lower', 'Passed lower'),
+                    ('passed_upper', 'Passed upper'),
+                    ('signed', 'Signed'),
+                ),
+                widget=forms.CheckboxSelectMultiple(),
+                required=False)
 
-        type = forms.ChoiceField(choices=BILL_TYPES, required=False)
-
-        subjects = forms.MultipleChoiceField(choices=BILL_SUBJECTS,
-                                             required=False,
-                #widget=forms.CheckboxSelectMultiple()
-                #widget=FilteredSelectMultiple("Subjects", is_stacked=False)
-                    )
 
     return FilterBillsForm

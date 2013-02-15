@@ -4,9 +4,6 @@
 
 {% block content %}
 
-<style>
-tr:hover {cursor: pointer;}
-</style>
   <script>
     $(document).ready(function(){
       var trs = $("tr");
@@ -19,7 +16,7 @@ tr:hover {cursor: pointer;}
 <div class="container">
     <h2>{{ meta.name }} [{{ session }}]</h2>
 <h3>All values for "{{object_type}}.{{key}}"</h3>
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered table-condensed hovertable">
   <thead>
   <tr><th>%</th><th>#</th><th>value</th></tr>
   </thead>

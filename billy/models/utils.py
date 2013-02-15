@@ -10,7 +10,7 @@ def mongoid_2_url(abbr, _id):
         'C': 'committee',
         'V': 'vote',
         'L': 'legislator_noslug',
-        }[letter]
+    }[letter]
     return urlresolvers.reverse(viewname, args=[abbr, _id])
 
 

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import glob
 import json
@@ -6,9 +7,10 @@ import datetime
 from time import time
 from collections import defaultdict
 
-from billy.core import settings, db
+from billy.core import settings, db, elasticsearch
 from billy.utils import (metadata, term_for_session, fix_bill_id,
                          JSONEncoderPlus)
+from billy.utils.fulltext import bill_to_elasticsearch
 from billy.importers.names import get_legislator_id
 from billy.importers.filters import apply_filters
 
@@ -39,32 +41,44 @@ def ensure_indexes():
                            ('bill_id', pymongo.ASCENDING)],
                           unique=True)
 
-    # doc_id is used for search in conjunction with ElasticSearch
+    # bill_id is used for search in conjunction with ElasticSearch
     #  sort field (date) comes first, followed by field that we do an $in on
     db.bills.ensure_index([('created_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('updated_at', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
     db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
-                           ('versions.doc_id', pymongo.ASCENDING)])
+                           ('bill_id', pymongo.ASCENDING)])
 
-    # common search indices
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('subjects', pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('sponsors.leg_id', pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
+    search_indices = [
+        ('sponsors.leg_id', settings.LEVEL_FIELD),
+        ('chamber', settings.LEVEL_FIELD),
+        ('session', settings.LEVEL_FIELD),
+        ('session', 'chamber', settings.LEVEL_FIELD),
+        ('_term', 'chamber', settings.LEVEL_FIELD),
+        ('status', settings.LEVEL_FIELD),
+        ('subjects', settings.LEVEL_FIELD),
+        ('type', settings.LEVEL_FIELD),
+        (settings.LEVEL_FIELD,),
+    ]
+    for index_keys in search_indices:
+        sort_indices = ['action_dates.first', 'action_dates.last',
+                        'updated_at']
+        # chamber-abbr gets indexed w/ every possible sort
+        if (index_keys == ('chamber', settings.LEVEL_FIELD) or
+            index_keys == (settings.LEVEL_FIELD,)):
+            sort_indices += ['action_dates.passed_upper',
+                             'action_dates.passed_lower']
+        for sort_index in sort_indices:
+            index = [(ikey, pymongo.ASCENDING) for ikey in index_keys]
+            index += [(sort_index, pymongo.DESCENDING)]
+            db.bills.ensure_index(index)
 
-    # generic sort-assist indices on the action_dates
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.first', pymongo.DESCENDING)])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.last', pymongo.DESCENDING)])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_upper', pymongo.DESCENDING)])
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('action_dates.passed_lower', pymongo.DESCENDING)])
+    # primary sponsors index
+    db.bills.ensure_index([('sponsors.leg_id', pymongo.ASCENDING),
+                           ('sponsors.type', pymongo.ASCENDING),
+                           ('state', pymongo.ASCENDING),
+                          ])
 
     # votes index
     db.votes.ensure_index([('bill_id', pymongo.ASCENDING),
@@ -111,6 +125,12 @@ def load_standalone_votes(data_dir):
     return votes
 
 
+def elasticsearch_push(bill):
+    if settings.ENABLE_ELASTICSEARCH_PUSH:
+        esdoc = bill_to_elasticsearch(bill)
+        elasticsearch.index(esdoc, 'billy', 'bills', id=bill['_id'])
+
+
 git_active_repo = None
 git_active_commit = None
 git_active_tree = None
@@ -132,14 +152,14 @@ def git_add_bill(data):
     git_active_repo.object_store.add_object(spam)
     git_active_tree[bid] = (0100644, spam.id)
     git_active_tree.check()
-    print "added %s - %s" % (data['_id'], spam.id)
+    print("added %s - %s" % (data['_id'], spam.id))
 
 
 def git_commit(message):
     if not hasattr(settings, "ENABLE_GIT") or not settings.ENABLE_GIT:
         return
 
-    print "Commiting import as '%s'" % (message)
+    print("Commiting import as '%s'" % message)
 
     global git_active_repo
     global git_active_tree
@@ -150,7 +170,7 @@ def git_commit(message):
 
     if git_old_tree == git_active_tree.id:
         # We don't wait t commit twice.
-        print "Nothing new here. Bailing out."
+        print("Nothing new here. Bailing out.")
         return
 
     c = git_active_commit
@@ -218,23 +238,6 @@ def git_prelod(abbr):
     tree = git_active_repo.tree(commit.tree)
     git_old_tree = tree.id
     git_active_tree = tree
-
-
-def track_version(bill, version):
-    doc = {'titles': [bill['title']] + bill.get('alternate_titles', []),
-           'url': version['url'],
-           'type': 'version',
-           'mimetype': version.get('mimetype', None),
-           settings.LEVEL_FIELD: bill[settings.LEVEL_FIELD],
-           'session': bill['session'],
-           'chamber': bill['chamber'],
-           'bill_id': bill['bill_id'],
-           'subjects': bill.get('subjects', []),
-           'sponsors': [s['leg_id'] for s in bill['sponsors'] if s['leg_id']]
-          }
-    # insert or update this document
-    db.tracked_versions.update({'_id': version['doc_id']}, {'$set': doc},
-                               upsert=True)
 
 
 def import_bill(data, standalone_votes, categorizer):
@@ -378,10 +381,10 @@ def import_bill(data, standalone_votes, categorizer):
 
         # passed & signed dates
         if (not dates['passed_upper'] and action['actor'] == 'upper'
-            and 'bill:passed' in action['type']):
+                and 'bill:passed' in action['type']):
             dates['passed_upper'] = adate
         elif (not dates['passed_lower'] and action['actor'] == 'lower'
-            and 'bill:passed' in action['type']):
+                and 'bill:passed' in action['type']):
             dates['passed_lower'] = adate
         elif (not dates['signed'] and 'governor:signed' in action['type']):
             dates['signed'] = adate
@@ -397,7 +400,7 @@ def import_bill(data, standalone_votes, categorizer):
 
                 delta = abs(vote['date'] - action['date'])
                 if (delta < datetime.timedelta(hours=20) and
-                    vote['chamber'] == action['actor']):
+                        vote['chamber'] == action['actor']):
                     if action_attached:
                         # multiple votes match, we can't guess
                         action.pop('related_votes', None)
@@ -424,9 +427,6 @@ def import_bill(data, standalone_votes, categorizer):
     alt_titles = set(data.get('alternate_titles', []))
 
     for version in data['versions']:
-        # add/update tracked_versions collection
-        track_version(data, version)
-
         # Merge any version titles into the alternate_titles list
         if 'title' in version:
             alt_titles.add(version['title'])
@@ -443,11 +443,13 @@ def import_bill(data, standalone_votes, categorizer):
 
     if not bill:
         insert_with_id(data)
+        elasticsearch_push(data)
         git_add_bill(data)
         save_votes(data, bill_votes)
         return "insert"
     else:
         update(bill, data, db.bills)
+        elasticsearch_push(bill)
         git_add_bill(bill)
         save_votes(bill, bill_votes)
         return "update"

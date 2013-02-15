@@ -3,26 +3,24 @@ import logging
 import importlib
 
 from billy.core import settings, base_arg_parser
-from billy.commands import BaseCommand
+from billy.bin.commands import BaseCommand
 
 logger = logging.getLogger('billy')
 
 COMMAND_MODULES = (
-    # lots of these commands can go away as billy matures
-    'billy.commands.textextract',       # useful for development
-    'billy.commands.download_photos',
-    'billy.commands.dump',
-    'billy.commands.update_external_ids',
-    'billy.commands.update_leg_ids',
-    'billy.commands.validate_api',
-    'billy.commands.sync_versions',
+    'billy.bin.commands.download_photos',
+    'billy.bin.commands.elasticsearch_push',
+    'billy.bin.commands.dump',
+    'billy.bin.commands.update_external_ids',
+    'billy.bin.commands.update_leg_ids',
+    'billy.bin.commands.validate_api',
 )
 
 
 def import_command_module(mod):
     try:
         importlib.import_module(mod)
-    except ImportError, e:
+    except ImportError as e:
         logger.warning(
             'error "{0}" prevented loading of {1} module'.format(e, mod))
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import sys
+import pdb
 import json
 import glob
 import logging
@@ -15,7 +17,7 @@ import datetime as dt
 from billy.core import db
 from billy.core import settings, base_arg_parser
 from billy.scrape import ScrapeError, get_scraper, check_sessions
-from billy.utils import term_for_session, JSONEncoderPlus
+from billy.utils import term_for_session
 from billy.scrape.validator import DatetimeValidator
 
 
@@ -38,7 +40,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
     except ScrapeError as e:
         # silence error only when alldata is present
         if ('alldata' in options.types and
-            str(e.orig_exception) == 'No module named %s' % scraper_type):
+                str(e.orig_exception) == 'No module named %s' % scraper_type):
             return None
         else:
             raise e
@@ -91,20 +93,21 @@ def _run_scraper(scraper_type, options, metadata):
     # run scraper against year/session/term
     for time in times:
         # old style
+        chambers = options.chambers
+        if scraper_type == 'events' and len(options.chambers) == 2:
+            chambers.append('other')
+
         if _is_old_scrape(scraper.scrape):
-            for chamber in options.chambers:
+            for chamber in chambers:
                 scraper.scrape(chamber, time)
         else:
-            scraper.scrape(time, chambers=options.chambers)
+            scraper.scrape(time, chambers=chambers)
 
         # error out if events or votes don't scrape anything
         if not scraper.object_count and scraper_type not in ('events',
                                                              'votes'):
             raise ScrapeError("%s scraper didn't save any objects" %
                               scraper_type)
-
-        if scraper_type == 'events' and len(options.chambers) == 2:
-            scraper.scrape('other', time)
 
     scrape['end_time'] = dt.datetime.utcnow()
     runs.append(scrape)
@@ -139,7 +142,7 @@ def _do_imports(abbrev, args):
     from billy.importers.speeches import import_speeches
 
     # always import metadata and districts
-    import_metadata(abbrev, settings.BILLY_DATA_DIR)
+    import_metadata(abbrev)
 
     dist_filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR, 'districts',
                                  '%s.csv' % abbrev)
@@ -159,14 +162,14 @@ def _do_imports(abbrev, args):
 
     if 'legislators' in args.types:
         report['legislators'] = \
-                import_legislators(abbrev, settings.BILLY_DATA_DIR)
+            import_legislators(abbrev, settings.BILLY_DATA_DIR)
 
     if 'bills' in args.types:
         report['bills'] = import_bills(abbrev, settings.BILLY_DATA_DIR)
 
     if 'committees' in args.types:
         report['committees'] = \
-                import_committees(abbrev, settings.BILLY_DATA_DIR)
+            import_committees(abbrev, settings.BILLY_DATA_DIR)
 
     if 'events' in args.types or 'speeches' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
@@ -205,21 +208,27 @@ def _do_reports(abbrev, args):
 def main():
     try:
         parser = argparse.ArgumentParser(
-          description='update billy data',
-          parents=[base_arg_parser],
+            description='update billy data',
+            parents=[base_arg_parser],
         )
 
-        what = parser.add_argument_group('what to scrape',
-                                 'flags that help select what data to scrape')
+        what = parser.add_argument_group(
+            'what to scrape', 'flags that help select what data to scrape')
         scrape = parser.add_argument_group('scraper config',
-                                 'settings for the scraper')
+                                           'settings for the scraper')
 
         parser.add_argument('module', type=str, help='scraper module (eg. nc)')
+        parser.add_argument('--pdb', action='store_true', default=False,
+                            help='invoke PDB when exception is raised')
+        parser.add_argument('--ipdb', action='store_true', default=False,
+                            help='invoke PDB when exception is raised')
+        parser.add_argument('--pudb', action='store_true', default=False,
+                            help='invoke PUDB when exception is raised')
         what.add_argument('-s', '--session', action='append',
-                            dest='sessions', default=[],
+                          dest='sessions', default=[],
                           help='session(s) to scrape')
         what.add_argument('-t', '--term', action='append', dest='terms',
-                            help='term(s) to scrape', default=[])
+                          help='term(s) to scrape', default=[])
 
         for arg in ('upper', 'lower'):
             what.add_argument('--' + arg, action='append_const',
@@ -228,7 +237,7 @@ def main():
                     'votes', 'events', 'speeches'):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
-        for arg in ('scrape', 'import', 'report'):
+        for arg in ('scrape', 'import', 'report', 'session-list'):
             parser.add_argument('--' + arg, dest='actions',
                                 action="append_const", const=arg,
                                 help='only run %s step' % arg)
@@ -251,6 +260,29 @@ def main():
                             dest='SCRAPELIB_RETRY_WAIT_SECONDS')
 
         args = parser.parse_args()
+
+        if args.pdb or args.pudb or args.ipdb:
+            _debugger = pdb
+            if args.pudb:
+                try:
+                    import pudb
+                    _debugger = pudb
+                except ImportError:
+                    pass
+            if args.ipdb:
+                try:
+                    import ipdb
+                    _debugger = ipdb
+                except ImportError:
+                    pass
+
+            # turn on PDB-on-error mode
+            # stolen from http://stackoverflow.com/questions/1237379/
+            # if this causes problems in interactive mode check that page
+            def _tb_info(type, value, tb):
+                traceback.print_exception(type, value, tb)
+                _debugger.pm()
+            sys.excepthook = _tb_info
 
         # inject scraper paths so scraper module can be found
         for newpath in settings.SCRAPER_PATHS:
@@ -339,10 +371,6 @@ def main():
                 logging.getLogger('billy').warning(
                     'metadata validation error: ' + str(e))
 
-            with open(os.path.join(args.output_dir, 'metadata.json'),
-                      'w') as f:
-                json.dump(metadata, f, cls=JSONEncoderPlus)
-
             run_record = []
             exec_record = {
                 "run_record": run_record,
@@ -415,6 +443,12 @@ def main():
         # reports
         if 'report' in args.actions:
             _do_reports(abbrev, args)
+
+        if 'session-list' in args.actions:
+            if hasattr(module, 'session_list'):
+                print("\n".join(module.session_list()))
+            else:
+                raise ScrapeError('session_list() is not defined')
 
     except ScrapeError as e:
         logging.getLogger('billy').critical('Error: %s', e)

@@ -10,6 +10,54 @@
     <script>
       $('.dropdown-toggle').dropdown();
     </script>
+    <style>
+        .good { background-color: #83D47A; }
+        .bad { background-color: #D47A7D; }
+        .entry {border-bottom: 1px solid #EEE; padding-top: 17px;}
+        .summary-attr {padding-right: 5px;}
+        .root-merge-fin { background-color: #abd6ba; }
+        .index-table tr:hover {color: black}
+        .index-table tr:hover > td.good { background-color: green; }
+        .index-table tr:hover > td.bad { background-color: red; }
+        .index-table  tr:hover > td.warning { background-color: yellow; }
+        .index-table  td.good { background-color: #b0ff66; }
+        .index-table  td.bad { background-color: #fc7c7d; }
+        .index-table  td.warning { background-color: #fcde7c; }
+        .hovertable tr:hover {cursor: pointer;}
+        /* collapse left margin */
+        .container-fluid { padding-left: 0px; }
+        .container-fluid > .content { margin-left: 10px; }
+        .merge-from-1 { background-color: #f2c58b; }
+        .merge-from-2 { background-color: #d1acc0; }
+        .merge-from-N { background-color: #abdb3b; }
+        /* to cut down ADD */
+        .dim          { opacity: .6; }
+        /* Style the flag drop-down menu.*/
+        img.flag {
+            height: 10px;
+            width: 15px;
+            padding-right: 10px;
+            padding-left: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            border: 0;
+            clear: right;
+        }
+        #mainFilter .select2-container {
+            width: 200px;
+        }
+        #mainFilter li {
+            float: None;
+            margin-right: 0px;
+        }
+        .jqplot-table-legend { width:   auto; }
+        .jqplot-point-label { font-weight: bold; font-size:   0.8em; }
+        .error { background-color: #faf0a5; }
+        .success { background-color: #d6ff99; }
+        .bill-table th { text-align: center; } 
+        .bill-table td { text-align: right; }
+    </style>
+
     {% block script %}
     {% endblock %}
     {% block style %}

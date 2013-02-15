@@ -81,6 +81,10 @@
             },
             "type": "array"
         },
+        "record_id": {
+            "required": false,
+            "type": "string"
+        },
         "related_bills": {
             "items": {
                 "properties": {
@@ -115,10 +119,6 @@
             "type": "array"
         },
         "status": {
-            "required": false,
-            "type": "string"
-        },
-        "record_id": {
             "required": false,
             "type": "string"
         },

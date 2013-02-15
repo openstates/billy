@@ -2,10 +2,7 @@
     views specific to events
 """
 from django.shortcuts import render
-from django.http import Http404, HttpResponse
-from django.contrib.sites.models import Site
 
-import billy
 from billy.core import settings
 from billy.models import db, Metadata
 

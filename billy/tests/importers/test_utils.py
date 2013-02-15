@@ -124,14 +124,12 @@ def test_convert_timestamps():
            'actions': [{'when': ts}, {'date': ts}],
            'sources': [{'when': ts}, {'date': ts}],
            'votes': [{'when': ts}, {'date': ts}],
-           'terms': [{'start_date': ts}, {'end_date': ts}],
            }
 
     expect = {'date': dt,
               'actions': [{'when': dt}, {'date': dt}],
               'sources': [{'when': dt}, {'date': dt}],
               'votes': [{'when': dt}, {'date': dt}],
-              'terms': [{'start_date': dt}, {'end_date': dt}],
               }
 
     assert utils.convert_timestamps(obj) == expect
@@ -167,13 +165,10 @@ def test_make_plus_fields():
                          'date': 'now',
                          'superfluous': 42}]}
 
-    expect = {'_type': 'bill', 'bill_id': 'AB 123',
-               'title': 'An Awesome Bill',
-               '+extra_field': 'this is not normal',
-               'actions': [{'actor': 'Tom Cruise',
-                            'action': 'hero',
-                            'date': 'now',
-                            '+superfluous': 42}]}
+    expect = {'_type': 'bill', 'bill_id': 'AB 123', 'title': 'An Awesome Bill',
+              '+extra_field': 'this is not normal',
+              'actions': [{'actor': 'Tom Cruise', 'action': 'hero',
+                           'date': 'now', '+superfluous': 42}]}
 
     plussed = utils.make_plus_fields(bill)
 

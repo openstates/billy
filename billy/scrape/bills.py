@@ -130,11 +130,8 @@ class Bill(SourcedObject):
         d = dict(name=name, url=url, mimetype=mimetype, **kwargs)
         self['versions'].append(d)
 
-    def add_action(self, actor, action, date,
-                    type=None,
-                    committees=None,
-                    legislators=None,
-                   **kwargs):
+    def add_action(self, actor, action, date, type=None, committees=None,
+                   legislators=None, **kwargs):
         """
         Add an action that was performed on this bill.
 

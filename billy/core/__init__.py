@@ -8,14 +8,13 @@ import pymongo
 from pymongo.son_manipulator import SONManipulator
 import pyes
 import boto
-from celery import Celery
 
 from billy.core import default_settings
 
 base_arg_parser = argparse.ArgumentParser(add_help=False)
 
-global_group = base_arg_parser.add_argument_group('global settings',
-                              'settings that apply to all billy commands')
+global_group = base_arg_parser.add_argument_group(
+    'global settings', 'settings that apply to all billy commands')
 
 global_group.add_argument('--mongo_host', help='mongo host', dest='MONGO_HOST')
 global_group.add_argument('--mongo_port', help='mongo port', dest='MONGO_PORT')
@@ -61,9 +60,9 @@ except ImportError:
 db = None
 mdb = None
 feeds_db = None
+user_db = None
 elasticsearch = None
 s3bucket = None
-celery = None
 _model_registry = {}
 _model_registry_by_collection = {}
 
@@ -76,10 +75,11 @@ class ErrorProxy(object):
         raise self.error
 
 
-def _configure_db(host, port, db_name):
+def _configure_db(host, port, db_name, user_db_name):
     global db
     global mdb
     global feeds_db
+    global user_db
 
     class Transformer(SONManipulator):
         def transform_outgoing(self, son, collection,
@@ -95,11 +95,13 @@ def _configure_db(host, port, db_name):
         conn = pymongo.Connection(host, port)
         db = conn[db_name]
         mdb = conn[db_name]
+        user_db = conn[user_db_name]
         feeds_db = conn['newsblogs']
         mdb.add_son_manipulator(transformer)
         feeds_db.add_son_manipulator(transformer)
     # return a dummy NoDB object if we couldn't connect
-    except pymongo.errors.AutoReconnect as e:
+    except (pymongo.errors.AutoReconnect,
+            pymongo.errors.ConnectionFailure) as e:
         db = ErrorProxy(e)
         mdb = ErrorProxy(e)
         feeds_db = ErrorProxy(e)
@@ -124,14 +126,8 @@ def _configure_s3(aws_key, aws_secret, bucket):
         s3bucket = ErrorProxy(e)
 
 
-def _configure_celery():
-    global celery
-    celery = Celery(include=['billy.fulltext.elasticsearch'])
-
-
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
-              settings.MONGO_DATABASE)
+              settings.MONGO_DATABASE, settings.MONGO_USER_DATABASE)
 if settings.ENABLE_ELASTICSEARCH:
     _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
 _configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)
-_configure_celery()

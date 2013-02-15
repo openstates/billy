@@ -77,8 +77,7 @@ def test_legislator_votes_fields():
     fields = ['motion']
 
     # Get the leg's votes manually.
-    rv1 = list(db.votes.find({'_voters': 'EXL000001'},
-                              fields=fields))
+    rv1 = list(db.votes.find({'_voters': 'EXL000001'}, fields=fields))
 
     # Now through the model method.
     leg = db.legislators.find_one('EXL000001')

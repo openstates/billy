@@ -22,7 +22,7 @@ class ScrapeError(Exception):
     def __str__(self):
         if self.orig_exception:
             return '%s\nOriginal Exception: %s' % (self.msg,
-                                        self.orig_exception)
+                                                   self.orig_exception)
         else:
             return self.msg
 
@@ -48,7 +48,7 @@ class ScraperMeta(type):
     def __new__(meta, classname, bases, classdict):
         cls = type.__new__(meta, classname, bases, classdict)
 
-        abbr = getattr(cls, settings.LEVEL_FIELD, None)
+        abbr = getattr(cls, 'jurisdiction', None)
         scraper_type = getattr(cls, 'scraper_type', None)
 
         if abbr and scraper_type:
@@ -125,18 +125,19 @@ class Scraper(scrapelib.Scraper):
                                        '../schemas/%s.json' % type)
             self._schema[type] = json.load(open(schema_path))
             self._schema[type]['properties'][settings.LEVEL_FIELD] = {
-                'maxLength': 2, 'minLength': 2, 'type': 'string'}
+                'minLength': 2, 'type': 'string'}
 
         # bills & votes
         self._schema['bill']['properties']['session']['enum'] = \
-                self.all_sessions()
+            self.all_sessions()
         self._schema['vote']['properties']['session']['enum'] = \
-                self.all_sessions()
+            self.all_sessions()
 
         # legislators
         terms = [t['name'] for t in self.metadata['terms']]
-        self._schema['person']['properties']['roles']['items'] \
-                ['properties']['term']['enum'] = terms
+        # ugly break here b/c this line is nearly impossible to split
+        self._schema['person']['properties']['roles'][
+            'items']['properties']['term']['enum'] = terms
 
     @property
     def object_count(self):
@@ -197,8 +198,8 @@ class Scraper(scrapelib.Scraper):
     def save_object(self, obj):
         self.log('save %s %s', obj['_type'], unicode(obj))
 
-        # copy over LEVEL_FIELD
-        obj[settings.LEVEL_FIELD] = getattr(self, settings.LEVEL_FIELD)
+        # copy jurisdiction to LEVEL_FIELD
+        obj[settings.LEVEL_FIELD] = getattr(self, 'jurisdiction')
 
         filename = obj.get_filename()
         self.output_names.add(filename)     # keep tally of all output names
@@ -261,15 +262,14 @@ def get_scraper(mod_path, scraper_type):
     try:
         ScraperClass = _scraper_registry[scraper_type]
     except KeyError as e:
-        raise ScrapeError("no %s scraper found in module %s" %
-                           (scraper_type, mod_path))
+        raise ScrapeError("no %s scraper found in module %s" % (
+            scraper_type, mod_path))
     return ScraperClass
-
 
 
 def check_sessions(metadata, sessions):
     all_sessions_in_terms = list(reduce(lambda x, y: x + y,
-                                   [x['sessions'] for x in metadata['terms']]))
+                                 [x['sessions'] for x in metadata['terms']]))
     # copy the list to avoid modifying it
     metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
                                                  []))

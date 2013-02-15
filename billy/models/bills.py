@@ -5,6 +5,7 @@ import collections
 import itertools
 
 from django.core import urlresolvers
+from django.core.exceptions import PermissionDenied
 import pymongo
 import pyes
 
@@ -40,13 +41,31 @@ class SponsorsManager(AttrManager):
                 for _id in obj['_all_ids']:
                     self._legislators[_id] = obj
 
+        if not hasattr(self, '_committees'):
+            # build a mapping from all _ids to committees
+            self._committees = {}
+            ids = [s.get('committee_id')
+                   for s in sponsors if s.get('committee_id') is not None]
+            if ids:
+                committees = db.committees.find({'_id': {'$in': ids}})
+            else:
+                committees = []
+            for obj in committees:
+                self._committees[obj['_id']] = obj
+
         for sponsor in sponsors:
-            leg_id = sponsor['leg_id']
+            leg_id = sponsor.get('leg_id')
+            committee_id = sponsor.get('committee_id', None)
             if leg_id is not None and leg_id in self._legislators:
-                legislator = self._legislators[sponsor['leg_id']]
+                legislator = self._legislators[leg_id]
                 legislator.update(sponsor)
                 legislator.bill = bill
                 yield legislator
+            elif committee_id is not None and committee_id in self._committees:
+                committee = self._committees[committee_id]
+                committee.update(sponsor)
+                committee.bill = bill
+                yield committee
             else:
                 spons = dictwrapper(sponsor)
                 spons.bill = bill
@@ -299,8 +318,53 @@ class BillVote(Document):
         else:
             bill = self.bill
         metadata = bill.metadata
-        name = metadata['chambers'][self['chamber']]['name']
-        return name
+        if self['chamber'] in metadata['chambers']:
+            return metadata['chambers'][self['chamber']]['name']
+        else:
+            return self['chamber'].title()
+
+
+class BillSearchResults(object):
+
+    def __init__(self, es_search, mongo_query, sort, fields):
+        self.es_search = es_search
+        self.mongo_query = mongo_query
+        self.sort = sort
+        self.fields = fields
+        self._len = None
+
+    def __len__(self):
+        if not self._len:
+            if self.es_search:
+                self._len = elasticsearch.search(self.es_search).total
+            else:
+                self._len = db.bills.find(self.mongo_query).count()
+        return self._len
+
+    def __getitem__(self, key):
+        start = 0
+        if isinstance(key, slice):
+            start = key.start or 0
+            stop = key.stop or len(self)
+            if key.step:
+                raise KeyError('step of %s is not permitted' % key.step)
+        elif isinstance(key, int):
+            start = key
+            stop = key + 1
+
+        if self.es_search:
+            es_result = elasticsearch.search(self.es_search,
+                                             sort=self.sort + ':desc,bill_id',
+                                             start=start,
+                                             size=stop - start)
+            _mongo_query = {'_id': {'$in': [r.get_id() for r in es_result]}}
+            return db.bills.find(_mongo_query, fields=self.fields).sort(
+                [(self.sort, pymongo.DESCENDING),
+                 ('bill_id', pymongo.ASCENDING)])
+        else:
+            return db.bills.find(self.mongo_query, fields=self.fields).sort(
+                [(self.sort, pymongo.DESCENDING)]
+            ).skip(start).limit(stop - start)
 
 
 class Bill(Document):
@@ -404,7 +468,7 @@ class Bill(Document):
             data.append(('stage3',
                          'Passed ' + self.other_chamber_name,
                          'date_passed_' + self.other_chamber))
-        data.append(('stage4', 'Governor Signs', 'date_signed'))
+        data.append(('stage4', 'Signed into Law', 'date_signed'))
 
         for stage, text, method in data:
             yield stage, text, getattr(self, method)()
@@ -434,99 +498,121 @@ class Bill(Document):
 
     @staticmethod
     def search(query=None, abbr=None, chamber=None, subjects=None,
-               bill_id=None, bill_id__in=None, search_window=None,
-               updated_since=None, sponsor_id=None, bill_fields=None,
-               status=None, type_=None, session=None):
-        _filter = {}
-        for key, value in [(settings.LEVEL_FIELD, abbr),
-                            ('chamber', chamber),
-                            ('subjects', subjects),
-                            ('bill_id', bill_id),
-                          ]:
-            if value is not None:
-                _filter[key] = value
+               bill_id=None, search_window=None, updated_since=None,
+               sponsor_id=None, status=[], type_=None, session=None,
+               bill_fields=None, sort=None, limit=None):
 
+        use_elasticsearch = False
+        numeric_query = False
+        mongo_filter = {}
+        es_terms = []
+
+        if query:
+            use_elasticsearch = settings.ENABLE_ELASTICSEARCH
+
+            # spammers get a 400
+            if '<a href' in query:
+                raise PermissionDenied('html detected')
+
+            # if query is numeric convert to an id filter
+            #   (TODO: maybe this should be an $or)
+            if re.findall('\d+', query):
+                # if query is entirely numeric make it a regex and hit mongo
+                if not re.findall('\D', query):
+                    mongo_filter['bill_id'] = {'$regex':
+                                               fix_bill_id(query).upper()}
+                else:
+                    mongo_filter['bill_id'] = fix_bill_id(query).upper()
+                use_elasticsearch = False
+                numeric_query = True
+
+        # handle abbr
+        if abbr and use_elasticsearch:
+            es_terms.append(pyes.TermFilter('jurisdiction', abbr))
+        elif abbr:
+            mongo_filter[settings.LEVEL_FIELD] = abbr
+
+        # sponsor_id
+        if sponsor_id and use_elasticsearch:
+            es_terms.append(pyes.TermFilter('sponsor_ids', sponsor_id))
+        elif sponsor_id:
+            mongo_filter['sponsors.leg_id'] = sponsor_id
+
+        # handle simple term arguments (chamber, bill_id, type, session)
+        simple_args = {'chamber': chamber, 'bill_id': bill_id, 'type': type_,
+                       'session': session}
         if search_window:
             if search_window == 'session':
-                _filter['_current_session'] = True
+                simple_args['_current_session'] = True
             elif search_window == 'term':
-                _filter['_current_term'] = True
+                simple_args['_current_term'] = True
             elif search_window.startswith('session:'):
-                _filter['session'] = search_window.split('session:')[1]
+                simple_args['session'] = search_window.split('session:')[1]
             elif search_window.startswith('term:'):
-                _filter['_term'] = search_window.split('term:')[1]
-            elif search_window == 'all':
-                pass
-            else:
+                simple_args['_term'] = search_window.split('term:')[1]
+            elif search_window != 'all':
                 raise ValueError('invalid search_window. valid choices are '
                                  ' "term", "session", "all"')
-        if updated_since:
+        for key, value in simple_args.iteritems():
+            if value is not None:
+                if use_elasticsearch:
+                    es_terms.append(pyes.TermFilter(key, value))
+                else:
+                    mongo_filter[key] = value
+
+        if subjects and use_elasticsearch:
+            for subject in subjects:
+                es_terms.append(pyes.TermFilter('subjects', subject))
+        elif subjects:
+            mongo_filter['subjects'] = {'$all': filter(None, subjects)}
+
+        if updated_since and use_elasticsearch:
+            es_terms.append(pyes.RangeFilter(
+                pyes.ESRangeOp('updated_at', 'gte', updated_since)))
+        elif updated_since:
             try:
-                _filter['updated_at'] = {'$gte': parse_param_dt(updated_since)}
+                mongo_filter['updated_at'] = {'$gte':
+                                              parse_param_dt(updated_since)}
             except ValueError:
                 raise ValueError('invalid updated_since parameter. '
                                  'please supply date in YYYY-MM-DD format')
-        if sponsor_id:
-            _filter['sponsors.leg_id'] = sponsor_id
 
-        if status:
-            # Status is slightly different: it's a dict like--
-            # {'action_dates.signed': {'$ne': None}}
-            _filter.update(**status)
+        # Status comes in as a list and needs to become:
+        # {'action_dates.signed': {'$ne': None}}
+        status_spec = []
+        for _status in status:
+            status_spec.append({'action_dates.%s' % _status: {'$ne': None}})
 
-        if type_:
-            _filter['type'] = type_
+        if len(status_spec) == 1:
+            status_spec = status_spec[0]
+        elif len(status_spec) > 1:
+            status_spec = {'$and': status_spec}
 
-        if session:
-            _filter['session'] = session
+        if status_spec and use_elasticsearch:
+            for key in status:
+                es_terms.append(pyes.ExistsFilter(key))
+        elif status_spec:
+            mongo_filter.update(**status_spec)
 
-        # process full-text query
-        if query and settings.ENABLE_ELASTICSEARCH:
-            # block spammers, possibly move to a BANNED_SEARCH_LIST setting
-            if '<a href' in query:
-                return db.bills.find({settings.LEVEL_FIELD: None})
+        # preprocess sort
+        if sort in ('first', 'last', 'signed', 'passed_lower', 'passed_upper'):
+            sort = 'action_dates.' + sort
+        elif sort not in ('updated_at', 'created_at'):
+            sort = 'action_dates.last'
 
-            if re.findall('\d+', query):
-                _id_filter = dict(_filter)
-                _id_filter['bill_id'] = fix_bill_id(query).upper()
-                result = db.bills.find(_id_filter)
-                if result:
-                    return result
-
+        # do the actual ES query
+        if query and use_elasticsearch:
             query = {"query_string": {"fields": ["text", "title"],
                                       "default_operator": "AND",
                                       "query": query}}
+            # query for one more than limit to figure out if there are more
             search = pyes.Search(query, fields=[])
-
-            # take terms from mongo query
-            es_terms = []
-            if settings.LEVEL_FIELD in _filter:
-                es_terms.append(pyes.TermFilter(settings.LEVEL_FIELD,
-                                            _filter.pop(settings.LEVEL_FIELD)))
-            if 'session' in _filter:
-                es_terms.append(pyes.TermFilter('session',
-                                                _filter.pop('session')))
-            if 'chamber' in _filter:
-                es_terms.append(pyes.TermFilter('chamber',
-                                                _filter.pop('chamber')))
-            if 'subjects' in _filter:
-                es_terms.append(pyes.TermFilter('subjects',
-                                           _filter.pop('subjects')['$all']))
-            if 'sponsors.leg_id' in _filter:
-                es_terms.append(pyes.TermFilter('sponsors',
-                                            _filter.pop('sponsors.leg_id')))
-
-            # add terms
             if es_terms:
                 search.filter = pyes.ANDFilter(es_terms)
 
-            # page size is a guess, could use tweaks
-            es_result = elasticsearch.search(search, search_type='scan',
-                                             scroll='3m', size=250)
-            doc_ids = [r.get_id() for r in es_result]
-            _filter['versions.doc_id'] = {'$in': doc_ids}
-        elif query:
-            _filter['title'] = {'$regex': query, '$options': 'i'}
+            return BillSearchResults(search, None, sort, bill_fields)
 
-        # return query
-        return db.bills.find(_filter, bill_fields)
+        elif query and not numeric_query:
+            mongo_filter['title'] = {'$regex': query, '$options': 'i'}
+
+        return BillSearchResults(None, mongo_filter, sort, bill_fields)

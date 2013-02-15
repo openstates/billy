@@ -7,10 +7,12 @@ import urllib2
 import pymongo
 
 from django.shortcuts import render, redirect
-from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
-from billy.models import db, Metadata, Legislator
+from billy.core import user_db
+from billy.models import db, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
@@ -24,10 +26,8 @@ def homepage(request):
     Templates:
         - billy/web/public/homepage.html
     '''
-    spec = {}
-    if hasattr(settings, 'ACTIVE_STATES'):
-        spec = {'abbreviation': {'$in': settings.ACTIVE_STATES}}
-    all_metadata = db.metadata.find(spec, fields=('name',)).sort('name')
+    all_metadata = db.metadata.find()
+
     return render(request, templatename('homepage'),
                   dict(all_metadata=all_metadata))
 
@@ -95,7 +95,8 @@ def find_your_legislator(request):
         if "boundary" in get:
             to_search = []
             for leg in leg_resp:
-                to_search.append(leg['boundary_id'])
+                if 'boundary_id' in leg:
+                    to_search.append(leg['boundary_id'])
             borders = set(to_search)
             ret = {}
             for border in borders:
@@ -120,7 +121,10 @@ def get_district(request, district_id):
         district_id,
         billy_settings.API_KEY
     )
-    f = urllib2.urlopen(qurl)
+    try:
+        f = urllib2.urlopen(qurl)
+    except urllib2.HTTPError:
+        raise Http404('no such district')
     return HttpResponse(f)
 
 
@@ -153,7 +157,7 @@ class VotesList(RelatedObjectsList):
     query_attr = 'votes_manager'
     use_table = True
     rowtemplate_name = templatename('votes_list_row')
-    column_headers_tmplname = templatename('votes_column_headers')
+    column_headers_tmplname = templatename('_votes_column_headers')
     nav_active = 'bills'
     description_template = '''
         Votes by <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
@@ -200,7 +204,7 @@ class NewsList(RelatedObjectsList):
     paginator = CursorPaginator
     query_attr = 'feed_entries'
     rowtemplate_name = templatename('feed_entry')
-    column_headers_tmplname = templatename('news_column_headers')
+    column_headers_tmplname = templatename('_news_column_headers')
     nav_active = 'bills'
     collection_name = 'entries'
     description_template = '''
@@ -220,4 +224,47 @@ class NewsList(RelatedObjectsList):
                 return redirect('news_list', abbr, collection_name,
                                 leg['_id'], slug)
         return super(NewsList, self).get(request, abbr, collection_name, _id,
-                                          slug)
+                                         slug)
+
+
+@login_required
+def user_profile(request):
+    if request.method == "GET":
+        saved_changes = bool(request.GET.get('saved_changes'))
+        profile = user_db.profiles.find_one(request.user.username)
+        return render(request, templatename('user_profile'),
+                      dict(saved_changes=saved_changes,
+                           profile=profile))
+
+    elif request.method == "POST":
+        POST = request.POST
+        if "lat" in POST and "lng" in POST:
+            lat = POST['lat']
+            lng = POST['lng']
+
+        doc = {'$set': dict(location=dict(lat=lat, lng=lng))}
+
+        if POST['api_key']:
+            doc['$set']['api_key'] = POST['api_key']
+
+        if POST['location_text']:
+            doc['$set']['location']['text'] = POST['location_text']
+
+        spec = dict(_id=request.user.username)
+        user_db.profiles.update(spec, doc, upsert=True)
+
+        return redirect('%s?%s' %
+                        (reverse('user_profile'), 'saved_changes=True'))
+
+
+@login_required
+def get_user_latlong(request):
+    profile = user_db.profiles.find_one(request.user.username)
+    data = {}
+    location = profile.get('location')
+    if location:
+        for key in ('lat', 'lng'):
+            data[key] = location.get(key)
+    resp = HttpResponse(mimetype='application/json')
+    json.dump(data, resp)
+    return resp

@@ -68,7 +68,7 @@ def insert_with_id(obj):
     cursor = collection.find({'_id': id_reg}).sort('_id', -1).limit(1)
 
     try:
-        new_id = int(cursor.next()['_id'][3:]) + 1
+        new_id = int(cursor.next()['_id'][len(abbr) + 1:]) + 1
     except StopIteration:
         new_id = 1
 
@@ -187,18 +187,9 @@ def convert_timestamps(obj):
             except TypeError:
                 raise TypeError("expected float for %s, got %s" % (key, value))
 
-    for key in ('sources', 'actions', 'votes'):
+    for key in ('sources', 'actions', 'votes', 'roles'):
         for child in obj.get(key, []):
             convert_timestamps(child)
-
-    for term in obj.get('terms', []):
-        convert_timestamps(term)
-
-    for details in obj.get('session_details', {}).values():
-        convert_timestamps(details)
-
-    for role in obj.get('roles', []):
-        convert_timestamps(role)
 
     return obj
 
@@ -321,7 +312,7 @@ def merge_legislators(leg1, leg2):
         #      old_roles & roles!! There's a potenital for data loss, but it's
         #      not that big of a thing.
         #   -- paultag & jamesturk, 02-02-2012
-        if len(leg1[roles]) > 0:
+        if len(leg1[roles]) > 0 and leg2[roles][0] != leg1[roles][0]:
             crole = leg1[roles][0]
             try:
                 leg1[old_roles][crole['term']].append(crole)

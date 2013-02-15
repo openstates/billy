@@ -21,10 +21,9 @@
             <td> {{bill.bill_id}} </td>
             <td> {{bill.title}} </td>
             {% url bill bill|level bill.session bill.bill_id as bill_url%}
-            {% if bill_url %}
-            <td> <a href="">public</a> </td>
-            {% endif %}
+
             <td> <a href="{% url object_json 'bills' bill|key:'_id' %}">json</a> </td>
+            <td><a href="{{bill.get_absolute_url}}">public</a></td>
         </tr>
         {% endfor %}
     </tbody>

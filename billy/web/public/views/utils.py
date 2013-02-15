@@ -74,13 +74,15 @@ class ListViewBase(TemplateView):
             for attr in ('title', 'description'):
                 if attr not in context:
                     context[attr] = self._render(attr, context,
-                                                    request=self.request)
+                                                 request=self.request)
 
         # Add the correct path to paginated links. Yuck.
         if self.request.GET:
             params = dict(self.request.GET.items())
             if 'page' in params:
                 del params['page']
+            for k, v in params.iteritems():
+                params[k] = unicode(v).encode('utf8')
             context.update(get_params=urllib.urlencode(params))
 
         return context
@@ -114,8 +116,8 @@ class RelatedObjectsList(ListViewBase):
     defer_rendering_title = True
 
     def get_context_data(self, *args, **kwargs):
-        context = super(RelatedObjectsList, self).get_context_data(
-                                                        *args, **kwargs)
+        context = super(RelatedObjectsList, self).get_context_data(*args,
+                                                                   **kwargs)
         context.update(
             obj=self.get_object(),
             collection_name=self.collection_name)
@@ -143,13 +145,13 @@ class RelatedObjectsList(ListViewBase):
         except KeyError:
             _id = self.kwargs['abbr']
 
+        if _id == 'all':
+            return None
+
         # Get the related object.
         collection = getattr(db, collection_name)
 
-        try:
-            obj = collection.find_one(_id)
-        except DoesNotExist:
-            raise Http404
+        obj = collection.find_one(_id)
 
         self.obj = obj
         return obj
@@ -165,7 +167,10 @@ class RelatedObjectsList(ListViewBase):
         if 100 < show_per_page:
             show_per_page = 100
 
-        objects = getattr(self.get_object(), self.query_attr)
+        obj = self.get_object()
+        if obj is None:
+            raise Http404('RelatedObjectsList.get_object returned None.')
+        objects = getattr(obj, self.query_attr)
 
         # The related collection of objects might be a
         # function or a manager class.
