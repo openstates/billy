@@ -23,13 +23,7 @@ class Command(NoArgsCommand):
     )
 
     def handle_noargs(self, **options):
-        # TODO: this would be nicer if it were by email address
         usernames = user_db.favorites.distinct('username')
-
-        if options['dry_run']:
-            print 'Dry Run'
-        else:
-            print 'Pushing to Scout'
 
         for username in usernames:
             self.push_user(username, options['dry_run'])
@@ -43,7 +37,7 @@ class Command(NoArgsCommand):
                    'notifications': 'email_daily'}
         interests = []
         for favorite in user_db.favorites.find({'username': username}):
-            if favorite['obj_type'] in ('legislator', 'bill', 'committee'):
+            if favorite['obj_type'] in ('legislator', 'bill'):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
                             'item_id': favorite['obj_id'],
@@ -61,6 +55,8 @@ class Command(NoArgsCommand):
                 else:
                     interest['in'] = ''
 
+            elif favorite['obj_type'] == 'committee':
+                continue        # no tracking for now
             else:
                 _log.warning('Unknown favorite type: %s', favorite['obj_type'])
                 continue
@@ -76,6 +72,7 @@ class Command(NoArgsCommand):
         if not dry_run:
             url = 'https://scout.sunlightfoundation.com/remote/service/sync'
             payload = json.dumps(payload, cls=JSONEncoderPlus)
+            _log.info(payload)
             resp = requests.post(url, data=payload)
             _log.info('[%s] %s', resp.status_code, resp.content)
 
