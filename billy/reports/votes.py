@@ -26,6 +26,7 @@ def scan_votes(abbr):
 
     # load exception data into sets of ids indexed by exception type
     quality_exceptions = get_quality_exceptions(abbr)
+    spec = {"abbr": abbr, "obj_id": None}
 
     for vote in db.votes.find({settings.LEVEL_FIELD: abbr}):
         session_d = sessions[vote['session']]
@@ -52,6 +53,13 @@ def scan_votes(abbr):
             if rc.get('leg_id'):
                 session_d['_rollcalls_with_leg_id_count'] += 1
             else:
+                spc = spec.copy()
+                spc['name'] = rc['name']
+                spc['term'] = term_for_session(abbr, vote['session'])
+
+                if db.manual.name_matchers.find(spc).count() > 0:
+                    continue
+
                 # keep missing leg_ids
                 session_d['unmatched_voters'].add(
                     (term_for_session(abbr, vote['session']),
