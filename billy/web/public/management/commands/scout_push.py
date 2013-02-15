@@ -74,10 +74,10 @@ class Command(NoArgsCommand):
                   payload['email'])
 
         if not dry_run:
-            url = 'http://scout.sunlightfoundation.com/remote/service/sync'
+            url = 'https://scout.sunlightfoundation.com/remote/service/sync'
             payload = json.dumps(payload, cls=JSONEncoderPlus)
             resp = requests.post(url, data=payload)
-            print resp.content
+            _log.info('[%s] %s', resp.status_code, resp.content)
 
 
     def _translate_filter_data(self, favorite, params):
