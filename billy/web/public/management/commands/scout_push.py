@@ -73,6 +73,7 @@ class Command(NoArgsCommand):
         if not dry_run:
             url = 'https://scout.sunlightfoundation.com/remote/service/sync'
             payload = json.dumps(payload, cls=JSONEncoderPlus)
+            _log.info(payload)
             resp = requests.post(url, data=payload)
             _log.info('[%s] %s', resp.status_code, resp.content)
 
