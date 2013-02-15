@@ -23,7 +23,6 @@ class Command(NoArgsCommand):
     )
 
     def handle_noargs(self, **options):
-        # TODO: this would be nicer if it were by email address
         usernames = user_db.favorites.distinct('username')
 
         for username in usernames:
@@ -57,7 +56,7 @@ class Command(NoArgsCommand):
                     interest['in'] = ''
 
             elif favorite['obj_type'] == 'committee':
-                pass        # no tracking for now
+                continue        # no tracking for now
             else:
                 _log.warning('Unknown favorite type: %s', favorite['obj_type'])
                 continue
