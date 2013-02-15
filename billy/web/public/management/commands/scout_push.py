@@ -26,7 +26,7 @@ class Command(NoArgsCommand):
         # TODO: this would be nicer if it were by email address
         usernames = user_db.favorites.distinct('username')
 
-        for user in usernames:
+        for username in usernames:
             self.push_user(username, options['dry_run'])
 
 
