@@ -159,8 +159,8 @@ def is_favorite(obj_id, obj_type, user, extra_spec=None):
 
 @login_required
 def favorites(request):
-    favorites = get_user_favorites(request.user.id)
-    profile = user_db.profiles.find_one(request.user.id)
+    favorites = get_user_favorites(request.user.username)
+    profile = user_db.profiles.find_one(request.user.username)
     return render(request, templatename('user_favorites'),
                   dict(favorites=favorites,
                        profile=profile,
@@ -233,6 +233,6 @@ def set_notification_preference(request):
 
     obj_type = 'notifications.' + obj_type
 
-    user_db.profiles.update({'_id': request.user.id},
+    user_db.profiles.update({'_id': request.user.username},
                             {'$set': {obj_type: alerts_on}}, upsert=True)
     return HttpResponse(status=200)

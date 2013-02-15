@@ -231,7 +231,7 @@ class NewsList(RelatedObjectsList):
 def user_profile(request):
     if request.method == "GET":
         saved_changes = bool(request.GET.get('saved_changes'))
-        profile = user_db.profiles.find_one(request.user.id)
+        profile = user_db.profiles.find_one(request.user.username)
         return render(request, templatename('user_profile'),
                       dict(saved_changes=saved_changes,
                            profile=profile))
@@ -250,7 +250,7 @@ def user_profile(request):
         if POST['location_text']:
             doc['$set']['location']['text'] = POST['location_text']
 
-        spec = dict(_id=request.user.id)
+        spec = dict(_id=request.user.username)
         user_db.profiles.update(spec, doc, upsert=True)
 
         return redirect('%s?%s' %
@@ -259,7 +259,7 @@ def user_profile(request):
 
 @login_required
 def get_user_latlong(request):
-    profile = user_db.profiles.find_one(request.user.id)
+    profile = user_db.profiles.find_one(request.user.username)
     data = {}
     location = profile.get('location')
     if location:
