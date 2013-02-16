@@ -410,7 +410,6 @@ class LegislatorGeoHandler(BillyHandler):
             filters.append({'district': 'At-Large',
                             settings.LEVEL_FIELD: jurisdiction})
 
-
         fields = _build_field_list(request)
         if fields is not None:
             fields['state'] = fields['district'] = fields['chamber'] = 1
