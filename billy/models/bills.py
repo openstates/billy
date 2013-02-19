@@ -5,6 +5,7 @@ import collections
 import itertools
 
 from django.core import urlresolvers
+from django.core.exceptions import PermissionDenied
 import pymongo
 import pyes
 
@@ -509,9 +510,9 @@ class Bill(Document):
         if query:
             use_elasticsearch = settings.ENABLE_ELASTICSEARCH
 
-            # block spammers, possibly move to a BANNED_SEARCH_LIST setting
+            # spammers get a 400
             if '<a href' in query:
-                return db.bills.find({settings.LEVEL_FIELD: None})
+                raise PermissionDenied('html detected')
 
             # if query is numeric convert to an id filter
             #   (TODO: maybe this should be an $or)

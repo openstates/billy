@@ -1,41 +1,43 @@
 '''
 Pushes stored user favorites to Scout for alert tracking.
-
-To run stand-alone for debugging, openstates_site has to be on sys.path and
-DJANGO_SETTINGS_MODULE has to be set to openstates_site/localsettings.py.
-See commented-out lines below for example.
 '''
-# import sys
-# sys.path.insert(0, '/home/thom/sunlight/openstates/site/openstates_site')
-# import os
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'local_settings'
-
 import json
 import logging
 import urlparse
+from optparse import make_option
 
-from celery.task.base import Task
 from django.contrib.auth.models import User
+from django.core.management.base import NoArgsCommand
+
 from billy.core import settings, user_db
 from billy.utils import JSONEncoderPlus
 
 import requests
 
+_log = logging.getLogger('billy.web.public.management.commands.scout_push')
 
-class ScoutPush(Task):
-    # no results needed
-    ignore_result = True
-    _log = logging.getLogger('billy.tasks.ScoutPush')
 
-    def run(self, user_id):
-        user = User.objects.get(pk=user_id)
+class Command(NoArgsCommand):
+    option_list = NoArgsCommand.option_list + (
+        make_option('--dry-run', action='store_true', dest='dry_run',
+                    default=False, help='dry run'),
+    )
+
+    def handle_noargs(self, **options):
+        usernames = user_db.favorites.distinct('username')
+
+        for username in usernames:
+            self.push_user(username, options['dry_run'])
+
+    def push_user(self, username, dry_run):
+        user = User.objects.get(username=username)
         payload = {'email': user.email,
                    'secret_key': settings.SCOUT_SECRET_KEY,
                    'service': settings.SCOUT_SERVICE,
                    'notifications': 'email_daily'}
         interests = []
-        for favorite in user_db.favorites.find({'user_id': user_id}):
-            if favorite['obj_type'] in ('legislator', 'bill', 'committee'):
+        for favorite in user_db.favorites.find({'username': username}):
+            if favorite['obj_type'] in ('legislator', 'bill'):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
                             'item_id': favorite['obj_id'],
@@ -53,9 +55,10 @@ class ScoutPush(Task):
                 else:
                     interest['in'] = ''
 
+            elif favorite['obj_type'] == 'committee':
+                continue        # no tracking for now
             else:
-                self._log.warning('Unknown favorite type: %s',
-                                  favorite['obj_type'])
+                _log.warning('Unknown favorite type: %s', favorite['obj_type'])
                 continue
 
             interest['active'] = favorite['is_favorite']
@@ -63,12 +66,15 @@ class ScoutPush(Task):
             interests.append(interest)
 
         payload['interests'] = interests
-        self._log.info('pushing %s interests for %s', len(interests),
-                       payload['email'])
+        _log.info('pushing %s interests for %s', len(interests),
+                  payload['email'])
 
-        url = 'http://scout.sunlightfoundation.com/remote/service/sync'
-        payload = json.dumps(payload, cls=JSONEncoderPlus)
-        requests.post(url, data=payload)
+        if not dry_run:
+            url = 'https://scout.sunlightfoundation.com/remote/service/sync'
+            payload = json.dumps(payload, cls=JSONEncoderPlus)
+            _log.info(payload)
+            resp = requests.post(url, data=payload)
+            _log.info('[%s] %s', resp.status_code, resp.content)
 
     def _translate_filter_data(self, favorite, params):
         '''Edit the favorite['search_params'] object and make them
@@ -114,4 +120,3 @@ class ScoutPush(Task):
             result['state'] = favorite['search_abbr'].upper()
 
         return result
-

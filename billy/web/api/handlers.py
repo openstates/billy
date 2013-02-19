@@ -382,6 +382,7 @@ class LegislatorGeoHandler(BillyHandler):
 
         filters = []
         boundary_mapping = {}
+        jurisdiction = None
 
         for dist in resp['objects']:
             # look up district slug
@@ -396,6 +397,7 @@ class LegislatorGeoHandler(BillyHandler):
                 boundary_mapping[(districts[0]['abbr'],
                                   districts[0]['name'],
                                   districts[0]['chamber'])] = boundary_id
+                jurisdiction = districts[0]['abbr']
             elif count != 0:
                 raise ValueError('multiple districts with boundary_id: %s' %
                                  boundary_id)
@@ -403,10 +405,10 @@ class LegislatorGeoHandler(BillyHandler):
         if not filters:
             return []
 
-        # append at-large legislators from this jurisdiction
-        filters.append({'district': 'At-Large',
-                        settings.LEVEL_FIELD: districts[0]['abbr']})
-
+        if jurisdiction:
+            # append at-large legislators from this jurisdiction
+            filters.append({'district': 'At-Large',
+                            settings.LEVEL_FIELD: jurisdiction})
 
         fields = _build_field_list(request)
         if fields is not None:

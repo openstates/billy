@@ -11,5 +11,4 @@ scrapelib>=0.7.0
 unicodecsv!=0.9.3
 validictory
 pyes
-celery
 

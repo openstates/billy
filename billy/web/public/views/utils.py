@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.http import Http404
 from django.template import Template, Context
 
-from billy.models import db, Metadata, DoesNotExist
+from billy.models import db, Metadata
 
 
 def templatename(name):

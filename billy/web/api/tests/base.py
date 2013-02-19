@@ -87,5 +87,5 @@ class BaseTestCase(unittest.TestCase):
         try:
             self.json
         except ValueError:
-            raise ValueError('no json object: ' + self.response)
+            raise ValueError('no json object: ' + self.response.content)
         self.assertEquals(self.response.status_code, 200)

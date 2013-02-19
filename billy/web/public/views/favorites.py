@@ -109,8 +109,8 @@ def _get_favorite_object(favorite):
         return getattr(mdb, collection_name).find_one(favorite['obj_id'])
 
 
-def get_user_favorites(user_id):
-    faves = list(user_db.favorites.find(dict(user_id=user_id)))
+def get_user_favorites(username):
+    faves = list(user_db.favorites.find(dict(username=username)))
     grouped = groupby(faves, itemgetter('obj_type'))
 
     res = collections.defaultdict(list)
@@ -136,8 +136,7 @@ def get_user_favorites(user_id):
 def is_favorite(obj_id, obj_type, user, extra_spec=None):
     '''Query database; return true or false.
     '''
-    spec = dict(obj_id=obj_id, obj_type=obj_type,
-                user_id=user.id)
+    spec = dict(obj_id=obj_id, obj_type=obj_type, username=user.username)
 
     # Enable the bill search to pass in search terms.
     if extra_spec is not None:
@@ -160,8 +159,8 @@ def is_favorite(obj_id, obj_type, user, extra_spec=None):
 
 @login_required
 def favorites(request):
-    favorites = get_user_favorites(request.user.id)
-    profile = user_db.profiles.find_one(request.user.id)
+    favorites = get_user_favorites(request.user.username)
+    profile = user_db.profiles.find_one(request.user.username)
     return render(request, templatename('user_favorites'),
                   dict(favorites=favorites,
                        profile=profile,
@@ -188,7 +187,7 @@ def set_favorite(request):
     spec = dict(
         obj_type=request.POST['obj_type'],
         obj_id=request.POST['obj_id'],
-        user_id=request.user.id
+        username=request.user.username
     )
 
     if request.POST['obj_type'] == 'search':
@@ -234,6 +233,6 @@ def set_notification_preference(request):
 
     obj_type = 'notifications.' + obj_type
 
-    user_db.profiles.update({'_id': request.user.id},
+    user_db.profiles.update({'_id': request.user.username},
                             {'$set': {obj_type: alerts_on}}, upsert=True)
     return HttpResponse(status=200)
