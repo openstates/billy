@@ -119,6 +119,7 @@ $(document).ready(function() {
   <h4>Retire Legislator</h4>
   <label>Retirement Date</label>
   <input type="text" placeholder="YYYY-MM-DD" name="end_date">
+  {% csrf_token %}
   <button type="submit" class="btn btn-danger">Retire Legislator</button>
 </form>
 
