@@ -46,7 +46,7 @@ def scan_committees(abbr):
                 report['_members_with_leg_id_count'] += 1
             else:
                 spc = spec.copy()
-                spc['name'] = mamber['name']
+                spc['name'] = member['name']
                 spc['chamber'] = com['chamber']
 
                 if db.manual.name_matchers.find(spc).count() > 0:
