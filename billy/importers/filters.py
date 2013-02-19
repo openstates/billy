@@ -118,7 +118,7 @@ def email_filter(email):
     if email.startswith(mailto):
         email = email[len(mailto):]
         if "?" in email:
-            email = email[:email.find("?")]
+            email = email[:email.index("?")]
 
     if ">" in email and "<" in email:
         # we likely have a nested email.
