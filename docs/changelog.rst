@@ -1,6 +1,24 @@
 billy changelog
 ===============
 
+1.7.0
+-----
+** 16 February 2013 **
+    * major changes in how ElasticSearch component works
+    * functional (Scout-synced) favorites support
+    * drastically improved mongodb indexing on bills collection
+    * add LOCKSMITH_REGISTRATION_URL and ENABLE_ELASTICSEARCH_PUSH settings
+    * add legislature_url to metadata
+    * more flexible support for non-2 letter abbreviations
+    * more robust public views for events
+    * allow joint committee votes
+    * add --pdb and related options to billy-update
+    * Michigan-specific exemption in fix_bill_id
+    * bugfix: correct centroid in boundary api method
+    * bugfix: stop activating legislators w/o active role
+    * bugfix: handle unicode in searches
+    * bugfix: ensure_csrf on favorites-wielding views
+
 1.6.0
 -----
 ** 5 December 2012 **

@@ -160,7 +160,6 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
                 _params[k] = v
         params = urllib.urlencode(_params, doseq=True)
 
-
     # If the requested page is a search results page with a query string,
     # create an extra spec to help determine whether the search is
     # currently favorited.

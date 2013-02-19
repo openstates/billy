@@ -1,11 +1,11 @@
 from django import forms
 
 from billy.models import db
-from billy.core import settings
 
 _all_abbrs = [('', '')]
 _all_metadata = db.metadata.find({}, fields=('name',)).sort('name')
 _all_abbrs += [(m['_id'], m['name']) for m in _all_metadata]
+
 
 def get_region_select_form(data):
 
@@ -79,6 +79,5 @@ def get_filter_bills_form(metadata):
                 ),
                 widget=forms.CheckboxSelectMultiple(),
                 required=False)
-
 
     return FilterBillsForm

@@ -16,6 +16,7 @@ import requests
 
 _log = logging.getLogger('billy.web.public.management.commands.scout_push')
 
+
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--dry-run', action='store_true', dest='dry_run',
@@ -27,7 +28,6 @@ class Command(NoArgsCommand):
 
         for username in usernames:
             self.push_user(username, options['dry_run'])
-
 
     def push_user(self, username, dry_run):
         user = User.objects.get(username=username)
@@ -76,7 +76,6 @@ class Command(NoArgsCommand):
             resp = requests.post(url, data=payload)
             _log.info('[%s] %s', resp.status_code, resp.content)
 
-
     def _translate_filter_data(self, favorite, params):
         '''Edit the favorite['search_params'] object and make them
         match the param names used in an api request.
@@ -121,4 +120,3 @@ class Command(NoArgsCommand):
             result['state'] = favorite['search_abbr'].upper()
 
         return result
-

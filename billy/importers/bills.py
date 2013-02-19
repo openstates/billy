@@ -66,7 +66,7 @@ def ensure_indexes():
                         'updated_at']
         # chamber-abbr gets indexed w/ every possible sort
         if (index_keys == ('chamber', settings.LEVEL_FIELD) or
-            index_keys == (settings.LEVEL_FIELD,)):
+                index_keys == (settings.LEVEL_FIELD,)):
             sort_indices += ['action_dates.passed_upper',
                              'action_dates.passed_lower']
         for sort_index in sort_indices:
