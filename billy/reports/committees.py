@@ -39,11 +39,19 @@ def scan_committees(abbr):
         if not com['members']:
             report['empty_count'] += 1
 
+        spec = {"abbr": abbr, "obj_id": None}
         for member in com['members']:
             report['_member_count'] += 1
             if member.get('leg_id') or member['name'] in ignored_names:
                 report['_members_with_leg_id_count'] += 1
             else:
+                spc = spec.copy()
+                spc['name'] = mamber['name']
+                spc['chamber'] = com['chamber']
+
+                if db.manual.name_matchers.find(spc).count() > 0:
+                    continue
+
                 report['unmatched_leg_ids'].add((com.get('term', ''),
                                                  com['chamber'],
                                                  member['name']))

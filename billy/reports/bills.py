@@ -88,6 +88,8 @@ def scan_bills(abbr):
         })
         ignored_names = [x['name'] for x in none_names]
         manual_pool = db.manual.find({})
+        spec = {"abbr": abbr, "obj_id": None}
+
         for sponsor in bill['sponsors']:
             session_d['_sponsor_count'] += 1
             if sponsor.get('leg_id') or sponsor.get('committee_id') \
@@ -95,6 +97,13 @@ def scan_bills(abbr):
 
                 session_d['_sponsors_with_id_count'] += 1
             else:
+                spc = spec.copy()
+                spc['name'] = sponsor['name']
+                spc['term'] = term_for_session(abbr, bill['session'])
+
+                if db.manual.name_matchers.find(spc).count() > 0:
+                    continue
+
                 # keep list of unmatched sponsors
                 session_d['unmatched_sponsors'].add(
                     (term_for_session(abbr, bill['session']), bill['chamber'],
