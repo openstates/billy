@@ -68,6 +68,7 @@ def test_email_basics():
     emails = [
         "foo@example.com",
         "mailto:foo@example.com",
+        "mailto:foo@example.com?foobar=baz",
         "<foo@example.com>",
         '"John Q. Public" <foo@example.com>'
     ]
