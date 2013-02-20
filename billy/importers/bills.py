@@ -31,66 +31,6 @@ filters = settings.BILL_FILTERS
 logger = logging.getLogger('billy')
 
 
-def ensure_indexes():
-    # TODO: add a _current_term, _current_session index?
-
-    # accomodates basic lookup / unique constraint on abbr/session/bill_id
-    db.bills.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                           ('session', pymongo.ASCENDING),
-                           ('chamber', pymongo.ASCENDING),
-                           ('bill_id', pymongo.ASCENDING)],
-                          unique=True)
-
-    # bill_id is used for search in conjunction with ElasticSearch
-    #  sort field (date) comes first, followed by field that we do an $in on
-    db.bills.ensure_index([('created_at', pymongo.DESCENDING),
-                           ('bill_id', pymongo.ASCENDING)])
-    db.bills.ensure_index([('updated_at', pymongo.DESCENDING),
-                           ('bill_id', pymongo.ASCENDING)])
-    db.bills.ensure_index([('action_dates.last', pymongo.DESCENDING),
-                           ('bill_id', pymongo.ASCENDING)])
-
-    search_indices = [
-        ('sponsors.leg_id', settings.LEVEL_FIELD),
-        ('chamber', settings.LEVEL_FIELD),
-        ('session', settings.LEVEL_FIELD),
-        ('session', 'chamber', settings.LEVEL_FIELD),
-        ('_term', 'chamber', settings.LEVEL_FIELD),
-        ('status', settings.LEVEL_FIELD),
-        ('subjects', settings.LEVEL_FIELD),
-        ('type', settings.LEVEL_FIELD),
-        (settings.LEVEL_FIELD,),
-    ]
-    for index_keys in search_indices:
-        sort_indices = ['action_dates.first', 'action_dates.last',
-                        'updated_at']
-        # chamber-abbr gets indexed w/ every possible sort
-        if (index_keys == ('chamber', settings.LEVEL_FIELD) or
-                index_keys == (settings.LEVEL_FIELD,)):
-            sort_indices += ['action_dates.passed_upper',
-                             'action_dates.passed_lower']
-        for sort_index in sort_indices:
-            index = [(ikey, pymongo.ASCENDING) for ikey in index_keys]
-            index += [(sort_index, pymongo.DESCENDING)]
-            db.bills.ensure_index(index)
-
-    # primary sponsors index
-    db.bills.ensure_index([('sponsors.leg_id', pymongo.ASCENDING),
-                           ('sponsors.type', pymongo.ASCENDING),
-                           ('state', pymongo.ASCENDING),
-                          ])
-
-    # votes index
-    db.votes.ensure_index([('bill_id', pymongo.ASCENDING),
-                           ('date', pymongo.ASCENDING)])
-    db.votes.ensure_index([('_voters', pymongo.ASCENDING),
-                           ('date', pymongo.ASCENDING)])
-
-    # subjects index
-    db.subjects.ensure_index('abbr')
-    db.manual.name_matchers.ensure_index('abbr')
-
-
 def match_sponsor_ids(abbr, bill):
     for sponsor in bill['sponsors']:
         # use sponsor's chamber if specified
@@ -492,8 +432,6 @@ def import_bills(abbr, data_dir):
     populate_current_fields(abbr)
 
     git_commit("Import Update")
-
-    ensure_indexes()
 
     return counts
 
