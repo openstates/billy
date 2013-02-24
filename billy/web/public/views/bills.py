@@ -289,6 +289,7 @@ def bill(request, abbr, session, bill_id):
         - sponsors
         - sources
         - nav_active
+        - affected_code_template
 
     Templates:
         - billy/web/public/bill.html
@@ -332,6 +333,7 @@ def bill(request, abbr, session, bill_id):
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],
+             affected_code_template=templatename('_bill_affected_code'),
              nav_active='bills'))
 
 
