@@ -1,6 +1,6 @@
+import argparse
 from billy.core import db
-from billy.importers.bills import ensure_indexes as bill_indexes
-
+from billy.bin.commands.ensure_indexes import MongoIndex
 
 def _assert_index(query, name_piece=None):
     cursor = query.explain()['cursor']
@@ -12,7 +12,13 @@ def _assert_index(query, name_piece=None):
 
 
 def test_bill_indexes():
-    bill_indexes()
+    parser = argparse.ArgumentParser(description='generic billy util')
+    subparsers = parser.add_subparsers(dest='subcommand')
+
+    class StubObj(object):
+        collections = ['bills', 'votes']
+
+    MongoIndex(subparsers).handle(StubObj())
 
     # looking up individual bills
     _assert_index(db.bills.find({'state': 'ex'}))

@@ -119,10 +119,10 @@ class MongoIndex(BaseCommand):
         for collection in collections:
             print('indexing', collection, '...')
             current = set(db[collection].index_information().keys())
-            current.remove('_id_')
+            current.discard('_id_')
             if collection == 'bills':
                 # basic lookup / unique constraint on abbr/session/bill_id
-                current.remove('%s_1_session_1_chamber_1_bill_id_1' %
+                current.discard('%s_1_session_1_chamber_1_bill_id_1' %
                                settings.LEVEL_FIELD)
                 db.bills.ensure_index([
                     (settings.LEVEL_FIELD, pymongo.ASCENDING),
