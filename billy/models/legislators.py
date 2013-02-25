@@ -313,7 +313,7 @@ class Legislator(Document):
         '''Return old roles, grouped first by term, then by chamber,
         then by type.'''
         wrapper = self._old_role_wrapper
-        chamber_getter = operator.itemgetter('chamber')
+        chamber_getter = operator.methodcaller('get', 'chamber')
         for term, roles in self['old_roles'].items():
             chamber_roles = defaultdict(lambda: defaultdict(list))
             for chamber, roles in itertools.groupby(roles, chamber_getter):
