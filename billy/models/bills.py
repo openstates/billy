@@ -14,6 +14,7 @@ from billy.core import mdb as db, settings, elasticsearch
 from .base import (Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)
 from .metadata import Metadata
+from .affected_code import affected_code
 from .utils import CachedAttribute, mongoid_2_url
 
 
@@ -616,3 +617,6 @@ class Bill(Document):
             mongo_filter['title'] = {'$regex': query, '$options': 'i'}
 
         return BillSearchResults(None, mongo_filter, sort, bill_fields)
+
+    def affected_code_iterator(self):
+        return affected_code(self)
