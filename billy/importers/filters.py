@@ -113,13 +113,12 @@ def phone_filter(original_number, formatter=_phone_formatter):
 
 
 def email_filter(email):
-    leaders = [
-        "mailto:"
-    ]
 
-    for leader in leaders:
-        if email.startswith(leader):
-            email = email[len(leader):]
+    mailto = "mailto:"
+    if email.startswith(mailto):
+        email = email[len(mailto):]
+        if "?" in email:
+            email = email[:email.index("?")]
 
     if ">" in email and "<" in email:
         # we likely have a nested email.

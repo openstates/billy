@@ -15,13 +15,6 @@ import pymongo
 logger = logging.getLogger('billy')
 
 
-def ensure_indexes():
-    db.committees.ensure_index([('_all_ids', pymongo.ASCENDING)])
-    db.committees.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                                ('committee', pymongo.ASCENDING),
-                                ('subcommittee', pymongo.ASCENDING)])
-
-
 def import_committees_from_legislators(current_term, abbr):
     """ create committees from legislators that have committee roles """
 
@@ -181,7 +174,6 @@ def import_committees(abbr, data_dir):
 
     link_parents(abbr)
 
-    ensure_indexes()
     return counts
 
 
