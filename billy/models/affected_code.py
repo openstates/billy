@@ -20,7 +20,10 @@ class _DetailsItem(dict):
             text = '<a href="{url}">{enum}</a>'
             chunks.append(text.format(**self))
         else:
-            chunks.append(enum)
+            if self.get('supernodes'):
+                chunks.append(', ')
+                chunks.append(self['name'])
+            chunks.append(self['enum'])
         return ' '.join(chunks)
 
 
@@ -34,26 +37,28 @@ class SourceChanges(object):
         self.bill = bill
 
     def display(self):
-        import pdb; pdb.set_trace()
         method = getattr(self, self.source + '_display', self.generic_display)
         return method()
 
     def generic_display(self):
-        display_name = self.bill.metadata['laws'].get(self.source, self.source)
+        display_name = self.bill.metadata['laws']
+        display_name = display_name.get(self.source, self.source)
+        display_name = display_name['display_name']
         chunks = [display_name]
         if len(self.details) == 1:
-            chunks.append('&sect;')
+            chunks.append(' &sect; ')
         elif len(self.details) > 1:
-            chunks.append('&sect;&sect;')
+            chunks.append(' &sect;&sect; ')
         for detail in self.details:
             chunks.append(detail.display())
-            chunks.append(';')
+            chunks.append('; ')
 
-        chunks[-1] == '.'
+        chunks[-1] = '.'
         if 4 < len(chunks):
-            chunks.insert(-3, 'and')
+            chunks.insert(-3, ', and ')
+            del chunks[-3]
 
-        return ' '.join(chunks)
+        return ''.join(chunks)
 
 
 def affected_code(bill):
@@ -74,8 +79,9 @@ def affected_code(bill):
                 source_changes = data[verb][source]
                 source_changes.details += list(details)
 
-    x = data['amend']['code']
-    import pdb; pdb.set_trace()
+    # Kill defaultdict.
+    for key in list(data):
+        data[key] = dict(data[key])
     return data
 
 
