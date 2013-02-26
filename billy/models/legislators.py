@@ -134,14 +134,24 @@ class Legislator(Document):
             kwargs.update(sort=[('updated_at', pymongo.DESCENDING)])
         return self.metadata.bills(extra_spec, *args, **kwargs)
 
-    def primary_sponsored_bills(self, fields=None):
-        kwargs = {}
-        if fields is not None:
-            kwargs['fields'] = fields
-        bills = self.metadata.bills({'sponsors.type': 'primary',
-                                     'sponsors.leg_id': self.id}, **kwargs)
+    def sponsored_bills_current_session(self):
+        session = self.metadata.most_recent_session
+        return self.sponsored_bills({'session': session})
+
+    @CachedAttribute
+    def sponsored_bills_counts(self):
+        '''Counts of how many primary and secondary sponsored bills this
+        legilsator has. Used for legislator bio blurbs.'''
+        bills = list(self.sponsored_bills_current_session())
+        return {
+            'primary': len(self.primary_sponsored_bills(bills)),
+            'secondary': len(self.secondary_sponsored_bills(bills))
+            }
+
+    def primary_sponsored_bills(self, bills_list):
+        'Bills on which this legislator is a primary sponsor.'
         primary_sponsored = []
-        for bill in bills:
+        for bill in bills_list:
             for sponsor in bill['sponsors']:
                 if sponsor['leg_id'] == self['_id']:
                     if sponsor['type'] == 'primary':
@@ -149,9 +159,16 @@ class Legislator(Document):
                         break
         return primary_sponsored
 
-    def secondary_sponsored_bills(self):
-        return self.metadata.bills({'sponsors.type': {'$ne': 'primary'},
-                                    'sponsors.leg_id': self.id})
+    def secondary_sponsored_bills(self, bills_list):
+        'Bills on which this legislator is a secondary sponsor.'
+        secondary_sponsored = []
+        for bill in bills_list:
+            for sponsor in bill['sponsors']:
+                if sponsor['leg_id'] == self['_id']:
+                    if sponsor['type'] != 'primary':
+                        secondary_sponsored.append(bill)
+                        break
+        return secondary_sponsored
 
     def display_name(self):
         return self['full_name']
