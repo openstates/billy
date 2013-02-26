@@ -138,8 +138,16 @@ class Legislator(Document):
         kwargs = {}
         if fields is not None:
             kwargs['fields'] = fields
-        return self.metadata.bills({'sponsors.type': 'primary',
-                                    'sponsors.leg_id': self.id}, **kwargs)
+        bills = self.metadata.bills({'sponsors.type': 'primary',
+                                     'sponsors.leg_id': self.id}, **kwargs)
+        primary_sponsored = []
+        for bill in bills:
+            for sponsor in bill['sponsors']:
+                if sponsor['leg_id'] == self['_id']:
+                    if sponsor['type'] == 'primary':
+                        primary_sponsored.append(bill)
+                        break
+        return primary_sponsored
 
     def secondary_sponsored_bills(self):
         return self.metadata.bills({'sponsors.type': {'$ne': 'primary'},
