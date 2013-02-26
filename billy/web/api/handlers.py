@@ -32,7 +32,7 @@ def _build_mongo_filter(request, keys, icase=True):
                 _filter[key] = value.lower()
             elif key.endswith('__in'):
                 values = value.split('|')
-                _filter[key[:-4]] = {'$in': values}
+                _filter[key[:-4]] = values
             else:
                 # We use regex queries to get case insensitive search - this
                 # means they won't use any indexes for now. Real case
@@ -173,7 +173,8 @@ class BillSearchHandler(BillyHandler):
         bill_fields = _build_field_list(request, bill_fields)
 
         # normal mongo search logic
-        base_fields = _build_mongo_filter(request, ('chamber', 'bill_id'))
+        base_fields = _build_mongo_filter(request, ('chamber', 'bill_id',
+                                                    'bill_id__in'))
 
         # process extra attributes
         query = request.GET.get('q')
@@ -183,7 +184,7 @@ class BillSearchHandler(BillyHandler):
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
         sponsor_id = request.GET.get('sponsor_id')
-        subjects = request.GET.getlist('subjects')
+        subjects = request.GET.getlist('subject')
         type_ = request.GET.get('type')
         status = request.GET.getlist('status')
 
