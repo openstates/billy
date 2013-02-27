@@ -183,7 +183,8 @@ def link_parents(abbr):
         else:
             parent = db.committees.find_one({settings.LEVEL_FIELD: abbr,
                                              'chamber': comm['chamber'],
-                                             'committee': comm['committee']})
+                                             'committee': comm['committee'],
+                                             'subcommittee': None})
             if not parent:
                 logger.warning("Failed finding parent for: %s" % sub)
                 comm['parent_id'] = None
