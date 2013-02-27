@@ -10,8 +10,6 @@ from billy.core import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
 from billy.importers.filters import apply_filters
 
-import pymongo
-
 filters = settings.LEGISLATOR_FILTERS
 logger = logging.getLogger('billy')
 

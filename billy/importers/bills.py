@@ -25,8 +25,6 @@ if hasattr(settings, "ENABLE_GIT") and settings.ENABLE_GIT:
     from dulwich.objects import Commit, parse_timezone
 
 
-import pymongo
-
 filters = settings.BILL_FILTERS
 logger = logging.getLogger('billy')
 

@@ -1,6 +1,5 @@
 import datetime
 from billy.core import db
-import pymongo
 
 
 class Counter(object):
