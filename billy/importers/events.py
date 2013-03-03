@@ -13,19 +13,8 @@ from billy.importers.names import get_legislator_id
 from billy.importers.utils import (prepare_obj, update, next_big_id,
                                    get_committee_id)
 
-import pymongo
-
 logger = logging.getLogger('billy')
 filters = settings.EVENT_FILTERS
-
-
-def ensure_indexes():
-    db.events.ensure_index([('when', pymongo.ASCENDING),
-                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
-                            ('type', pymongo.ASCENDING)])
-    db.events.ensure_index([('when', pymongo.DESCENDING),
-                            (settings.LEVEL_FIELD, pymongo.ASCENDING),
-                            ('type', pymongo.ASCENDING)])
 
 
 def _insert_with_id(event):
@@ -104,7 +93,6 @@ def import_events(abbr, data_dir, import_actions=False):
             bill['id'] = db_bill['_id']
             bill['bill_id'] = bill_id
         import_event(data)
-    ensure_indexes()
 
 
 def normalize_dates(event):

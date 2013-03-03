@@ -540,6 +540,8 @@ class Bill(Document):
             mongo_filter['sponsors.leg_id'] = sponsor_id
 
         # handle simple term arguments (chamber, bill_id, type, session)
+        if isinstance(bill_id, list) and not use_elasticsearch:
+            bill_id = {'$in': bill_id}
         simple_args = {'chamber': chamber, 'bill_id': bill_id, 'type': type_,
                        'session': session}
         if search_window:

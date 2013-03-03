@@ -10,29 +10,8 @@ from billy.core import settings
 from billy.importers.utils import insert_with_id, update, prepare_obj
 from billy.importers.filters import apply_filters
 
-import pymongo
-
 filters = settings.LEGISLATOR_FILTERS
 logger = logging.getLogger('billy')
-
-
-def ensure_indexes():
-    db.legislators.ensure_index('_all_ids', pymongo.ASCENDING)
-    db.legislators.ensure_index([('roles.{0}'.format(settings.LEVEL_FIELD),
-                                  pymongo.ASCENDING),
-                                 ('roles.type', pymongo.ASCENDING),
-                                 ('roles.term', pymongo.ASCENDING),
-                                 ('roles.chamber', pymongo.ASCENDING),
-                                 ('_scraped_name', pymongo.ASCENDING),
-                                 ('first_name', pymongo.ASCENDING),
-                                 ('last_name', pymongo.ASCENDING),
-                                 ('middle_name', pymongo.ASCENDING),
-                                 ('suffixes', pymongo.ASCENDING)],
-                                name='role_and_name_parts')
-    db.legislators.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                                 ('active', pymongo.ASCENDING),
-                                 ('chamber', pymongo.ASCENDING), ])
-    db.districts.ensure_index('boundary_id')
 
 
 def import_legislators(abbr, data_dir):
@@ -59,8 +38,6 @@ def import_legislators(abbr, data_dir):
 
     activate_legislators(current_term, abbr)
     deactivate_legislators(current_term, abbr)
-
-    ensure_indexes()
 
     return counts
 

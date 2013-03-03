@@ -10,16 +10,7 @@ from billy.core import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, insert_with_id
 
-import pymongo
-
 logger = logging.getLogger('billy')
-
-
-def ensure_indexes():
-    db.committees.ensure_index([('_all_ids', pymongo.ASCENDING)])
-    db.committees.ensure_index([(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                                ('committee', pymongo.ASCENDING),
-                                ('subcommittee', pymongo.ASCENDING)])
 
 
 def import_committees_from_legislators(current_term, abbr):
@@ -181,7 +172,6 @@ def import_committees(abbr, data_dir):
 
     link_parents(abbr)
 
-    ensure_indexes()
     return counts
 
 
@@ -193,7 +183,8 @@ def link_parents(abbr):
         else:
             parent = db.committees.find_one({settings.LEVEL_FIELD: abbr,
                                              'chamber': comm['chamber'],
-                                             'committee': comm['committee']})
+                                             'committee': comm['committee'],
+                                             'subcommittee': None})
             if not parent:
                 logger.warning("Failed finding parent for: %s" % sub)
                 comm['parent_id'] = None
