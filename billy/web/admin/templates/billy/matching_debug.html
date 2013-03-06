@@ -1,0 +1,43 @@
+{% extends "billy/base.html" %}
+{% load humanize %}
+{% load staticfiles %}
+{% load billy_utiltags %}
+{% load url from future %}
+
+{% block title %}Data Quality{% endblock %}
+
+{% block script %}
+  <script>
+    $(document).ready(function(){
+      var trs = $("tr");
+      trs.click(function(){
+        var href = $(this).attr('href');
+        window.location = (href || window.location);
+        });
+      });
+  </script>
+{% endblock %}
+
+{% block content %}
+<table class="table table-striped table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Number of times seen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, ids in names.items %}
+        <tr>
+            <td>{{name}}</td>
+            <td>
+            {% for collection, id in ids|slice:":10" %}
+                <a href="{% url 'object_json' collection id %}">{{id}}</a>
+            {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

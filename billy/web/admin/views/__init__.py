@@ -566,12 +566,12 @@ def object_json(request, collection, _id):
 
     re_attr = re.compile(r'^    "(.{1,100})":', re.M)
 
-    obj = getattr(db, collection).find_one(_id)
-    if obj is None:
+    model_obj = getattr(mdb, collection).find_one(_id)
+    if model_obj is None:
         msg = 'No object found with id %r in collection %r'
         raise Http404(msg % (_id, collection))
 
-    obj = OrderedDict(sorted(obj.items()))
+    obj = OrderedDict(sorted(model_obj.items()))
 
     obj_id = obj['_id']
     obj_json = json.dumps(obj, cls=JSONEncoderPlus, indent=4)
@@ -594,7 +594,7 @@ def object_json(request, collection, _id):
 
     return render(request, 'billy/object_json.html', dict(
         obj=obj, obj_id=obj_id, obj_json=obj_json, collection=collection,
-        metadata=mdata,
+        metadata=mdata, model_obj=model_obj
     ))
 
 
