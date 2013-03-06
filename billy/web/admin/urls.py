@@ -24,6 +24,8 @@ urlpatterns = patterns(
     # matching
     url(r'^(?P<abbr>[a-z-]+)/name-matching/$', 'matching.edit',
         name='admin_matching'),
+    url(r'^(?P<abbr>[a-z-]+)/name-matching/debug/$', 'matching.debug',
+        name='admin_matching_debug'),
     url(r'^(?P<abbr>[a-z-]+)/matching-commit/$', 'matching.commit',
         name='admin_matching_commit'),
     url(r'^(?P<abbr>[a-z-]+)/matching-remove/(?P<id>.+)/$', 'matching.remove',
