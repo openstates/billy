@@ -93,7 +93,7 @@ class PlaintextColumns(object):
                 ends[matchobj.end()] += 1
         return ends
 
-    def _guess_column_boundaries(self):
+    def _get_column_boundaries(self):
         '''Use the guessed ends to guess the boundaries of the plain
         text columns.
         '''
@@ -131,14 +131,13 @@ class PlaintextColumns(object):
         # And get from the last boundary to the line ending.
         boundaries.append(slice(last_boundary, None))
         return boundaries
-        return self._check_boundaries(boundaries)
 
     @property
     def boundaries(self):
         _boundaries = getattr(self, '_boundaries', None)
         if _boundaries is not None:
             return _boundaries
-        self._boundaries = _boundaries = self._guess_column_boundaries()
+        self._boundaries = _boundaries = self._get_column_boundaries()
         return _boundaries
 
     def getcells(self, line):
