@@ -183,6 +183,7 @@ class BillSearchHandler(BillyHandler):
             abbr = abbr.lower()
         search_window = request.GET.get('search_window', 'all')
         since = request.GET.get('updated_since', None)
+        last_action_since = request.GET.get('last_action_since', None)
         sponsor_id = request.GET.get('sponsor_id')
         subjects = request.GET.getlist('subject')
         type_ = request.GET.get('type')
@@ -197,7 +198,9 @@ class BillSearchHandler(BillyHandler):
             query = Bill.search(query,
                                 abbr=abbr,
                                 search_window=search_window,
-                                updated_since=since, sponsor_id=sponsor_id,
+                                updated_since=since,
+                                last_action_since=last_action_since,
+                                sponsor_id=sponsor_id,
                                 subjects=subjects, type_=type_, status=status,
                                 sort=sort, bill_fields=bill_fields,
                                 **base_fields)

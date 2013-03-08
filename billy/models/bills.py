@@ -499,13 +499,17 @@ class Bill(Document):
     @staticmethod
     def search(query=None, abbr=None, chamber=None, subjects=None,
                bill_id=None, search_window=None, updated_since=None,
-               sponsor_id=None, status=[], type_=None, session=None,
-               bill_fields=None, sort=None, limit=None):
+               last_action_since=None, sponsor_id=None, status=None,
+               type_=None, session=None, bill_fields=None,
+               sort=None, limit=None):
 
         use_elasticsearch = False
         numeric_query = False
         mongo_filter = {}
         es_terms = []
+
+        if status is None:
+            status = []
 
         if query:
             use_elasticsearch = settings.ENABLE_ELASTICSEARCH
@@ -577,6 +581,17 @@ class Bill(Document):
                                               parse_param_dt(updated_since)}
             except ValueError:
                 raise ValueError('invalid updated_since parameter. '
+                                 'please supply date in YYYY-MM-DD format')
+
+        if last_action_since and use_elasticsearch:
+            es_terms.append(pyes.RangeFilter(
+                pyes.ESRangeOp('action_dates.last', 'gte', last_action_since)))
+        elif last_action_since:
+            try:
+                mongo_filter['action_dates.last'] = {'$gte':
+                                             parse_param_dt(last_action_since)}
+            except ValueError:
+                raise ValueError('invalid last_action_since parameter. '
                                  'please supply date in YYYY-MM-DD format')
 
         # Status comes in as a list and needs to become:
