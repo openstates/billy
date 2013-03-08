@@ -66,17 +66,14 @@ class PlaintextColumns(object):
      'Battles',
      'Bauer',
      'Brown,C',
-     'Candelaria Rear',
+     'Candelaria Reardon',
      'DeLaney',
      'Dvorak')
-
-    >>> tuple(xrange(3))
-    (0, 1, 2)
 
     >>> list(table.cells())
     ['Austin', 'Errington', 'Lawson, L', ...]
     '''
-    def __init__(self, text, threshold=5):
+    def __init__(self, text, threshold=3):
         '''Threshold is how many times a column boundary (an integer offset
         from the beginning of the line) must be found in order to qualify
         as a boundary and not an outlier.
