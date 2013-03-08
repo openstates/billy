@@ -10,8 +10,6 @@ from billy.core import settings
 from billy.importers.names import get_legislator_id
 from billy.importers.utils import prepare_obj, update, insert_with_id
 
-import pymongo
-
 logger = logging.getLogger('billy')
 
 
@@ -185,7 +183,8 @@ def link_parents(abbr):
         else:
             parent = db.committees.find_one({settings.LEVEL_FIELD: abbr,
                                              'chamber': comm['chamber'],
-                                             'committee': comm['committee']})
+                                             'committee': comm['committee'],
+                                             'subcommittee': None})
             if not parent:
                 logger.warning("Failed finding parent for: %s" % sub)
                 comm['parent_id'] = None

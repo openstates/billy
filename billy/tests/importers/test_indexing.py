@@ -2,6 +2,7 @@ import argparse
 from billy.core import db
 from billy.bin.commands.ensure_indexes import MongoIndex
 
+
 def _assert_index(query, name_piece=None):
     cursor = query.explain()['cursor']
     if name_piece:

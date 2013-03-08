@@ -1,39 +1,20 @@
 {
     "description": "bill data",
     "properties": {
-        "_type": {
-            "enum": [
-                "bill"
-            ],
-            "type": "string"
-        },
+        "_type": { "enum": [ "bill" ], "type": "string" },
         "actions": {
             "items": {
                 "properties": {
-                    "action": {
-                        "type": "string"
-                    },
-                    "actor": {
-                        "type": "string"
-                    },
-                    "date": {
-                        "type": "datetime"
-                    },
+                    "action": { "type": "string" },
+                    "actor": { "type": "string" },
+                    "date": { "type": "datetime" },
                     "related_entities": {
                         "items": {
                             "properties": {
-                                "id": {
-                                    "required": false,
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
+                                "id": { "required": false, "type": "string" },
+                                "name": { "type": "string" },
                                 "type": {
-                                    "enum": [
-                                        "committee",
-                                        "legislator"
-                                    ],
+                                    "enum": ["committee", "legislator"],
                                     "type": "string"
                                 }
                             },
@@ -83,17 +64,10 @@
             "type": "array"
         },
         "alternate_bill_ids": {
-            "items": {
-                "type": "string"
-            },
-            "required": false,
-            "type": "array"
+            "items": { "type": "string" }, "required": false, "type": "array"
         },
         "alternate_titles": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
+            "items": { "type": "string" }, "type": "array"
         },
         "companions": {
             "items": {
@@ -106,43 +80,24 @@
             },
             "type": "array"
         },
-        "bill_id": {
-            "type": "string"
-        },
-        "chamber": {
-            "enum": [
-                "upper",
-                "lower"
-            ],
-            "type": "string"
-        },
+        "bill_id": { "type": "string" },
+        "chamber": { "enum": [ "upper", "lower" ], "type": "string" },
         "documents": {
             "items": {
                 "properties": {
-                    "mimetype": {
-                        "required": false,
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    }
+                    "mimetype": { "required": false, "type": "string" },
+                    "name": { "type": "string" },
+                    "url": { "type": "string" }
                 },
                 "type": "object"
             },
             "type": "array"
         },
-        "session": {
-            "type": "string"
-        },
+        "session": { "type": "string" },
         "sources": {
             "items": {
                 "properties": {
-                    "url": {
-                        "type": "string"
-                    }
+                    "url": { "type": "string" }
                 },
                 "type": "object"
             },
@@ -167,26 +122,13 @@
             "type": "array"
         },
         "subjects": {
-            "items": {
-                "type": "string"
-            },
+            "items": { "type": "string" },
             "required": false,
             "type": "array"
         },
-        "title": {
-            "type": "string"
-        },
-        "summary": {
-            "type": "string",
-            "blank": true,
-            "required": false
-        },
-        "type": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
-        },
+        "title": { "type": "string" },
+        "summary": { "type": "string", "blank": true, "required": false },
+        "type": { "items": { "type": "string" }, "type": "array" },
         "versions": {
             "items": {
                 "properties": {
@@ -201,17 +143,9 @@
                             "application/vnd.wordperfect"
                         ]
                     },
-                    "name": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "required": false,
-                        "type": "string"
-                    },
-                    "url": {
-                        "blank": true,
-                        "type": "string"
-                    }
+                    "name": { "type": "string" },
+                    "title": { "required": false, "type": "string" },
+                    "url": { "blank": true, "type": "string" }
                 },
                 "type": "object"
             },
@@ -220,59 +154,23 @@
         "votes": {
             "items": {
                 "properties": {
-                    "_type": {
-                        "enum": [
-                            "vote"
-                        ],
+                    "_type": { "enum": [ "vote" ],
                         "type": "string"
                     },
-                    "chamber": {
-                        "enum": [
-                            "upper",
-                            "lower",
-                            "joint"
-                        ],
+                    "chamber": { "enum": [ "upper", "lower", "joint" ],
                         "type": "string"
                     },
-                    "committee": {
-                        "required": false,
-                        "type": "string"
-                    },
-                    "date": {
-                        "type": "datetime"
-                    },
-                    "motion": {
-                        "type": "string"
-                    },
-                    "no_count": {
-                        "minimum": 0,
-                        "type": "integer"
-                    },
-                    "no_votes": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "other_count": {
-                        "minimum": 0,
-                        "type": "integer"
-                    },
-                    "other_votes": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "passed": {
-                        "type": "boolean"
-                    },
-                    "sources": {
-                        "items": {
+                    "committee": { "required": false, "type": "string" },
+                    "date": { "type": "datetime" },
+                    "motion": { "type": "string" },
+                    "no_count": { "minimum": 0, "type": "integer" },
+                    "no_votes": { "items": { "type": "string" }, "type": "array" },
+                    "other_count": { "minimum": 0, "type": "integer" },
+                    "other_votes": { "items": { "type": "string" }, "type": "array" },
+                    "passed": { "type": "boolean" },
+                    "sources": { "items": {
                             "properties": {
-                                "url": {
-                                    "type": "string"
-                                }
+                                "url": { "type": "string" }
                             },
                             "type": "object"
                         },
@@ -292,16 +190,8 @@
                         "required": false,
                         "type": "string"
                     },
-                    "yes_count": {
-                        "minimum": 0,
-                        "type": "integer"
-                    },
-                    "yes_votes": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    }
+                    "yes_count": { "minimum": 0, "type": "integer" },
+                    "yes_votes": { "items": { "type": "string" }, "type": "array" }
                 },
                 "type": "object"
             },

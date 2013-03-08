@@ -1,7 +1,6 @@
 from __future__ import print_function
 from billy.core import db
 from billy.bin.commands import BaseCommand
-from billy.utils import metadata
 from billy.core import settings
 import pymongo
 
@@ -11,8 +10,10 @@ class MongoIndex(BaseCommand):
     help = '''make indexes'''
 
     def add_args(self):
-        self.add_argument('collections', nargs='*',
-                          help='collection(s) to run matching for (defaults to all)')
+        self.add_argument(
+            'collections', nargs='*',
+            help='collection(s) to run matching for (defaults to all)'
+        )
         self.add_argument('--purge', action='store_true', default=False,
                           help='purge old indexes')
 
@@ -64,7 +65,8 @@ class MongoIndex(BaseCommand):
             ],
             'bills': [
                 # bill_id is used for search in conjunction with ElasticSearch
-                #  sort field (date) comes first, followed by field that we do an $in on
+                #  sort field (date) comes first
+                #  followed by field that we do an $in on
                 [('created_at', pymongo.DESCENDING),
                  ('bill_id', pymongo.ASCENDING)],
                 [('updated_at', pymongo.DESCENDING),
@@ -123,7 +125,7 @@ class MongoIndex(BaseCommand):
             if collection == 'bills':
                 # basic lookup / unique constraint on abbr/session/bill_id
                 current.discard('%s_1_session_1_chamber_1_bill_id_1' %
-                               settings.LEVEL_FIELD)
+                                settings.LEVEL_FIELD)
                 db.bills.ensure_index([
                     (settings.LEVEL_FIELD, pymongo.ASCENDING),
                     ('session', pymongo.ASCENDING),

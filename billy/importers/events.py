@@ -13,8 +13,6 @@ from billy.importers.names import get_legislator_id
 from billy.importers.utils import (prepare_obj, update, next_big_id,
                                    get_committee_id)
 
-import pymongo
-
 logger = logging.getLogger('billy')
 filters = settings.EVENT_FILTERS
 

@@ -54,7 +54,7 @@
         .jqplot-point-label { font-weight: bold; font-size:   0.8em; }
         .error { background-color: #faf0a5; }
         .success { background-color: #d6ff99; }
-        .bill-table th { text-align: center; } 
+        .bill-table th { text-align: center; }
         .bill-table td { text-align: right; }
     </style>
 
@@ -96,6 +96,7 @@
                     </a>
                     <ul class="dropdown-menu">
                     <li><a href="{% url admin_matching metadata.abbreviation %}">Name Matching</a> </li>
+                    <li><a href="{% url admin_matching_debug metadata.abbreviation %}">Name Matching Debug</a> </li>
                     <li><a href="{% url admin_subjects metadata.abbreviation %}">Subjects</a> </li>
                     <li><a href="{% url other_actions metadata.abbreviation %}">Other Actions</a> </li>
                     <li><a href="{% url quality_exceptions metadata.abbreviation %}">Data Quality Exceptions</a> </li>

@@ -1,3 +1,5 @@
+from collections import defaultdict, OrderedDict
+
 from bson import ObjectId
 
 from django.shortcuts import render, redirect
@@ -83,3 +85,44 @@ def commit(request, abbr):
                                        upsert=True, safe=True)
 
     return redirect('admin_matching', abbr)
+
+
+def debug(request, abbr):
+    '''This view lets you view all names that would show up
+    in name matching sorted by length, but also click through
+    to the object in which they were found, to aid in debugging
+    scrapers.
+    '''
+    names = defaultdict(set)
+    spec = {settings.LEVEL_FIELD: abbr}
+
+    for bill in db.bills.find(spec):
+        _id = bill['_id']
+        for sponsor in bill['sponsors']:
+            names[sponsor['name']].add(('bills', _id))
+
+    for committee in db.committees.find(spec):
+        _id = committee['_id']
+        for member in committee['members']:
+            names[member['name']].add(('committees', _id))
+
+    for legislator in db.legislators.find(spec):
+        names[legislator['full_name']].add(('legislators', legislator['_id']))
+
+    for vote in db.votes.find(spec):
+        _id = vote['_id']
+        for vote_val in 'yes', 'no', 'other':
+            votes = vote[vote_val + '_votes']
+            for voter in votes:
+                names[voter['name']].add(('votes', _id))
+
+    # Order them by name length.
+    ordered_names = OrderedDict()
+    for name, value in sorted(names.items(), key=lambda item: len(item[0])):
+        # And make the set sliceable.
+        ordered_names[name] = list(value)
+
+    return render(request, 'billy/matching_debug.html', {
+        "abbr": abbr,
+        "names": ordered_names,
+    })
