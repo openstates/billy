@@ -36,6 +36,5 @@ billy-util = billy.bin.util:main
           "unicodecsv",
           "validictory>=0.7.1",
           "pyes",
-          "celery",
       ]
 )

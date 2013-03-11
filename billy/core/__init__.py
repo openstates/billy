@@ -6,7 +6,6 @@ import logging.config
 
 import pymongo
 from pymongo.son_manipulator import SONManipulator
-import pyes
 import boto
 
 from billy.core import default_settings
@@ -108,6 +107,7 @@ def _configure_db(host, port, db_name, user_db_name):
 
 
 def _configure_es(host, timeout):
+    import pyes
     global elasticsearch
     try:
         elasticsearch = pyes.ES(host, timeout)

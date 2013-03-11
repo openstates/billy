@@ -6,6 +6,7 @@ import urllib
 import urlparse
 
 from bson import ObjectId
+from django.core.exceptions import ImproperlyConfigured
 
 from billy.core import db
 import difflib
@@ -133,6 +134,6 @@ try:
 
     def get_domain():
         return Site.objects.get_current().domain
-except ImportError:
+except (ImportError, ImproperlyConfigured):
     def get_domain():           # noqa
         return 'example.com'
