@@ -54,7 +54,7 @@ class Committee(Document):
         sub = self['subcommittee']
         if sub is not None:
             name = '%s: %s' % (name, sub)
-        return name.title()
+        return name
 
     def events(self):
         return db.events.find({"participants.committee_id": self['_id']})
