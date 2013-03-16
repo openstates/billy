@@ -7,7 +7,6 @@ import itertools
 from django.core import urlresolvers
 from django.core.exceptions import PermissionDenied
 import pymongo
-import pyes
 
 from billy.utils import parse_param_dt, fix_bill_id
 from billy.core import mdb as db, settings, elasticsearch
@@ -336,7 +335,8 @@ class BillSearchResults(object):
     def __len__(self):
         if not self._len:
             if self.es_search:
-                self._len = elasticsearch.search(self.es_search).total
+                # TODO: pass index & doc_type params
+                self._len = elasticsearch.count(self.es_search)
             else:
                 self._len = db.bills.find(self.mongo_query).count()
         return self._len
@@ -353,10 +353,12 @@ class BillSearchResults(object):
             stop = key + 1
 
         if self.es_search:
-            es_result = elasticsearch.search(self.es_search,
-                                             sort=self.sort + ':desc,bill_id',
-                                             start=start,
-                                             size=stop - start)
+            search = dict(self.es_search)
+            search['sort'] = self.sort + ':desc,bill_id'
+            search['from'] = start
+            search['size'] = stop - start
+            # TODO: set index/type
+            es_result = elasticsearch.search(search)
             _mongo_query = {'_id': {'$in': [r.get_id() for r in es_result]}}
             return db.bills.find(_mongo_query, fields=self.fields).sort(
                 [(self.sort, pymongo.DESCENDING),
@@ -532,13 +534,13 @@ class Bill(Document):
 
         # handle abbr
         if abbr and use_elasticsearch:
-            es_terms.append(pyes.TermFilter('jurisdiction', abbr))
+            es_terms.append({'term': {'jurisdiction': abbr}})
         elif abbr:
             mongo_filter[settings.LEVEL_FIELD] = abbr
 
         # sponsor_id
         if sponsor_id and use_elasticsearch:
-            es_terms.append(pyes.TermFilter('sponsor_ids', sponsor_id))
+            es_terms.append({'term': {'sponsor_ids': sponsor_id}})
         elif sponsor_id:
             mongo_filter['sponsors.leg_id'] = sponsor_id
 
@@ -562,19 +564,18 @@ class Bill(Document):
         for key, value in simple_args.iteritems():
             if value is not None:
                 if use_elasticsearch:
-                    es_terms.append(pyes.TermFilter(key, value))
+                    es_terms.append({'term': {key: value}})
                 else:
                     mongo_filter[key] = value
 
         if subjects and use_elasticsearch:
             for subject in subjects:
-                es_terms.append(pyes.TermFilter('subjects', subject))
+                es_terms.append({'term': {'subjects': subject}})
         elif subjects:
             mongo_filter['subjects'] = {'$all': filter(None, subjects)}
 
         if updated_since and use_elasticsearch:
-            es_terms.append(pyes.RangeFilter(
-                pyes.ESRangeOp('updated_at', 'gte', updated_since)))
+            es_terms.append({'range': {'updated_at': {'gte': updated_since}}})
         elif updated_since:
             try:
                 mongo_filter['updated_at'] = {'$gte':
@@ -584,8 +585,8 @@ class Bill(Document):
                                  'please supply date in YYYY-MM-DD format')
 
         if last_action_since and use_elasticsearch:
-            es_terms.append(pyes.RangeFilter(
-                pyes.ESRangeOp('action_dates.last', 'gte', last_action_since)))
+            es_terms.append({'range': {'action_dates.last':
+                                       {'gte': last_action_since}}})
         elif last_action_since:
             try:
                 mongo_filter['action_dates.last'] = {'$gte':
@@ -607,7 +608,7 @@ class Bill(Document):
 
         if status_spec and use_elasticsearch:
             for key in status:
-                es_terms.append(pyes.ExistsFilter(key))
+                es_terms.append({'exists': {'field': key}})
         elif status_spec:
             mongo_filter.update(**status_spec)
 
@@ -619,14 +620,16 @@ class Bill(Document):
 
         # do the actual ES query
         if query and use_elasticsearch:
-            query = {"query_string": {"fields": ["text", "title"],
-                                      "default_operator": "AND",
-                                      "query": query}}
-            # query for one more than limit to figure out if there are more
-            search = pyes.Search(query, fields=[])
+            #search = pyes.Search(query, fields=[])
+            #if es_terms:
+            #    search.filter = pyes.ANDFilter(es_terms)
+            search = {'query': {"query_string": {"fields": ["text", "title"],
+                                                 "default_operator": "AND",
+                                                 "query": query}}}
             if es_terms:
-                search.filter = pyes.ANDFilter(es_terms)
-
+                search['filter'] = {'and': es_terms}
+                search = {'query': {'filtered': search}}
+            search['fields'] = []
             return BillSearchResults(search, None, sort, bill_fields)
 
         elif query and not numeric_query:

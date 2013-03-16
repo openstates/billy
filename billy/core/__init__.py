@@ -107,10 +107,10 @@ def _configure_db(host, port, db_name, user_db_name):
 
 
 def _configure_es(host, timeout):
-    import pyes
+    import pyelasticsearch
     global elasticsearch
     try:
-        elasticsearch = pyes.ES(host, timeout)
+        elasticsearch = pyelasticsearch.ElasticSearch(host, timeout=timeout)
     except Exception as e:
         elasticsearch = ErrorProxy(e)
 

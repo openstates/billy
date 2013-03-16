@@ -35,6 +35,6 @@ billy-util = billy.bin.util:main
           "scrapelib>=0.7.0",
           "unicodecsv",
           "validictory>=0.7.1",
-          "pyes",
+          "pyelasticsearch",
       ]
 )
