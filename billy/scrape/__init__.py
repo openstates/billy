@@ -38,33 +38,12 @@ class NoDataForPeriod(ScrapeError):
         return 'No data exists for %s' % self.period
 
 
-# maps scraper_type -> scraper
-_scraper_registry = dict()
-
-
-class ScraperMeta(type):
-    """ register derived scrapers in a central registry """
-
-    def __new__(meta, classname, bases, classdict):
-        cls = type.__new__(meta, classname, bases, classdict)
-
-        abbr = getattr(cls, 'jurisdiction', None)
-        scraper_type = getattr(cls, 'scraper_type', None)
-
-        if abbr and scraper_type:
-            _scraper_registry[scraper_type] = cls
-
-        return cls
-
-
 class Scraper(scrapelib.Scraper):
     """ Base class for all Scrapers
 
     Provides several useful methods for retrieving URLs and checking
     arguments against metadata.
     """
-
-    __metaclass__ = ScraperMeta
 
     latest_only = False
 
@@ -253,17 +232,26 @@ def get_scraper(mod_path, scraper_type):
 
     # act of importing puts it into the registry
     try:
-        mod_path = '%s.%s' % (mod_path, scraper_type)
-        importlib.import_module(mod_path)
+        module = importlib.import_module(mod_path)
     except ImportError as e:
         raise ScrapeError("could not import %s" % mod_path, e)
 
-    # now pull the class out of the registry
-    try:
-        ScraperClass = _scraper_registry[scraper_type]
-    except KeyError as e:
+    # now find the class within the module
+    ScraperClass = None
+
+    for k, v in module.__dict__.iteritems():
+        if k.startswith('_'):
+            continue
+        if getattr(v, 'scraper_type', None) == scraper_type:
+            if ScraperClass:
+                raise ScrapeError("two %s scrapers found in module %s: %s %s" %
+                                  (scraper_type, mod_path, ScraperClass, k))
+            ScraperClass = v
+
+    if not ScraperClass:
         raise ScrapeError("no %s scraper found in module %s" % (
             scraper_type, mod_path))
+
     return ScraperClass
 
 
