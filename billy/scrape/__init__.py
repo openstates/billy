@@ -38,25 +38,6 @@ class NoDataForPeriod(ScrapeError):
         return 'No data exists for %s' % self.period
 
 
-# maps scraper_type -> scraper
-_scraper_registry = dict()
-
-
-class ScraperMeta(type):
-    """ register derived scrapers in a central registry """
-
-    def __new__(meta, classname, bases, classdict):
-        cls = type.__new__(meta, classname, bases, classdict)
-
-        abbr = getattr(cls, 'jurisdiction', None)
-        scraper_type = getattr(cls, 'scraper_type', None)
-
-        if abbr and scraper_type:
-            _scraper_registry[scraper_type] = cls
-
-        return cls
-
-
 class Scraper(scrapelib.Scraper):
     """ Base class for all Scrapers
 
@@ -64,12 +45,10 @@ class Scraper(scrapelib.Scraper):
     arguments against metadata.
     """
 
-    __metaclass__ = ScraperMeta
-
     latest_only = False
 
     def __init__(self, metadata, output_dir=None, strict_validation=None,
-                 fastmode=False, **kwargs):
+                 fastmode=False):
         """
         Create a new Scraper instance.
 
@@ -77,19 +56,18 @@ class Scraper(scrapelib.Scraper):
         :param output_dir: the data directory to use
         :param strict_validation: exit immediately if validation fails
         """
+        super(Scraper, self).__init__()
 
-        # configure underlying scrapelib object
-        kwargs['cache_obj'] = scrapelib.FileCache(settings.BILLY_CACHE_DIR)
-        kwargs['requests_per_minute'] = settings.SCRAPELIB_RPM
-        kwargs['timeout'] = settings.SCRAPELIB_TIMEOUT
-        kwargs['retry_attempts'] = settings.SCRAPELIB_RETRY_ATTEMPTS
-        kwargs['retry_wait_seconds'] = settings.SCRAPELIB_RETRY_WAIT_SECONDS
+        # scrapelib overrides
+        self.timeout = settings.SCRAPELIB_TIMEOUT
+        self.cache_storage = scrapelib.FileCache(settings.BILLY_CACHE_DIR)
+        self.requests_per_minute = settings.SCRAPELIB_RPM
+        self.retry_attempts = settings.SCRAPELIB_RETRY_ATTEMPTS
+        self.retry_wait_seconds = settings.SCRAPELIB_RETRY_WAIT_SECONDS
 
         if fastmode:
-            kwargs['requests_per_minute'] = 0
-            kwargs['cache_write_only'] = False
-
-        super(Scraper, self).__init__(**kwargs)
+            self.requests_per_minute = 0
+            self.cache_write_only = False
 
         self.metadata = metadata
         self.output_dir = output_dir
@@ -253,17 +231,26 @@ def get_scraper(mod_path, scraper_type):
 
     # act of importing puts it into the registry
     try:
-        mod_path = '%s.%s' % (mod_path, scraper_type)
-        importlib.import_module(mod_path)
+        module = importlib.import_module(mod_path)
     except ImportError as e:
         raise ScrapeError("could not import %s" % mod_path, e)
 
-    # now pull the class out of the registry
-    try:
-        ScraperClass = _scraper_registry[scraper_type]
-    except KeyError as e:
+    # now find the class within the module
+    ScraperClass = None
+
+    for k, v in module.__dict__.iteritems():
+        if k.startswith('_'):
+            continue
+        if getattr(v, 'scraper_type', None) == scraper_type:
+            if ScraperClass:
+                raise ScrapeError("two %s scrapers found in module %s: %s %s" %
+                                  (scraper_type, mod_path, ScraperClass, k))
+            ScraperClass = v
+
+    if not ScraperClass:
         raise ScrapeError("no %s scraper found in module %s" % (
             scraper_type, mod_path))
+
     return ScraperClass
 
 

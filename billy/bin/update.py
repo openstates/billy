@@ -40,7 +40,7 @@ def _get_configured_scraper(scraper_type, options, metadata):
     except ScrapeError as e:
         # silence error only when alldata is present
         if ('alldata' in options.types and
-                str(e.orig_exception) == 'No module named %s' % scraper_type):
+            ('no %s scraper found in' % scraper_type) in str(e)):
             return None
         else:
             raise e
