@@ -1,6 +1,19 @@
 billy changelog
 ===============
 
+1.8.0
+-----
+    * more CSRF bugfixing
+    * ensure_indexes command
+    * beginnings of news entry api
+    * add newsapi methods
+    * add last_action_since API parameter
+    * bugfix for committee having itself as parent
+    * bugfix for committee display on site
+    * switch to scrapelib >= 0.8
+    * switch from pyes to pyelasticsearch
+    * simplify module loading mechanism
+
 1.7.0
 -----
 ** 16 February 2013 **
