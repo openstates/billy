@@ -66,7 +66,8 @@ def load_standalone_votes(data_dir):
 def elasticsearch_push(bill):
     if settings.ENABLE_ELASTICSEARCH_PUSH:
         esdoc = bill_to_elasticsearch(bill)
-        elasticsearch.index(esdoc, 'billy', 'bills', id=bill['_id'])
+        elasticsearch.index(index='billy', doc_type='bills', id=bill['_id'],
+                            doc=esdoc)
 
 
 git_active_repo = None

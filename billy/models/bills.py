@@ -335,8 +335,12 @@ class BillSearchResults(object):
     def __len__(self):
         if not self._len:
             if self.es_search:
-                # TODO: pass index & doc_type params
-                self._len = elasticsearch.count(self.es_search)
+                resp = elasticsearch.count(self.es_search['query'],
+                                           index='billy', doc_type='bills')
+                if not resp['_shards']['successful']:
+                    raise Exception('ElasticSearch error: %s' %
+                                    resp['_shards']['failures'])
+                self._len = resp['count']
             else:
                 self._len = db.bills.find(self.mongo_query).count()
         return self._len
@@ -354,12 +358,13 @@ class BillSearchResults(object):
 
         if self.es_search:
             search = dict(self.es_search)
-            search['sort'] = self.sort + ':desc,bill_id'
+            search['sort'] = [{self.sort: 'desc'}, 'bill_id']
             search['from'] = start
             search['size'] = stop - start
-            # TODO: set index/type
-            es_result = elasticsearch.search(search)
-            _mongo_query = {'_id': {'$in': [r.get_id() for r in es_result]}}
+            es_result = elasticsearch.search(search,
+                                             index='billy', doc_type='bills')
+            _mongo_query = {'_id': {'$in': [r['_id'] for r in
+                                            es_result['hits']['hits']]}}
             return db.bills.find(_mongo_query, fields=self.fields).sort(
                 [(self.sort, pymongo.DESCENDING),
                  ('bill_id', pymongo.ASCENDING)])
@@ -620,9 +625,6 @@ class Bill(Document):
 
         # do the actual ES query
         if query and use_elasticsearch:
-            #search = pyes.Search(query, fields=[])
-            #if es_terms:
-            #    search.filter = pyes.ANDFilter(es_terms)
             search = {'query': {"query_string": {"fields": ["text", "title"],
                                                  "default_operator": "AND",
                                                  "query": query}}}
