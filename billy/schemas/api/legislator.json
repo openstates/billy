@@ -38,7 +38,7 @@
    "votesmart_id": {"type": ["null", "string"], "required": false},
    "nimsp_candidate_id": {"type": ["string", "null"], "required": false},
    "state": {"type": "string", "minLength": 2, "maxLength": 2},
-   "district": {"type": "string", "required": false},
+   "district": {"type": ["string", "null"], "required": false},
    "chamber": {"type": "string", "required": false},
    "party": {"type": "string", "required": false},
    "photo_url": {"type": "string", "required": false, "blank": true},
