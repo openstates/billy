@@ -338,8 +338,20 @@ class BillSearchResults(object):
                 resp = elasticsearch.count(self.es_search['query'],
                                            index='billy', doc_type='bills')
                 if not resp['_shards']['successful']:
-                    raise Exception('ElasticSearch error: %s' %
-                                    resp['_shards']['failures'])
+                    # if we get a parse exception, simplify from query_string
+                    # to a simple text match
+                    if ('ParseException' in
+                        resp['_shards']['failures'][0]['reason']):
+                        fquery = self.es_search['query']['filtered']['query']
+                        fquery['match'] = {'_all':
+                                           fquery['query_string']['query']}
+                        fquery.pop('query_string')
+                        resp = elasticsearch.count(self.es_search['query'],
+                                                   index='billy',
+                                                   doc_type='bills')
+                    else:
+                        raise Exception('ElasticSearch error: %s' %
+                                        resp['_shards']['failures'])
                 self._len = resp['count']
             else:
                 self._len = db.bills.find(self.mongo_query).count()
