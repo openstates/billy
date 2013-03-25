@@ -10,6 +10,8 @@ billy changelog
     * add last_action_since API parameter
     * bugfix for committee having itself as parent
     * bugfix for committee display on site
+    * bugfix for ElasticSearch parse errors causing 500s
+    * miscellaneous schema updates 
     * switch to scrapelib >= 0.8
     * switch from pyes to pyelasticsearch
     * simplify module loading mechanism

@@ -47,7 +47,7 @@
              }}
     }}},
     "votes": {"type": "array", "items": {"type": "object", "properties": {
-        "chamber": {"type": "string", "enum": ["upper", "lower"]},
+        "chamber": {"type": "string", "enum": ["upper", "lower", "joint"]},
         "committee": {"type": "string", "required": false},
         "date": {"type": "datetime"},
         "motion": {"type": "string"},
