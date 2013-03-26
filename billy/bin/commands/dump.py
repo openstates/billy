@@ -268,19 +268,6 @@ class DumpJSON(BaseCommand):
         with open(os.path.join(schema_dir, "committee.json")) as f:
             committee_schema = json.load(f)
 
-        logging.info('exporting %s bills...' % abbr)
-        for bill in db.bills.find({settings.LEVEL_FIELD: abbr}, timeout=False):
-            path = "bills/%s/%s/%s/%s" % (abbr, bill['session'],
-                                          bill['chamber'], bill['bill_id'])
-            url = api_url(path)
-
-            response = scraper.urlopen(url).bytes
-            if validate:
-                validictory.validate(json.loads(response), bill_schema,
-                                     validator_cls=APIValidator)
-
-            zip.writestr(path, response)
-
         logging.info('exporting %s legislators...' % abbr)
         for legislator in db.legislators.find({settings.LEVEL_FIELD: abbr}):
             path = 'legislators/%s' % legislator['_id']
@@ -301,6 +288,19 @@ class DumpJSON(BaseCommand):
             response = scraper.urlopen(url).bytes
             if validate:
                 validictory.validate(json.loads(response), committee_schema,
+                                     validator_cls=APIValidator)
+
+            zip.writestr(path, response)
+
+        logging.info('exporting %s bills...' % abbr)
+        for bill in db.bills.find({settings.LEVEL_FIELD: abbr}, timeout=False):
+            path = "bills/%s/%s/%s/%s" % (abbr, bill['session'],
+                                          bill['chamber'], bill['bill_id'])
+            url = api_url(path)
+
+            response = scraper.urlopen(url).bytes
+            if validate:
+                validictory.validate(json.loads(response), bill_schema,
                                      validator_cls=APIValidator)
 
             zip.writestr(path, response)
