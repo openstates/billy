@@ -89,7 +89,7 @@ urlpatterns = patterns(
     url(r'^v1/metadata/$', all_metadata_handler),
     url(r'^v1/metadata/(?P<abbr>[a-zA-Z-]+)/$', metadata_handler),
 
-    # two urls for bill handler
+    # bills, including three urls for bill handler
     url(r'^v1/bills/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
         r'(?P<chamber>upper|lower)/(?P<bill_id>.+)/$', bill_handler),
     url(r'^v1/bills/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
@@ -99,6 +99,7 @@ urlpatterns = patterns(
 
     url(r'^v1/legislators/(?P<id>[A-Z-]+L\d{6})/$', legislator_handler),
     url(r'^v1/legislators/$', legsearch_handler),
+    url(r'v1/legislators/geo/$', legislator_geo_handler),
 
     url(r'^v1/committees/(?P<id>[A-Z-]+C\d{6})/$', committee_handler),
     url(r'^v1/committees/$', committee_search_handler),
@@ -106,19 +107,19 @@ urlpatterns = patterns(
     url(r'^v1/events/$', events_handler),
     url(r'^v1/events/(?P<id>[A-Z-]+E\d{8})/$', events_handler),
 
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
-        '(?P<chamber>upper|lower)/', subject_list_handler),
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/',
-        subject_list_handler),
-    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/', subject_list_handler),
-    url(r'v1/legislators/geo/$', legislator_geo_handler),
-
     # districts & boundaries
     url(r'v1/districts/(?P<abbr>[a-zA-Z-]+)/$',
         district_handler),
     url(r'v1/districts/(?P<abbr>[a-zA-Z-]+)/(?P<chamber>upper|lower)/$',
         district_handler),
     url(r'v1/districts/boundary/(?P<boundary_id>.+)/$', boundary_handler),
+
+    # experimental - undocumented methods
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/'
+        '(?P<chamber>upper|lower)/', subject_list_handler),
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/',
+        subject_list_handler),
+    url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/', subject_list_handler),
 
     url(r'^v1/news/(?P<id>[A-Z]{3}\d{,10})/$', news_handler),
 )
