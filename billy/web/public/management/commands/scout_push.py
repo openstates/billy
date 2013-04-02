@@ -4,6 +4,7 @@ Pushes stored user favorites to Scout for alert tracking.
 import json
 import logging
 import urlparse
+import datetime
 from optparse import make_option
 
 from django.contrib.auth.models import User
@@ -68,6 +69,10 @@ class Command(NoArgsCommand):
         payload['interests'] = interests
         _log.info('pushing %s interests for %s', len(interests),
                   payload['email'])
+
+        profile = user_db.profiles.find_one(dict(_id=username))
+        profile['last_scout_sync'] = datetime.datetime.utcnow()
+        user_db.profiles.save(profile)
 
         if not dry_run:
             url = 'https://scout.sunlightfoundation.com/remote/service/sync'
