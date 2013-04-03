@@ -143,7 +143,8 @@ class PlaintextColumns(object):
         for boundary in self.boundaries:
             cell = line.lstrip()[boundary].strip()
             if cell:
-                yield cell
+                for cell in re.split('\s{3,}', cell):
+                    yield cell
             else:
                 yield None
 
