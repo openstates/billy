@@ -70,6 +70,7 @@ class Command(NoArgsCommand):
         _log.info('pushing %s interests for %s', len(interests),
                   payload['email'])
 
+        # Add the last scout sync date to the user's profile.
         profile = user_db.profiles.find_one(dict(_id=username))
         profile['last_scout_sync'] = datetime.datetime.utcnow()
         user_db.profiles.save(profile)
