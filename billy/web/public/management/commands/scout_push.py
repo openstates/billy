@@ -72,6 +72,7 @@ class Command(NoArgsCommand):
 
         # Add the last scout sync date to the user's profile.
         profile = user_db.profiles.find_one(dict(_id=username))
+        profile = profile or {}
         profile['last_scout_sync'] = datetime.datetime.utcnow()
         user_db.profiles.save(profile)
 
