@@ -303,7 +303,7 @@ def bill(request, abbr, session, bill_id):
     bill = db.bills.find_one({settings.LEVEL_FIELD: abbr, 'session': session,
                               'bill_id': fixed_bill_id})
     if bill is None:
-        raise Http404('no bill found {0} {1} {2}'.format(abbr, session,
+        raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session,
                                                          bill_id))
 
     events = db.events.find({
