@@ -42,7 +42,7 @@ class Command(NoArgsCommand):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
                             'item_id': favorite['obj_id'],
-                           }
+                            }
             elif favorite['obj_type'] == 'search':
                 params = urlparse.parse_qs(favorite['search_params'])
                 interest = {
@@ -71,8 +71,9 @@ class Command(NoArgsCommand):
                   payload['email'])
 
         # Add the last scout sync date to the user's profile.
-        profile = user_db.profiles.find_one(dict(_id=username))
-        profile = profile or {}
+        profile_spec = dict(_id=username)
+        profile = user_db.profiles.find_one(profile_spec)
+        profile = profile or profile_spec
         profile['last_scout_sync'] = datetime.datetime.utcnow()
         user_db.profiles.save(profile)
 
