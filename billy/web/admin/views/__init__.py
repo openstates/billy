@@ -677,7 +677,7 @@ def bad_vote_list(request, abbr):
         raise Http404('No metadata found for abbreviation %r' % abbr)
     report = mdb.reports.find_one({'_id': abbr})
     bad_vote_ids = report['votes']['bad_vote_counts']
-    votes = db.votes.find({'_id': {'$in': bad_vote_ids}})
+    votes = mdb.votes.find({'_id': {'$in': bad_vote_ids}})
 
     context = {'metadata': meta, 'vote_ids': bad_vote_ids,
                'votes': votes}
