@@ -150,7 +150,7 @@ class Legislator(Document):
 
     def title(self):
         chamber = self.get('chamber')
-        if chamber:
+        if chamber and chamber in self.metadata['chambers']:
             return self.metadata['chambers'][chamber]['title']
         else:
             return ''
