@@ -46,9 +46,6 @@ class Person(SourcedObject):
     def add_role(self, role, term, start_date=None, end_date=None,
                  **kwargs):
         """
-        If ``start_date`` or ``end_date`` are ``None``, they will default
-        to the start/end date of the given term.
-
         Examples:
 
         leg.add_role('member', term='2009', chamber='upper',
