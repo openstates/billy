@@ -45,10 +45,6 @@ class Command(NoArgsCommand):
         interests = []
         for favorite in user_db.favorites.find({'username': username}):
 
-            # The default for sending notifications is true.
-            if not notifications.get(favorite['obj_type'], True):
-                continue
-
             if favorite['obj_type'] in ('legislator', 'bill'):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
@@ -73,7 +69,12 @@ class Command(NoArgsCommand):
                 _log.warning('Unknown favorite type: %s', favorite['obj_type'])
                 continue
 
-            interest['active'] = favorite['is_favorite']
+            send_alerts = notifications.get(favorite['obj_type'], True)
+            if favorite['is_favorite'] and send_alerts:
+                interest['active'] = True
+            else:
+                interest['active'] = False
+
             interest['changed_at'] = favorite['timestamp']
             interests.append(interest)
 
