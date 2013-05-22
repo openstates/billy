@@ -36,8 +36,19 @@ class Command(NoArgsCommand):
                    'secret_key': settings.SCOUT_SECRET_KEY,
                    'service': settings.SCOUT_SERVICE,
                    'notifications': 'email_daily'}
+
+        # Only send alerts if the user has turned alerts on for that
+        # object type.
+        profile = user_db.profiles.find_one(dict(_id=username))
+        notifications = profile['notifications']
+
         interests = []
         for favorite in user_db.favorites.find({'username': username}):
+
+            # The default for sending notifications is true.
+            if not notifications.get(favorite['obj_type'], True):
+                continue
+
             if favorite['obj_type'] in ('legislator', 'bill'):
                 interest = {'interest_type': 'item',
                             'item_type': 'state_' + favorite['obj_type'],
