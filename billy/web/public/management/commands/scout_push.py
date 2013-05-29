@@ -40,7 +40,7 @@ class Command(NoArgsCommand):
         # Only send alerts if the user has turned alerts on for that
         # object type.
         profile = user_db.profiles.find_one(dict(_id=username))
-        notifications = profile['notifications']
+        notifications = profile.get('notifications', {})
 
         interests = []
         for favorite in user_db.favorites.find({'username': username}):
