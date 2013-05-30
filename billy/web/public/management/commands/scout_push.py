@@ -39,7 +39,9 @@ class Command(NoArgsCommand):
 
         # Only send alerts if the user has turned alerts on for that
         # object type.
-        profile = user_db.profiles.find_one(dict(_id=username))
+        profile_spec = dict(_id=username)
+        profile = user_db.profiles.find_one(profile_spec)
+        profile = profile or profile_spec
         notifications = profile.get('notifications', {})
 
         interests = []
@@ -83,9 +85,6 @@ class Command(NoArgsCommand):
                   payload['email'])
 
         # Add the last scout sync date to the user's profile.
-        profile_spec = dict(_id=username)
-        profile = user_db.profiles.find_one(profile_spec)
-        profile = profile or profile_spec
         profile['last_scout_sync'] = datetime.datetime.utcnow()
         user_db.profiles.save(profile)
 
