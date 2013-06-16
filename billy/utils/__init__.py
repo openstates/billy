@@ -1,9 +1,11 @@
-import datetime
+import os
 import json
 import re
 import time
 import urllib
+import datetime
 import urlparse
+import contextlib
 
 from bson import ObjectId
 from django.core.exceptions import ImproperlyConfigured
@@ -137,3 +139,18 @@ try:
 except (ImportError, ImproperlyConfigured):
     def get_domain():           # noqa
         return 'example.com'
+
+
+@contextlib.contextmanager
+def cd(path):
+    '''Creates the path if it doesn't exist'''
+    old_dir = os.getcwd()
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
