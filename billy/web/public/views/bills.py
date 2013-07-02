@@ -305,7 +305,7 @@ class AllBillCSVList(AllBillList):
 
                 yield ",".join((escape(x) for x in entries))
 
-        return HttpResponse((x + "\n" for x in _gen_csv()),
+        return HttpResponse((x + "\r\n" for x in _gen_csv()),
                             content_type='text/csv')
 
 
