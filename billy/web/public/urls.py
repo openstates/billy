@@ -1,7 +1,8 @@
 from django.conf.urls.defaults import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
-from billy.web.public.views.bills import BillList, AllBillList, BillFeed
+from billy.web.public.views.bills import (BillList, AllBillList,
+                                          AllBillCSVList, BillFeed)
 from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -111,6 +112,8 @@ urlpatterns += patterns(
 
     url(r'^(?P<abbr>all)/bills/$', ensure_csrf_cookie(AllBillList.as_view()),
         name='all_bills'),
+    url(r'^(?P<abbr>all)/bills-csv/$',
+        ensure_csrf_cookie(AllBillCSVList.as_view()), name='all_bills_csv'),
     url(r'^(?P<abbr>[a-z-]+)/bills/$', ensure_csrf_cookie(BillList.as_view()),
         name='bills'),
     url(r'^(?P<abbr>[a-z-]+)/bills/feed/$', BillFeed.as_view(),
