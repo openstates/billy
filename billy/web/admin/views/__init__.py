@@ -980,7 +980,8 @@ def legislator_edit_commit(request):
                 "url": source
             })
 
-    del(payload['leg_id'])
+    for key in ["leg_id", "csrfmiddlewaretoken"]:
+        del(payload[key])
 
     update = {}
     locked = []

@@ -237,6 +237,78 @@ class AllBillList(RelatedBillsList):
     title_template = ('Search All Bills')
 
 
+class AllBillCSVList(AllBillList):
+    '''
+    Context:
+        - Determined by RelatedBillsList.get_context_data
+
+    Teamplates:
+       - None, creates a csv.
+    '''
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(*args, **kwargs)
+        p = context['object_list']
+        p.limit = p.count
+
+        def escape(what):
+            if what == "":
+                return what
+
+            return '"%s"' % (what.replace("\"", "\\\""))
+
+        def _gen_csv():
+            fields = [
+                "Title",
+                "State",
+                "Legislative Session",
+                "Bill ID",
+                "Originating Chamber",
+                "Sponsors",
+                "First Action Date",
+                "Last Action Date",
+                "Latest Action",
+                "Passed Senate",
+                "Passed House",
+                "OpenStates Link",
+            ]
+
+            yield ",".join((x for x in fields))
+
+            for bill in context['object_list']:
+                entries = [bill[x] for x in [
+                    "title",
+                    "state",
+                    "session",
+                    "bill_id",
+                    "chamber",
+                ]]
+
+                entries.append("; ".join([x['name'] for x in bill['sponsors']]))
+                dates = sorted(bill['actions'], key=lambda x: x['date'])
+                fmt = "%Y-%m-%d"
+                entries.append(dates[0]['date'].strftime(fmt))
+                entries.append(dates[-1]['date'].strftime(fmt))
+                entries.append(dates[-1]['action'])
+                ap = lambda x: "bill:passed" in x['type']
+
+                lp = lambda x: x['actor'] == 'lower' and ap(x)
+                up = lambda x: x['actor'] == 'lower' and ap(x)
+
+                lower_passages = filter(lp, dates)
+                upper_passages = filter(up, dates)
+                url = bill.get_absolute_url()
+
+                [entries.append(x[-1]['date'].strftime(fmt) if x else "") for
+                 x in [lower_passages, upper_passages]]
+
+                entries.append("http://openstates.org" + url)
+
+                yield ",".join((escape(x) for x in entries))
+
+        return HttpResponse((x + "\r\n" for x in _gen_csv()),
+                            content_type='text/csv')
+
+
 class BillFeed(BillList):
     """ does everything BillList does but outputs as RSS """
 

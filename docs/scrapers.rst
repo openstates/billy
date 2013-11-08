@@ -122,7 +122,7 @@ Legislators
 
 ``LegislatorScraper`` implementations should gather and save :class:`~billy.scrape.legislators.Legislator` objects.
 
-Sometimes it is easiest to also gather committee memberships at the same time as legislators.  Committee memberships can can be attached to :class:`~billy.scrape.legislators.Legislator` objects via the :meth:`add_role` method.
+Sometimes it is easiest to also gather committee memberships at the same time as legislators.  Committee memberships can be attached to :class:`~billy.scrape.legislators.Legislator` objects via the :meth:`add_role` method.
 
 LegislatorScraper
 -----------------
@@ -158,3 +158,21 @@ Committee
 ---------
 .. autoclass:: billy.scrape.committees.Committee
    :members: __init__, add_member
+
+Events
+======
+
+``EventScraper`` implementations should gather and save :class:`~billy.scrape.events.Event` objects.
+
+Relevant bills, documents, and participants can be attached to :class:`~billy.scrape.events.Event` objects via the :meth:`add_related_bill`, 
+:meth:`add_document`, and :meth:`add_participant` methods, respectively.
+
+EventScraper
+------------
+.. autoclass:: billy.scrape.events.EventScraper
+   :members: scrape, save_event
+   
+Event
+-----
+.. autoclass:: billy.scrape.events.Event
+   :members: __init__, add_document, add_participant, add_related_bill
