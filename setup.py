@@ -24,17 +24,18 @@ billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
       install_requires=[
-          "Django>=1.4.2",
+          "Django>1.4,<1.5",
+          "django-pjax",
+          "https://bitbucket.org/jespern/django-piston/get/tip.tar.gz",
           "boto",
-          "django-piston",
           "icalendar",
           "lxml>=2.2",
           "name_tools>=0.1.2",
           "nose",
           "pymongo>=2.2",
           "scrapelib>=0.7.0",
-          "unicodecsv",
-          "validictory>=0.7.1",
+          "unicodecsv!=0.9.3",
+          "validictory",
           "pyelasticsearch",
       ]
 )

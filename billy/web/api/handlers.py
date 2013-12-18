@@ -115,6 +115,7 @@ def _metadata_backwards_shim(metadata):
 
 class AllMetadataHandler(BillyHandler):
     def read(self, request):
+        use_shim = bool(request.GET.get('fields'))
         fields = _build_field_list(request, {'abbreviation': 1,
                                              'name': 1,
                                              'feature_flags': 1,
@@ -123,21 +124,29 @@ class AllMetadataHandler(BillyHandler):
                                             })
         for f in fields.copy():
             if '_chamber_' in f:
+                use_shim = True
                 fields['chambers'] = 1
         data = db.metadata.find(fields=fields).sort('name')
-        return [_metadata_backwards_shim(m) for m in data]
+        if use_shim:
+            return [_metadata_backwards_shim(m) for m in data]
+        else:
+            return list(data)
 
 
 class MetadataHandler(BillyHandler):
     def read(self, request, abbr):
+        use_shim = bool(request.GET.get('fields'))
         field_list = _build_field_list(request)
         if field_list:
             for f in field_list.copy():
                 if '_chamber_' in f:
+                    use_shim = True
                     field_list['chambers'] = 1
-        return _metadata_backwards_shim(
-            db.metadata.find_one({'_id': abbr.lower()}, fields=field_list)
-        )
+        data = db.metadata.find_one({'_id': abbr.lower()}, fields=field_list)
+        if use_shim:
+            return _metadata_backwards_shim(data)
+        else:
+            return data
 
 
 class BillHandler(BillyHandler):
