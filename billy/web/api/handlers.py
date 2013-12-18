@@ -130,7 +130,7 @@ class AllMetadataHandler(BillyHandler):
         if use_shim:
             return [_metadata_backwards_shim(m) for m in data]
         else:
-            return data
+            return list(data)
 
 
 class MetadataHandler(BillyHandler):
