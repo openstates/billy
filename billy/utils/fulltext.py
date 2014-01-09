@@ -6,7 +6,7 @@ import tempfile
 import importlib
 import subprocess
 
-import scrapelib
+import requests
 import boto.s3.key
 
 from billy.scrape.utils import convert_pdf
@@ -68,8 +68,8 @@ def s3_get(abbr, doc):
         try:
             return k.get_contents_as_string()
         except:
-            data = scrapelib.urlopen(doc['url'].replace(' ', '%20'))
-            content_type = data.response.headers.get('content-type')
+            response = requests.get(doc['url'].replace(' ', '%20'))
+            content_type = response.headers.get('content-type')
             if not content_type:
                 url = doc['url'].lower()
                 if url.endswith('htm') or doc['url'].endswith('html'):
@@ -78,11 +78,11 @@ def s3_get(abbr, doc):
                     content_type = 'application/pdf'
             headers = {'x-amz-acl': 'public-read',
                        'Content-Type': content_type}
-            k.set_contents_from_string(data.bytes, headers=headers)
+            k.set_contents_from_string(data.content, headers=headers)
             _log.debug('pushed %s to s3 as %s', doc['url'], doc['doc_id'])
-            return data.bytes
+            return data.content
     else:
-        return scrapelib.urlopen(doc['url'].replace(' ', '%20')).bytes
+        return requests.get(doc['url'].replace(' ', '%20')).content
 
 
 PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
