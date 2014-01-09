@@ -173,6 +173,8 @@ def update(old, new, collection, sneaky_update_filter=None):
         old['updated_at'] = datetime.datetime.utcnow()
         collection.save(old, safe=True)
 
+    return need_save
+
 
 def convert_timestamps(obj):
     """

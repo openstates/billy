@@ -387,8 +387,8 @@ def import_bill(data, standalone_votes, categorizer):
         save_votes(data, bill_votes)
         return "insert"
     else:
-        update(bill, data, db.bills)
-        elasticsearch_push(bill)
+        if update(bill, data, db.bills):
+            elasticsearch_push(bill)
         git_add_bill(bill)
         save_votes(bill, bill_votes)
         return "update"
