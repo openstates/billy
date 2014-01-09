@@ -1,9 +1,11 @@
-import datetime
+import os
 import json
 import re
 import time
 import urllib
+import datetime
 import urlparse
+import contextlib
 
 from bson import ObjectId
 from django.core.exceptions import ImproperlyConfigured
@@ -137,3 +139,42 @@ try:
 except (ImportError, ImproperlyConfigured):
     def get_domain():           # noqa
         return 'example.com'
+
+
+@contextlib.contextmanager
+def cd(path):
+    '''Creates the path if it doesn't exist'''
+    old_dir = os.getcwd()
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
+
+
+class CachedAttr(object):
+    '''Computes attribute value and caches it in instance.
+
+    Example:
+        class MyClass(object):
+            def myMethod(self):
+                # ...
+            myMethod = CachedAttribute(myMethod)
+    Use "del inst.myMethod" to clear cache.
+
+    Source: http://code.activestate.com/recipes/276643-caching-and-aliasing-with-descriptors/'''
+
+    def __init__(self, method, name=None):
+        self.method = method
+        self.name = name or method.__name__
+
+    def __get__(self, inst, cls):
+        if inst is None:
+            return self
+        result = self.method(inst)
+        setattr(inst, self.name, result)
+        return result
