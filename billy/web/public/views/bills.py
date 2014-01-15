@@ -338,7 +338,7 @@ class BillFeed(BillList):
 
 
 def bill_noslug(request, abbr, bill_id):
-    bill = db.bills.find_one({'_id': bill_id})
+    bill = db.bills.find_one({'_all_ids': bill_id})
     if bill is None:
         raise Http404("No such bill (%s)" % (bill_id))
 
