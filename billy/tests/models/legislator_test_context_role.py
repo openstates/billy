@@ -196,20 +196,15 @@ def setup_func():
 
         u'terms': [
             {
-            u'+start_date': datetime.datetime(2008, 12, 1, 0, 0),
-            u'end_year': 2010,
-            u'name': u'20092010',
-            u'sessions': [
-                u'20092010',
-                u'20092010 Special Session 1',
-                u'20092010 Special Session 2',
-                u'20092010 Special Session 3',
-                u'20092010 Special Session 4',
-                u'20092010 Special Session 5',
-                u'20092010 Special Session 6',
-                u'20092010 Special Session 7',
-                u'20092010 Special Session 8'],
-            u'start_year': 2009
+                u'+start_date': datetime.datetime(2008, 12, 1, 0, 0),
+                u'end_year': 2010,
+                u'name': u'20092010',
+                u'sessions': [u'20092010', u'20092010 Special Session 1',
+                              u'20092010 Special Session 2', u'20092010 Special Session 3',
+                              u'20092010 Special Session 4', u'20092010 Special Session 5',
+                              u'20092010 Special Session 6', u'20092010 Special Session 7',
+                              u'20092010 Special Session 8'],
+                u'start_year': 2009
             },
             {
                 u'+start_date': datetime.datetime(2010, 12, 6, 0, 0),

@@ -238,11 +238,11 @@ def test_populate_current_fields():
 def test_votematcher():
     # three votes, two with the same fingerprint
     votes = [{'motion': 'a', 'chamber': 'b', 'date': 'c',
-             'yes_count': 1, 'no_count': 2, 'other_count': 3},
+              'yes_count': 1, 'no_count': 2, 'other_count': 3},
              {'motion': 'x', 'chamber': 'y', 'date': 'z',
-             'yes_count': 0, 'no_count': 0, 'other_count': 0},
+              'yes_count': 0, 'no_count': 0, 'other_count': 0},
              {'motion': 'a', 'chamber': 'b', 'date': 'c',
-             'yes_count': 1, 'no_count': 2, 'other_count': 3},
+              'yes_count': 1, 'no_count': 2, 'other_count': 3},
             ]
     vm = bills.VoteMatcher('ex')
 
