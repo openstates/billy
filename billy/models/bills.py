@@ -340,14 +340,11 @@ class BillSearchResults(object):
                 if not resp['_shards']['successful']:
                     # if we get a parse exception, simplify from query_string
                     # to a simple text match
-                    if ('ParseException' in
-                        resp['_shards']['failures'][0]['reason']):
+                    if 'ParseException' in resp['_shards']['failures'][0]['reason']:
                         fquery = self.es_search['query']['filtered']['query']
-                        fquery['match'] = {'_all':
-                                           fquery['query_string']['query']}
+                        fquery['match'] = {'_all': fquery['query_string']['query']}
                         fquery.pop('query_string')
-                        resp = elasticsearch.count(self.es_search['query'],
-                                                   index='billy',
+                        resp = elasticsearch.count(self.es_search['query'], index='billy',
                                                    doc_type='bills')
                     else:
                         raise Exception('ElasticSearch error: %s' %
@@ -606,8 +603,7 @@ class Bill(Document):
                                        {'gte': last_action_since}}})
         elif last_action_since:
             try:
-                mongo_filter['action_dates.last'] = {'$gte':
-                                             parse_param_dt(last_action_since)}
+                mongo_filter['action_dates.last'] = {'$gte': parse_param_dt(last_action_since)}
             except ValueError:
                 raise ValueError('invalid last_action_since parameter. '
                                  'please supply date in YYYY-MM-DD format')
