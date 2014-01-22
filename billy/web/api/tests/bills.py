@@ -36,7 +36,7 @@ class BillLookupTestCase(BaseTestCase):
             u'votes', u'title', u'alternate_titles', u'country',
             u'companions', u'sponsors', u'actions', u'chamber',
             u'state', u'session', u'action_dates', u'level',
-            u'type', u'id', u'bill_id', 'subjects'])
+            u'type', u'id', u'bill_id', 'subjects', 'all_ids'])
         self.assertEquals(set(self.json), expected_keys)
 
     def test_bill_id(self):
@@ -62,7 +62,7 @@ class BillyIDTestCase(BaseTestCase):
             u'votes', u'title', u'alternate_titles', u'country',
             u'companions', u'sponsors', u'actions', u'chamber',
             u'state', u'session', u'action_dates', u'level',
-            u'type', u'id', u'bill_id', 'subjects'])
+            u'type', u'id', u'bill_id', 'subjects', 'all_ids'])
         self.assertEquals(set(self.json), expected_keys)
 
     def test_bill_id(self):
