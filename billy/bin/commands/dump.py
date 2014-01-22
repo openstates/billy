@@ -268,6 +268,10 @@ class DumpJSON(BaseCommand):
         with open(os.path.join(schema_dir, "committee.json")) as f:
             committee_schema = json.load(f)
 
+        # write out metadata
+        response = scraper.urlopen(api_url('metadata/%s' % abbr)).bytes
+        zip.writestr('metadata.json', response)
+
         logging.info('exporting %s legislators...' % abbr)
         for legislator in db.legislators.find({settings.LEVEL_FIELD: abbr}):
             path = 'legislators/%s' % legislator['_id']
