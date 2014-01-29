@@ -17,6 +17,8 @@ import pymongo
 from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
+AT_LARGE = ['At-Large', 'Chairman']
+
 
 _lower_fields = (settings.LEVEL_FIELD, 'chamber')
 
@@ -420,7 +422,7 @@ class LegislatorGeoHandler(BillyHandler):
 
         if jurisdiction:
             # append at-large legislators from this jurisdiction
-            filters.append({'district': 'At-Large',
+            filters.append({'district': {'$in': AT_LARGE},
                             settings.LEVEL_FIELD: jurisdiction})
 
         fields = _build_field_list(request)
@@ -428,7 +430,7 @@ class LegislatorGeoHandler(BillyHandler):
             fields['state'] = fields['district'] = fields['chamber'] = 1
         legislators = list(db.legislators.find({'$or': filters}, fields))
         for leg in legislators:
-            if leg['district'] != 'At-Large':
+            if leg['district'] not in AT_LARGE:
                 leg['boundary_id'] = boundary_mapping[(
                     leg[settings.LEVEL_FIELD], leg['district'], leg['chamber']
                 )]
