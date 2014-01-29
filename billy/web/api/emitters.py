@@ -50,7 +50,7 @@ class BillyJSONEmitter(JSONEmitter):
             # convert _id to id
             if '_id' in obj:
                 obj['id'] = obj['_id']
-            elif '_all_ids' in obj:
+            if '_all_ids' in obj:
                 obj['all_ids'] = obj['_all_ids']
 
             for key, value in obj.items():

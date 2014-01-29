@@ -76,11 +76,10 @@ def s3_get(abbr, doc):
                     content_type = 'text/html'
                 elif url.endswith('pdf'):
                     content_type = 'application/pdf'
-            headers = {'x-amz-acl': 'public-read',
-                       'Content-Type': content_type}
-            k.set_contents_from_string(data.content, headers=headers)
+            headers = {'x-amz-acl': 'public-read', 'Content-Type': content_type}
+            k.set_contents_from_string(response.content, headers=headers)
             _log.debug('pushed %s to s3 as %s', doc['url'], doc['doc_id'])
-            return data.content
+            return response.content
     else:
         return requests.get(doc['url'].replace(' ', '%20')).content
 

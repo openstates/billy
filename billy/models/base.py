@@ -271,7 +271,10 @@ class RelatedDocument(object):
         except KeyError:
             pass
 
-        spec = {'_id': self.model_id}
+        if self.model_id[2] == 'B':
+            spec = {'_all_ids': self.model_id}
+        else:
+            spec = {'_id': self.model_id}
         spec.update(extra_spec)
 
         obj = self.model.collection.find_one(spec, *args, **kwargs)

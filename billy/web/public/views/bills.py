@@ -338,7 +338,7 @@ class BillFeed(BillList):
 
 
 def bill_noslug(request, abbr, bill_id):
-    bill = db.bills.find_one({'_id': bill_id})
+    bill = db.bills.find_one({'_all_ids': bill_id})
     if bill is None:
         raise Http404("No such bill (%s)" % (bill_id))
 
@@ -370,13 +370,11 @@ def bill(request, abbr, session, bill_id):
     fixed_bill_id = fix_bill_id(bill_id)
     # redirect if URL's id isn't fixed id without spaces
     if fixed_bill_id.replace(' ', '') != bill_id:
-        return redirect('bill', abbr=abbr, session=session,
-                        bill_id=fixed_bill_id.replace(' ', ''))
+        return redirect('bill', abbr=abbr, session=session, bill_id=fixed_bill_id.replace(' ', ''))
     bill = db.bills.find_one({settings.LEVEL_FIELD: abbr, 'session': session,
                               'bill_id': fixed_bill_id})
     if bill is None:
-        raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session,
-                                                         bill_id))
+        raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session, bill_id))
 
     events = db.events.find({
         settings.LEVEL_FIELD: abbr,

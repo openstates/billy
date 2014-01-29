@@ -3,6 +3,7 @@ billy changelog
 
 1.8.0
 -----
+** 16 January 2014 **
     * more CSRF bugfixing
     * ensure_indexes command
     * beginnings of news entry api
