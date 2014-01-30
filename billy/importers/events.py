@@ -122,11 +122,13 @@ def import_event(data):
     if '_guid' in data:
         event = db.events.find_one({settings.LEVEL_FIELD:
                                     data[settings.LEVEL_FIELD],
+                                    'state': data['state'],
                                     '_guid': data['_guid']})
 
     if not event:
         event = db.events.find_one({settings.LEVEL_FIELD:
                                     data[settings.LEVEL_FIELD],
+                                    'state': data['state'],
                                     'when': data['when'],
                                     'end': data['end'],
                                     'type': data['type'],
