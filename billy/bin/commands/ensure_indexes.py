@@ -39,17 +39,9 @@ class MongoIndex(BaseCommand):
                 [('when', pymongo.DESCENDING),
                  (settings.LEVEL_FIELD, pymongo.ASCENDING),
                  ('type', pymongo.ASCENDING)],
-                [('when', pymongo.DESCENDING),
-                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
-                 ('related_bills.bill_id', pymongo.ASCENDING)],
-                [('when', pymongo.ASCENDING),
-                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
-                 ('related_bills.bill_id', pymongo.ASCENDING)],
-                [
-                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
+                [ (settings.LEVEL_FIELD, pymongo.ASCENDING),
                  ('related_bills.bill_id', pymongo.ASCENDING),
-                 ('when', pymongo.DESCENDING),
-                ],
+                 ('when', pymongo.DESCENDING) ],
             ],
             'legislators': [
                 [('_all_ids', pymongo.ASCENDING)],
@@ -90,9 +82,10 @@ class MongoIndex(BaseCommand):
                  ('sponsors.type', pymongo.ASCENDING),
                  (settings.LEVEL_FIELD, pymongo.ASCENDING)
                 ],
-                [(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                 ('type', pymongo.ASCENDING),
-                ]
+                # for distinct queries
+                #[(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                # ('type', pymongo.ASCENDING),
+                #],
             ],
             'subjects': [
                 [('abbr', pymongo.ASCENDING)],
