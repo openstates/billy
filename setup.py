@@ -26,7 +26,6 @@ billy-util = billy.bin.util:main
       install_requires=[
           "Django>1.4,<1.5",
           "django-pjax",
-          "https://bitbucket.org/jespern/django-piston/get/tip.tar.gz",
           "boto",
           "icalendar",
           "lxml>=2.2",

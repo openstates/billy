@@ -67,6 +67,7 @@ class MongoIndex(BaseCommand):
                 # bill_id is used for search in conjunction with ElasticSearch
                 #  sort field (date) comes first
                 #  followed by field that we do an $in on
+                [('_all_ids', pymongo.ASCENDING)],
                 [('created_at', pymongo.DESCENDING),
                  ('bill_id', pymongo.ASCENDING)],
                 [('updated_at', pymongo.DESCENDING),
