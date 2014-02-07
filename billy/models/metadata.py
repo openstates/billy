@@ -156,9 +156,9 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        if not hasattr(self, '_distinct_subjects'):
-            self._distinct_subjects = sorted(self.bills().distinct('subjects'))
-        return self._distinct_subjects
+        if '_distinct_subjects' in self:
+            self['_distinct_subjects'] = sorted(self.bills().distinct('subjects'))
+        return self['_distinct_subjects']
 
     def distinct_action_types(self):
         if not hasattr(self, '_distinct_action_types'):
