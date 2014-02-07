@@ -45,6 +45,11 @@ class MongoIndex(BaseCommand):
                 [('when', pymongo.ASCENDING),
                  (settings.LEVEL_FIELD, pymongo.ASCENDING),
                  ('related_bills.bill_id', pymongo.ASCENDING)],
+                [
+                 (settings.LEVEL_FIELD, pymongo.ASCENDING),
+                 ('related_bills.bill_id', pymongo.ASCENDING)
+                 ('when', pymongo.DESCENDING),
+                ],
             ],
             'legislators': [
                 [('_all_ids', pymongo.ASCENDING)],
