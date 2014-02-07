@@ -29,11 +29,6 @@ def metadata(abbr, __metadata=__metadata):
         return __metadata[abbr]
     rv = db.metadata.find_one({'_id': abbr})
 
-    # add distinct queries in here so we only have to do them once
-    rv['_distinct_subjects'] = sorted(db.bills.find({'state': abbr}).distinct('subjects'))
-    rv['_distinct_action_types'] = sorted(db.bills.find({'state': abbr}).distinct('actions.type'))
-    rv['_distinct_types'] = sorted(db.bills.find({'state': abbr}).distinct('type'))
-
     __metadata[abbr] = rv
     return rv
 

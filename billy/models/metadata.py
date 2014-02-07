@@ -156,13 +156,13 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        return self['_distinct_subjects']
+        return sorted(db.bills.find({'state': abbr}).distinct('subjects'))
 
     def distinct_action_types(self):
-        return self['_distinct_action_types']
+        return sorted(db.bills.find({'state': abbr}).distinct('actions.type'))
 
     def distinct_bill_types(self):
-        return self['_distinct_types']
+        return sorted(db.bills.find({'state': abbr}).distinct('type'))
 
     def committees_legislators(self, *args, **kwargs):
         '''Return an iterable of committees with all the
