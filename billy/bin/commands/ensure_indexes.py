@@ -90,6 +90,9 @@ class MongoIndex(BaseCommand):
                  ('sponsors.type', pymongo.ASCENDING),
                  (settings.LEVEL_FIELD, pymongo.ASCENDING)
                 ],
+                [(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                 ('type', pymongo.ASCENDING),
+                ]
             ],
             'subjects': [
                 [('abbr', pymongo.ASCENDING)],
