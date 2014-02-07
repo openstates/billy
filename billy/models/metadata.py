@@ -8,6 +8,8 @@ from .base import (Document, RelatedDocument, RelatedDocuments, ListManager,
                    DictManager, AttrManager, DoesNotExist)
 from ..utils import metadata as get_metadata
 
+_distinct_subjects = {}
+
 
 class Term(DictManager):
     methods_only = True
@@ -156,7 +158,9 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        return sorted(self.bills().distinct('subjects'))
+        if self.abbr not in _distinct_subjects:
+            _distinct_subjects[self.abbr] = sorted(self.bills().distinct('subjects'))
+        return _distinct_subjects[self.abbr]
 
     def distinct_action_types(self):
         return sorted(self.bills().distinct('actions.type'))
