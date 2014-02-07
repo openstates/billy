@@ -83,9 +83,9 @@ class MongoIndex(BaseCommand):
                  (settings.LEVEL_FIELD, pymongo.ASCENDING)
                 ],
                 # for distinct queries
-                #[(settings.LEVEL_FIELD, pymongo.ASCENDING),
-                # ('type', pymongo.ASCENDING),
-                #],
+                [(settings.LEVEL_FIELD, pymongo.ASCENDING),
+                 ('type', pymongo.ASCENDING),
+                ],
             ],
             'subjects': [
                 [('abbr', pymongo.ASCENDING)],
