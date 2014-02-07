@@ -156,7 +156,7 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        if '_distinct_subjects' in self:
+        if '_distinct_subjects' not in self:
             self['_distinct_subjects'] = sorted(self.bills().distinct('subjects'))
         return self['_distinct_subjects']
 
