@@ -9,7 +9,8 @@ from .base import (Document, RelatedDocument, RelatedDocuments, ListManager,
 from ..utils import metadata as get_metadata
 
 _distinct_subjects = {}
-
+_distinct_types = {}
+_distinct_action_types = {}
 
 class Term(DictManager):
     methods_only = True
@@ -163,10 +164,14 @@ class Metadata(Document):
         return _distinct_subjects[self.abbr]
 
     def distinct_action_types(self):
-        return sorted(self.bills().distinct('actions.type'))
+        if self.abbr not in _distinct_action_types:
+            _distinct_action_types[self.abbr] = sorted(self.bills().distinct('actions.type'))
+        return _distinct_action_types[self.abbr]
 
     def distinct_bill_types(self):
-        return sorted(self.bills().distinct('type'))
+        if self.abbr not in _distinct_types:
+            _distinct_types[self.abbr] = sorted(self.bills().distinct('type'))
+        return _distinct_types[self.abbr]
 
     def committees_legislators(self, *args, **kwargs):
         '''Return an iterable of committees with all the
