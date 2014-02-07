@@ -161,14 +161,14 @@ class Metadata(Document):
         return self['_distinct_subjects']
 
     def distinct_action_types(self):
-        if not hasattr(self, '_distinct_action_types'):
-            self._distinct_action_types = sorted(self.bills().distinct('actions.type'))
-        return self._distinct_action_types
+        if '_distinct_action_types' not in self:
+            self['_distinct_action_types'] = sorted(self.bills().distinct('actions.type'))
+        return self['_distinct_action_types']
 
     def distinct_bill_types(self):
-        if not hasattr(self, '_distinct_types'):
-            self._distinct_types = sorted(self.bills().distinct('type'))
-        return self._distinct_types
+        if '_distinct_types' not in self:
+            self['_distinct_types'] = sorted(self.bills().distinct('type'))
+        return self['_distinct_types']
 
     def committees_legislators(self, *args, **kwargs):
         '''Return an iterable of committees with all the
