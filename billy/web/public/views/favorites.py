@@ -3,14 +3,17 @@ import collections
 from itertools import groupby
 from operator import itemgetter
 from urlparse import parse_qs
+from StringIO import StringIO
+
+import unicodecsv
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.template.defaultfilters import truncatewords
 
-from billy.core import user_db
-from billy.core import mdb
+from billy.core import user_db, mdb, settings
 import billy.utils
 from .utils import templatename
 
@@ -236,3 +239,36 @@ def set_notification_preference(request):
     user_db.profiles.update({'_id': request.user.username},
                             {'$set': {obj_type: alerts_on}}, upsert=True)
     return HttpResponse(status=200)
+
+
+def favorite_bills_csv(request):
+    '''Generate a csv of the user's favorited bills.
+    '''
+    # Get the faves.
+    favorites = get_user_favorites(request.user.username)
+
+    # Create a csv resposne.
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="favorite_bills.csv"'
+
+    # Start a CSV writer.
+    fields = (settings.LEVEL_FIELD.title(), 'Bill Id', 'Sponsor', 'Title',
+             'Session', 'Recent Action Date', 'Recent Action', 'Other Sponsors')
+    writer = unicodecsv.DictWriter(response, fields, encoding='utf-8')
+    writer.writeheader()
+
+    # Write in each bill.
+    for bill in favorites['bill']:
+        bill = mdb.bills.find_one(bill['obj_id'])
+        sponsors = (sp['full_name'] for sp in bill.sponsors_manager)
+        row = (
+            bill.metadata['name'],
+            bill['bill_id'],
+            next(sponsors),
+            truncatewords(bill['title'], 25),
+            bill.session_details()['display_name'],
+            bill.most_recent_action()['date'],
+            bill.most_recent_action()['action'],
+            truncatewords(', '.join(sponsors), 40))
+        writer.writerow(dict(zip(fields, row)))
+    return response
