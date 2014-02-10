@@ -143,10 +143,14 @@ def search(request, abbr):
         # the Richard S. Madaleno problem. See Jira issue OS-32.
         textbits = search_text.split()
         textbits = filter(lambda s: 2 < len(s), textbits)
+        textbits = filter(lambda s: '.' not in s, textbits)
         andspec = []
-        spec = {'$and': andspec}
         for text in textbits:
             andspec.append({'full_name': {'$regex': text, '$options': 'i'}})
+        if andspec:
+            spec = {'$and': andspec}
+        else:
+            spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
 
         # Run the query.
         if abbr != 'all':
