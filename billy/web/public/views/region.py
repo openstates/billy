@@ -139,8 +139,16 @@ def search(request, abbr):
         bill_result_count = len(bill_results)
         bill_results = bill_results[:5]
 
-        # See if any legislator names match.
-        spec = {'full_name': {'$regex': search_text, '$options': 'i'}}
+        # See if any legislator names match. First split up name to avoid
+        # the Richard S. Madaleno problem. See Jira issue OS-32.
+        textbits = search_text.split()
+        textbits = filter(lambda s: 2 < len(s), textbits)
+        andspec = []
+        spec = {'$and': andspec}
+        for text in textbits:
+            andspec.append({'full_name': {'$regex': text, '$options': 'i'}})
+
+        # Run the query.
         if abbr != 'all':
             spec[settings.LEVEL_FIELD] = abbr
         legislator_results = list(db.legislators.find(spec).sort(
