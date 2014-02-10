@@ -48,6 +48,9 @@ urlpatterns += patterns(
     url(r'^favorites/set_notification_preference/$',
         'billy.web.public.views.favorites.set_notification_preference',
         name='set_notification_preference'),
+    url(r'^favorites/favorite_bills_csv/$',
+        'billy.web.public.views.favorites.favorite_bills_csv',
+        name='favorite_bills_csv'),
 )
 
 # region specific
