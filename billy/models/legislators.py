@@ -155,6 +155,11 @@ class Legislator(Document):
         else:
             return ''
 
+    def office_emails(self):
+        for office in self['offices']:
+            if 'email' in office:
+                yield office['email']
+
     def context_role(self, bill=None, vote=None, session=None, term=None):
         '''Tell this legislator object which session to use when calculating
         the legisator's context_role for a given bill or vote.
