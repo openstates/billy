@@ -265,8 +265,7 @@ class BillSearchHandler(BillyHandler):
 
 class LegislatorHandler(BillyHandler):
     def read(self, request, id):
-        return db.legislators.find_one({'_all_ids': id},
-                                       _build_field_list(request))
+        return db.legislators.find_one({'_all_ids': id}, _build_field_list(request))
 
 
 class LegislatorSearchHandler(BillyHandler):
@@ -275,10 +274,9 @@ class LegislatorSearchHandler(BillyHandler):
         # replace with request's fields if they exist
         legislator_fields = _build_field_list(request, legislator_fields)
 
-        _filter = _build_mongo_filter(request, (settings.LEVEL_FIELD,
-                                                'first_name', 'last_name'))
-        elemMatch = _build_mongo_filter(request, ('chamber', 'term',
-                                                  'district', 'party'))
+        _filter = _build_mongo_filter(request, (settings.LEVEL_FIELD, 'first_name', 'last_name',
+                                                'full_name'))
+        elemMatch = _build_mongo_filter(request, ('chamber', 'term', 'district', 'party'))
         if elemMatch:
             _filter['roles'] = {'$elemMatch': elemMatch}
 
