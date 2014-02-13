@@ -47,7 +47,9 @@ class Favorites(dict):
         return [obj['obj'] for obj in self.get('legislator', [])]
 
     def committee_objects(self):
-        return [obj['obj'] for obj in self.get('committee', [])]
+        deleted = dict(has_been_deleted=True)
+        objs = [obj.get('obj', deleted) for obj in self.get('committee', [])]
+        return objs
 
 
 class FavoritedSearch(dict):
