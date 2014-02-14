@@ -262,7 +262,7 @@ def favorite_bills_csv(request):
     # Write in each bill.
     for bill in favorites['bill']:
         bill = mdb.bills.find_one(bill['obj_id'])
-        sponsors = (sp['full_name'] for sp in bill.sponsors_manager)
+        sponsors = (sp['name'] for sp in bill.sponsors_manager)
         row = (
             bill.metadata['name'],
             bill['bill_id'],
