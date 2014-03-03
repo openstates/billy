@@ -15,6 +15,8 @@ def templatename(name):
 
 def mongo_fields(*fields):
     fields = dict(zip(fields, itertools.repeat(1)))
+    # FIXED the return value was being assigned.
+    return fields
 
 
 def normalize_whitespace(s):
