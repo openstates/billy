@@ -3,7 +3,7 @@ from billy.importers.filters import (phone_filter, email_filter,
 
 
 def test_phone_filter():
-    number = "(555) 606-0842"
+    number = "555-606-0842"
     numbers = [
         "(555)-606-0842",
         "(555) 606-0842",
@@ -18,11 +18,10 @@ def test_phone_filter():
 
 
 def test_phone_filter_country():
-    number = "+1 (555) 606-0842"
+    number = "1-555-606-0842"
     numbers = [
         "+1-(555)-606-0842",
-        "+1 (555) 606-0842",
-        "1-555-606-0842",
+        "+1 (555) 606-0842"
     ]
     for num in numbers:
         assert phone_filter(num) == number
@@ -51,12 +50,10 @@ def test_garbage():
 
 
 def test_extention():
-    number = "(555) 606-0842 x505"
+    number = "555-606-0842 x505"
     numbers = [
         "555-606-0842, x505",
         "555-606-0842 x505",
-        "555 606-0842 x505",
-        "(555) 606-0842 x505",
         "555-606-0842 Ext. 505",
         "555-606-0842 Ext. 505",
         "555-606-0842 Extension 505"
