@@ -47,11 +47,19 @@ def run_filter(fltr, object_path, obj):
 
 
 def _phone_formatter(obj, extention):
-    objs = []
-    for thing in ["country", "area", "prefix", "line_number"]:
-        if thing in obj:
-            objs.append(obj[thing])
-    number = "-".join(objs)
+    if obj == {}:
+        return ""
+
+    number = ""
+    # +C (AREA) PREFIX-LINENUM
+    if "country" in obj:
+        number += "+%s " % (obj['country'])
+
+    if "area" in obj:
+        number += "(%s) " % (obj['area'])
+
+    number += "%s-%s" % (obj['prefix'], obj['line_number'])
+
     if extention is not None:
         number += " x%s" % (extention)
     return number
@@ -109,6 +117,9 @@ def phone_filter(original_number, formatter=_phone_formatter):
                 return original_number
 
     number = formatter(obj, extention)
+    if not number:
+        return original_number
+
     return number
 
 
