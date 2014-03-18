@@ -265,6 +265,6 @@ def get_user_latlong(request):
     if location:
         for key in ('lat', 'lng'):
             data[key] = location.get(key)
-    resp = HttpResponse(mimetype='application/json')
+    resp = HttpResponse(content_type='application/json')
     json.dump(data, resp)
     return resp
