@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 
 {% block title %}Data Quality{% endblock %}
@@ -16,6 +17,6 @@
     {% endfor %}
 </ul>
 
-<a href = '{% url quality_exceptions metadata.abbreviation %}' >go back</a>
+<a href = '{% url 'quality_exceptions' metadata.abbreviation %}' >go back</a>
 
 {% endblock %}

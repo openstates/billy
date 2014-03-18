@@ -1,10 +1,11 @@
+{% load url from future %}
 {% extends "billy/base.html" %}
 {% load billy_utiltags %}
 {% block title %}{{metadata.name}} committees - deleting{% endblock %}
 
 {% block content %}
 
-<form action="{% url delete_committees %}" method="POST">
+<form action="{% url 'delete_committees' %}" method="POST">
 {% csrf_token %}
 <div>
     <h3>Permanently Delete these Committees?</h3>
@@ -25,7 +26,7 @@
         <input type="hidden" name="committees" value="{{com|key:"_id"}}">
     {% endfor %}
 
-    <a href="{% url admin_committees abbr %}"
+    <a href="{% url 'admin_committees' abbr %}"
         class="btn btn-default">Go Back</a>
     <button type="submit" name="confirm" value="true"
         class="btn btn-danger">Delete Checked Committees</button>

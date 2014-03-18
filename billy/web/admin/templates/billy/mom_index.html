@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load staticfiles %}
 {% load humanize %}
 {% load billy_utiltags %}
@@ -27,7 +28,7 @@
             </p>
         </div>
 
-        <form action="{% url mom_merge abbr %}" action="GET" >
+        <form action="{% url 'mom_merge' abbr %}" action="GET" >
             <fieldset>
                 <div class="control-group" >
                     <label>Legislator 1</label>

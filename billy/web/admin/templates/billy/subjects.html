@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load staticfiles %}
 {% load billy_utiltags %}
@@ -68,7 +69,7 @@
     of <span id="total">Unknown (wait a second)</span></h3>
 <br />
 
-<form action="{% url admin_subjects_commit metadata.abbreviation %}" method = "POST" >
+<form action="{% url 'admin_subjects_commit' metadata.abbreviation %}" method = "POST" >
     {% csrf_token %}
 <table class="table table-striped table-bordered table-condensed" id="target">
     <tr>
@@ -98,7 +99,7 @@
 <span class="label label-info">{{ n }}</span>
 {% endfor %}
         </td>
-        <td><a href="{% url admin_subjects_remove metadata.abbreviation subject|key:"_id" %}" >remove</a></td>
+        <td><a href="{% url 'admin_subjects_remove' metadata.abbreviation subject|key:"_id" %}" >remove</a></td>
     </tr>
 {% endfor %}
 </table>

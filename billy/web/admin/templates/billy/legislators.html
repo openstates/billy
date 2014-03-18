@@ -1,5 +1,6 @@
 {% extends "billy/base.html" %}
 {% load billy_utiltags %}
+{% load url from future %}
 
 {% block title %}{{metadata.name}} legislators{% endblock %}
 
@@ -50,11 +51,11 @@
     <td>{{leg.district}}</td>
     <td>{{leg.party}}</td>
     <td>
-        {% url legislator_noslug leg|level leg.leg_id as leg_url %}
+        {% url 'legislator_noslug' leg|level leg.leg_id as leg_url %}
         {% if leg_url %}<a href="{{leg_url}}">public</a>{% endif %}
     </td>
-    <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
-    <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
+    <td><a href="{% url 'object_json' "legislators" leg.leg_id %}">json</a></td>
+    <td><a href="{% url 'admin_legislator_edit' leg.leg_id %}">edit</a></td>
 </tr>
 {% endfor %}
 </table>
@@ -85,8 +86,8 @@
             {% endfor %}
         </dl>
     </td>
-    <td><a href="{% url object_json "legislators" leg.leg_id %}">json</a></td>
-    <td><a href="{% url admin_legislator_edit leg.leg_id %}">edit</a></td>
+    <td><a href="{% url 'object_json' "legislators" leg.leg_id %}">json</a></td>
+    <td><a href="{% url 'admin_legislator_edit' leg.leg_id %}">edit</a></td>
 </tr>
 {% endfor %}
 </tbody>

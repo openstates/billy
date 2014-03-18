@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load billy_utiltags %}
 {% block title %} {{meta.name}} bill list {% endblock title %}
 
@@ -20,9 +21,9 @@
             <td> {{bill.chamber}} </td>
             <td> {{bill.bill_id}} </td>
             <td> {{bill.title}} </td>
-            {% url bill bill|level bill.session bill.bill_id as bill_url%}
+            {% url 'bill' bill|level bill.session bill.bill_id as bill_url%}
 
-            <td> <a href="{% url object_json 'bills' bill|key:'_id' %}">json</a> </td>
+            <td> <a href="{% url 'object_json' 'bills' bill|key:'_id' %}">json</a> </td>
             <td><a href="{{bill.get_absolute_url}}">public</a></td>
         </tr>
         {% endfor %}

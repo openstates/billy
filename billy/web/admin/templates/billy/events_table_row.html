@@ -1,7 +1,8 @@
+{% load url from future %}
 {% load billy_utiltags %}
 <tr>
-    <td><a href="{% url admin_event event|level event_id %}">{{event_id}}</a></td>
+    <td><a href="{% url 'admin_event' event|level event_id %}">{{event_id}}</a></td>
     <td>{{event.when|date:"M d, Y"}}</a></td>
-    <td><a href="{% url object_json 'events' event_id %}">[json]</a>&nbsp;{{event.description}}</td>
+    <td><a href="{% url 'object_json' 'events' event_id %}">[json]</a>&nbsp;{{event.description}}</td>
     <td>{{event.location}}</td>
 </tr>

@@ -1,5 +1,6 @@
 {% extends "billy/base.html" %}
 {% load billy_utiltags %}
+{% load url from future %}
 
 {% block title %}{{ leg.full_name }}{% endblock %}
 
@@ -56,11 +57,11 @@ $(document).ready(function() {
 
 {% block content %}
 
-<a href="{% url object_json "legislators" leg.leg_id %}" >json</a>
-{% url legislator_noslug leg|level leg.leg_id as leg_url %}
+<a href="{% url 'object_json' "legislators" leg.leg_id %}" >json</a>
+{% url 'legislator_noslug' leg|level leg.leg_id as leg_url %}
 {% if leg_url %} | <a href="{{leg_url}}" >public</a> {% endif %}
 
-<form action="{% url admin_legislator_edit_commit %}" method = 'post' >
+<form action="{% url 'admin_legislator_edit_commit' %}" method = 'post' >
     {% csrf_token %}
     <input type="hidden" value="{{ leg.leg_id }}" name="leg_id" />
 <table>
@@ -115,7 +116,7 @@ $(document).ready(function() {
 </table>
 </form>
 
-<form class="well form-inline" action="{% url retire_legislator leg.leg_id %}" method="POST">
+<form class="well form-inline" action="{% url 'retire_legislator' leg.leg_id %}" method="POST">
   <h4>Retire Legislator</h4>
   <label>Retirement Date</label>
   <input type="text" placeholder="YYYY-MM-DD" name="end_date">

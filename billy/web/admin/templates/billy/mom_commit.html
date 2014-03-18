@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load billy_utiltags %}
 
@@ -14,8 +15,8 @@
             <br />
             The merge is shown below just for last-stage verification of the
             results. Please do pay attention to it. Feel free to head back
-            home <a href="{% url mom_index abbr %}" >here</a>, or check the
-            new legislator <a href="{% url object_json "legislators" merged.leg_id %}" >json</a>
+            home <a href="{% url 'mom_index' abbr %}" >here</a>, or check the
+            new legislator <a href="{% url 'object_json' "legislators" merged.leg_id %}" >json</a>
             </p>
         </div>
         <div class="merge-results" >
