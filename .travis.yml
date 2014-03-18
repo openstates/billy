@@ -13,3 +13,6 @@ notifications:
         - jturk@sunlightfoundation.com
         - paultag@sunlightfoundation.com
         - tneale@sunlightfoundation.com
+matrix:
+    allow_failures:
+        - env: DJANGO_PACKAGE="Django<1.7"
