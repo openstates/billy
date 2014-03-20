@@ -6,7 +6,7 @@ env:
     - DJANGO_PACKAGE="Django<1.5"
     - DJANGO_PACKAGE="Django<1.7"
 services: mongodb
-install: pip install pymongo nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston -e git+https://github.com/jdunck/unicodecsv#egg=unicodecsv --use-mirrors 
+install: pip install pymongo nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston -e git+git@github.com:jdunck/python-unicodecsv.git#egg=unicodecsv --use-mirrors 
 before_script: echo -e "BOUNDARY_SERVICE_URL = 'http://ec2-184-73-61-66.compute-1.amazonaws.com/'\nBOUNDARY_SERVICE_SETS='sldl,sldu'" > billy_settings.py
 script: nosetests && django-admin.py test --settings=billy.tests.django_settings --pythonpath=.
 notifications:
