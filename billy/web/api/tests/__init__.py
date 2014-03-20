@@ -3,7 +3,7 @@
 The django test runner looks for unittest.TestCase subclasses
 defined in this file, so import any testcases here.
 '''
-from .metadata import *
+from .test_metadata import *
 from .test_bills import *
 from .test_legislators import *
 from .test_committees import *
