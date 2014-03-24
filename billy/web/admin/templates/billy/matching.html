@@ -32,12 +32,12 @@
         <td>{{name}}</td>
         <td>
             <select class="mselect" name="legislator,{{term}},{{chamber}},{{name}}" type="text" >
-                {{leg_options}}
+                {{leg_options|safe}}
             </select>
         </td>
         <td>
             <select class="mselect" name="committee,{{term}},{{chamber}},{{name}}" type="text" >
-                {{com_options}}
+                {{com_options|safe}}
             </select>
         </td>
     </tr>
