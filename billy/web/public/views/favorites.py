@@ -250,7 +250,7 @@ def favorite_bills_csv(request):
     favorites = get_user_favorites(request.user.username)
 
     # Create a csv resposne.
-    response = HttpResponse(mimetype='text/csv')
+    response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="favorite_bills.csv"'
 
     # Start a CSV writer.

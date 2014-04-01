@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from billy.web.public.views.misc import VotesList, NewsList
 from billy.web.public.views.bills import (BillList, AllBillList,

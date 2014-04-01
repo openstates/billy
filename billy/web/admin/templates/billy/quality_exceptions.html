@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load billy_utiltags %}
 
@@ -19,7 +20,7 @@
                 <span class="label label-info">{{ i }}</span>
             {% endfor %}</td>
         <td>{{ ex.notes }}</td>
-        <td><a href="{% url quality_exception_remove metadata.abbreviation ex|key:"_id" %}" >remove</a></td>
+        <td><a href="{% url 'quality_exception_remove' metadata.abbreviation ex|key:"_id" %}" >remove</a></td>
     </tr>
 {% endfor %}
 </table>
@@ -29,7 +30,7 @@
 <br /><br />
 
 <div class="span8">
-    <form method = 'POST' action = "{% url quality_exception_commit metadata.abbreviation %}" class="form-horizontal">
+    <form method = 'POST' action = "{% url 'quality_exception_commit' metadata.abbreviation %}" class="form-horizontal">
         {% csrf_token %}
         <fieldset>
             <div class="control-group">

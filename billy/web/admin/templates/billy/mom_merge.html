@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load billy_utiltags %}
 
@@ -50,9 +51,9 @@ $(document).ready(function() {
         </div>
         <span>
             The actions here will <b>remove</b> legislator
-            <a href="{% url object_json "legislators" remove %}" >{{ remove }}</a>
+            <a href="{% url 'object_json' "legislators" remove %}" >{{ remove }}</a>
             and <b>update</b> legislator
-            <a href="{% url object_json "legislators" merge.leg_id %}" >{{ merge.leg_id }}</a>
+            <a href="{% url 'object_json' "legislators" merge.leg_id %}" >{{ merge.leg_id }}</a>
         </span>
         <div class="merge-plan" >
             <table>
@@ -105,7 +106,7 @@ $(document).ready(function() {
             data loss. If you're not at all sure, this is your last chance to
             avoid the merge.
         </p>
-        <form action="{% url mom_commit abbr %}" method="POST" >
+        <form action="{% url 'mom_commit' abbr %}" method="POST" >
             <input name="leg1" type="hidden" value="{{ leg1.leg_id }}" />
             <input name="leg2" type="hidden" value="{{ leg2.leg_id }}" />
             {% csrf_token %}

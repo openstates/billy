@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load billy_utiltags %}
 
@@ -45,7 +46,7 @@
                     {{ leg1 }} is removed from the database or merged with another Legislator.
                 {% else %}
                     I've found
-                    <a href="{% url object_json "legislators" leg1 %}" >{{ leg1 }}</a>
+                    <a href="{% url 'object_json' "legislators" leg1 %}" >{{ leg1 }}</a>
                     in the DB, and is a root legislator currently. This means I
                     am able to merge this Legislator with another.
                 {% endif %}
@@ -55,7 +56,7 @@
                     {{ leg2 }} is removed from the database or merged with another Legislator.
                 {% else %}
                     I've found
-                    <a href="{% url object_json "legislators" leg2 %}" >{{ leg2 }}</a>
+                    <a href="{% url 'object_json' "legislators" leg2 %}" >{{ leg2 }}</a>
                     in the DB, and is a root legislator currently. This means I
                     am able to merge this Legislator with another.
                 {% endif %}

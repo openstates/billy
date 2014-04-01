@@ -51,7 +51,7 @@ def keyfunc(obj):
 @is_superuser
 def _csv_response(request, csv_name, columns, data, abbr):
     if 'csv' in request.REQUEST:
-        resp = HttpResponse(mimetype="text/plain")
+        resp = HttpResponse(content_type="text/csv")
         resp['Content-Disposition'] = 'attachment; filename=%s_%s.csv' % (
             abbr, csv_name)
         out = unicodecsv.writer(resp)

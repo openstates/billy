@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load url from future %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,42 +68,42 @@
       <div class="navbar">
         <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="{% url admin_index %}">billy admin</a>
+            <a class="brand" href="{% url 'admin_index' %}">billy admin</a>
             <ul class="nav">
                 {% if metadata %}
-                <li> <a href='{% url admin_overview metadata.abbreviation %}'>{{metadata.name}}</a> </li>
+                <li> <a href='{% url 'admin_overview' metadata.abbreviation %}'>{{metadata.name}}</a> </li>
                 <li class="divider-vertical"></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle"
                         data-toggle="dropdown">Bills<b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                    <li> <a href="{% url admin_bills metadata.abbreviation %}">Bill Overview</a> </li>
-                    <li> <a href="{% url bad_vote_list metadata.abbreviation %}">Bad Vote Counts</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}">Current Session</a> </li>
-                    <li> <a href="{% url bill_list metadata.abbreviation %}?limit=current_term">Current Term</a> </li>
-                    <li> <a href="{% url duplicate_versions metadata.abbreviation %}">Dup. Versions</a> </li>
-                    <li> <a href="{% url progress_meter_gaps metadata.abbreviation %}">Progress gaps</a> </li>
+                    <li> <a href="{% url 'admin_bills' metadata.abbreviation %}">Bill Overview</a> </li>
+                    <li> <a href="{% url 'bad_vote_list' metadata.abbreviation %}">Bad Vote Counts</a> </li>
+                    <li> <a href="{% url 'bill_list' metadata.abbreviation %}?limit=no_versions">Versionless</a> </li>
+                    <li> <a href="{% url 'bill_list' metadata.abbreviation %}?limit=no_sponsors">Sponsorless</a> </li>
+                    <li> <a href="{% url 'bill_list' metadata.abbreviation %}?limit=no_actions">Actionless</a> </li>
+                    <li> <a href="{% url 'bill_list' metadata.abbreviation %}">Current Session</a> </li>
+                    <li> <a href="{% url 'bill_list' metadata.abbreviation %}?limit=current_term">Current Term</a> </li>
+                    <li> <a href="{% url 'duplicate_versions' metadata.abbreviation %}">Dup. Versions</a> </li>
+                    <li> <a href="{% url 'progress_meter_gaps' metadata.abbreviation %}">Progress gaps</a> </li>
                     </ul>
                 </li>
-                <li> <a href='{% url admin_legislators metadata.abbreviation %}'>Legislators</a> </li>
-                <li> <a href='{% url admin_committees metadata.abbreviation %}'>Committees</a> </li>
+                <li> <a href='{% url 'admin_legislators' metadata.abbreviation %}'>Legislators</a> </li>
+                <li> <a href='{% url 'admin_committees' metadata.abbreviation %}'>Committees</a> </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle"
                         data-toggle="dropdown">Manual Data<b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                    <li><a href="{% url admin_matching metadata.abbreviation %}">Name Matching</a> </li>
-                    <li><a href="{% url admin_matching_debug metadata.abbreviation %}">Name Matching Debug</a> </li>
-                    <li><a href="{% url admin_subjects metadata.abbreviation %}">Subjects</a> </li>
-                    <li><a href="{% url other_actions metadata.abbreviation %}">Other Actions</a> </li>
-                    <li><a href="{% url quality_exceptions metadata.abbreviation %}">Data Quality Exceptions</a> </li>
+                    <li><a href="{% url 'admin_matching' metadata.abbreviation %}">Name Matching</a> </li>
+                    <li><a href="{% url 'admin_matching_debug' metadata.abbreviation %}">Name Matching Debug</a> </li>
+                    <li><a href="{% url 'admin_subjects' metadata.abbreviation %}">Subjects</a> </li>
+                    <li><a href="{% url 'other_actions' metadata.abbreviation %}">Other Actions</a> </li>
+                    <li><a href="{% url 'quality_exceptions' metadata.abbreviation %}">Data Quality Exceptions</a> </li>
                     </ul>
                 </li>
-                <li> <a href="{% url run_detail_list metadata.abbreviation %}">Run Detail</a> </li>
+                <li> <a href="{% url 'run_detail_list' metadata.abbreviation %}">Run Detail</a> </li>
                 {% endif %}
                 {% block menu %}{% endblock %}
             </ul>

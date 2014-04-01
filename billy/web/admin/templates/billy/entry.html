@@ -1,7 +1,8 @@
+{% load url from future %}
 {% load billy_utiltags %}
 <div class="entry">
 <span class="pull-right">
-	<a href="{% url object_json 'feed_entries' entry.id %}">json</a></span>
+	<a href="{% url 'object_json' 'feed_entries' entry.id %}">json</a></span>
 <h3>[{{entry|level}}]&nbsp;<a href="{{entry.link}}">{{entry.title}}</a></h3>
 <h5>
 	<small>

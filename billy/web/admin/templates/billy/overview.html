@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load billy_utiltags %}
 
@@ -9,14 +10,14 @@
 {% block content %}
 <div class="container">
     <h1>{{ metadata.name }}</h1>
-    <a href="{% url object_json "metadata" metadata.abbreviation %}">Metadata</a>
+    <a href="{% url 'object_json' "metadata" metadata.abbreviation %}">Metadata</a>
 </div>
 
 <div class="container">
 
 <div class="row"> <div class="span12">
 <div class="well {% if runlog.failure %}bad{% else %}good{% endif %}">
-    <h3><a href="{% url run_detail_list metadata.abbreviation %}" >Last run information</a></h3>
+    <h3><a href="{% url 'run_detail_list' metadata.abbreviation %}" >Last run information</a></h3>
     {% if runlog %}
     <p>
     <br /> Last scrape started at {{ runlog.scraped.started }} UTC,
@@ -43,7 +44,7 @@
 
 
 <div class="well">
-    <h3><a href="{% url admin_bills metadata.abbreviation %}">Bills</a></h3>
+    <h3><a href="{% url 'admin_bills' metadata.abbreviation %}">Bills</a></h3>
     <dl>
         <dt>Upper:</dt><dd>{{report.bills.upper_count}}</dd>
         <dt>Lower:</dt><dd>{{report.bills.lower_count}}</dd>
@@ -65,12 +66,12 @@
     <h3>Distinct Object Values</h3>
     <p>These pages display distinct values for each key found in objects in the collections in mongo.</p>
     {% for session in sessions %}
-        <a href="{% url summary_index metadata.abbreviation session %}">{{session}}</a></br>
+        <a href="{% url 'summary_index' metadata.abbreviation session %}">{{session}}</a></br>
     {% endfor %}
 </div>
 
 <div class="well">
-    <h3><a href="{% url admin_events metadata.abbreviation %}">Events</a></h3>
+    <h3><a href="{% url 'admin_events' metadata.abbreviation %}">Events</a></h3>
     <p>View the first 20 events.</p>
 </div>
 </div>
@@ -107,7 +108,7 @@
 </div>
 
 <div class="well">
-    <h3><a href="{% url quality_exceptions metadata.abbreviation %}" >Data Quality Exceptions</a></h3>
+    <h3><a href="{% url 'quality_exceptions' metadata.abbreviation %}" >Data Quality Exceptions</a></h3>
     <p>
         View existing / add additional data quality exceptions.
     </p>

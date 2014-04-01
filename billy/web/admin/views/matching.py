@@ -49,13 +49,40 @@ def edit(request, abbr):
 
         unmatched_ids.append((term, chamber, name, id_type))
 
+    LEG_OPTIONS = '<option value="Unknown" >Unknown</option>'
+    for leg in legs:
+        kwargs = leg.copy()
+        if 'chamber' not in kwargs:
+            kwargs['chamber'] = None
+
+        LEG_OPTIONS += """
+        <option value="{leg_id}" >
+             {first_name} {last_name}
+             {chamber}
+             ({leg_id})
+         </option>""".format(**kwargs)
+
+
+    COM_OPTIONS = '<option value="Unknown" >Unknown</option>'
+    for committee in committees:
+        kwargs = committee.copy()
+        COM_OPTIONS += """
+        <option value="{_id}" >
+            {chamber}/{committee}
+            {subcommittee}
+            ({_id})
+        </option>
+        """.format(**kwargs)
+
     return render(request, 'billy/matching.html', {
         "metadata": meta,
         "unmatched_ids": unmatched_ids,
         "all_ids": sorted_ids,
         "committees": committees,
         "known_objs": known_objs,
-        "legs": legs
+        "legs": legs,
+        "leg_options": LEG_OPTIONS,
+        "com_options": COM_OPTIONS,
     })
 
 

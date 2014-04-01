@@ -1,4 +1,5 @@
 {% extends "billy/base.html" %}
+{% load url from future %}
 {% load humanize %}
 {% load staticfiles %}
 {% load billy_utiltags %}
@@ -16,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-<form action="{% url admin_matching_commit metadata.abbreviation %}" method="POST" >
+<form action="{% url 'admin_matching_commit' metadata.abbreviation %}" method="POST" >
 {% csrf_token %}
 <table class="table table-striped table-bordered table-condensed">
     <tr>
@@ -31,26 +32,12 @@
         <td>{{name}}</td>
         <td>
             <select class="mselect" name="legislator,{{term}},{{chamber}},{{name}}" type="text" >
-                <option value="Unknown" >Unknown</option>
-                {% for leg in legs %}
-                <option value="{{ leg.leg_id }}" >
-                {{ leg.first_name }} {{ leg.last_name }}
-                {{leg.chamber}}
-                ({{ leg.leg_id }})
-                </option>
-                {% endfor %}
+                {{leg_options|safe}}
             </select>
         </td>
         <td>
             <select class="mselect" name="committee,{{term}},{{chamber}},{{name}}" type="text" >
-                <option value="Unknown" >Unknown</option>
-                {% for committee in committees %}
-                <option value="{{ committee|key:"_id" }}" >
-                    {{ committee.chamber }}/{{ committee.committee }}
-                    {{committee.subcommittee}}
-                    ({{committee|key:"_id"}})
-                </option>
-                {% endfor %}
+                {{com_options|safe}}
             </select>
         </td>
     </tr>
@@ -81,7 +68,7 @@
         {% else %}
         <td></td>
         {% endif %}
-        <td><a href="{% url admin_matching_remove metadata.abbreviation id %}" >remove</a></td>
+        <td><a href="{% url 'admin_matching_remove' metadata.abbreviation id %}" >remove</a></td>
     </tr>
 {% endfor %}
 </table>
