@@ -31,10 +31,7 @@ class Command(NoArgsCommand):
             self.push_user(username, options['dry_run'])
 
     def push_user(self, username, dry_run):
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return
+        user = User.objects.get(username=username)
         payload = {'email': user.email,
                    'secret_key': settings.SCOUT_SECRET_KEY,
                    'service': settings.SCOUT_SERVICE,
