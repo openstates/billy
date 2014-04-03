@@ -153,7 +153,6 @@ def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
             (k, [unicode(v).encode('utf-8') for v in vv])
             for (k, vv) in dict(request.GET).items()]
         for k, v in params:
-            print k, v
             if len(v) == 1:
                 _params[k] = v.pop()
             elif len(v) > 1:

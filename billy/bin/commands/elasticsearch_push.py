@@ -26,7 +26,7 @@ class ElasticsearchPush(BaseCommand):
             sys.path.insert(0, newpath)
         if args.sample:
             bill = db.bills.find({'_id': args.sample})[0]
-            print bill_to_elasticsearch(bill)
+            print(bill_to_elasticsearch(bill))
         else:
             for abbr in args.abbrs:
                 for bill in db.bills.find({settings.LEVEL_FIELD: abbr.lower()},
