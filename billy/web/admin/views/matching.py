@@ -55,7 +55,7 @@ def edit(request, abbr):
         if 'chamber' not in kwargs:
             kwargs['chamber'] = None
 
-        LEG_OPTIONS += """
+        LEG_OPTIONS += u"""
         <option value="{leg_id}" >
              {first_name} {last_name}
              {chamber}
