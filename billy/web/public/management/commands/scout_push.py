@@ -139,3 +139,8 @@ class Command(NoArgsCommand):
             result['state'] = favorite['search_abbr'].upper()
 
         return result
+
+
+if __name__ == '__main__':
+    import sys
+    Command().run_from_argv(sys.argv)
