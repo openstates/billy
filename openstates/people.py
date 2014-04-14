@@ -7,8 +7,17 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old = self.api('legislators/' + legislator_id + '?')
         old.pop('country', None)
         old.pop('level', None)
+        district = old.pop('district', None)
+        photo = old.get('photo_url')
 
-        new = Legislator(name=old['full_name'], image=old['photo_url'])
+        kwargs = {}
+        if photo:
+            kwargs['image'] = photo
+
+        new = Legislator(name=old['full_name'], post_id=district, **kwargs)
+        for source in old.pop('sources'):
+            new.add_source(**source)
+
         return new
 
     def scrape(self):
