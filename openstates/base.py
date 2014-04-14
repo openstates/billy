@@ -34,5 +34,9 @@ class OpenstatesBaseScraper(Scraper):
         Preform an API call against `method`. Return the parsed json
         data.
         """
-        url = 'http://openstates.org/api/v1/' + method + '&apikey=' + self.apikey
+        url = 'http://openstates.org/api/v1/{}{}apikey={}'.format(
+            method,
+            "&" if "?" in method else "?",
+            self.apikey
+        )
         return self.get(url).json()
