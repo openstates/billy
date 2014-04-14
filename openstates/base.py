@@ -6,7 +6,7 @@ import os
 class OpenstatesBaseScraper(Scraper):
 
     def __init__(self, *args, **kwargs):
-        super(OpenstatesPersonScraper, self).__init__(*args, **kwargs)
+        super(OpenstatesBaseScraper, self).__init__(*args, **kwargs)
 
         self.apikey = os.getenv('SUNLIGHT_API_KEY')
         if self.apikey is None:
