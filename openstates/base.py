@@ -4,6 +4,12 @@ import os
 
 
 class OpenstatesBaseScraper(Scraper):
+    """
+    This is the OpenStates base Pupa scraper.
+
+    This is used to centralize the OpenStates scrapers into a single place,
+    and offload as much as we can here.
+    """
 
     def __init__(self, *args, **kwargs):
         super(OpenstatesBaseScraper, self).__init__(*args, **kwargs)
@@ -24,5 +30,9 @@ class OpenstatesBaseScraper(Scraper):
             )
 
     def api(self, method):
+        """
+        Preform an API call against `method`. Return the parsed json
+        data.
+        """
         url = 'http://openstates.org/api/v1/' + method + '&apikey=' + self.apikey
         return self.get(url).json()
