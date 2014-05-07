@@ -49,7 +49,7 @@ def edit(request, abbr):
 
         unmatched_ids.append((term, chamber, name, id_type))
 
-    LEG_OPTIONS = '<option value="Unknown" >Unknown</option>'
+    LEG_OPTIONS = u'<option value="Unknown" >Unknown</option>'
     for leg in legs:
         kwargs = leg.copy()
         if 'chamber' not in kwargs:
@@ -63,10 +63,10 @@ def edit(request, abbr):
          </option>""".format(**kwargs)
 
 
-    COM_OPTIONS = '<option value="Unknown" >Unknown</option>'
+    COM_OPTIONS = u'<option value="Unknown" >Unknown</option>'
     for committee in committees:
         kwargs = committee.copy()
-        COM_OPTIONS += """
+        COM_OPTIONS += u"""
         <option value="{_id}" >
             {chamber}/{committee}
             {subcommittee}
