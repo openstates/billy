@@ -8,13 +8,14 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('country', None)
         old.pop('level', None)
         district = old.pop('district', None)
+        chamber = old.pop('chamber', None)
         photo = old.get('photo_url')
 
         kwargs = {}
         if photo:
             kwargs['image'] = photo
 
-        new = Legislator(name=old['full_name'], post_id=district, **kwargs)
+        new = Legislator(name=old['full_name'], district=district, chamber=chamber, **kwargs)
         for source in old.pop('sources'):
             new.add_source(**source)
 
