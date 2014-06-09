@@ -19,6 +19,7 @@ class NorthCarolina(Jurisdiction):
     scrapers = {
         "people": PersonScraper,
     }
+    parties = [{'name': 'Republican'}, {'name': 'Democratic'}]
 
     organizations = [house, senate]
     posts = ([Post(label=str(n), role='Representative', organization_id=house._id)
