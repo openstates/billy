@@ -3,6 +3,9 @@ from .base import OpenstatesBaseScraper
 
 
 class OpenstatesPersonScraper(OpenstatesBaseScraper):
+
+    _committees = {}
+
     def scrape_legislator(self, legislator_id):
         old = self.api('legislators/' + legislator_id + '?')
         # just not needed
@@ -101,12 +104,18 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         com = old.pop('committee')
         sub = old.pop('subcommittee')
-        name = sub or com
-        new = Committee(name, chamber=old.pop('chamber'))
+        parent_id = old.pop('parent_id')
+        if sub:
+            parent = self._committees[parent_id].id
+            new = Committee(sub, chamber=old.pop('chamber'), parent_id=parent)
+        else:
+            new = Committee(com, chamber=old.pop('chamber'))
+            assert parent_id is None
 
         # all_ids
         for id in old.pop('all_ids'):
             new.add_identifier(id, scheme='openstates')
+            self._committees[id] = new
 
         # sources
         for source in old.pop('sources'):
@@ -121,5 +130,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             yield self.scrape_legislator(result['id'])
 
         method = 'committees/?state={}&fields=id'.format(self.state)
-        for result in self.api(method):
+        results = sorted(self.api(method), key=lambda x: x.get('parent_id', '') or '')
+        for result in results:
             yield self.scrape_committee(result['id'])
