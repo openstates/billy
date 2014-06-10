@@ -1,4 +1,4 @@
-from pupa.scrape import Legislator
+from pupa.scrape import Legislator, Committee
 from .base import OpenstatesBaseScraper
 
 
@@ -6,14 +6,18 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
     def scrape_legislator(self, legislator_id):
         old = self.api('legislators/' + legislator_id + '?')
         # just not needed
+        old.pop('id')
+        old.pop('created_at')
+        old.pop('updated_at')
         old.pop('country', None)
         old.pop('level', None)
         old.pop('state')
         old.pop('leg_id')
-        old.pop('id')
-        old.pop('created_at')
-        old.pop('updated_at')
         old.pop('active')
+        # junk keys
+        old.pop('suffix', None)
+        old.pop('notice', None)
+        old.pop('csrfmiddlewaretoken', None)
 
         # translated
         district = old.pop('district', None)
@@ -73,11 +77,49 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('suffixes')
         old.pop('nickname', None)
 
-        #assert not old, old
+        to_pop = []
+        for key, val in old.items():
+            if key.startswith('+'):
+                new.extras[key[1:]] = val
+                to_pop.append(key)
+        for k in to_pop:
+            old.pop(k)
+
+        assert not old, old.keys()
 
         return new
+
+    def scrape_committee(self, committee_id):
+        old = self.api('committees/' + committee_id + '?')
+        old.pop('id')
+        old.pop('created_at')
+        old.pop('updated_at')
+        old.pop('country', None)
+        old.pop('level', None)
+        old.pop('state')
+        old.pop('votesmart_id')
+
+        com = old.pop('committee')
+        sub = old.pop('subcommittee')
+        name = sub or com
+        new = Committee(name, chamber=old.pop('chamber'))
+
+        # all_ids
+        for id in old.pop('all_ids'):
+            new.add_identifier(id, scheme='openstates')
+
+        # sources
+        for source in old.pop('sources'):
+            new.add_source(**source)
+
+        assert not old, old.keys()
+
 
     def scrape(self):
         method = 'legislators/?state={}&fields=id'.format(self.state)
         for result in self.api(method):
             yield self.scrape_legislator(result['id'])
+
+        method = 'committees/?state={}&fields=id'.format(self.state)
+        for result in self.api(method):
+            yield self.scrape_committee(result['id'])
