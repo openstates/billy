@@ -100,7 +100,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('country', None)
         old.pop('level', None)
         old.pop('state')
-        old.pop('votesmart_id')
+        old.pop('votesmart_id', None)
 
         com = old.pop('committee')
         sub = old.pop('subcommittee')
@@ -121,7 +121,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for source in old.pop('sources'):
             new.add_source(**source)
 
+        # TODO: members
+        old.pop('members')
+
         assert not old, old.keys()
+
+        return new
 
 
     def scrape(self):
