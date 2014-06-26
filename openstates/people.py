@@ -8,6 +8,23 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
     _people = {}
     _roles = set()
 
+    def get_term_years(self, term_name=None):
+        if term_name is None:
+            return self.metadata['terms'][-1]['start_year'], self.metadata['terms'][-1]['end_year']
+        for term in self.metadata['terms']:
+            if term['name'] == term_name:
+                return term['start_year'], term['end_year']
+
+    def process_role(self, role, leg_id):
+        start, end = self.get_term_years(role['term'])
+        if role['type'] == 'committee member':
+            # leg_id, com_id, role, start, end
+            self._roles.add((leg_id, role['committee_id'], role['position'], start, end))
+        elif role['type'] == 'member':
+            pass
+        else:
+            raise Exception("unknown role type: " + role['type'])
+
     def scrape_legislator(self, legislator_id):
         old = self.api('legislators/' + legislator_id + '?')
         # just not needed
@@ -69,27 +86,20 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for source in old.pop('sources'):
             new.add_source(**source)
 
+        # roles
         for role in old.pop('roles'):
-            if role['type'] == 'committee member':
-                if role['committee_id']:
-                    # leg_id, com_id, role
-                    self._roles.add((id, role['committee_id'], role['position']))
-                else:
-                    pass # TODO - missing com id
-            elif role['type'] == 'member':
-                pass
-            else:
-                raise Exception("unknown role type: " + role['type'])
+            self.process_role(role, leg_id=id)
 
-        # TODO: old_role stuff
-        old.pop('old_roles', None)
+        for role_list in old.pop('old_roles', {}).values():
+            for role in role_list:
+                self.process_role(role, leg_id=id)
 
-        # TODO: name stuff
+        # ignore most of the names for now
         old.pop('first_name')
-        old.pop('last_name')
         old.pop('middle_name')
         old.pop('suffixes')
         old.pop('nickname', None)
+        new.sort_name = old.pop('last_name')
 
         to_pop = []
         for key, val in old.items():
@@ -99,6 +109,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for k in to_pop:
             old.pop(k)
 
+        # ensure we got it all
         assert not old, old.keys()
 
         return new
@@ -140,12 +151,10 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             new.add_source(**source)
 
         # members
+        start, end = self.get_term_years()
         for role in old.pop('members'):
-            if role['leg_id']:
-                # leg_id, com_id, role
-                self._roles.add((role['leg_id'], id, role['role']))
-            else:
-                pass # TODO - missing leg id
+            # leg_id, com_id, role, start, end
+            self._roles.add((role['leg_id'], id, role['role'], start, end))
 
         assert not old, old.keys()
 
@@ -153,6 +162,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
 
     def scrape(self):
+        method = 'metadata/{}?'.format(self.state)
+        self.metadata = self.api(method)
+
         method = 'legislators/?state={}&fields=id'.format(self.state)
         for result in self.api(method):
             yield self.scrape_legislator(result['id'])
@@ -162,8 +174,16 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for result in results:
             yield self.scrape_committee(result['id'])
 
-        for leg_id, com_id, role in self._roles:
-            yield Membership(person_id=self._people[leg_id]._id,
-                             organization_id=self._committees[com_id]._id,
-                             role=role, label=role)
-            # start_date?
+        for leg_id, com_id, role, start, end in self._roles:
+
+            # resolve OpenStates committee id to JSON ids
+            if com_id in self._committees:
+                com_id = self._committees[com_id]._id
+            else:
+                com_id = None
+
+            if com_id and leg_id:
+                yield Membership(person_id=self._people[leg_id]._id, organization_id=com_id,
+                                 role=role, label=role, start_date=str(start), end_date=str(end))
+            else:
+                pass # TODO: missing com_id or leg_id
