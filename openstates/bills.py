@@ -8,11 +8,20 @@ action_types = {
     'bill:reading:2': 'reading-2',
     'bill:reading:3': 'reading-3',
     'bill:passed': 'passage',
+    'bill:failed': 'failure',
+    'bill:withdrawn': 'withdrawal',
     'committee:referred': 'committee-referral',
     'committee:passed': 'committee-passage',
+    'committee:passed:favorable': 'committee-passage-favorable',
+    'committee:passed:unfavorable': 'committee-passage-unfavorable',
     'committee:failed': 'committee-failure',
     'governor:received': 'executive-received',
-    'governor:signed': 'executive-signed',
+    'governor:signed': 'executive-signature',
+    'governor:vetoed': 'executive-veto',
+    'amendment:introduced': 'amendment-introduction',
+    'amendment:passed': 'amendment-passage',
+    'amendment:withdrawn': 'amendment-withdrawal',
+    'amendment:failed': 'amendment-failure',
 }
 
 
@@ -46,7 +55,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         for doc in old.pop('versions'):
             new.add_version_link(doc['name'], doc['url'], media_type=doc['mimetype'])
 
-        for subj in old.pop('scraped_subjects'):
+        for subj in old.pop('scraped_subjects', []):
             new.add_subject(subj)
 
         for spon in old.pop('sponsors'):
@@ -65,7 +74,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                            classification=[action_types[c] for c in act['type'] if c != 'other'])
             # TODO: related_entities
 
-        for comp in old.pop('companions'):
+        for comp in old.pop('companions', []):
             # TODO: fix this
             new.add_related_bill(comp['bill_id'], comp['session'], comp['relation_type'])
 
