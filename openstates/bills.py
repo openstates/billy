@@ -51,7 +51,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         for spon in old.pop('sponsors'):
             if spon.get('committee_id') is not None:
-                entity_type = 'committee'
+                entity_type = 'organization'
             elif spon.get('leg_id') is not None:
                 entity_type = 'person'
             else:
