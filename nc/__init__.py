@@ -1,8 +1,12 @@
 from pupa.scrape import Jurisdiction, Organization, Post
 from openstates.people import OpenstatesPersonScraper
-
+from openstates.bills import OpenstatesBillScraper
 
 class PersonScraper(OpenstatesPersonScraper):
+    state = 'nc'
+
+
+class BillScraper(OpenstatesBillScraper):
     state = 'nc'
 
 
@@ -18,6 +22,7 @@ class NorthCarolina(Jurisdiction):
 
     scrapers = {
         "people": PersonScraper,
+        "bills": BillScraper,
     }
     parties = [{'name': 'Republican'}, {'name': 'Democratic'}]
 

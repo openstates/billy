@@ -1,10 +1,13 @@
 from pupa.scrape import Jurisdiction, Organization, Post
 from openstates.people import OpenstatesPersonScraper
+from openstates.bills import OpenstatesBillScraper
 
 
 class PersonScraper(OpenstatesPersonScraper):
     state = 'ak'
 
+class BillScraper(OpenstatesBillScraper):
+    state = 'ak'
 
 house = Organization('Alaska State House', classification='legislature', chamber='lower')
 senate = Organization('Alaska State Senate', classification='legislature', chamber='upper')
@@ -18,6 +21,7 @@ class Alaska(Jurisdiction):
 
     scrapers = {
         "people": PersonScraper,
+        "bills": BillScraper,
     }
     parties = [{'name': 'Republican'}, {'name': 'Democratic'}]
 
