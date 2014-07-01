@@ -19,7 +19,9 @@ class Alaska(Jurisdiction):
     name = "Alaska State Legislature"
     url = "http://w3.legis.state.ak.us/"
     legislative_sessions = [
-        {"name": '28'}
+        {"name": '28'},
+        {"name": '27'},
+        {"name": '26'},
     ]
 
     scrapers = {
