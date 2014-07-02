@@ -35,7 +35,6 @@ def make_jurisdiction(a_state):
     # legislature_url
     # chambers.title
     # terms?
-    # sessions
 
     # make orgs
     orgs = []
@@ -69,6 +68,6 @@ def make_jurisdiction(a_state):
 
         scrapers = {'people': PersonScraper, 'bills': BillScraper}
         parties = [{'name': 'Republican'}, {'name': 'Democratic'}]
-        sessions = leg_sessions
+        legislative_sessions = leg_sessions
 
     return StateJuris
