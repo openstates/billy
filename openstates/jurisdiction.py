@@ -65,8 +65,6 @@ def make_jurisdiction(a_state):
         classification = 'government'
         name = metadata['name']
         organizations = orgs
-
-        organizations = orgs
         scrapers = {'people': PersonScraper, 'bills': BillScraper}
         parties = [{'name': 'Republican'}, {'name': 'Democratic'}]
         legislative_sessions = leg_sessions
