@@ -49,8 +49,8 @@ def make_jurisdiction(a_state):
         for s in td['sessions']:
             session = {'identifier': s,
                        'name': metadata['session_details'][s]['display_name'],
-                       'start_date': metadata['session_details'][s].get('start_date', ''),
-                       'end_date': metadata['session_details'][s].get('end_date', ''),
+                       'start_date': metadata['session_details'][s].get('start_date', '')[:10],
+                       'end_date': metadata['session_details'][s].get('end_date', '')[:10],
                       }
             leg_sessions.append(session)
 
