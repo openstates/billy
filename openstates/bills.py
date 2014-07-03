@@ -64,7 +64,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             elif spon.get('leg_id') is not None:
                 entity_type = 'person'
             else:
-                entity_type = None
+                entity_type = ''
             # TODO: use sponsorship ids to do matching
             new.add_sponsorship(spon['name'], spon['type'], entity_type,
                                 spon['type'] == 'primary')
