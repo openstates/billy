@@ -19,7 +19,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         start, end = self.get_term_years(role['term'])
         if role['type'] == 'committee member':
             # leg_id, com_id, role, start, end
-            self._roles.add((leg_id, role['committee_id'], role['position'], start, end))
+            self._roles.add((leg_id, role['committee_id'], role.get('position', 'member'),
+                             start, end))
         elif role['type'] == 'member':
             pass
         else:
