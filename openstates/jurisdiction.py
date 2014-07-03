@@ -54,7 +54,6 @@ def make_jurisdiction(a_state):
                       }
             leg_sessions.append(session)
 
-
     # make scrapers
     class PersonScraper(OpenstatesPersonScraper):
         state = a_state
@@ -65,6 +64,7 @@ def make_jurisdiction(a_state):
         division_id = 'ocd-division/country:us/state:' + a_state
         classification = 'government'
         name = metadata['name']
+        organizations = orgs
 
         organizations = orgs
         scrapers = {'people': PersonScraper, 'bills': BillScraper}
