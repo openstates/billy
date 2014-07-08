@@ -1,6 +1,7 @@
 from pupa.scrape import Jurisdiction, Organization
 from openstates.base import OpenstatesBaseScraper
 from openstates.people import OpenstatesPersonScraper
+from openstates.events import OpenstatesEventScraper
 from openstates.bills import OpenstatesBillScraper
 
 def chamber_name(state, chamber):
@@ -59,13 +60,16 @@ def make_jurisdiction(a_state):
         state = a_state
     class BillScraper(OpenstatesBillScraper):
         state = a_state
+    class EventScraper(OpenstatesEventScraper):
+        state = a_state
 
     class StateJuris(Jurisdiction):
         division_id = 'ocd-division/country:us/state:' + a_state
         classification = 'government'
         name = metadata['name']
         organizations = orgs
-        scrapers = {'people': PersonScraper, 'bills': BillScraper}
+        scrapers = {'people': PersonScraper, 'bills': BillScraper,
+                    'events': EventScraper,}
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},
                    {'name': 'Independent'},
