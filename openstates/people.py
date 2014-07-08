@@ -18,8 +18,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
     def process_role(self, role, leg_id):
         start, end = self.get_term_years(role['term'])
         if role['type'] == 'committee member':
-            # leg_id, com_id, role, start, end
-            self._roles.add((leg_id, role['committee_id'], role.get('position', 'member'),
+            self._roles.add((leg_id,
+                             role.get('committee_id', None),
+                             role.get('position', 'member'),
                              start, end))
         elif role['type'] == 'member':
             pass
@@ -41,6 +42,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('suffix', None)
         old.pop('notice', None)
         old.pop('csrfmiddlewaretoken', None)
+        old.pop('office_address', None)
+        old.pop('office_phone', None)
 
         # translated
         district = old.pop('district', None)

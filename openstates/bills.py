@@ -10,6 +10,7 @@ action_types = {
     'bill:passed': 'passage',
     'bill:failed': 'failure',
     'bill:withdrawn': 'withdrawal',
+    'bill:substituted': 'substitution',
     'committee:referred': 'committee-referral',
     'committee:passed': 'committee-passage',
     'committee:passed:favorable': 'committee-passage-favorable',
@@ -48,7 +49,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_title(title)
 
         for doc in old.pop('documents'):
-            new.add_document_link(doc['name'], doc['url'])
+            new.add_document_link(doc['name'], doc['url'], on_duplicate='ignore')
 
         for doc in old.pop('versions'):
             new.add_version_link(doc['name'], doc['url'], media_type=doc['mimetype'])
