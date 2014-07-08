@@ -12,10 +12,26 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
         method = 'events/?state={}&dtstart=1776-07-04'.format(self.state)
         self.events = self.api(method)
         for event in self.events:
-            e = Event(name=event['description'],
-                      location=event['location'],
-                      start_time=dparse(event['when']),
-                      end_time=dparse(event['end']),)
-            for source in event['sources']:
+            e = Event(name=event.pop('description'),
+                      classification=event.pop('type'),
+                      location=event.pop('location'),
+                      timezone=event.pop('timezone'),
+                      start_time=dparse(event.pop('when')),
+                      end_time=dparse(event.pop('end')),)
+
+            for source in event.pop('sources'):
                 e.add_source(**source)
+
+            ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
+                      'session', 'id']
+
+            for i in ignore:
+                if i in event:
+                    event.pop(i)
+
+            print(event)
+
+            assert event == {}, "Unknown fields: %s" % (
+                ", ".join(event.keys())
+            )
             yield e
