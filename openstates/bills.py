@@ -1,4 +1,4 @@
-from pupa.scrape import Bill
+from pupa.scrape import Bill, Vote
 from .base import OpenstatesBaseScraper
 
 
@@ -40,8 +40,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('action_dates')
         # TODO: subjects?
         old.pop('subjects')
-        # TODO: votes
-        old.pop('votes')
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=old.pop('chamber'), classification=old.pop('type'))
@@ -86,9 +84,41 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         for source in old.pop('sources'):
             new.add_source(**source)
 
+        # votes
+        for vote in old.pop('votes'):
+            vote.pop('id')
+            vote.pop('state')
+            vote.pop('bill_id')
+            vote.pop('bill_chamber', None)
+            vote.pop('+state', None)
+            vote.pop('+country', None)
+            vote.pop('+level', None)
+            assert vote.pop('type') == 'other'
+
+            newvote = Vote(legislative_session=vote.pop('session'),
+                           motion_text=vote.pop('motion'),
+                           result='pass' if vote.pop('passed') else 'fail',
+                           chamber=vote.pop('chamber'),
+                           start_date=vote.pop('date'),
+                           classification=[],
+                           bill=new)
+            for vt in ('yes', 'no', 'other'):
+                newvote.set_count(vt, vote.pop(vt + '_count'))
+                for name in vote.pop(vt + '_votes'):
+                    newvote.vote(vt, name['name'])
+                    # TODO: leg_id needs to be used here at some point
+
+            for source in vote.pop('sources'):
+                newvote.add_source(**source)
+
+            vote.pop('vote_id')
+
+            assert not vote, vote.keys()
+            yield newvote
+
         assert not old, old.keys()
 
-        return new
+        yield new
 
 
     def scrape(self):
@@ -97,4 +127,4 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         method = 'bills/?state={}&fields=id'.format(self.state)
         for result in self.api(method):
-            yield self.scrape_bill(result['id'])
+            yield from self.scrape_bill(result['id'])
