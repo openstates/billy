@@ -29,7 +29,17 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 if i in event:
                     event.pop(i)
 
-            print(event)
+            for p in event.pop('participants', []):
+                print(p)
+                raise ValueError
+
+            for b in event.pop('related_bills', []):
+                print(b)
+                raise ValueError
+
+            for document in event.pop('documents', []):
+                print(document)
+                raise ValueError
 
             assert event == {}, "Unknown fields: %s" % (
                 ", ".join(event.keys())
