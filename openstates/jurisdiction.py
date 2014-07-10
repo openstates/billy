@@ -4,6 +4,12 @@ from openstates.people import OpenstatesPersonScraper
 from openstates.events import OpenstatesEventScraper
 from openstates.bills import OpenstatesBillScraper
 
+POSTS = {
+    'ak': {'lower': range(1, 41), 'upper': (chr(n) for n in range(65, 85))},
+    'al': {'lower': range(1, 106), 'upper': range(1, 36)},
+    'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
+}
+
 def chamber_name(state, chamber):
     if state in ('ne', 'dc', 'pr'):
         raise ValueError(state)
@@ -74,6 +80,8 @@ def make_jurisdiction(a_state):
                 if otype in metadata['chambers']:
                     org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
                                        classification=otype, parent_id=legislature._id)
+                    for post in POSTS[a_state][otype]:
+                        org.add_post(str(post), metadata['chambers'][otype]['title'])
                     yield org
 
     return StateJuris
