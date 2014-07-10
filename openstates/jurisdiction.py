@@ -32,18 +32,7 @@ def make_jurisdiction(a_state):
     metadata = osbs.api('metadata/{}?'.format(a_state))
 
     # timezone
-    # legislature_name
-    # legislature_url
     # chambers.title
-    # terms?
-
-    # make orgs
-    orgs = []
-    for otype in ('upper', 'lower'):
-        if otype in metadata['chambers']:
-            org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
-                               classification='legislature', chamber=otype)
-            orgs.append(org)
 
     leg_sessions = []
     for td in metadata['terms']:
@@ -67,13 +56,24 @@ def make_jurisdiction(a_state):
         division_id = 'ocd-division/country:us/state:' + a_state
         classification = 'government'
         name = metadata['name']
-        organizations = orgs
-        scrapers = {'people': PersonScraper, 'bills': BillScraper,
-                    'events': EventScraper,}
+        scrapers = {'people': PersonScraper,
+                    'bills': BillScraper,
+                    #'events': EventScraper,
+                   }
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},
                    {'name': 'Independent'},
                   ]
         legislative_sessions = leg_sessions
+
+        def get_organizations(self):
+            legislature = Organization(metadata['legislature_name'], classification='legislature')
+            yield legislature
+
+            for otype in ('upper', 'lower'):
+                if otype in metadata['chambers']:
+                    org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
+                                       classification=otype, parent_id=legislature._id)
+                    yield org
 
     return StateJuris

@@ -138,7 +138,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         if sub:
             if parent_id:
                 parent = self._committees[parent_id]._id
-                new = Committee(sub, chamber=chamber, parent_id=parent)
+                new = Committee(sub, parent_id=parent)
             else:
                 new = Committee(com + ': ' + sub, chamber=chamber)
         else:
