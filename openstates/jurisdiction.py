@@ -77,6 +77,7 @@ def make_jurisdiction(a_state):
             yield legislature
             executive = Organization(metadata['name'] + ' Executive Branch',
                                      classification='executive')
+            yield executive
 
             for otype in ('upper', 'lower'):
                 if otype in metadata['chambers']:
