@@ -1,8 +1,11 @@
 from pupa.scrape import Event
 from .base import OpenstatesBaseScraper
 import dateutil.parser
+import pytz
 
-dparse = lambda x: dateutil.parser.parse(x) if x else None
+dparse = lambda x: pytz.timezone(
+    'America/New_York'
+).localize(dateutil.parser.parse(x)) if x else None
 
 
 
@@ -44,4 +47,5 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
             assert event == {}, "Unknown fields: %s" % (
                 ", ".join(event.keys())
             )
+
             yield e

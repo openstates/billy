@@ -64,7 +64,7 @@ def make_jurisdiction(a_state):
         name = metadata['name']
         scrapers = {'people': PersonScraper,
                     'bills': BillScraper,
-                    #'events': EventScraper,
+                    'events': EventScraper,
                    }
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},
