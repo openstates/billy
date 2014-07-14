@@ -37,7 +37,6 @@ def make_jurisdiction(a_state):
     osbs = OpenstatesBaseScraper(None, None)
     metadata = osbs.api('metadata/{}?'.format(a_state))
 
-    # timezone
     # chambers.title
 
     leg_sessions = []
@@ -62,6 +61,7 @@ def make_jurisdiction(a_state):
         division_id = 'ocd-division/country:us/state:' + a_state
         classification = 'government'
         name = metadata['name']
+        timezone = metadata['capitol_timezone']
         scrapers = {'people': PersonScraper,
                     'bills': BillScraper,
                     'events': EventScraper,

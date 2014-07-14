@@ -3,13 +3,14 @@ from .base import OpenstatesBaseScraper
 import dateutil.parser
 import pytz
 
-dparse = lambda x: pytz.timezone(
-    'America/New_York'
-).localize(dateutil.parser.parse(x)) if x else None
-
 
 
 class OpenstatesEventScraper(OpenstatesBaseScraper):
+
+    def _date_parse(self, x):
+        return pytz.timezone(self.jurisdiction.timezone).localize(
+            dateutil.parser.parse(x)
+        ) if x else None
 
     def scrape(self):
         method = 'events/?state={}&dtstart=1776-07-04'.format(self.state)
@@ -19,8 +20,8 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       classification=event.pop('type'),
                       location=event.pop('location'),
                       timezone=event.pop('timezone'),
-                      start_time=dparse(event.pop('when')),
-                      end_time=dparse(event.pop('end')),)
+                      start_time=self._date_parse(event.pop('when')),
+                      end_time=self._date_parse(event.pop('end')),)
 
             for source in event.pop('sources'):
                 e.add_source(**source)
