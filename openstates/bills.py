@@ -43,8 +43,13 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         # TODO: subjects?
         old.pop('subjects', [])
 
+        classification = old.pop('type')
+
+        if classification == ['miscellaneous']:
+            return
+
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
-                   chamber=old.pop('chamber'), classification=old.pop('type'))
+                   chamber=old.pop('chamber'), classification=classification)
 
         for title in old.pop('alternate_titles'):
             new.add_title(title)
