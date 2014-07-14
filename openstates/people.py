@@ -157,6 +157,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('level', None)
         old.pop('state')
         old.pop('votesmart_id', None)
+        old.pop('+short_name', None)
+        old.pop('+session', None)
+        old.pop('+az_committee_id', None)
 
         com = old.pop('committee')
         sub = old.pop('subcommittee')

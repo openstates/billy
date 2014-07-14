@@ -39,8 +39,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('created_at')
         old.pop('updated_at')
         old.pop('action_dates')
+        old.pop('+final_disposition', None)
         # TODO: subjects?
-        old.pop('subjects')
+        old.pop('subjects', [])
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=old.pop('chamber'), classification=old.pop('type'))
@@ -83,6 +84,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_identifier(id, scheme='openstates')
 
         for source in old.pop('sources'):
+            source.pop('retrieved', None)
             new.add_source(**source)
 
         # votes
@@ -94,7 +96,25 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+state', None)
             vote.pop('+country', None)
             vote.pop('+level', None)
-            assert vote.pop('type') == 'other'
+            vote.pop('+vacant', None)
+            vote.pop('+not_voting', None)
+            vote.pop('+amended', None)
+            vote.pop('+excused', None)
+            vote.pop('+NV', None)
+            vote.pop('+AB', None)
+            vote.pop('+P', None)
+            vote.pop('+V', None)
+            vote.pop('+E', None)
+            vote.pop('+EXC', None)
+            vote.pop('+EMER', None)
+            vote.pop('+present', None)
+            vote.pop('+absent', None)
+
+
+            # TODO: use committee, vtype?
+            vote.pop('committee', None)
+            vote.pop('committee_id', None)
+            vtype = vote.pop('type')
 
             newvote = Vote(legislative_session=vote.pop('session'),
                            motion_text=vote.pop('motion'),
@@ -110,6 +130,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                     # TODO: leg_id needs to be used here at some point
 
             for source in vote.pop('sources'):
+                source.pop('retrieved', None)
                 newvote.add_source(**source)
 
             vote.pop('vote_id')
