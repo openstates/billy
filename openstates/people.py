@@ -1,4 +1,5 @@
-from pupa.scrape import Legislator, Committee, Membership
+from pupa.scrape import Legislator, Committee, Membership, Person
+from pupa.utils import make_psuedo_id
 from .base import OpenstatesBaseScraper
 
 
@@ -22,8 +23,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                              role.get('committee_id', None),
                              role.get('position', 'member'),
                              start, end))
+        elif role['type'] == 'Lt. Governor':
+            pass
+
         elif role['type'] == 'member':
             pass
+
         else:
             raise Exception("unknown role type: " + role['type'])
 
@@ -50,9 +55,32 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         chamber = old.pop('chamber', None)
         image = old.pop('photo_url', '')
         name = old.pop('full_name')
-        party = old.pop('party')
+        party = old.pop('party', None)
 
-        new = Legislator(name=name, district=district, chamber=chamber, party=party, image=image)
+        if district is None:
+            new = Person(name=name, image=image)
+            if party:
+                membership = Membership(person_id=new._id,
+                                        role="member",
+                                        organization_id=make_psuedo_id(
+                                            classification="party",
+                                            name=party))
+                new._related.append(membership)
+
+            if old['roles']:
+                if 'Lt. Governor' in [x['type'] for x in old['roles']]:
+                    self.jurisdiction._executive.add_post(
+                        'Lt. Governor',
+                        'lt-gov'
+                    )
+                    membership = Membership(
+                        person_id=new._id,
+                        role="Lt. Governor",
+                        organization_id=self.jurisdiction._executive._id
+                    )
+                    new._related.append(membership)
+        else:
+            new = Legislator(name=name, district=district, chamber=chamber, party=party, image=image)
 
         # various ids
         id_types = {'votesmart_id': 'votesmart',
@@ -88,6 +116,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # sources
         for source in old.pop('sources'):
+            if 'retrieved' in source:
+                source.pop('retrieved')
             new.add_source(**source)
 
         # roles
@@ -169,7 +199,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         method = 'metadata/{}?'.format(self.state)
         self.metadata = self.api(method)
 
-        method = 'legislators/?state={}&fields=id'.format(self.state)
+        method = 'legislators/?state={}&fields=id&active=False'.format(self.state)
         for result in self.api(method):
             yield self.scrape_legislator(result['id'])
 
