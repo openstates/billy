@@ -8,6 +8,7 @@ POSTS = {
     'ak': {'lower': range(1, 41), 'upper': (chr(n) for n in range(65, 85))},
     'al': {'lower': range(1, 106), 'upper': range(1, 36)},
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
+    'tx': {'lower': range(1, 151), 'upper': range(1, 32)},
 }
 
 def chamber_name(state, chamber):
