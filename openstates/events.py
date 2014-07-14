@@ -24,22 +24,43 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       end_time=self._date_parse(event.pop('end')),)
 
             for source in event.pop('sources'):
+                if 'retrieved' in source:
+                    source.pop('retrieved')
                 e.add_source(**source)
 
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
-                      'session', 'id']
+                      'session', 'id', '+chamber', '+agenda']
+            # +agenda:
+            #   Agenda on old (very old) OpenStates data is actually a string
+            #   and not any sort of structured data we can use in the items
+            #   schema, and is only present for a handful of events.
 
             for i in ignore:
                 if i in event:
                     event.pop(i)
 
+            if '+link' in event:
+                e.add_source(url=event.pop("+link"))
+
             for p in event.pop('participants', []):
-                print(p)
-                raise ValueError
+                type_ = {
+                    "committee": "organization",
+                    "legislator": "person",
+                    None: None,
+                }[p.get('participant_type')]
+
+                if type_ is None:
+                    # Garbage data.
+                    continue
+
+                e.add_participant(name=p['participant'],
+                                  note=p['type'],
+                                  type=type_,)
 
             for b in event.pop('related_bills', []):
-                print(b)
-                raise ValueError
+                item = e.add_agenda_item(b['description'])
+                item.add_bill(bill=b['bill_id'],
+                              note=b['type'])
 
             for document in event.pop('documents', []):
                 print(document)
