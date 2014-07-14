@@ -75,7 +75,10 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                                 spon['type'] == 'primary')
 
         for act in old.pop('actions'):
-            new.add_action(act['action'], act['date'][:10], chamber=act['actor'],
+            actor = act['actor']
+            if actor == 'governor':
+                actor = 'executive'
+            new.add_action(act['action'], act['date'][:10], chamber=actor,
                            classification=[action_types[c] for c in act['type'] if c != 'other'])
             # TODO: related_entities
 
