@@ -136,10 +136,10 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         new.sort_name = old.pop('last_name')
 
         to_pop = []
-        for key, val in old.items():
-            if key.startswith('+'):
-                new.extras[key[1:]] = val
-                to_pop.append(key)
+        #for key, val in old.items():
+        #    if key.startswith('+'):
+        #        new.extras[key[1:]] = val
+        #        to_pop.append(key)
         for k in to_pop:
             old.pop(k)
 
