@@ -96,6 +96,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_source(**source)
 
         # votes
+        vote_no = 1
         for vote in old.pop('votes'):
             vote.pop('id')
             vote.pop('state')
@@ -124,13 +125,20 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('committee_id', None)
             vtype = vote.pop('type')
 
+            # some states need identifiers for uniqueness
+            identifier = None
+            if self.state in ('ak', ):
+                identifier = vote['date'] + '-' + str(vote_no)
+                vote_no += 1
+
             newvote = Vote(legislative_session=vote.pop('session'),
                            motion_text=vote.pop('motion'),
                            result='pass' if vote.pop('passed') else 'fail',
                            chamber=vote.pop('chamber'),
                            start_date=vote.pop('date'),
                            classification=[],
-                           bill=new)
+                           bill=new,
+                           identifier=identifier)
             for vt in ('yes', 'no', 'other'):
                 newvote.set_count(vt, vote.pop(vt + '_count'))
                 for name in vote.pop(vt + '_votes'):
