@@ -135,11 +135,15 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('nickname', None)
         new.sort_name = old.pop('last_name')
 
-        to_pop = ['+office_fax', '+phone', '+room', '+fax']
-        #for key, val in old.items():
-        #    if key.startswith('+'):
-        #        new.extras[key[1:]] = val
-        #        to_pop.append(key)
+        # keys to keep
+        to_extras = ['+occupation']
+        for k in to_extras:
+            v = old.pop(k, None)
+            if v:
+                new.extras[k[1:]] = v
+
+        # keys not to keep
+        to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo']
         for k in to_pop:
             old.pop(k, None)
 

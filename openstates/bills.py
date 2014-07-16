@@ -48,6 +48,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         if classification == ['miscellaneous']:
             return
 
+        if classification == ['memorial resolution'] and self.state == 'ar':
+            classification = ['memorial']
+
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=old.pop('chamber'), classification=classification)
 
