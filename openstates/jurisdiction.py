@@ -66,7 +66,7 @@ def make_jurisdiction(a_state):
         timezone = metadata['capitol_timezone']
         scrapers = {'people': PersonScraper,
                     'bills': BillScraper,
-                    'events': EventScraper,
+                    #'events': EventScraper,
                    }
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},

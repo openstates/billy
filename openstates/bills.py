@@ -126,7 +126,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vtype = vote.pop('type')
 
             # some states need identifiers for uniqueness
-            identifier = None
+            identifier = ''
             if self.state in ('ak', ):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
