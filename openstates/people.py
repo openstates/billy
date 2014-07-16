@@ -143,7 +143,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 new.extras[k[1:]] = v
 
         # keys not to keep
-        to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo']
+        to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice']
         for k in to_pop:
             old.pop(k, None)
 
@@ -174,6 +174,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         if sub:
             if parent_id:
+                print(id, parent_id)
                 parent = self._committees[parent_id]._id
                 new = Committee(sub, parent_id=parent)
             else:
@@ -210,7 +211,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for result in self.api(method):
             yield self.scrape_legislator(result['id'])
 
-        method = 'committees/?state={}&fields=id'.format(self.state)
+        method = 'committees/?state={}&fields=id,parent_id'.format(self.state)
         results = sorted(self.api(method), key=lambda x: x.get('parent_id', '') or '')
         for result in results:
             yield self.scrape_committee(result['id'])

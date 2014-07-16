@@ -50,6 +50,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         if classification == ['memorial resolution'] and self.state == 'ar':
             classification = ['memorial']
+        if classification == ['concurrent memorial resolution'] and self.state == 'ar':
+            classification = ['concurrent memorial']
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=old.pop('chamber'), classification=classification)
