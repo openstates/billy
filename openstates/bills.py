@@ -19,10 +19,12 @@ action_types = {
     'governor:received': 'executive-received',
     'governor:signed': 'executive-signature',
     'governor:vetoed': 'executive-veto',
+    'governor:vetoed:line-item': 'executive-veto-line-item',
     'amendment:introduced': 'amendment-introduction',
     'amendment:passed': 'amendment-passage',
     'amendment:withdrawn': 'amendment-withdrawal',
     'amendment:failed': 'amendment-failure',
+    'bill:veto_override:passed': 'veto-override-passage',
 }
 
 
@@ -40,6 +42,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('updated_at')
         old.pop('action_dates')
         old.pop('+final_disposition', None)
+        old.pop('+volume_chapter', None)
+        old.pop('+fiscal_notes', None)
+        old.pop('+final_disposition', None)
         # TODO: subjects?
         old.pop('subjects', [])
 
@@ -54,7 +59,12 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             classification = ['concurrent memorial']
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
-                   chamber=old.pop('chamber'), classification=classification)
+                   chamber=old.pop('chamber'), classification=classification,
+                  )
+
+        abstract = old.pop('summary', None)
+        if abstract:
+            new.add_abstract(abstract, note='')
 
         for title in old.pop('alternate_titles'):
             new.add_title(title)
@@ -83,6 +93,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             actor = act['actor']
             if actor == 'governor':
                 actor = 'executive'
+            elif actor == 'joint':
+                actor = 'legislature'
             new.add_action(act['action'], act['date'][:10], chamber=actor,
                            classification=[action_types[c] for c in act['type'] if c != 'other'])
             # TODO: related_entities
@@ -123,6 +135,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+EMER', None)
             vote.pop('+present', None)
             vote.pop('+absent', None)
+            vote.pop('+seconded', None)
+            vote.pop('+moved', None)
+            vote.pop('+vote_type', None)
 
 
             # TODO: use committee, vtype?
@@ -132,7 +147,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             # some states need identifiers for uniqueness
             identifier = ''
-            if self.state in ('ak', ):
+            if self.state in ('ak', 'az', 'co'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 

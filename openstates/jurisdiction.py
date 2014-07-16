@@ -9,6 +9,12 @@ POSTS = {
     'al': {'lower': range(1, 106), 'upper': range(1, 36)},
     'az': {'lower': range(1, 31), 'upper': range(1, 31)},
     'ar': {'lower': range(1, 101), 'upper': range(1, 36)},
+    # ca
+    'co': {'lower': range(1, 66), 'upper': range(1, 36)},
+    'ct': {'lower': range(1, 152), 'upper': range(1, 37)},
+    'de': {'lower': range(1, 42), 'upper': range(1, 22)},
+
+
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},
 }
@@ -72,6 +78,7 @@ def make_jurisdiction(a_state):
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},
                    {'name': 'Independent'},
+                   {'name': 'Green'},
                   ]
         legislative_sessions = leg_sessions
 

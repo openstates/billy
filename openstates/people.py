@@ -116,8 +116,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # sources
         for source in old.pop('sources'):
-            if 'retrieved' in source:
-                source.pop('retrieved')
+            source.pop('retrieved', None)
+            source.pop('+page', None)
             new.add_source(**source)
 
         # roles
@@ -136,14 +136,15 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         new.sort_name = old.pop('last_name')
 
         # keys to keep
-        to_extras = ['+occupation']
+        to_extras = ['+occupation', '+twitter']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
                 new.extras[k[1:]] = v
 
         # keys not to keep
-        to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice']
+        to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
+                  '+page']
         for k in to_pop:
             old.pop(k, None)
 
@@ -197,6 +198,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for role in old.pop('members'):
             # leg_id, com_id, role, start, end
             self._roles.add((role['leg_id'], id, role['role'], start, end))
+
+        to_extras = ['+twitter']
+        for k in to_extras:
+            v = old.pop(k, None)
+            if v:
+                new.extras[k[1:]] = v
 
         assert not old, old.keys()
 
