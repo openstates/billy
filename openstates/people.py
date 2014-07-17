@@ -30,6 +30,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             pass
 
         else:
+            print(role)
             raise Exception("unknown role type: " + role['type'])
 
     def scrape_legislator(self, legislator_id):
@@ -136,7 +137,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         new.sort_name = old.pop('last_name')
 
         # keys to keep
-        to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date']
+        to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -144,7 +145,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # keys not to keep
         to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
-                  '+page', '+suffix', '+city', '+address']
+                  '+page', '+suffix', '+city', '+address', '+additional_info_url', '+contact_form',
+                  '+fax_number', '+phone_number', '+business_phone',
+                 ]
         for k in to_pop:
             old.pop(k, None)
 
