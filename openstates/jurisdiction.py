@@ -17,6 +17,9 @@ POSTS = {
     'ga': {'lower': range(1, 181), 'upper': range(1, 57)},
     'hi': {'lower': range(1, 52), 'upper': range(1, 27)},
     'id': {'lower': range(1, 36), 'upper': range(1, 36)},
+    # il
+    'in': {'lower': range(1, 101), 'upper': range(1, 51)},
+    'ia': {'lower': range(1, 101), 'upper': range(1, 51)},
 
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},

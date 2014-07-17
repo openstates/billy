@@ -52,7 +52,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         classification = old.pop('type')
 
-        if classification == ['miscellaneous']:
+        if classification[0] in ['miscellaneous', 'jres', 'cres']:
             return
 
         if classification == ['memorial resolution'] and self.state == 'ar':
@@ -140,7 +140,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+seconded', None)
             vote.pop('+moved', None)
             vote.pop('+vote_type', None)
-
+            vote.pop('+actual_vote', None)
+            vote.pop('+skip_votes', None)
 
             # TODO: use committee, vtype?
             vote.pop('committee', None)
