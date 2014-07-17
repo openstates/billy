@@ -117,7 +117,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             source.pop('retrieved', None)
             new.add_source(**source)
 
-        to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number']
+        to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
+                     '+companion'
+                    ]
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -181,6 +183,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 source.pop('retrieved', None)
                 newvote.add_source(**source)
 
+            if not newvote.sources:
+                newvote.sources = new.sources
+
             vote.pop('vote_id')
 
             assert not vote, vote.keys()
@@ -195,6 +200,10 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         method = 'metadata/{}?'.format(self.state)
         self.metadata = self.api(method)
 
-        method = 'bills/?state={}&fields=id'.format(self.state)
-        for result in self.api(method):
-            yield from self.scrape_bill(result['id'])
+        for page in range(1, 100):
+            method = 'bills/?state={}&fields=id&per_page=2000&page='.format(self.state)
+            results = self.api(method)
+            if not results:
+                break
+            for result in results:
+                yield from self.scrape_bill(result['id'])
