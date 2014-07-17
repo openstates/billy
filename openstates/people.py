@@ -23,6 +23,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                              role.get('committee_id', None),
                              role.get('position', 'member'),
                              start, end))
+        elif role['type'] == 'chair':
+            self._roles.add((leg_id,
+                             role.get('committee_id', None),
+                             'chair',
+                             start, end))
         elif role['type'] == 'member':
             pass
         # TODO: handle these
