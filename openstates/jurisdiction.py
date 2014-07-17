@@ -9,7 +9,7 @@ POSTS = {
     'al': {'lower': range(1, 106), 'upper': range(1, 36)},
     'az': {'lower': range(1, 31), 'upper': range(1, 31)},
     'ar': {'lower': range(1, 101), 'upper': range(1, 36)},
-    # ca
+    # ca - big
     'co': {'lower': range(1, 66), 'upper': range(1, 36)},
     'ct': {'lower': range(1, 152), 'upper': range(1, 37)},
     'de': {'lower': range(1, 42), 'upper': range(1, 22)},
@@ -17,9 +17,16 @@ POSTS = {
     'ga': {'lower': range(1, 181), 'upper': range(1, 57)},
     'hi': {'lower': range(1, 52), 'upper': range(1, 27)},
     'id': {'lower': range(1, 36), 'upper': range(1, 36)},
-    # il
+    # il - big
     'in': {'lower': range(1, 101), 'upper': range(1, 51)},
     'ia': {'lower': range(1, 101), 'upper': range(1, 51)},
+    'ks': {'lower': range(1, 126), 'upper': range(1, 41)},
+    'ky': {'lower': range(1, 101), 'upper': range(1, 39)},
+    'la': {'lower': range(1, 106), 'upper': range(1, 41)},
+    'me': {'lower': range(1, 152), 'upper': range(1, 36)},
+    # ma - weird districts
+    'mi': {'lower': range(1, 111), 'upper': range(1, 39)},
+    # mn - weird districts
 
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},

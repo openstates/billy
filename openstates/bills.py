@@ -27,6 +27,7 @@ action_types = {
     'amendment:failed': 'amendment-failure',
     'amendment:tabled': 'amendment-failure',
     'bill:veto_override:passed': 'veto-override-passage',
+    'bill:veto_override:failed': 'veto-override-failure',
 }
 
 
@@ -43,10 +44,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('created_at')
         old.pop('updated_at')
         old.pop('action_dates')
-        old.pop('+final_disposition', None)
-        old.pop('+volume_chapter', None)
         old.pop('+fiscal_notes', None)
-        old.pop('+final_disposition', None)
         # TODO: subjects?
         old.pop('subjects', [])
 
@@ -60,6 +58,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         if classification == ['concurrent memorial resolution'] and self.state == 'ar':
             classification = ['concurrent memorial']
 
+        if not old['title'] and self.state == 'me':
+            old['title'] = '(unknown)'
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=old.pop('chamber'), classification=classification,
                   )
@@ -97,8 +97,11 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'executive'
             elif actor == 'joint':
                 actor = 'legislature'
-            new.add_action(act['action'], act['date'][:10], chamber=actor,
-                           classification=[action_types[c] for c in act['type'] if c != 'other'])
+            elif actor == 'other':
+                actor = 'legislature'
+            if act['action']:
+                new.add_action(act['action'], act['date'][:10], chamber=actor,
+                               classification=[action_types[c] for c in act['type'] if c != 'other'])
             # TODO: related_entities
 
         for comp in old.pop('companions', []):
@@ -113,6 +116,12 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         for source in old.pop('sources'):
             source.pop('retrieved', None)
             new.add_source(**source)
+
+        to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number']
+        for k in to_extras:
+            v = old.pop(k, None)
+            if v:
+                new.extras[k[1:]] = v
 
         # votes
         vote_no = 1
@@ -150,7 +159,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             # some states need identifiers for uniqueness
             identifier = ''
-            if self.state in ('ak', 'az', 'co', 'fl'):
+            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 

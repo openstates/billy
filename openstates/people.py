@@ -33,6 +33,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         # TODO: handle these
         elif role['type'] == 'Lt. Governor':
             pass
+        elif role['type'] in ('Senate President', 'Minority Whip', 'Majority Whip',
+                              'Majority Floor Leader', 'Speaker Pro Tem', 'Majority Caucus Chair',
+                              'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
+                              'President Pro Tem',
+                             ):
+            pass
         elif role['type'] == 'substitute':
             pass
         else:
@@ -143,7 +149,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # keys to keep
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
-                     '+secretary', '+office_hours',
+                     '+secretary', '+office_hours', '+resident_county', '+district_name',
                     ]
         for k in to_extras:
             v = old.pop(k, None)
@@ -154,7 +160,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
                   '+page', '+suffix', '+city', '+address', '+additional_info_url', '+contact_form',
                   '+fax_number', '+phone_number', '+business_phone', '+email_address', '+img_url',
-                  '+office_phone',
+                  '+office_phone', '+disctict_name', '+office_loc', '+leg_url', '+office'
                  ]
         for k in to_pop:
             old.pop(k, None)
