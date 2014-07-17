@@ -3,6 +3,7 @@ from .base import OpenstatesBaseScraper
 
 
 action_types = {
+    'bill:filed': 'filing',
     'bill:introduced': 'introduction',
     'bill:reading:1': 'reading-1',
     'bill:reading:2': 'reading-2',
@@ -24,6 +25,7 @@ action_types = {
     'amendment:passed': 'amendment-passage',
     'amendment:withdrawn': 'amendment-withdrawal',
     'amendment:failed': 'amendment-failure',
+    'amendment:tabled': 'amendment-failure',
     'bill:veto_override:passed': 'veto-override-passage',
 }
 

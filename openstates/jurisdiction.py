@@ -13,6 +13,8 @@ POSTS = {
     'co': {'lower': range(1, 66), 'upper': range(1, 36)},
     'ct': {'lower': range(1, 152), 'upper': range(1, 37)},
     'de': {'lower': range(1, 42), 'upper': range(1, 22)},
+    'fl': {'lower': range(1, 121), 'upper': range(1, 41)},
+    'ga': {'lower': range(1, 181), 'upper': range(1, 57)},
 
 
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},

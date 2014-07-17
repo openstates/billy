@@ -136,7 +136,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         new.sort_name = old.pop('last_name')
 
         # keys to keep
-        to_extras = ['+occupation', '+twitter']
+        to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -144,7 +144,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # keys not to keep
         to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
-                  '+page']
+                  '+page', '+suffix', '+city', '+address']
         for k in to_pop:
             old.pop(k, None)
 
@@ -199,7 +199,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             # leg_id, com_id, role, start, end
             self._roles.add((role['leg_id'], id, role['role'], start, end))
 
-        to_extras = ['+twitter']
+        to_extras = ['+twitter', '+description', '+code']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
