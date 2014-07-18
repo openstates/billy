@@ -65,6 +65,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         chamber = old.pop('chamber')
         if chamber == 'upper' and self.state in ('ne', 'dc'):
             chamber = 'legislature'
+        elif chamber == 'joint':
+            chamber = 'legislature'
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
                    chamber=chamber, classification=classification)
@@ -102,9 +104,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'executive'
             elif actor.lower() == 'house':
                 actor = 'lower'
-            elif actor.lower() == 'senate':
+            elif actor.lower() in ('senate', 'upper`'):
                 actor = 'upper'
-            elif actor in ('joint', 'other', 'Data Systems'):
+            elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk'):
                 actor = 'legislature'
 
             # nebraska & DC
@@ -130,7 +132,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_source(**source)
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
-                     '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:']
+                     '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
+                    '+bill_lr', '+official_title', '+bill_url']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -176,14 +179,18 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             # some states need identifiers for uniqueness
             identifier = ''
-            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga'):
+            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
+
+            chamber = vote.pop('chamber')
+            if chamber == 'upper' and self.state in ('ne', 'dc'):
+                chamber = 'legislature'
 
             newvote = Vote(legislative_session=vote.pop('session'),
                            motion_text=vote.pop('motion'),
                            result='pass' if vote.pop('passed') else 'fail',
-                           chamber=vote.pop('chamber'),
+                           chamber=chamber,
                            start_date=vote.pop('date'),
                            classification=[],
                            bill=new,

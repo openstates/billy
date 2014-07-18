@@ -227,7 +227,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             self._roles.add((role['leg_id'], id, role['role'], start, end))
 
         to_extras = ['+twitter', '+description', '+code', '+secretary', '+office_hours',
-                     '+office_phone']
+                     '+office_phone', '+meetings_info', '+status']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
