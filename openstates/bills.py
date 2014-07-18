@@ -26,6 +26,7 @@ action_types = {
     'amendment:withdrawn': 'amendment-withdrawal',
     'amendment:failed': 'amendment-failure',
     'amendment:tabled': 'amendment-failure',
+    'amendment:amended': 'amendment-amended',
     'bill:veto_override:passed': 'veto-override-passage',
     'bill:veto_override:failed': 'veto-override-failure',
 }
@@ -116,7 +117,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_source(**source)
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
-                     '+companion'
+                     '+companion', '+description',
                     ]
         for k in to_extras:
             v = old.pop(k, None)
@@ -151,6 +152,10 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+vote_type', None)
             vote.pop('+actual_vote', None)
             vote.pop('+skip_votes', None)
+            vote.pop('vote_id')
+            vote.pop('+bill_chamber', None)
+            vote.pop('+session', None)
+            vote.pop('+bill_id', None)
 
             # TODO: use committee, vtype?
             vote.pop('committee', None)
@@ -159,7 +164,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             # some states need identifiers for uniqueness
             identifier = ''
-            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi'):
+            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 
@@ -183,8 +188,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             if not newvote.sources:
                 newvote.sources = new.sources
-
-            vote.pop('vote_id')
 
             assert not vote, vote.keys()
             yield newvote

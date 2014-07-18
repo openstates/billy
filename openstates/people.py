@@ -160,7 +160,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
                   '+page', '+suffix', '+city', '+address', '+additional_info_url', '+contact_form',
                   '+fax_number', '+phone_number', '+business_phone', '+email_address', '+img_url',
-                  '+office_phone', '+disctict_name', '+office_loc', '+leg_url', '+office'
+                  '+office_phone', '+disctict_name', '+office_loc', '+leg_url', '+office',
+                  '+district_address', '+capital_address'
                  ]
         for k in to_pop:
             old.pop(k, None)
