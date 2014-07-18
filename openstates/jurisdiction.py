@@ -27,6 +27,11 @@ POSTS = {
     # ma - weird districts
     'mi': {'lower': range(1, 111), 'upper': range(1, 39)},
     # mn - weird districts
+    'ms': {'lower': range(1, 123), 'upper': range(1, 53)},
+    'mo': {'lower': range(1, 164), 'upper': range(1, 35)},
+    'mt': {'lower': range(1, 101), 'upper': range(1, 51)},
+    'ne': {'upper': range(1, 50)},
+
 
     'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},

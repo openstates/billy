@@ -202,7 +202,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         self.metadata = self.api(method)
 
         for page in range(1, 100):
-            method = 'bills/?state={}&fields=id&per_page=2000&page='.format(self.state)
+            method = 'bills/?state={}&fields=id&per_page=2000&page={}'.format(self.state, page)
             results = self.api(method)
             if not results:
                 break
