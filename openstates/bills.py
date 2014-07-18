@@ -95,9 +95,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             actor = act['actor']
             if actor == 'governor':
                 actor = 'executive'
-            elif actor == 'joint':
-                actor = 'legislature'
-            elif actor == 'other':
+            elif actor in ('joint', 'other', 'Data Systems'):
                 actor = 'legislature'
             if act['action']:
                 new.add_action(act['action'], act['date'][:10], chamber=actor,
