@@ -69,6 +69,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         name = old.pop('full_name')
         party = old.pop('party', None)
 
+        if party == 'Nonpartisan':
+            party = None
+
+        if self.state in('ne', 'dc'):
+            chamber = 'legislature'
+
         if district is None:
             new = Person(name=name, image=image)
             if party:
@@ -162,7 +168,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+fax_number', '+phone_number', '+business_phone', '+email_address', '+img_url',
                   '+office_phone', '+disctict_name', '+office_loc', '+leg_url', '+office',
                   '+district_address', '+capital_address', '+bis_phone', '+capital_phone',
-                  '+org_info', '+role', '+other_phone', '+home_phone'
+                  '+org_info', '+role', '+other_phone', '+home_phone', '+zip'
                  ]
         for k in to_pop:
             old.pop(k, None)
@@ -191,6 +197,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         chamber = old.pop('chamber')
         if chamber == 'joint':
             chamber = ''
+        if self.state in('ne', 'dc'):
+            chamber = 'legislature'
 
         if sub:
             if parent_id:

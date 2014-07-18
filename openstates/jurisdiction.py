@@ -102,7 +102,6 @@ def make_jurisdiction(a_state):
 
         def get_organizations(self):
             legislature = Organization(metadata['legislature_name'], classification='legislature')
-            yield legislature
             executive = Organization(metadata['name'] + ' Executive Branch',
                                      classification='executive')
             yield executive
@@ -110,12 +109,19 @@ def make_jurisdiction(a_state):
             self._legislature = legislature
             self._executive = executive
 
-            for otype in ('upper', 'lower'):
-                if otype in metadata['chambers']:
-                    org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
-                                       classification=otype, parent_id=legislature._id)
-                    for post in POSTS[a_state][otype]:
-                        org.add_post(str(post), metadata['chambers'][otype]['title'])
-                    yield org
+            if a_state != 'ne':
+                for otype in ('upper', 'lower'):
+                    if otype in metadata['chambers']:
+                        org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
+                                           classification=otype, parent_id=legislature._id)
+                        for post in POSTS[a_state][otype]:
+                            org.add_post(str(post), metadata['chambers'][otype]['title'])
+                        yield org
+            else:
+                for post in POSTS[a_state]['upper']:
+                    self._legislature.add_post(str(post), metadata['chambers']['upper']['title'])
+
+            yield legislature
+
 
     return StateJuris

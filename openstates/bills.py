@@ -61,9 +61,13 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         if not old['title'] and self.state == 'me':
             old['title'] = '(unknown)'
+
+        chamber = old.pop('chamber')
+        if chamber == 'upper' and self.state in ('ne', 'dc'):
+            chamber = 'legislature'
+
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),
-                   chamber=old.pop('chamber'), classification=classification,
-                  )
+                   chamber=chamber, classification=classification)
 
         abstract = old.pop('summary', None)
         if abstract:
@@ -94,10 +98,19 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         for act in old.pop('actions'):
             actor = act['actor']
-            if actor == 'governor':
+            if actor.lower() == 'governor':
                 actor = 'executive'
+            elif actor.lower() == 'house':
+                actor = 'lower'
+            elif actor.lower() == 'senate':
+                actor = 'upper'
             elif actor in ('joint', 'other', 'Data Systems'):
                 actor = 'legislature'
+
+            # nebraska & DC
+            if actor == 'upper' and self.state in ('ne', 'dc'):
+                actor = 'legislature'
+
             if act['action']:
                 new.add_action(act['action'], act['date'][:10], chamber=actor,
                                classification=[action_types[c] for c in act['type'] if c != 'other'])
@@ -117,8 +130,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_source(**source)
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
-                     '+companion', '+description',
-                    ]
+                     '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -160,7 +172,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # TODO: use committee, vtype?
             vote.pop('committee', None)
             vote.pop('committee_id', None)
-            vtype = vote.pop('type')
+            vtype = vote.pop('type', 'passage')
 
             # some states need identifiers for uniqueness
             identifier = ''
@@ -188,6 +200,12 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             if not newvote.sources:
                 newvote.sources = new.sources
+
+            to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action']
+            for k in to_extras:
+                v = vote.pop(k, None)
+                if v:
+                    newvote.extras[k.replace('+', '')] = v
 
             assert not vote, vote.keys()
             yield newvote
