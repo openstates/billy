@@ -119,8 +119,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # TODO: related_entities
 
         for comp in old.pop('companions', []):
-            # TODO: fix this
-            new.add_related_bill(comp['bill_id'], comp['session'], comp['relation_type'])
+            if self.state == 'nj':
+                rtype = 'companion'
+            new.add_related_bill(comp['bill_id'], comp['session'], rtype)
 
 
         # generic OpenStates stuff
@@ -180,7 +181,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # some states need identifiers for uniqueness
             identifier = ''
             if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne',
-                              'ms', 'mt', 'tx'):
+                              'ms', 'mt', 'tx', 'nv', 'nm'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 
