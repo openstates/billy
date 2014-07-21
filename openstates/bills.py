@@ -106,7 +106,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'lower'
             elif actor.lower() in ('senate', 'upper`'):
                 actor = 'upper'
-            elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk', 'Office of the Legislative Fiscal Analyst'):
+            elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk',
+                           'Office of the Legislative Fiscal Analyst', 'Became Law w'):
                 actor = 'legislature'
 
             # nebraska & DC
@@ -135,9 +136,16 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             source.pop('retrieved', None)
             new.add_source(**source)
 
+        ext_title = old.pop('+extended_title', None)
+        if ext_title:
+            new.add_title(ext_title, note='Extended Title')
+        official_title = old.pop('+official_title', None)
+        if official_title:
+            new.add_title(official_title, note='Official Title')
+
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
                      '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
-                    '+bill_lr', '+official_title', '+bill_url']
+                    '+bill_lr', '+bill_url']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -184,7 +192,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # some states need identifiers for uniqueness
             identifier = ''
             if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne',
-                              'ms', 'mt', 'tx', 'nv', 'nm'):
+                              'ms', 'mt', 'tx', 'nv', 'nm', 'wv', 'ut', 'wy'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 
