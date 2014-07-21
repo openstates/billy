@@ -179,7 +179,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             # some states need identifiers for uniqueness
             identifier = ''
-            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne'):
+            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne',
+                              'ms', 'mt', 'tx'):
                 identifier = vote['date'] + '-' + str(vote_no)
                 vote_no += 1
 
