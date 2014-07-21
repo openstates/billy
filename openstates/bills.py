@@ -187,6 +187,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             chamber = vote.pop('chamber')
             if chamber == 'upper' and self.state in ('ne', 'dc'):
                 chamber = 'legislature'
+            elif chamber == 'joint':
+                chamber = 'legislature'
 
             newvote = Vote(legislative_session=vote.pop('session'),
                            motion_text=vote.pop('motion'),
