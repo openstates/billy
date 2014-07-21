@@ -82,7 +82,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_document_link(doc['name'], doc['url'], on_duplicate='ignore')
 
         for doc in old.pop('versions'):
-            new.add_version_link(doc['name'], doc['url'], media_type=doc['mimetype'])
+            new.add_version_link(doc['name'], doc['url'], media_type=doc.pop('mimetype', ''))
 
         for subj in old.pop('scraped_subjects', []):
             new.add_subject(subj)
@@ -106,7 +106,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'lower'
             elif actor.lower() in ('senate', 'upper`'):
                 actor = 'upper'
-            elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk'):
+            elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk', 'Office of the Legislative Fiscal Analyst'):
                 actor = 'legislature'
 
             # nebraska & DC
@@ -122,6 +122,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             if self.state == 'nj':
                 rtype = 'companion'
             new.add_related_bill(comp['bill_id'], comp['session'], rtype)
+
+        for abid in old.pop('alternate_bill_ids', []) + old.pop('+alternate_bill_ids', []):
+            new.add_identifier(abid)
 
 
         # generic OpenStates stuff
@@ -212,7 +215,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             if not newvote.sources:
                 newvote.sources = new.sources
 
-            to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action']
+            to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
+                         '+location']
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:

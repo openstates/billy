@@ -37,6 +37,10 @@ POSTS = {
     'nm': {'lower': range(1, 71), 'upper': range(1, 43)},
     'nv': {'lower': range(1, 43), 'upper': range(1, 22)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},
+    'ut': {'lower': range(1, 76), 'upper': range(1, 30)},
+    'wa': {'lower': range(1, 50), 'upper': range(1, 50)},
+    'wv': {'lower': range(1, 68), 'upper': range(1, 18)},
+    'wy': {'lower': range(1, 61), 'upper': range(1, 31)},
 }
 
 def chamber_name(state, chamber):
