@@ -46,6 +46,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('updated_at')
         old.pop('action_dates')
         old.pop('+subject', None)
+        old.pop('+scraped_subjects', None)
         # TODO: subjects?
         old.pop('subjects', [])
 
@@ -120,7 +121,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # TODO: related_entities
 
         for comp in old.pop('companions', []):
-            if self.state == 'nj':
+            if self.state in ('nj', 'mn'):
                 rtype = 'companion'
             new.add_related_bill(comp['bill_id'], comp['session'], rtype)
 
@@ -145,7 +146,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
                      '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
-                    '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note']
+                    '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -222,7 +223,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newvote.sources = new.sources
 
             to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
-                         '+location', '+rcs_num']
+                         '+location', '+rcs_num', '+type_', '+threshold']
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:
