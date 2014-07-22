@@ -5,46 +5,7 @@ from openstates.events import OpenstatesEventScraper
 from openstates.bills import OpenstatesBillScraper
 
 POSTS = {
-    # ca - big
-    # il - big
-    # ma - weird districts
-    # mn - weird districts
-    # nh - weird districts
-    'ak': {'lower': range(1, 41), 'upper': (chr(n) for n in range(65, 85))},
-    'al': {'lower': range(1, 106), 'upper': range(1, 36)},
-    'ar': {'lower': range(1, 101), 'upper': range(1, 36)},
-    'az': {'lower': range(1, 31), 'upper': range(1, 31)},
-    'co': {'lower': range(1, 66), 'upper': range(1, 36)},
-    'ct': {'lower': range(1, 152), 'upper': range(1, 37)},
-    'de': {'lower': range(1, 42), 'upper': range(1, 22)},
-    'fl': {'lower': range(1, 121), 'upper': range(1, 41)},
-    'ga': {'lower': range(1, 181), 'upper': range(1, 57)},
-    'hi': {'lower': range(1, 52), 'upper': range(1, 27)},
-    'ia': {'lower': range(1, 101), 'upper': range(1, 51)},
-    'id': {'lower': range(1, 36), 'upper': range(1, 36)},
-    'in': {'lower': range(1, 101), 'upper': range(1, 51)},
-    'ks': {'lower': range(1, 126), 'upper': range(1, 41)},
-    'ky': {'lower': range(1, 101), 'upper': range(1, 39)},
-    'la': {'lower': range(1, 106), 'upper': range(1, 41)},
-    'me': {'lower': range(1, 152), 'upper': range(1, 36)},
-    'mi': {'lower': range(1, 111), 'upper': range(1, 39)},
-    'mo': {'lower': range(1, 164), 'upper': range(1, 35)},
-    'ms': {'lower': range(1, 123), 'upper': range(1, 53)},
-    'mt': {'lower': range(1, 101), 'upper': range(1, 51)},
-    'nc': {'lower': range(1, 121), 'upper': range(1, 51)},
     'ne': {'upper': range(1, 50)},
-    'nj': {'lower': range(1, 41), 'upper': range(1, 41)},
-    'nm': {'lower': range(1, 71), 'upper': range(1, 43)},
-    'nv': {'lower': range(1, 43), 'upper': range(1, 22)},
-    'ok': {'lower': range(1, 102), 'upper': range(1, 49)},
-    'ri': {'lower': range(1, 76), 'upper': range(1, 39)},
-    'sc': {'lower': range(1, 125), 'upper': range(1, 47)},
-    'sd': {'lower': range(1, 36), 'upper': range(1, 36)},
-    'tx': {'lower': range(1, 151), 'upper': range(1, 32)},
-    'ut': {'lower': range(1, 76), 'upper': range(1, 30)},
-    'wa': {'lower': range(1, 50), 'upper': range(1, 50)},
-    'wv': {'lower': range(1, 68), 'upper': range(1, 18)},
-    'wy': {'lower': range(1, 61), 'upper': range(1, 31)},
 }
 
 def chamber_name(state, chamber):

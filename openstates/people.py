@@ -71,6 +71,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         if party == 'Nonpartisan':
             party = None
+        elif party == 'Democrat':
+            party = 'Democratic'
 
         if self.state in('ne', 'dc'):
             chamber = 'legislature'
@@ -157,7 +159,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
                      '+secretary', '+office_hours', '+resident_county', '+district_name',
                      '+leg_status', '+legal_position', '+gender', '+title', '+start_year',
-                     '+end_date', 'occupation'
+                     '+end_date', 'occupation', '+biography', '+oregon_member_id',
                     ]
         for k in to_extras:
             v = old.pop(k, None)
@@ -172,6 +174,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+district_address', '+capital_address', '+bis_phone', '+capital_phone',
                   '+org_info', '+role', '+other_phone', '+home_phone', '+zip', '+zipcode',
                   '+county', '+capitol_phone', '+image_url', '+header', '+town_represented',
+                  '+full_address', '+capitol_address', '+website', '+district_phone'
                  ]
         for k in to_pop:
             old.pop(k, None)
