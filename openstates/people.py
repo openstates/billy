@@ -157,12 +157,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
                      '+secretary', '+office_hours', '+resident_county', '+district_name',
                      '+leg_status', '+legal_position', '+gender', '+title', '+start_year',
-                     '+end_date',
+                     '+end_date', 'occupation'
                     ]
         for k in to_extras:
             v = old.pop(k, None)
             if v:
-                new.extras[k[1:]] = v
+                new.extras[k.replace('+', '')] = v
 
         # keys not to keep
         to_pop = ['+office_fax', '+phone', '+room', '+fax', '+email', '+url', '+photo', '+notice',
@@ -171,7 +171,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+office_phone', '+disctict_name', '+office_loc', '+leg_url', '+office',
                   '+district_address', '+capital_address', '+bis_phone', '+capital_phone',
                   '+org_info', '+role', '+other_phone', '+home_phone', '+zip', '+zipcode',
-                  '+county', '+capitol_phone', '+image_url', '+header'
+                  '+county', '+capitol_phone', '+image_url', '+header', '+town_represented',
                  ]
         for k in to_pop:
             old.pop(k, None)
@@ -231,7 +231,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         to_extras = ['+twitter', '+description', '+code', '+secretary', '+office_hours',
                      '+office_phone', '+meetings_info', '+status', '+aide', '+contact_info',
-                     '+comm_type', 'comm_type', 'aide', 'contact_info']
+                     '+comm_type', 'comm_type', 'aide', 'contact_info', '+town_represented']
         for k in to_extras:
             v = old.pop(k, None)
             if v:

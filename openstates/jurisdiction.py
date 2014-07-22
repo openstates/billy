@@ -36,6 +36,10 @@ POSTS = {
     'nj': {'lower': range(1, 41), 'upper': range(1, 41)},
     'nm': {'lower': range(1, 71), 'upper': range(1, 43)},
     'nv': {'lower': range(1, 43), 'upper': range(1, 22)},
+    'ok': {'lower': range(1, 102), 'upper': range(1, 49)},
+    'ri': {'lower': range(1, 76), 'upper': range(1, 39)},
+    'sc': {'lower': range(1, 125), 'upper': range(1, 47)},
+    'sd': {'lower': range(1, 36), 'upper': range(1, 36)},
     'tx': {'lower': range(1, 151), 'upper': range(1, 32)},
     'ut': {'lower': range(1, 76), 'upper': range(1, 30)},
     'wa': {'lower': range(1, 50), 'upper': range(1, 50)},
@@ -120,8 +124,11 @@ def make_jurisdiction(a_state):
                     if otype in metadata['chambers']:
                         org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
                                            classification=otype, parent_id=legislature._id)
-                        for post in POSTS[a_state][otype]:
-                            org.add_post(str(post), metadata['chambers'][otype]['title'])
+                        districts = osbs.api('districts/{}/{}?'.format(a_state, otype))
+                        for district in districts:
+                            org.add_post(district['name'], metadata['chambers'][otype]['title'])
+                        #for post in POSTS[a_state][otype]:
+                        #    org.add_post(str(post), metadata['chambers'][otype]['title'])
                         yield org
             else:
                 for post in POSTS[a_state]['upper']:

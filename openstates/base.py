@@ -39,4 +39,7 @@ class OpenstatesBaseScraper(Scraper):
             "&" if "?" in method else "?",
             self.apikey
         )
-        return self.get(url).json()
+        try:
+            return self.get(url).json()
+        except ValueError:
+            raise ValueError('error retrieving ' + url)

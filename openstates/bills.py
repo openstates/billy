@@ -145,7 +145,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
                      '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
-                    '+bill_lr', '+bill_url']
+                    '+bill_lr', '+bill_url', '+rcs_num']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -183,18 +183,16 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+bill_chamber', None)
             vote.pop('+session', None)
             vote.pop('+bill_id', None)
+            vote.pop('+bill_session', None)
 
             # TODO: use committee, vtype?
             vote.pop('committee', None)
             vote.pop('committee_id', None)
             vtype = vote.pop('type', 'passage')
 
-            # some states need identifiers for uniqueness
-            identifier = ''
-            if self.state in ('ak', 'az', 'co', 'fl', 'in', 'ks', 'ia', 'me', 'hi', 'ga', 'ne',
-                              'ms', 'mt', 'tx', 'nv', 'nm', 'wv', 'ut', 'wy'):
-                identifier = vote['date'] + '-' + str(vote_no)
-                vote_no += 1
+            # most states need identifiers for uniqueness
+            identifier = vote['date'] + '-' + str(vote_no)
+            vote_no += 1
 
             chamber = vote.pop('chamber')
             if chamber == 'upper' and self.state in ('ne', 'dc'):
@@ -224,7 +222,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newvote.sources = new.sources
 
             to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
-                         '+location']
+                         '+location', '+rcs_num']
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:
