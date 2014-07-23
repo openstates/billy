@@ -121,7 +121,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             # TODO: related_entities
 
         for comp in old.pop('companions', []):
-            if self.state in ('nj', 'mn'):
+            if self.state in ('nj', 'ny', 'mn'):
                 rtype = 'companion'
             new.add_related_bill(comp['bill_id'], comp['session'], rtype)
 
