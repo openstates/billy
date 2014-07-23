@@ -36,7 +36,7 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
 
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
                       '+location_url', 'session', 'id', '+chamber', '+agenda',
-                      '+details']
+                      '+media_contact', '+contact', '+details']
             # +agenda:
             #   Agenda on old (very old) OpenStates data is actually a string
             #   and not any sort of structured data we can use in the items
