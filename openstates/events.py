@@ -29,7 +29,7 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 e.add_source(**source)
 
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
-                      'session', 'id', '+chamber', '+agenda']
+                      'session', 'id', '+chamber', '+agenda', '+details']
             # +agenda:
             #   Agenda on old (very old) OpenStates data is actually a string
             #   and not any sort of structured data we can use in the items
@@ -39,8 +39,9 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 if i in event:
                     event.pop(i)
 
-            if '+link' in event:
-                e.add_source(url=event.pop("+link"))
+            for link in ['+link', 'link']:
+                if link in event:
+                    e.add_source(url=event.pop(link))
 
             for p in event.pop('participants', []):
                 type_ = {
