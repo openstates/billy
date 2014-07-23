@@ -62,7 +62,6 @@ def make_jurisdiction(a_state):
         timezone = metadata['capitol_timezone']
         scrapers = {'people': PersonScraper,
                     'bills': BillScraper,
-                    #'events': EventScraper,
                    }
         parties = [{'name': 'Republican'},
                    {'name': 'Democratic'},
@@ -100,5 +99,7 @@ def make_jurisdiction(a_state):
 
             yield legislature
 
+    if 'events' in metadata['feature_flags']:
+        StateJuris.scrapers['events'] = EventScraper
 
     return StateJuris
