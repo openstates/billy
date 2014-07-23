@@ -23,6 +23,12 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
 
+            if len(e.name) >= 300:
+                e.name = e.name[:290]
+
+            if len(e.location['name']) >= 100:
+                e.location['name'] = e.location['name'][:90]
+
             for source in event.pop('sources'):
                 if 'retrieved' in source:
                     source.pop('retrieved')
