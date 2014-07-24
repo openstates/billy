@@ -1,6 +1,7 @@
 from pupa.scrape import Event
 from .base import OpenstatesBaseScraper
 import dateutil.parser
+import datetime as dt
 import pytz
 
 
@@ -21,6 +22,9 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       timezone=event.pop('timezone'),
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
+
+            if e.start_time < dt.datetime(2012, 1, 1, tzinfo=pytz.UTC):
+                continue
 
             if len(e.name) >= 300:
                 e.name = e.name[:290]
