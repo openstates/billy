@@ -4,7 +4,6 @@ import dateutil.parser
 import pytz
 
 
-
 class OpenstatesEventScraper(OpenstatesBaseScraper):
 
     def _date_parse(self, x):
@@ -73,8 +72,8 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                               note=b.pop('type', b.pop('+type', None)))
 
             for document in event.pop('documents', []):
-                print(document)
-                raise ValueError
+                e.add_document(url=document['url'],
+                               note=document['name'])
 
             assert event == {}, "Unknown fields: %s" % (
                 ", ".join(event.keys())
