@@ -1,4 +1,4 @@
-from pupa.scrape import Legislator, Committee, Membership, Person
+from pupa.scrape import Organization, Membership, Person
 from pupa.utils import make_psuedo_id
 from .base import OpenstatesBaseScraper
 
@@ -16,7 +16,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if term['name'] == term_name:
                 return term['start_year'], term['end_year']
 
-    def process_role(self, role, leg_id):
+    def process_role(self, new, role, leg_id, skip_member=False):
         start, end = self.get_term_years(role['term'])
         if role['type'] == 'committee member':
             self._roles.add((leg_id,
@@ -29,8 +29,10 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                              'chair',
                              start, end))
         elif role['type'] == 'member':
-            pass
-        # TODO: handle these
+            if not skip_member:
+                # add party & district for this old role
+                new.add_term('member', role['chamber'], district=role['district'],
+                             start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
             pass
         elif role['type'] in ('Senate President', 'Minority Whip', 'Majority Whip',
@@ -77,30 +79,21 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         if self.state in('ne', 'dc'):
             chamber = 'legislature'
 
-        if district is None:
-            new = Person(name=name, image=image)
-            if party:
-                membership = Membership(person_id=new._id,
-                                        role="member",
-                                        organization_id=make_psuedo_id(
-                                            classification="party",
-                                            name=party))
-                new._related.append(membership)
-
-            if old['roles']:
-                if 'Lt. Governor' in [x['type'] for x in old['roles']]:
-                    self.jurisdiction._executive.add_post(
-                        'Lt. Governor',
-                        'lt-gov'
-                    )
-                    membership = Membership(
-                        person_id=new._id,
-                        role="Lt. Governor",
-                        organization_id=self.jurisdiction._executive._id
-                    )
-                    new._related.append(membership)
+        if old['roles'] and 'Lt. Governor' in [x['type'] for x in old['roles']]:
+            new = Person(name=name, district=district, party=party, image=image)
+            self.jurisdiction._executive.add_post(
+                'Lt. Governor',
+                'lt-gov'
+            )
+            membership = Membership(
+                person_id=new._id,
+                role="Lt. Governor",
+                organization_id=self.jurisdiction._executive._id
+            )
+            new._related.append(membership)
         else:
-            new = Legislator(name=name, district=district, chamber=chamber, party=party, image=image)
+            new = Person(name=name, district=district, primary_org=chamber, party=party,
+                         image=image)
 
         # various ids
         id_types = {'votesmart_id': 'votesmart',
@@ -142,11 +135,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # roles
         for role in old.pop('roles'):
-            self.process_role(role, leg_id=id)
+            self.process_role(new, role, leg_id=id, skip_member=True)
 
         for role_list in old.pop('old_roles', {}).values():
             for role in role_list:
-                self.process_role(role, leg_id=id)
+                self.process_role(new, role, leg_id=id)
 
         # ignore most of the names for now
         old.pop('first_name')
@@ -212,11 +205,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if parent_id:
                 print(id, parent_id)
                 parent = self._committees[parent_id]._id
-                new = Committee(sub, parent_id=parent)
+                new = Organization(sub, parent_id=parent, classification='committee')
             else:
-                new = Committee(com + ': ' + sub, chamber=chamber)
+                new = Organization(com + ': ' + sub, chamber=chamber, classification='committee')
         else:
-            new = Committee(com, chamber=chamber)
+            new = Organization(com, chamber=chamber, classification='committee')
             assert parent_id is None
 
         # all_ids
