@@ -31,7 +31,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
-                new.add_term('member', role['chamber'], district=role['district'],
+                district = role['district'].strip('(').strip(')')
+                new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
             pass
