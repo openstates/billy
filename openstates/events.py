@@ -1,8 +1,8 @@
 from pupa.scrape import Event
 from .base import OpenstatesBaseScraper
 import dateutil.parser
+import datetime as dt
 import pytz
-
 
 
 class OpenstatesEventScraper(OpenstatesBaseScraper):
@@ -23,13 +23,23 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
 
+            if e.start_time < dt.datetime(2012, 1, 1, tzinfo=pytz.UTC):
+                continue
+
+            if len(e.name) >= 300:
+                e.name = e.name[:290]
+
+            if len(e.location['name']) >= 100:
+                e.location['name'] = e.location['name'][:90]
+
             for source in event.pop('sources'):
                 if 'retrieved' in source:
                     source.pop('retrieved')
                 e.add_source(**source)
 
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
-                      'session', 'id', '+chamber', '+agenda', '+details']
+                      '+location_url', 'session', 'id', '+chamber', '+agenda',
+                      '+media_contact', '+contact', '+details']
             # +agenda:
             #   Agenda on old (very old) OpenStates data is actually a string
             #   and not any sort of structured data we can use in the items
@@ -59,13 +69,15 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                                   type=type_,)
 
             for b in event.pop('related_bills', []):
-                item = e.add_agenda_item(b['description'])
+                item = e.add_agenda_item(
+                    b.pop('description', b.pop('+description', None)))
+
                 item.add_bill(bill=b['bill_id'],
-                              note=b['type'])
+                              note=b.pop('type', b.pop('+type', None)))
 
             for document in event.pop('documents', []):
-                print(document)
-                raise ValueError
+                e.add_document(url=document['url'],
+                               note=document['name'])
 
             assert event == {}, "Unknown fields: %s" % (
                 ", ".join(event.keys())
