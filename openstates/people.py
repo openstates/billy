@@ -1,4 +1,4 @@
-from pupa.scrape import Organization, Membership, Person
+from pupa.scrape import Legislator, Committee, Membership, Person
 from pupa.utils import make_psuedo_id
 from .base import OpenstatesBaseScraper
 
@@ -100,8 +100,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                     )
                     new._related.append(membership)
         else:
-            new = Person(name=name, district=district,
-                         primary_org=chamber, party=party, image=image)
+            new = Legislator(name=name, district=district, chamber=chamber, party=party, image=image)
 
         # various ids
         id_types = {'votesmart_id': 'votesmart',
@@ -213,11 +212,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if parent_id:
                 print(id, parent_id)
                 parent = self._committees[parent_id]._id
-                new = Organization(sub, parent_id=parent)
+                new = Committee(sub, parent_id=parent)
             else:
-                new = Organization(com + ': ' + sub, classification=chamber)
+                new = Committee(com + ': ' + sub, chamber=chamber)
         else:
-            new = Organization(com, classification=chamber)
+            new = Committee(com, chamber=chamber)
             assert parent_id is None
 
         # all_ids
