@@ -2,6 +2,11 @@ from pupa.scrape import Organization, Membership, Person
 from pupa.utils import make_psuedo_id
 from .base import OpenstatesBaseScraper
 
+birthdays = {
+    'ALL000035': '1965-03-20',
+    'ALL000138': '0000',
+}
+
 
 class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
@@ -31,7 +36,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
-                district = role['district'].strip('(').strip(')')
+                district = role['district'].strip('(').strip(')').strip()
                 new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
@@ -95,6 +100,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         else:
             new = Person(name=name, district=district, primary_org=chamber, party=party,
                          image=image)
+
+        if id in birthdays:
+            new.birth_date = birthdays[id]
 
         # various ids
         id_types = {'votesmart_id': 'votesmart',
