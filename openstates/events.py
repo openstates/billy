@@ -23,9 +23,6 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
 
-            if e.start_time < dt.datetime(2012, 1, 1, tzinfo=pytz.UTC):
-                continue
-
             if len(e.name) >= 300:
                 e.name = e.name[:290]
 
@@ -36,6 +33,9 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 if 'retrieved' in source:
                     source.pop('retrieved')
                 e.add_source(**source)
+
+            if e.sources == []:
+                continue
 
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
                       '+location_url', 'session', 'id', '+chamber', '+agenda',
