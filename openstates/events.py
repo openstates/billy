@@ -82,7 +82,15 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 item.add_bill(bill=b['bill_id'],
                               note=b.pop('type', b.pop('+type', None)))
 
+            seen_documents = set([])
             for document in event.pop('documents', []):
+                if document['url'] in seen_documents:
+                    print("XXX: Buggy data in: Duped Document URL: %s (%s)" % (
+                        document['url'], document['name']
+                    ))
+                    continue
+
+                seen_documents.add(document['url'])
                 e.add_document(url=document['url'],
                                note=document['name'])
 
