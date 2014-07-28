@@ -263,14 +263,16 @@ def favorite_bills_csv(request):
     for bill in favorites['bill']:
         bill = mdb.bills.find_one(bill['obj_id'])
         sponsors = (sp['name'] for sp in bill.sponsors_manager)
+
         row = (
-            bill.metadata['name'],
-            bill['bill_id'],
-            next(sponsors),
+            bill.metadata.get('name', ''),
+            bill.get('bill_id', ''),
+            next(sponsors, ''),
             truncatewords(bill['title'], 25),
-            bill.session_details()['display_name'],
-            bill.most_recent_action()['date'],
-            bill.most_recent_action()['action'],
+            bill.session_details().get('display_name', ''),
+            bill.most_recent_action().get('date', ''),
+            bill.most_recent_action().get('action', ''),
             truncatewords(', '.join(sponsors), 40))
+
         writer.writerow(dict(zip(fields, row)))
     return response

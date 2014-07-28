@@ -113,12 +113,12 @@ class RelatedBillsList(RelatedObjectsList):
         context.update(description=' '.join(description))
 
         # Add the correct path to paginated links.
-        params = dict(self.request.GET.items())
-        if 'page' in params:
-            del params['page']
-        for k, v in params.iteritems():
-            params[k] = unicode(v).encode('utf8')
-        context.update(get_params=urllib.urlencode(params))
+        params = list(self.request.GET.iterlists())
+        for k, v in params[:]:
+            if k == 'page':
+                params.remove((k, v))
+        get_params = urllib.urlencode(params, doseq=True)
+        context['get_params'] = get_params
 
         # Add the abbr.
         context['abbr'] = self.kwargs['abbr']
