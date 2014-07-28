@@ -99,7 +99,15 @@ def make_jurisdiction(a_state):
 
             yield legislature
 
-    if 'events' in metadata['feature_flags']:
+    STATE_EVENT_BLACKLIST = set([
+        "de",  # There is a scraper, but it appears it's never got any
+        # real data. The OpenStates API returns no events (rightly so).
+        # This should be removed once that's not true anymore.
+        #   - PRT // Jul 28th, 2014.
+    ])
+
+    if ('events' in metadata['feature_flags'] and
+            a_state not in STATE_EVENT_BLACKLIST):
         StateJuris.scrapers['events'] = EventScraper
 
     return StateJuris
