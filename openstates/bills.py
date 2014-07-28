@@ -66,7 +66,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         chamber = old.pop('chamber')
         if chamber == 'upper' and self.state in ('ne', 'dc'):
             chamber = 'legislature'
-        elif chamber == 'joint':
+        elif chamber in ('joint', 'conference'):
             chamber = 'legislature'
 
         new = Bill(old.pop('bill_id'), old.pop('session'), old.pop('title'),

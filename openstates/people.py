@@ -39,6 +39,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 district = role['district'].strip('(').strip(')').strip()
                 if 'Replication or Save Conflict' in district:
                     return
+                if self.state in('ne', 'dc'):
+                    role['chamber'] = 'legislature'
                 new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
