@@ -23,18 +23,18 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       timezone=event.pop('timezone'),
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
+            if len(e.name) >= 300:
+                e.name = e.name[:290]
+
+            if len(e.location['name']) >= 100:
+                e.location['name'] = e.location['name'][:90]
+
             composite_key = (e.name, e.description, e.start_time)
             if composite_key in seen:
                 print("Duplicate found: %s/%s/%s" % (composite_key))
                 continue
 
             seen.add(composite_key)
-
-            if len(e.name) >= 300:
-                e.name = e.name[:290]
-
-            if len(e.location['name']) >= 100:
-                e.location['name'] = e.location['name'][:90]
 
             for source in event.pop('sources'):
                 if 'retrieved' in source:
@@ -82,7 +82,15 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                 item.add_bill(bill=b['bill_id'],
                               note=b.pop('type', b.pop('+type', None)))
 
+            seen_documents = set([])
             for document in event.pop('documents', []):
+                if document['url'] in seen_documents:
+                    print("XXX: Buggy data in: Duped Document URL: %s (%s)" % (
+                        document['url'], document['name']
+                    ))
+                    continue
+
+                seen_documents.add(document['url'])
                 e.add_document(url=document['url'],
                                note=document['name'])
 
