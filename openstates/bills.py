@@ -59,6 +59,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             classification = ['memorial']
         if classification == ['concurrent memorial resolution'] and self.state == 'ar':
             classification = ['concurrent memorial']
+        if classification == ['joint session resolution'] and self.state == 'il':
+            classification = ['joint resolution']
 
         if not old['title'] and self.state == 'me':
             old['title'] = '(unknown)'
@@ -108,7 +110,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             elif actor.lower() in ('senate', 'upper`'):
                 actor = 'upper'
             elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk',
-                           'Office of the Legislative Fiscal Analyst', 'Became Law w'):
+                           'Office of the Legislative Fiscal Analyst', 'Became Law w',
+                           'conference'):
                 actor = 'legislature'
 
             # nebraska & DC
@@ -223,7 +226,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newvote.sources = new.sources
 
             to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
-                         '+location', '+rcs_num', '+type_', '+threshold']
+                         '+location', '+rcs_num', '+type_', '+threshold', '+other_vote_detail']
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:
