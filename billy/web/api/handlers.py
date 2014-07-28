@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from billy.core import db, feeds_db
 from billy.models import Bill
 from billy.core import settings
-from billy.utils import find_bill, parse_param_dt
+from billy.utils import find_bill, parse_param_dt, fix_bill_id
 
 import pymongo
 
@@ -35,6 +35,8 @@ def _build_mongo_filter(request, keys, icase=True):
             elif key.endswith('__in'):
                 values = value.split('|')
                 _filter[key[:-4]] = values
+            elif key == 'bill_id':
+                _filter[key] = fix_bill_id(value.upper())
             else:
                 # We use regex queries to get case insensitive search - this
                 # means they won't use any indexes for now. Real case
