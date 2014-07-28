@@ -182,6 +182,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+county', '+capitol_phone', '+image_url', '+header', '+town_represented',
                   '+full_address', '+capitol_address', '+website', '+district_phone',
                   '+district_offices', '+party', '+district', '+capitol_office', '+office_address',
+                  '2008-2011',
 
                  ]
         for k in to_pop:
