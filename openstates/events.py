@@ -15,6 +15,7 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
     def scrape(self):
         method = 'events/?state={}&dtstart=1776-07-04'.format(self.state)
         self.events = self.api(method)
+        seen = set()
         for event in self.events:
             e = Event(name=event.pop('description'),
                       classification=event.pop('type'),
@@ -22,9 +23,12 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                       timezone=event.pop('timezone'),
                       start_time=self._date_parse(event.pop('when')),
                       end_time=self._date_parse(event.pop('end')),)
-
-            if e.start_time < dt.datetime(2012, 1, 1, tzinfo=pytz.UTC):
+            composite_key = (e.name, e.description, e.start_time)
+            if composite_key in seen:
+                print("Duplicate found: %s/%s/%s" % (composite_key))
                 continue
+
+            seen.add(composite_key)
 
             if len(e.name) >= 300:
                 e.name = e.name[:290]
@@ -37,9 +41,12 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
                     source.pop('retrieved')
                 e.add_source(**source)
 
+            if e.sources == []:
+                continue
+
             ignore = ['country', 'level', 'state', 'created_at', 'updated_at',
                       '+location_url', 'session', 'id', '+chamber', '+agenda',
-                      '+media_contact', '+contact', '+details']
+                      '+cancelled', '+media_contact', '+contact', '+details']
             # +agenda:
             #   Agenda on old (very old) OpenStates data is actually a string
             #   and not any sort of structured data we can use in the items
