@@ -36,7 +36,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
-                district = role['district'].strip('(').strip(')').strip()
+                district = role['district'].strip('(').strip(')').strip().replace('\u200b', '')
                 if 'Replication or Save Conflict' in district:
                     return
                 if self.state in('ne', 'dc'):

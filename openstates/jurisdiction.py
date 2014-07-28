@@ -6,6 +6,8 @@ from openstates.bills import OpenstatesBillScraper
 
 POSTS = {
     'ne': {'upper': range(1, 50)},
+    'dc': {'upper': ['Ward 1', 'Ward 2', 'Ward 3', 'Ward 4', 'Ward 5', 'Ward 6', 'Ward 7',
+                     'Ward 8', 'At-Large', 'Chairman']}
 }
 
 def chamber_name(state, chamber):
@@ -82,7 +84,7 @@ def make_jurisdiction(a_state):
             self._legislature = legislature
             self._executive = executive
 
-            if a_state != 'ne':
+            if a_state not in ('ne', 'dc'):
                 for otype in ('upper', 'lower'):
                     if otype in metadata['chambers']:
                         org = Organization(metadata['name'] + ' ' + chamber_name(a_state, otype),
@@ -90,8 +92,6 @@ def make_jurisdiction(a_state):
                         districts = osbs.api('districts/{}/{}?'.format(a_state, otype))
                         for district in districts:
                             org.add_post(district['name'], metadata['chambers'][otype]['title'])
-                        #for post in POSTS[a_state][otype]:
-                        #    org.add_post(str(post), metadata['chambers'][otype]['title'])
                         yield org
             else:
                 for post in POSTS[a_state]['upper']:

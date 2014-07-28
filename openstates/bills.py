@@ -52,6 +52,16 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         classification = old.pop('type')
 
+        # ca weirdness
+        if 'fiscal committee' in classification:
+            classification.remove('fiscal committee')
+        if 'urgency' in classification:
+            classification.remove('urgency')
+        if 'local program' in classification:
+            classification.remove('local program')
+        if 'tax levy' in classification:
+            classification.remove('tax levy')
+
         if classification[0] in ['miscellaneous', 'jres', 'cres']:
             return
 
@@ -88,7 +98,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_version_link(doc['name'], doc['url'], media_type=doc.pop('mimetype', ''))
 
         for subj in old.pop('scraped_subjects', []):
-            new.add_subject(subj)
+            if subj:
+                new.add_subject(subj)
 
         for spon in old.pop('sponsors'):
             if spon.get('committee_id') is not None:
@@ -103,7 +114,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         for act in old.pop('actions'):
             actor = act['actor']
-            if actor.lower() == 'governor':
+            if actor.lower() in ('governor', 'mayor'):
                 actor = 'executive'
             elif actor.lower() == 'house':
                 actor = 'lower'
@@ -149,7 +160,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
                      '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
-                    '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes']
+                    '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes', 
+                    '+short_title', '+type_']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -226,7 +238,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newvote.sources = new.sources
 
             to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
-                         '+location', '+rcs_num', '+type_', '+threshold', '+other_vote_detail']
+                         '+location', '+rcs_num', '+type_', '+threshold', '+other_vote_detail',
+                         '+voice_vote',
+                        ]
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:
