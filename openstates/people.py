@@ -36,7 +36,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
-                district = role['district'].strip('(').strip(')').strip().replace('\u200b', '')
+                district = role['district'].strip('(').strip(')').strip().replace('\u200b', '').lstrip('0')
                 if 'Replication or Save Conflict' in district:
                     return
                 if self.state in('ne', 'dc'):
@@ -60,6 +60,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old = self.api('legislators/' + legislator_id + '?')
         # just not needed
         id = old.pop('id')
+
         old.pop('created_at')
         old.pop('updated_at')
         old.pop('country', None)
@@ -133,7 +134,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for office in old.pop('offices'):
             for key, type in office_keys.items():
                 if office[key]:
-                    new.add_contact_detail(type=type, value=office[key], note=office['name'])
+                    if 'Office Hours' in office[key]:
+                        for x in office[key].split('Office Hours: '):
+                            new.add_contact_detail(type=type, value=x, note=office['name'])
+                    else:
+                        new.add_contact_detail(type=type, value=office[key], note=office['name'])
 
         # links
         link = old.pop('url', None)
@@ -183,7 +188,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+full_address', '+capitol_address', '+website', '+district_phone',
                   '+district_offices', '+party', '+district', '+capitol_office', '+office_address',
                   '2008-2011',
-
                  ]
         for k in to_pop:
             old.pop(k, None)
@@ -262,7 +266,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         method = 'legislators/?state={}&fields=id&active=False'.format(self.state)
         for result in self.api(method):
-            yield self.scrape_legislator(result['id'])
+            if result['id'] not in ('NJL000013',):
+                yield self.scrape_legislator(result['id'])
 
         method = 'committees/?state={}&fields=id,parent_id'.format(self.state)
         results = sorted(self.api(method), key=lambda x: x.get('parent_id', '') or '')
@@ -278,6 +283,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 com_id = None
 
             if com_id and leg_id:
+                if leg_id == 'NJL000013':
+                    leg_id = 'NJL000015'
                 yield Membership(person_id=self._people[leg_id]._id, organization_id=com_id,
                                  role=role, label=role, start_date=str(start), end_date=str(end))
             else:
