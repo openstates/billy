@@ -71,6 +71,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             classification = ['concurrent memorial']
         if classification == ['joint session resolution'] and self.state == 'il':
             classification = ['joint resolution']
+        if classification == ['legislative resolution'] and self.state == 'ny':
+            classification = ['resolution']
 
         if not old['title'] and self.state == 'me':
             old['title'] = '(unknown)'
