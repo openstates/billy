@@ -204,11 +204,18 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('+session', None)
             vote.pop('+bill_id', None)
             vote.pop('+bill_session', None)
-
-            # TODO: use committee, vtype?
             vote.pop('committee', None)
             vote.pop('committee_id', None)
             vtype = vote.pop('type', 'passage')
+
+            if vtype == 'veto_override':
+                vtype = ['veto-override']
+            elif vtype == 'amendment':
+                vtype = ['amendment-passage']
+            elif vtype == 'other':
+                vtype = []
+            else:
+                vtype = ['bill-passage']
 
             # most states need identifiers for uniqueness, just do it everywhere
             identifier = vote['date'] + '-' + str(vote_no)
@@ -225,7 +232,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                            result='pass' if vote.pop('passed') else 'fail',
                            chamber=chamber,
                            start_date=vote.pop('date'),
-                           classification=[],
+                           classification=[vtype],
                            bill=new,
                            identifier=identifier)
             for vt in ('yes', 'no', 'other'):
