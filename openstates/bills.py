@@ -109,7 +109,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 entity_type = 'person'
             else:
                 entity_type = ''
-            # TODO: use sponsorship ids to do matching
             new.add_sponsorship(spon['name'], spon['type'], entity_type,
                                 spon['type'] == 'primary')
 
@@ -131,9 +130,10 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'legislature'
 
             if act['action']:
-                new.add_action(act['action'], act['date'][:10], chamber=actor,
-                               classification=[action_types[c] for c in act['type'] if c != 'other'])
-            # TODO: related_entities
+                newact = new.add_action(act['action'], act['date'][:10], chamber=actor,
+                                        classification=[action_types[c] for c in act['type'] if c != 'other'])
+                for re in act.get('related_entities', []):
+                    re.add_related_entity(re['name'], re['type'])
 
         for comp in old.pop('companions', []):
             if self.state in ('nj', 'ny', 'mn'):
@@ -232,7 +232,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newvote.set_count(vt, vote.pop(vt + '_count'))
                 for name in vote.pop(vt + '_votes'):
                     newvote.vote(vt, name['name'])
-                    # TODO: leg_id needs to be used here at some point
 
             for source in vote.pop('sources'):
                 source.pop('retrieved', None)
