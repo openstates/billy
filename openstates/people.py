@@ -134,7 +134,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for office in old.pop('offices'):
             for key, type in office_keys.items():
                 if office[key]:
-                    if 'Office Hours' in office[key]:
+                    if 'Office Hours' in office[key] and self.state == 'pa':
                         for x in office[key].split('Office Hours: '):
                             new.add_contact_detail(type=type, value=x, note=office['name'])
                     else:
