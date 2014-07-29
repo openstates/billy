@@ -39,11 +39,24 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 district = district.replace(' And ', ' and ')
                 if district.endswith(' -'):
                     district = district[:-2]
-
                 if district == 'Second Essex, Consiting Of Boxford: Precincts 2, 3; Georgetown; Groveland; Haverhill: Ward 4: Precinct 3, Ward 7: Precinct 3; Merrimac; Newbury; West Newbury':
                     district = 'Second Essex'
                 if district == 'Seventeenth Essex, Consistng Of Andover: Precincts 2, 3, 4; Lawrence: Ward C, Precincts 1, 2, 3, Ward D, Ward E, Precinct 1; Methuen: Precinct 2':
                     district = 'Seventeenth Essex'
+
+                if role['chamber'] == 'upper' and self.state == 'pr':
+                    pr_district = {
+                        '1': 'I',
+                        '2': 'II',
+                        '3': 'III',
+                        '4': 'IV',
+                        '5': 'V',
+                        '6': 'VI',
+                        '7': 'VII',
+                        '8': 'VIII',
+                    }
+                    if district in pr_district:
+                        district = pr_district[district]
 
                 if 'Replication or Save Conflict' in district:
                     return
@@ -58,7 +71,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                               'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
                               'President Pro Tem',
                              ):
-            pass # TODO: handle these!
+            new.add_term(role['type'], role['chamber'], district=district,
+                         start_date=str(start), end_date=str(end))
         elif role['type'] == 'substitute':
             pass
         else:
@@ -90,13 +104,27 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         name = old.pop('full_name')
         party = old.pop('party', None)
 
-        if party == 'Nonpartisan' or party == 'Unknown':
+        if party in ('Nonpartisan', 'unknown', 'Unknown'):
             party = None
         elif party == 'Democrat':
             party = 'Democratic'
 
         if self.state in('ne', 'dc'):
             chamber = 'legislature'
+
+        if chamber == 'upper' and self.state == 'pr':
+            pr_district = {
+                '1': 'I',
+                '2': 'II',
+                '3': 'III',
+                '4': 'IV',
+                '5': 'V',
+                '6': 'VI',
+                '7': 'VII',
+                '8': 'VIII',
+            }
+            if district in pr_district:
+                district = pr_district[district]
 
         if old['roles'] and 'Lt. Governor' in [x['type'] for x in old['roles']]:
             new = Person(name=name, district=district, party=party, image=image)

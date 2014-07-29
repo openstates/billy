@@ -72,6 +72,9 @@ def make_jurisdiction(a_state):
                    {'name': 'Progressive'},
                    {'name': 'Democratic-Farmer-Labor'},
                    {'name': 'Republican/Democratic'},
+                   {'name': 'Partido Independentista Puertorriqueño'},
+                   {'name': 'Partido Popular Democrático'},
+                   {'name': 'Partido Nuevo Progresista'},
                   ]
         legislative_sessions = leg_sessions
 
