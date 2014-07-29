@@ -22,6 +22,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 return term['start_year'], term['end_year']
 
     def process_role(self, new, role, leg_id, skip_member=False):
+        if self.state == 'la' and len(role['term']) == 4:
+            role['term'] = '2008-2011'
         start, end = self.get_term_years(role['term'])
         com_id = role.get('committee_id', None)
         if role['type'] == 'committee member':
@@ -162,6 +164,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         for role in old.pop('roles'):
             self.process_role(new, role, leg_id=id, skip_member=True)
 
+        if '2008-2011' in old:
+            old['old_roles']['2008-2011'] = old.pop('2008-2011')
+
         for role_list in old.pop('old_roles', {}).values():
             for role in role_list:
                 self.process_role(new, role, leg_id=id)
@@ -200,7 +205,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                   '+county', '+capitol_phone', '+image_url', '+header', '+town_represented',
                   '+full_address', '+capitol_address', '+website', '+district_phone',
                   '+district_offices', '+party', '+district', '+capitol_office', '+office_address',
-                  '2008-2011',
                  ]
         for k in to_pop:
             old.pop(k, None)
