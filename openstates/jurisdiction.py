@@ -117,9 +117,39 @@ def make_jurisdiction(a_state):
                         elif a_state == 'vt' and otype == 'upper':
                             old_posts = ['Grand Isle']
                             end_date = '2012-05-01'
-                        #elif a_state == 'md' and otype == 'upper':
-                        #    old_posts = ['Grand Isle']
-                        #    end_date = '2012-05-01'
+                        elif a_state == 'nv' and otype == 'upper':
+                            old_posts = [
+                                'Washoe County, No. 1', 'Washoe County, No. 2',
+                                'Washoe County, No. 3', 'Washoe County, No. 4',
+                                'Clark County, No. 1', 'Clark County, No. 2',
+                                'Clark County, No. 3', 'Clark County, No. 4',
+                                'Clark County, No. 5', 'Clark County, No. 6',
+                                'Clark County, No. 7', 'Clark County, No. 8',
+                                'Clark County, No. 9', 'Clark County, No. 10',
+                                'Clark County, No. 11', 'Clark County, No. 12',
+                                'Capital Senatorial District',
+                                'Central Nevada Senatorial District',
+                                'Rural Nevada Senatorial District',
+                            ]
+                            end_date = '2012-01-01'
+                        elif a_state == 'ma':
+                            if otype == 'lower':
+                                old_posts = [
+                                    'Essex',
+                                    'Middlesex',
+                                ]
+                            elif otype == 'upper':
+                                old_posts = [
+                                    'Third Essex and Middlesex',
+                                    'Suffolk and Norfolk',
+                                    'Hampshire and Franklin',
+                                    'Middlesex and Essex',
+                                    'Berkshire, Hampshire and Franklin',
+                                    'Thirty-First Middlesex',
+                                    'Worcester, Hampden, Hampshire and Franklin',
+                                    'Middlesex, Suffolk and Essex',
+                                ]
+                            end_date = '2012-01-01'
                         else:
                             old_posts = []
 

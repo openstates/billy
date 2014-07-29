@@ -34,6 +34,15 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if not skip_member:
                 # add party & district for this old role
                 district = role['district'].strip('(').strip(')').strip().replace('\u200b', '').lstrip('0')
+                district = district.replace(' And ', ' and ')
+                if district.endswith(' -'):
+                    district = district[:-2]
+
+                if district == 'Second Essex, Consiting Of Boxford: Precincts 2, 3; Georgetown; Groveland; Haverhill: Ward 4: Precinct 3, Ward 7: Precinct 3; Merrimac; Newbury; West Newbury':
+                    district = 'Second Essex'
+                if district == 'Seventeenth Essex, Consistng Of Andover: Precincts 2, 3, 4; Lawrence: Ward C, Precincts 1, 2, 3, Ward D, Ward E, Precinct 1; Methuen: Precinct 2':
+                    district = 'Seventeenth Essex'
+
                 if 'Replication or Save Conflict' in district:
                     return
                 if self.state in('ne', 'dc'):
@@ -167,7 +176,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         gender = old.pop('+gender', None)
         if gender:
             old.gender = gender
-        biography = old.pop('+biography')
+        biography = old.pop('+biography', None)
         if biography:
             old.biography = biography
 

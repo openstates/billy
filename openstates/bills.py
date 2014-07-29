@@ -133,7 +133,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 newact = new.add_action(act['action'], act['date'][:10], chamber=actor,
                                         classification=[action_types[c] for c in act['type'] if c != 'other'])
                 for re in act.get('related_entities', []):
-                    re.add_related_entity(re['name'], re['type'])
+                    if re['type'] == 'committee':
+                        re['type'] = 'organization'
+                    newact.add_related_entity(re['name'], re['type'])
 
         for comp in old.pop('companions', []):
             if self.state in ('nj', 'ny', 'mn'):
@@ -213,7 +215,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             elif vtype == 'amendment':
                 vtype = ['amendment-passage']
             elif vtype == 'other':
-                vtype = []
+                vtype = ''
             else:
                 vtype = ['bill-passage']
 
@@ -232,7 +234,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                            result='pass' if vote.pop('passed') else 'fail',
                            chamber=chamber,
                            start_date=vote.pop('date'),
-                           classification=[vtype],
+                           classification=vtype,
                            bill=new,
                            identifier=identifier)
             for vt in ('yes', 'no', 'other'):
