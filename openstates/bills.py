@@ -115,15 +115,15 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
         for act in old.pop('actions'):
             actor = act['actor']
-            if actor.lower() in ('governor', 'mayor'):
+            if actor.lower() in ('governor', 'mayor', 'secretary of state'):
                 actor = 'executive'
-            elif actor.lower() in ('house', 'lower (desk)') or actor.lower().startswith('lower (committee'):
+            elif actor.lower() == 'house' or (actor.lower().startswith('lower (') and self.state == 'ca'):
                 actor = 'lower'
-            elif actor.lower() in ('senate', 'upper`', 'upper (rules)') or actor.lower().startswith('upper (committee'):
+            elif actor.lower() in ('senate', 'upper`') or (actor.lower().startswith('upper (') and self.state == 'ca'):
                 actor = 'upper'
             elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk',
                            'Office of the Legislative Fiscal Analyst', 'Became Law w',
-                           'conference'):
+                           'conference') or (actor.lower().startswith('legislature (') and self.state == 'ca'):
                 actor = 'legislature'
 
             # nebraska & DC
@@ -160,10 +160,12 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             new.add_title(official_title, note='Official Title')
 
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
-                     '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
-                    '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes', 
-                    '+short_title', '+type_', '+conference_committee', 'conference_committee',
-                    '+companion_bill_ids']
+                     '+companion', '+description', '+fiscal_note_probable:',
+                     '+preintroduction_required:', '+drafter', '+category:', '+chapter',
+                     '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
+                     '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes',
+                     '+short_title', '+type_', '+conference_committee', 'conference_committee',
+                     '+companion_bill_ids']
         for k in to_extras:
             v = old.pop(k, None)
             if v:

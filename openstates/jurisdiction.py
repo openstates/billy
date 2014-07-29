@@ -117,6 +117,9 @@ def make_jurisdiction(a_state):
                         elif a_state == 'vt' and otype == 'upper':
                             old_posts = ['Grand Isle']
                             end_date = '2012-05-01'
+                        #elif a_state == 'md' and otype == 'upper':
+                        #    old_posts = ['Grand Isle']
+                        #    end_date = '2012-05-01'
                         else:
                             old_posts = []
 

@@ -164,12 +164,18 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('nickname', None)
         new.sort_name = old.pop('last_name')
 
+        gender = old.pop('+gender', None)
+        if gender:
+            old.gender = gender
+        biography = old.pop('+biography')
+        if biography:
+            old.biography = biography
+
         # keys to keep
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
                      '+secretary', '+office_hours', '+resident_county', '+district_name',
-                     '+leg_status', '+legal_position', '+gender', '+title', '+start_year',
-                     '+end_date', 'occupation', '+biography', '+oregon_member_id',
-                    ]
+                     '+leg_status', '+legal_position', '+title', '+start_year',
+                     '+end_date', 'occupation', '+oregon_member_id']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
