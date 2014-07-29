@@ -47,7 +47,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('action_dates')
         old.pop('+subject', None)
         old.pop('+scraped_subjects', None)
-        # TODO: subjects?
         old.pop('subjects', [])
 
         classification = old.pop('type')
@@ -163,7 +162,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         to_extras = ['+status', '+final_disposition', '+volume_chapter', '+ld_number', '+referral',
                      '+companion', '+description', '+fiscal_note_probable:', '+preintroduction_required:', '+drafter', '+category:', '+chapter', '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
                     '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes', 
-                    '+short_title', '+type_', '+conference_committee', 'conference_committee']
+                    '+short_title', '+type_', '+conference_committee', 'conference_committee',
+                    '+companion_bill_ids']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
@@ -208,7 +208,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             vote.pop('committee_id', None)
             vtype = vote.pop('type', 'passage')
 
-            # most states need identifiers for uniqueness
+            # most states need identifiers for uniqueness, just do it everywhere
             identifier = vote['date'] + '-' + str(vote_no)
             vote_no += 1
 
@@ -241,8 +241,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
 
             to_extras = ['+record', '+method', 'method', '+filename', 'record', '+action',
                          '+location', '+rcs_num', '+type_', '+threshold', '+other_vote_detail',
-                         '+voice_vote',
-                        ]
+                         '+voice_vote']
             for k in to_extras:
                 v = vote.pop(k, None)
                 if v:

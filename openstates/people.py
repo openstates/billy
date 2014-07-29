@@ -23,16 +23,13 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
     def process_role(self, new, role, leg_id, skip_member=False):
         start, end = self.get_term_years(role['term'])
+        com_id = role.get('committee_id', None)
+        if not com_id:
+            return
         if role['type'] == 'committee member':
-            self._roles.add((leg_id,
-                             role.get('committee_id', None),
-                             role.get('position', 'member'),
-                             start, end))
+            self._roles.add((leg_id, com_id role.get('position', 'member'), start, end))
         elif role['type'] == 'chair':
-            self._roles.add((leg_id,
-                             role.get('committee_id', None),
-                             'chair',
-                             start, end))
+            self._roles.add((leg_id, com_id, 'chair', start, end))
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
@@ -44,13 +41,13 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
-            pass
+            # handle this!
         elif role['type'] in ('Senate President', 'Minority Whip', 'Majority Whip',
                               'Majority Floor Leader', 'Speaker Pro Tem', 'Majority Caucus Chair',
                               'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
                               'President Pro Tem',
                              ):
-            pass
+            # TODO: handle these!
         elif role['type'] == 'substitute':
             pass
         else:
@@ -244,7 +241,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         start, end = self.get_term_years()
         for role in old.pop('members'):
             # leg_id, com_id, role, start, end
-            self._roles.add((role['leg_id'], id, role['role'], start, end))
+            if role['leg_id']:
+                self._roles.add((role['leg_id'], id, role['role'], start, end))
 
         to_extras = ['+twitter', '+description', '+code', '+secretary', '+office_hours',
                      '+office_phone', '+meetings_info', '+status', '+aide', '+contact_info',
@@ -281,12 +279,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if com_id in self._committees:
                 com_id = self._committees[com_id]._id
             else:
-                com_id = None
+                continue
 
-            if com_id and leg_id:
-                if leg_id == 'NJL000013':
-                    leg_id = 'NJL000015'
-                yield Membership(person_id=self._people[leg_id]._id, organization_id=com_id,
-                                 role=role, label=role, start_date=str(start), end_date=str(end))
-            else:
-                pass # TODO: missing com_id or leg_id
+            if leg_id == 'NJL000013':
+                leg_id = 'NJL000015'
+            yield Membership(person_id=self._people[leg_id]._id, organization_id=com_id,
+                             role=role, label=role, start_date=str(start), end_date=str(end))
