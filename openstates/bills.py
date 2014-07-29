@@ -117,9 +117,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             actor = act['actor']
             if actor.lower() in ('governor', 'mayor'):
                 actor = 'executive'
-            elif actor.lower() == 'house':
+            elif actor.lower() in ('house', 'lower (desk)') or actor.lower().startswith('lower (committee'):
                 actor = 'lower'
-            elif actor.lower() in ('senate', 'upper`'):
+            elif actor.lower() in ('senate', 'upper`', 'upper (rules)') or actor.lower().startswith('upper (committee'):
                 actor = 'upper'
             elif actor in ('joint', 'other', 'Data Systems', 'Speaker', 'clerk',
                            'Office of the Legislative Fiscal Analyst', 'Became Law w',

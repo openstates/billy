@@ -92,10 +92,43 @@ def make_jurisdiction(a_state):
                         districts = osbs.api('districts/{}/{}?'.format(a_state, otype))
                         for district in districts:
                             org.add_post(district['name'], metadata['chambers'][otype]['title'])
+
+                        # old posts
+                        if a_state == 'vt' and otype == 'lower':
+                            old_posts = ['Washington-Chittenden-1', 'Addison-Rutland-1',
+                                         'Bennington-5', 'Bennington-Rutland-1',
+                                         'Caledonia-Washington-1', 'Chittenden-1-1',
+                                         'Chittenden-1-2', 'Chittenden-3-1', 'Chittenden-3-10',
+                                         'Chittenden-3-2', 'Chittenden-3-3', 'Chittenden-3-4',
+                                         'Chittenden-3-5', 'Chittenden-3-6', 'Chittenden-3-7',
+                                         'Chittenden-3-8', 'Chittenden-3-9', 'Chittenden-4',
+                                         'Chittenden-8', 'Chittenden-9', 'Franklin-3',
+                                         'Grand Isle-Chittenden-1-1', 'Lamoille-Washington-1',
+                                         'Lamoille-4', 'Orange-Addison-1', 'Orange-Caledonia-1',
+                                         'Orleans-Caledonia-1', 'Orleans-Franklin-1',
+                                         'Rutland-1-1', 'Rutland-1-2', 'Rutland-7', 'Rutland-8',
+                                         'Washington-3-1', 'Washington-3-2', 'Washington-3-3',
+                                         'Windham-2', 'Windham-3-1', 'Windham-3-2', 'Windham-3-3',
+                                         'Windham-Bennington-Windsor-1', 'Windham-Bennington-1',
+                                         'Windsor-Rutland-1', 'Windsor-Rutland-2', 'Windsor-1-1',
+                                         'Windsor-1-2', 'Windsor-3', 'Windsor-4', 'Windsor-6-1',
+                                         'Windsor-6-2']
+                            end_date = '2012-05-01'
+                        elif a_state == 'vt' and otype == 'upper':
+                            old_posts = ['Grand Isle']
+                            end_date = '2012-05-01'
+                        else:
+                            old_posts = []
+
+                        for p in old_posts:
+                            org.add_post(p, metadata['chambers'][otype]['title'],
+                                         end_date=end_date)
+
                         yield org
             else:
                 for post in POSTS[a_state]:
                     self._legislature.add_post(str(post), metadata['chambers']['upper']['title'])
+
 
             yield legislature
 
