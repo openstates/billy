@@ -5,13 +5,13 @@ from openstates.events import OpenstatesEventScraper
 from openstates.bills import OpenstatesBillScraper
 
 POSTS = {
-    'ne': {'upper': range(1, 50)},
-    'dc': {'upper': ['Ward 1', 'Ward 2', 'Ward 3', 'Ward 4', 'Ward 5', 'Ward 6', 'Ward 7',
-                     'Ward 8', 'At-Large', 'Chairman']}
+    'ne': range(1, 50),
+    'dc': ['Ward 1', 'Ward 2', 'Ward 3', 'Ward 4', 'Ward 5', 'Ward 6', 'Ward 7', 'Ward 8',
+           'At-Large', 'Chairman']
 }
 
 def chamber_name(state, chamber):
-    if state in ('ne', 'dc', 'pr'):
+    if state in ('ne', 'dc'):
         raise ValueError(state)
 
     if chamber == 'lower':
@@ -94,7 +94,7 @@ def make_jurisdiction(a_state):
                             org.add_post(district['name'], metadata['chambers'][otype]['title'])
                         yield org
             else:
-                for post in POSTS[a_state]['upper']:
+                for post in POSTS[a_state]:
                     self._legislature.add_post(str(post), metadata['chambers']['upper']['title'])
 
             yield legislature

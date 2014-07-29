@@ -24,12 +24,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
     def process_role(self, new, role, leg_id, skip_member=False):
         start, end = self.get_term_years(role['term'])
         com_id = role.get('committee_id', None)
-        if not com_id:
-            return
         if role['type'] == 'committee member':
-            self._roles.add((leg_id, com_id role.get('position', 'member'), start, end))
+            if com_id:
+                self._roles.add((leg_id, com_id, role.get('position', 'member'), start, end))
         elif role['type'] == 'chair':
-            self._roles.add((leg_id, com_id, 'chair', start, end))
+            if com_id:
+                self._roles.add((leg_id, com_id, 'chair', start, end))
         elif role['type'] == 'member':
             if not skip_member:
                 # add party & district for this old role
@@ -41,13 +41,13 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
-            # handle this!
+            pass # handle this!
         elif role['type'] in ('Senate President', 'Minority Whip', 'Majority Whip',
                               'Majority Floor Leader', 'Speaker Pro Tem', 'Majority Caucus Chair',
                               'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
                               'President Pro Tem',
                              ):
-            # TODO: handle these!
+            pass # TODO: handle these!
         elif role['type'] == 'substitute':
             pass
         else:
@@ -79,7 +79,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         name = old.pop('full_name')
         party = old.pop('party', None)
 
-        if party == 'Nonpartisan':
+        if party == 'Nonpartisan' or party == 'Unknown':
             party = None
         elif party == 'Democrat':
             party = 'Democratic'
