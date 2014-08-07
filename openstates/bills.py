@@ -125,6 +125,9 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                            'conference') or (actor.lower().startswith('legislature (') and self.state == 'ca'):
                 actor = 'legislature'
 
+            if actor in ('committee', 'sponsor') and self.state == 'pr':
+                actor = 'legislature'
+
             # nebraska & DC
             if actor == 'upper' and self.state in ('ne', 'dc'):
                 actor = 'legislature'
