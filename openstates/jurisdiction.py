@@ -47,9 +47,9 @@ def make_jurisdiction(a_state):
                        'start_date': metadata['session_details'][s].get('start_date', '')[:10],
                        'end_date': metadata['session_details'][s].get('end_date', '')[:10],
                       }
-            if metadata['session_details'][s]['type'] == 'primary':
+            if metadata['session_details'][s].get('type') == 'primary':
                 session['classification'] = 'primary'
-            elif metadata['session_details'][s]['type'] == 'special':
+            elif metadata['session_details'][s].get('type') == 'special':
                 session['classification'] = 'special'
             leg_sessions.append(session)
 
