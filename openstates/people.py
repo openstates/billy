@@ -71,7 +71,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                               'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
                               'President Pro Tem',
                              ):
-            new.add_term(role['type'], role['chamber'], district=district,
+            new.add_term(role['type'], role['chamber'],
                          start_date=str(start), end_date=str(end))
         elif role['type'] == 'substitute':
             pass
