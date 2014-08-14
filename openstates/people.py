@@ -208,10 +208,10 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         gender = old.pop('+gender', None)
         if gender:
-            old.gender = gender
+            new.gender = gender
         biography = old.pop('+biography', None)
         if biography:
-            old.biography = biography
+            new.biography = biography
 
         # keys to keep
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
