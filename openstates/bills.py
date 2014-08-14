@@ -138,6 +138,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 for re in act.get('related_entities', []):
                     if re['type'] == 'committee':
                         re['type'] = 'organization'
+                    elif re['type'] == 'legislator':
+                        re['type'] = 'person'
                     newact.add_related_entity(re['name'], re['type'])
 
         for comp in old.pop('companions', []):
