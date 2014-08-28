@@ -24,6 +24,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
     def process_role(self, new, role, leg_id, skip_member=False):
         if self.state == 'la' and len(role['term']) == 4:
             role['term'] = '2008-2011'
+
         start, end = self.get_term_years(role['term'])
         com_id = role.get('committee_id', None)
         if role['type'] == 'committee member':
@@ -62,6 +63,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                     return
                 if self.state in('ne', 'dc'):
                     role['chamber'] = 'legislature'
+
                 new.add_term('member', role['chamber'], district=district,
                              start_date=str(start), end_date=str(end))
         elif role['type'] == 'Lt. Governor':
@@ -139,6 +141,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             )
             new._related.append(membership)
         else:
+            # a weird bug in TN
+            if chamber == 'joint' and self.state == 'tn':
+                chamber = 'upper'
             new = Person(name=name, district=district, primary_org=chamber, party=party,
                          image=image)
 
