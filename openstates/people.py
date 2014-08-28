@@ -72,7 +72,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                               'President Pro Tem',
                              ):
             new.add_term(role['type'], role['chamber'],
-                         start_date=str(start), end_date=str(end))
+                         start_date=str(start), end_date=str(end), label=role['type'])
         elif role['type'] == 'substitute':
             pass
         else:
