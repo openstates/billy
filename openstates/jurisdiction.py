@@ -1,4 +1,5 @@
 import csv
+import re
 import opencivicdata.divisions
 
 from pupa.scrape import Jurisdiction, Organization
@@ -7,6 +8,7 @@ from openstates.people import OpenstatesPersonScraper
 from openstates.events import OpenstatesEventScraper
 from openstates.bills import OpenstatesBillScraper
 
+DISTRICT_INFO = re.compile("(?P<flavor>.*)/(?P<state>[^-]*)-(?P<district>.*)")
 POSTS = {
     'ne': range(1, 50),
     'dc': ['Ward 1', 'Ward 2', 'Ward 3', 'Ward 4', 'Ward 5', 'Ward 6', 'Ward 7', 'Ward 8',
@@ -94,8 +96,6 @@ def make_jurisdiction(a_state):
             self._legislature = legislature
             self._executive = executive
 
-            import re
-            DISTRICT_INFO = re.compile("(?P<flavor>.*)/(?P<state>[^-]*)-(?P<district>.*)")
             def openstates_to_id(district):
                 info = DISTRICT_INFO.match(district['boundary_id']).groupdict()
                 chamber = {
