@@ -94,6 +94,17 @@ def make_jurisdiction(a_state):
             self._legislature = legislature
             self._executive = executive
 
+            import re
+            DISTRICT_INFO = re.compile("(?P<flavor>.*)/(?P<state>[^-]*)-(?P<district>.*)")
+            def openstates_to_id(district):
+                info = DISTRICT_INFO.match(district['boundary_id']).groupdict()
+                chamber = {
+                    "sldu": "upper",
+                    "sldl": "lower",
+                }[info['flavor']]
+                return "{state}-{chamber}-{district}".format(
+                    chamber=chamber, **info)
+
             with open(
                 opencivicdata.divisions.OCD_DIVISION_CSV.format("us"),
                 'r'
@@ -108,9 +119,15 @@ def make_jurisdiction(a_state):
                                            classification=otype, parent_id=legislature._id)
                         districts = osbs.api('districts/{}/{}?'.format(a_state, otype))
                         for district in districts:
-                            division = ocd_districts.get(district['id'].lower())
+                            division = ocd_districts.get(
+                                openstates_to_id(district)
+                            )
                             if division:
                                 division = division['id']
+                            else:
+                                print(division, district)
+                                raise Exception
+
                             org.add_post(
                                 district['name'],
                                 metadata['chambers'][otype]['title'],
