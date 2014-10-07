@@ -31,10 +31,6 @@ Scraping
 
     process upper/lower chamber (if neither is specified will include both)
 
-.. option:: -v, --verbose
-
-    be verbose (use multiple times for more verbosity)
-
 .. option:: -s SESSION, --session SESSION
 
     session(s) to scrape, must be present in state's metadata
