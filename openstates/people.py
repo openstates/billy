@@ -1,5 +1,4 @@
 from pupa.scrape import Organization, Membership, Person
-from pupa.utils import make_psuedo_id
 from .base import OpenstatesBaseScraper
 
 birthdays = {
