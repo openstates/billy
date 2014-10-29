@@ -3,10 +3,10 @@ import re
 import opencivicdata.divisions
 
 from pupa.scrape import Jurisdiction, Organization
-from openstates.base import OpenstatesBaseScraper
-from openstates.people import OpenstatesPersonScraper
-from openstates.events import OpenstatesEventScraper
-from openstates.bills import OpenstatesBillScraper
+from openstatesapi.base import OpenstatesBaseScraper
+from openstatesapi.people import OpenstatesPersonScraper
+from openstatesapi.events import OpenstatesEventScraper
+from openstatesapi.bills import OpenstatesBillScraper
 
 DISTRICT_INFO = re.compile("(?P<flavor>.*)/(?P<state>[^-]*)-(?P<district>.*)")
 POSTS = {
