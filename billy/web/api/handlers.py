@@ -483,7 +483,11 @@ class BoundaryHandler(BillyHandler):
 
     def _ocd_id_to_shape_url(self, ocd_id):
         # url = "%sboundaries/%s/simple_shape" % (self.base_url, boundary_id)
-        url = "{}{}".format(settings.BOUNDARY_SERVICE_URL, ocd_id)
+        url = "{}{}?apikey={}".format(
+            settings.BOUNDARY_SERVICE_URL,
+            ocd_id,
+            settings.API_KEY,
+        )
         data = json.load(urllib2.urlopen(url))
         geometries = filter(
             lambda x: x['boundary_set']['name'] in ACTIVE_BOUNDARY_SETS,
