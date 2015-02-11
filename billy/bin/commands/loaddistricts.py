@@ -32,7 +32,8 @@ class LoadDistricts(BaseCommand):
                 dist_csv = unicodecsv.DictReader(fd)
                 for dist in dist_csv:
                     dist['_id'] = '%(abbr)s-%(chamber)s-%(name)s' % dist
-                    dist['boundary_id'] = dist['boundary_id'] % dist
+                    # dist['boundary_id'] = dist['boundary_id'] % dist
+                    dist['boundary_id'] = dist['division_id']  # Stop-gap
                     dist['num_seats'] = int(dist['num_seats'])
                     db.districts.save(dist, safe=True)
         else:
