@@ -82,8 +82,6 @@ class Scraper(scrapelib.Scraper):
         self._schema = {}
         self._load_schemas()
 
-        self.follow_robots = False
-
         # logging convenience methods
         self.logger = logging.getLogger("billy")
         self.log = self.logger.info
