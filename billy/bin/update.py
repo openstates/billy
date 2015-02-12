@@ -142,21 +142,6 @@ def _do_imports(abbrev, args):
 
     # always import metadata and districts
     import_metadata(abbrev)
-
-    dist_filename = os.path.join(settings.BILLY_MANUAL_DATA_DIR, 'districts',
-                                 '%s.csv' % abbrev)
-    if os.path.exists(dist_filename):
-        db.districts.remove({'abbr': abbrev})
-        dist_csv = unicodecsv.DictReader(open(dist_filename))
-        for dist in dist_csv:
-            dist['_id'] = '%(abbr)s-%(chamber)s-%(name)s' % dist
-            dist['boundary_id'] = dist['boundary_id'] % dist
-            dist['num_seats'] = int(dist['num_seats'])
-            db.districts.save(dist, safe=True)
-    else:
-        logging.getLogger('billy').warning("%s not found, continuing without "
-                                           "districts" % dist_filename)
-
     report = {}
 
     if 'legislators' in args.types:

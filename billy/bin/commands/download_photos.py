@@ -10,7 +10,7 @@ from billy.core import db
 from billy.core import settings
 from billy.bin.commands import BaseCommand
 
-scraper = scrapelib.Scraper(follow_robots=False)
+scraper = scrapelib.Scraper()
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)

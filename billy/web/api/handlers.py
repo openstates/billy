@@ -18,6 +18,7 @@ from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
 AT_LARGE = ['At-Large', 'Chairman']
+ACTIVE_BOUNDARY_SETS = settings.BOUNDARY_SERVICE_SETS.split(",")
 
 
 _lower_fields = (settings.LEVEL_FIELD, 'chamber')
@@ -389,8 +390,8 @@ class LegislatorGeoHandler(BillyHandler):
             resp.write(': Need lat and long parameters')
             return resp
 
-        url = "%sboundaries/?contains=%s,%s&sets=%s&limit=0" % (
-            self.base_url, latitude, longitude, settings.BOUNDARY_SERVICE_SETS
+        url = "%sdivisions/?fields=id&lat=%s&lon=%s&apikey=%s" % (
+            self.base_url, latitude, longitude, settings.API_KEY
         )
 
         resp = json.load(urllib2.urlopen(url))
@@ -399,20 +400,31 @@ class LegislatorGeoHandler(BillyHandler):
         boundary_mapping = {}
         jurisdiction = None
 
-        for dist in resp['objects']:
-            # look up district slug
-            boundary_id = dist['url'].replace('/boundaries/', '').strip('/')
-            districts = db.districts.find({'boundary_id': boundary_id})
+        for dist in resp['results']:
+            ocdid = dist['id']
+            # ocd-division/country:us/state:oh/cd:11
+            _, localpart = ocdid.rsplit("/", 1)
+            set_, series = localpart.split(":", 1)
+            if set_ not in ['sldl', 'sldu']:
+                # Place, CD, County, ...
+                continue
+
+            districts = db.districts.find({'division_id': ocdid})
             count = districts.count()
+
             if count == 1:
-                filters.append({'district': districts[0]['name'],
-                                'chamber': districts[0]['chamber'],
-                                settings.LEVEL_FIELD: districts[0]['abbr'],
-                               })
-                boundary_mapping[(districts[0]['abbr'],
-                                  districts[0]['name'],
-                                  districts[0]['chamber'])] = boundary_id
-                jurisdiction = districts[0]['abbr']
+                district = districts[0]
+                boundary_id = district['division_id']
+
+                filters.append({'district': district['name'],
+                                'chamber': district['chamber'],
+                                settings.LEVEL_FIELD: district['abbr']})
+
+                boundary_mapping[(district['abbr'],
+                                  district['name'],
+                                  district['chamber'])] = boundary_id
+
+                jurisdiction = district['abbr']
             elif count != 0:
                 raise ValueError('multiple districts with boundary_id: %s' %
                                  boundary_id)
@@ -469,9 +481,27 @@ class DistrictHandler(BillyHandler):
 class BoundaryHandler(BillyHandler):
     base_url = settings.BOUNDARY_SERVICE_URL
 
+    def _ocd_id_to_shape_url(self, ocd_id):
+        # url = "%sboundaries/%s/simple_shape" % (self.base_url, boundary_id)
+        url = "{}{}?apikey={}".format(
+            settings.BOUNDARY_SERVICE_URL,
+            ocd_id,
+            settings.API_KEY,
+        )
+        data = json.load(urllib2.urlopen(url))
+        geometries = filter(
+            lambda x: x['boundary_set']['name'] in ACTIVE_BOUNDARY_SETS,
+            data['geometries']
+        )
+        if len(geometries) == 1:
+            geom, = geometries
+            return "{}{}".format(settings.BOUNDARY_SERVICE_URL,
+                                 geom['related']['simple_shape_url'])
+        return
+
     def read(self, request, boundary_id):
-        url = "%sboundaries/%s/simple_shape" % (self.base_url, boundary_id)
         try:
+            url = self._ocd_id_to_shape_url(boundary_id)
             data = json.load(urllib2.urlopen(url))
         except urllib2.HTTPError as e:
             if e.code >= 400:
@@ -501,10 +531,11 @@ class BoundaryHandler(BillyHandler):
                  }
         bbox = [[min_lat, min_lon], [max_lat, max_lon]]
 
-        district = db.districts.find_one({'boundary_id': boundary_id})
+        district = db.districts.find_one({'division_id': boundary_id})
         if not district:
             resp = rc.NOT_FOUND
             return resp
+
         district['shape'] = data['coordinates']
         district['region'] = region
         district['bbox'] = bbox
