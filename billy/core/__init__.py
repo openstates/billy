@@ -111,7 +111,7 @@ def _configure_es(host, timeout):
     global elasticsearch
     try:
         elasticsearch = pyelasticsearch.ElasticSearch(host, timeout=timeout,
-                                                      revival_delay=0)
+                                                      max_retries=0)
     except Exception as e:
         elasticsearch = ErrorProxy(e)
 
