@@ -15,6 +15,7 @@ COMMAND_MODULES = (
     'billy.bin.commands.update_external_ids',
     'billy.bin.commands.update_leg_ids',
     'billy.bin.commands.loaddistricts',
+    'billy.bin.commands.unsubscribe',
 )
 
 
