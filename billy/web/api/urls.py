@@ -36,7 +36,7 @@ if getattr(settings, 'USE_LOCKSMITH', False):
 
     authorizer = Authorizer()
 
-    class Resource(piston.resource.Resource, CORSResource):
+    class Resource(CORSResource):
         def __call__(self, request, *args, **kwargs):
             resp = super(Resource, self).__call__(request, *args, **kwargs)
 
