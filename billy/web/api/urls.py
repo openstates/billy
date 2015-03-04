@@ -10,6 +10,14 @@ from billy.web.api import handlers
 from billy.web.api.emitters import BillyJSONEmitter
 from billy.web.api.emitters import ICalendarEmitter
 
+
+class CORSResource(piston.resource.Resource):
+    def __call__(self, *args, **kwargs):
+        r = super(CORSResource, self).__call__(*args, **kwargs)
+        r['Access-Control-Allow-Origin'] = '*'
+        return r
+
+
 if getattr(settings, 'USE_LOCKSMITH', False):
     from locksmith.mongoauth.authentication import PistonKeyAuthentication
     from locksmith.mongoauth.db import db
@@ -28,7 +36,7 @@ if getattr(settings, 'USE_LOCKSMITH', False):
 
     authorizer = Authorizer()
 
-    class Resource(piston.resource.Resource):
+    class Resource(piston.resource.Resource, CORSResource):
         def __call__(self, request, *args, **kwargs):
             resp = super(Resource, self).__call__(request, *args, **kwargs)
 
@@ -43,7 +51,7 @@ if getattr(settings, 'USE_LOCKSMITH', False):
             return resp
 else:
     authorizer = None
-    Resource = piston.resource.Resource
+    Resource = CORSResource
 
 Emitter.register('json', BillyJSONEmitter, 'application/json; charset=utf-8')
 
