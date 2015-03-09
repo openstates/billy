@@ -9,7 +9,7 @@ ADD . /opt/sunlightfoundation.com/billy/
 RUN pip install -r /opt/sunlightfoundation.com/billy/requirements.txt
 RUN pip install -e /opt/sunlightfoundation.com/billy/
 
-RUN mkdir -p /tmp/pupa
-WORKDIR /tmp/pupa
+RUN mkdir -p /billy
+WORKDIR /billy
 
 ENTRYPOINT ["billy-update"]
