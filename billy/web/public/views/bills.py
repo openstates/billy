@@ -270,6 +270,7 @@ class AllBillCSVList(AllBillList):
                 "Passed Senate",
                 "Passed House",
                 "OpenStates Link",
+                "Versions",
             ]
 
             yield ",".join((x for x in fields))
@@ -302,6 +303,15 @@ class AllBillCSVList(AllBillList):
                  x in [lower_passages, upper_passages]]
 
                 entries.append("http://openstates.org" + url)
+
+                versions = bill.get("versions", [])
+                version = versions[0]['url'] if len(versions) > 0 else ""
+                entries.append(version)
+                # We'll just get a version; figuring out the latest version
+                # means a Mongo query for each bill's time. We'll just take
+                # the 0th element of the list, since most folks will have to
+                # research them all anyway. Putting all the versions in the
+                # output is quite unwieldy.
 
                 yield ",".join((escape(x) for x in entries))
 
