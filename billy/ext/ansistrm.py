@@ -50,7 +50,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     def emit(self, record):
         try:
-            message = self.format(record)
+            message = self.format(record).encode('utf-8')
             stream = self.stream
             if not self.is_tty:
                 stream.write(message)

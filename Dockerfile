@@ -12,4 +12,7 @@ RUN pip install -e /opt/sunlightfoundation.com/billy/
 RUN mkdir -p /billy
 WORKDIR /billy
 
+ENV PYTHONIOENCODING 'utf-8'
+ENV LANG 'en_US.UTF-8'
+
 ENTRYPOINT ["billy-update"]

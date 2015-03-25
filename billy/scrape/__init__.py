@@ -177,7 +177,7 @@ class Scraper(scrapelib.Scraper):
         # copy jurisdiction to LEVEL_FIELD
         obj[settings.LEVEL_FIELD] = getattr(self, 'jurisdiction')
 
-        filename = obj.get_filename()
+        filename = obj.get_filename().encode('utf-8')
         self.output_names.add(filename)     # keep tally of all output names
 
         # pluralize type
