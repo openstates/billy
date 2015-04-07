@@ -173,7 +173,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                        'address': 'address'}
         for office in old.pop('offices'):
             for key, type in office_keys.items():
-                if office[key]:
+                if office.get(key):
                     if 'Office Hours' in office[key] and self.state == 'pa':
                         for x in office[key].split('Office Hours: '):
                             if x:
@@ -185,6 +185,12 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         link = old.pop('url', None)
         if link:
             new.add_link(link)
+
+        links = old.pop('+links',[])
+        for l in links:
+            #conflict of interest forms in UT
+            if self.state == "ut":
+                new.add_link(url=l,note="conflict of interest form")
 
         # sources
         for source in old.pop('sources'):
