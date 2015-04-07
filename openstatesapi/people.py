@@ -186,12 +186,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         if link:
             new.add_link(link)
 
-        links = old.pop('+links',[])
-        for l in links:
-            #conflict of interest forms in UT
-            if self.state == "ut":
-                new.add_link(url=l,note="conflict of interest form")
-
         # sources
         for source in old.pop('sources'):
             source.pop('retrieved', None)
