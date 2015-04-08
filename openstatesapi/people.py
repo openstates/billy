@@ -193,8 +193,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 print(l)
                 new.add_link(note="conflict of interest form",url=l)
 
-
-
         # sources
         for source in old.pop('sources'):
             source.pop('retrieved', None)
