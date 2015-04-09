@@ -222,6 +222,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         biography = old.pop('+biography', None)
         if biography:
             new.biography = biography
+        birth_date = old.pop('+birth_date', None)
+        if birth_date:
+            new.birth_date = birth_date
 
         # keys to keep
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
