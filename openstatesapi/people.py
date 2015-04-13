@@ -216,6 +216,10 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         old.pop('nickname', None)
         new.sort_name = old.pop('last_name')
 
+        #some places have legacy names without underscores
+        old.pop('+firstname', None)
+        old.pop('+lastname', None)
+
         gender = old.pop('+gender', None)
         if gender:
             new.gender = gender
