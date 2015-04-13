@@ -172,7 +172,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                      '+requester', '+transmittal_date:', '+by_request_of', '+bill_draft_number:',
                      '+bill_lr', '+bill_url', '+rcs_num', '+fiscal_note', '+impact_clause', '+fiscal_notes',
                      '+short_title', '+type_', '+conference_committee', 'conference_committee',
-                     '+companion_bill_ids']
+                     '+companion_bill_ids', '+additional_information']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
