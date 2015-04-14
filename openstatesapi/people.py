@@ -234,7 +234,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         to_extras = ['+occupation', '+twitter', '+facebook_url', '+sworn_in_date', '+profession',
                      '+secretary', '+office_hours', '+resident_county', '+district_name',
                      '+leg_status', '+legal_position', '+title', '+start_year',
-                     '+end_date', 'occupation', '+oregon_member_id']
+                     '+end_date', 'occupation', '+oregon_member_id',
+                     '+facebook', '+youtube', '+instagram']
         for k in to_extras:
             v = old.pop(k, None)
             if v:
