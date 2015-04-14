@@ -45,6 +45,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
         old.pop('created_at')
         old.pop('updated_at')
         old.pop('action_dates')
+        old.pop('+bill_type',None)
         old.pop('+subject', None)
         old.pop('+scraped_subjects', None)
         old.pop('subjects', [])
