@@ -108,7 +108,8 @@ def make_jurisdiction(a_state):
                             org.add_post(
                                 district['name'],
                                 metadata['chambers'][otype]['title'],
-                                division_id=division
+                                division_id=division,
+                                role="member"
                             )
 
                         # old posts
@@ -173,12 +174,14 @@ def make_jurisdiction(a_state):
 
                         for p in old_posts:
                             org.add_post(p, metadata['chambers'][otype]['title'],
-                                         end_date=end_date)
+                                         end_date=end_date, role="member")
 
                         yield org
             else:
                 for post in POSTS[a_state]:
-                    self._legislature.add_post(str(post), metadata['chambers']['upper']['title'])
+                    self._legislature.add_post(str(post),
+                                        metadata['chambers']['upper']['title'],
+                                        role="member")
 
 
             yield legislature
