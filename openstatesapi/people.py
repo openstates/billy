@@ -145,10 +145,13 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             # a weird bug in TN
             if chamber == 'joint' and self.state == 'tn':
                 chamber = 'upper'
+            #dc. one chamber. we've been inconsistent.
+            if self.state == 'dc':
+                chamber = 'upper'
             if chamber:
                 person_role = self.metadata["chambers"][chamber]["title"]
             elif old["roles"]:
-                chamber_guess = roles[0]["chamber"]
+                chamber_guess = old["roles"][0]["chamber"]
                 person_role = self.metadata["chambers"][chamber_guess]["title"]
             elif old_roles:
                 most_recent_term = sorted(old_roles.keys())[-1]
