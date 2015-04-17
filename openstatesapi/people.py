@@ -127,6 +127,8 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if district in pr_district:
                 district = pr_district[district]
 
+        old_roles = old.pop('old_roles', {})
+
         if old['roles'] and 'Lt. Governor' in [x['type'] for x in old['roles']]:
             new = Person(name=name, district=district, party=party, image=image)
             self.jurisdiction._executive.add_post(
@@ -143,7 +145,19 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             # a weird bug in TN
             if chamber == 'joint' and self.state == 'tn':
                 chamber = 'upper'
-            person_role = self.metadata["chambers"][chamber]["title"]
+            if chamber:
+                person_role = self.metadata["chambers"][chamber]["title"]
+            elif old["roles"]:
+                chamber_guess = roles[0]["chamber"]
+                person_role = self.metadata["chambers"][chamber_guess]["title"]
+            elif old_roles:
+                most_recent_term = sorted(old_roles.keys())[-1]
+                chamber_guess = old_roles[most_recent_term][0]["chamber"]
+                person_role = self.metadata["chambers"][chamber_guess]["title"]
+            else:
+                raise AssertionError("Can't find a chamber anywhere")
+
+
             new = Person(name=name, district=district, primary_org=chamber, party=party,
                          image=image, role=person_role)
 
@@ -206,7 +220,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         if '2008-2011' in old:
             old['old_roles']['2008-2011'] = old.pop('2008-2011')
 
-        for role_list in old.pop('old_roles', {}).values():
+        for role_list in old_roles.values():
             for role in role_list:
                 self.process_role(new, role, leg_id=id)
 
