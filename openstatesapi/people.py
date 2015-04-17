@@ -143,8 +143,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             # a weird bug in TN
             if chamber == 'joint' and self.state == 'tn':
                 chamber = 'upper'
+            person_role = self.metadata["chambers"][chamber]["title"]
             new = Person(name=name, district=district, primary_org=chamber, party=party,
-                         image=image)
+                         image=image, role=person_role)
 
         if id in birthdays:
             new.birth_date = birthdays[id]
