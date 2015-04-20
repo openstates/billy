@@ -60,10 +60,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
                 if 'Replication or Save Conflict' in district:
                     return
-                if self.state in('ne', 'dc'):
-                    role['chamber'] = 'legislature'
 
                 mem_type = self.metadata["chambers"][role["chamber"]]["title"]
+
+                if self.state in('ne', 'dc'):
+                    role['chamber'] = 'legislature'
 
                 new.add_term(role=mem_type,
                                 org_classification=role['chamber'],
