@@ -63,7 +63,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 if self.state in('ne', 'dc'):
                     role['chamber'] = 'legislature'
 
-                new.add_term(role='member',
+                mem_type = self.metadata["chambers"][role["chamber"]]["title"]
+
+                new.add_term(role=mem_type,
                                 org_classification=role['chamber'],
                                 district=district,
                                 start_date=str(start),
