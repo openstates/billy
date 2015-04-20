@@ -63,8 +63,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                 if self.state in('ne', 'dc'):
                     role['chamber'] = 'legislature'
 
-                new.add_term('member', role['chamber'], district=district,
-                             start_date=str(start), end_date=str(end))
+                new.add_term(role='member',
+                                org_classification=role['chamber'],
+                                district=district,
+                                start_date=str(start),
+                                end_date=str(end))
         elif role['type'] == 'Lt. Governor':
             pass # handle this!
         elif role['type'] in ('Senate President', 'Minority Whip', 'Majority Whip',
@@ -72,8 +75,11 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
                               'Minority Caucus Chair', 'Minority Floor Leader', 'Speaker of the House',
                               'President Pro Tem',
                              ):
-            new.add_term(role['type'], role['chamber'],
-                         start_date=str(start), end_date=str(end), label=role['type'])
+            new.add_term(role=role['type'],
+                            org_classification=role['chamber'],
+                            start_date=str(start),
+                            end_date=str(end),
+                            label=role['type'])
         elif role['type'] == 'substitute':
             pass
         else:
