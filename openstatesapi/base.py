@@ -29,7 +29,7 @@ class OpenstatesBaseScraper(Scraper):
                 "~/.sunlight.key"
             )
 
-    def api(self, method):
+    def api(self, method, retrys=4):
         """
         Preform an API call against `method`. Return the parsed json
         data.
@@ -39,7 +39,10 @@ class OpenstatesBaseScraper(Scraper):
             "&" if "?" in method else "?",
             self.apikey
         )
+
+        self.retry_attempts = retrys
         try:
-            return self.get(url).json()
+            return self.get(url,retry_on_404=True).json()
+
         except ValueError:
             raise ValueError('error retrieving ' + url)
