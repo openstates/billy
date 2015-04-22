@@ -1,7 +1,6 @@
 from pupa.scrape import Scraper
 import os.path
 import os
-from scrapelib import HTTPError
 
 
 class OpenstatesBaseScraper(Scraper):
