@@ -114,7 +114,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         name = old.pop('full_name')
         party = old.pop('party', None)
 
-        if party in ('Nonpartisan', 'unknown', 'Unknown','Unaffiliated'):
+        if party in ('Nonpartisan', 'unknown', 'Unknown', 'Unaffiliated'):
             party = None
         elif party == 'Democrat':
             party = 'Democratic'
