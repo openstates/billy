@@ -405,7 +405,7 @@ class LegislatorGeoHandler(BillyHandler):
             # ocd-division/country:us/state:oh/cd:11
             _, localpart = ocdid.rsplit("/", 1)
             set_, series = localpart.split(":", 1)
-            if set_ not in ['sldl', 'sldu']:
+            if set_ not in ['sldl', 'sldu', 'ward']:
                 # Place, CD, County, ...
                 continue
 
