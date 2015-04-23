@@ -305,12 +305,16 @@ def merge_legislators(leg1, leg2):
         leg1[key] = leg2[key]
 
     # XXX: Set updated_at
+
+    if len(leg2[roles]) == 0:
+        raise AssertionError("The new legislator has no roles. "\
+            "This merge should be done by hand.")
     if leg1[roles] != leg2[roles]:
         # OK. Let's dump the current roles into the old roles.
         # WARNING: This code *WILL* drop current ctty appointments.
         #  What this means:
         #      In the case where someone goes from chamber L->U, and is on
-        #      joint-ctty A, moves to U, we will *LOOSE* joint-ctty from
+        #      joint-ctty A, moves to U, we will *LOSE* joint-ctty from
         #      old_roles & roles!! There's a potenital for data loss, but it's
         #      not that big of a thing.
         #   -- paultag & jamesturk, 02-02-2012
