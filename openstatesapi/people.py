@@ -151,27 +151,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             )
             new._related.append(membership)
         else:
-            # a weird bug in TN
-            if chamber == 'joint' and self.state == 'tn':
-                chamber = 'upper'
-            #dc. one chamber. we've been inconsistent.
-            if self.state == 'dc':
-                chamber = 'upper'
-            if chamber:
-                person_role = self.metadata["chambers"][chamber]["title"]
-            elif old["roles"]:
-                chamber_guess = old["roles"][0]["chamber"]
-                person_role = self.metadata["chambers"][chamber_guess]["title"]
-            elif old_roles:
-                most_recent_term = sorted(old_roles.keys())[-1]
-                chamber_guess = old_roles[most_recent_term][0]["chamber"]
-                person_role = self.metadata["chambers"][chamber_guess]["title"]
-            else:
-                raise AssertionError("Can't find a chamber anywhere")
-
-
-            new = Person(name=name, district=district, primary_org=chamber, party=party,
-                         image=image, role=person_role)
+            new = Person(name=name, party=party, image=image)
 
         if id in birthdays:
             new.birth_date = birthdays[id]
