@@ -88,7 +88,10 @@ def make_jurisdiction(a_state):
         legislative_sessions = leg_sessions
 
         def get_organizations(self):
-            legislature = Organization(metadata['legislature_name'], classification='legislature')
+            org_name = metadata['legislature_name']
+            if org_name.lower() == "council":
+                org_name = "legislature"
+            legislature = Organization(org_name, classification='legislature')
             executive = Organization(metadata['name'] + ' Executive Branch',
                                      classification='executive')
             yield executive
