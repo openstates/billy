@@ -17,12 +17,17 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
         self.events = self.api(method)
         seen = set()
         for event in self.events:
+            begin = self._date_parse(event.pop('when'))
+            end = self._date_parse(event.pop('end'))
+            all_day = event.pop('all_day',False)
+
             e = Event(name=event.pop('description'),
                       classification=event.pop('type'),
                       location=event.pop('location'),
                       timezone=event.pop('timezone'),
-                      start_time=self._date_parse(event.pop('when')),
-                      end_time=self._date_parse(event.pop('end')),)
+                      start_time=begin,
+                      end_time=end,
+                      all_day=all_day,)
             if len(e.name) >= 300:
                 e.name = e.name[:290]
 
