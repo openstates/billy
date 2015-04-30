@@ -78,7 +78,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             old['title'] = '(unknown)'
 
         chamber = old.pop('chamber')
-        if chamber == 'upper' and self.state in ('ne', 'dc'):
+        if self.state in ('ne', 'dc'):
             chamber = 'legislature'
         elif chamber in ('joint', 'conference'):
             chamber = 'legislature'
@@ -130,8 +130,10 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
                 actor = 'legislature'
 
             # nebraska & DC
-            if actor == 'upper' and self.state in ('ne', 'dc'):
+            if actor in ('upper','council') and self.state in ('ne', 'dc'):
                 actor = 'legislature'
+
+            print(actor)
 
             if act['action']:
                 newact = new.add_action(act['action'], act['date'][:10], chamber=actor,
