@@ -207,7 +207,7 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         # roles
         for role in old.pop('roles'):
-            self.process_role(new, role, leg_id=id, skip_member=True)
+            self.process_role(new, role, leg_id=id)
 
         if '2008-2011' in old:
             old['old_roles']['2008-2011'] = old.pop('2008-2011')
