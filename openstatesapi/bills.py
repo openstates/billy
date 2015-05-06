@@ -133,8 +133,6 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             if actor in ('upper','council') and self.state in ('ne', 'dc'):
                 actor = 'legislature'
 
-            print(actor)
-
             if act['action']:
                 newact = new.add_action(act['action'], act['date'][:10], chamber=actor,
                                         classification=[action_types[c] for c in act['type'] if c != 'other'])

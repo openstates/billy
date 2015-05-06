@@ -291,7 +291,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
 
         if sub:
             if parent_id:
-                print(id, parent_id)
                 parent = self._committees[parent_id]._id
                 new = Organization(sub, parent_id=parent, classification='committee')
             else:
