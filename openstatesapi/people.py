@@ -136,6 +136,9 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
             if district in pr_district:
                 district = pr_district[district]
 
+        if '2008-2011' in old:
+            old['old_roles']['2008-2011'] = old.pop('2008-2011')
+
         old_roles = old.pop('old_roles', {})
 
         if old['roles'] and 'Lt. Governor' in [x['type'] for x in old['roles']]:
@@ -208,9 +211,6 @@ class OpenstatesPersonScraper(OpenstatesBaseScraper):
         # roles
         for role in old.pop('roles'):
             self.process_role(new, role, leg_id=id)
-
-        if '2008-2011' in old:
-            old['old_roles']['2008-2011'] = old.pop('2008-2011')
 
         for role_list in old_roles.values():
             for role in role_list:
