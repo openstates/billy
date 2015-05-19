@@ -23,7 +23,7 @@ class OpenstatesEventScraper(OpenstatesBaseScraper):
 
             e = Event(name=event.pop('description'),
                       classification=event.pop('type'),
-                      location=event.pop('location'),
+                      location_name=event.pop('location'),
                       timezone=event.pop('timezone'),
                       start_time=begin,
                       end_time=end,
