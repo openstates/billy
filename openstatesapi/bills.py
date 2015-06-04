@@ -73,6 +73,8 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             classification = ['joint resolution']
         if classification == ['legislative resolution'] and self.state == 'ny':
             classification = ['resolution']
+        if classification == ['address'] and self.state == 'nh':
+            classification = ['resolution']
 
         if not old['title'] and self.state == 'me':
             old['title'] = '(unknown)'
