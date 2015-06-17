@@ -83,8 +83,7 @@ class BillyHandlerMetaClass(HandlerMetaClass):
                 fmt = request.GET.get('format')
                 if fmt == 'ics' and 'fields' in request.GET:
                     resp = rc.BAD_REQUEST
-                    resp.write(": cannot specify fields param if format=%s" %
-                               fmt)
+                    resp.write("cannot specify fields param if format=%s" % fmt)
                     return resp
                 obj = old_read(*args, **kwargs)
                 if isinstance(obj, HttpResponse):
@@ -220,7 +219,7 @@ class BillSearchHandler(BillyHandler):
                                 **base_fields)
         except ValueError as e:
             resp = rc.BAD_REQUEST
-            resp.write(': %s' % e)
+            resp.write('%s' % e)
             return resp
 
         # add pagination
@@ -241,7 +240,7 @@ class BillSearchHandler(BillyHandler):
             # limit response size
             if len(query) > 10000:
                 resp = rc.BAD_REQUEST
-                resp.write(': request too large, try narrowing your search by '
+                resp.write('request too large, try narrowing your search by '
                            'adding more filters.')
                 return resp
             bills = query[:]
@@ -355,7 +354,7 @@ class EventsHandler(BillyHandler):
 
         if invalid_date:
             resp = rc.BAD_REQUEST
-            resp.write(": invalid updated_since parameter."
+            resp.write("invalid updated_since parameter."
                        " Please supply a date in YYYY-MM-DD format.")
             return resp
 
@@ -387,7 +386,7 @@ class LegislatorGeoHandler(BillyHandler):
 
         if not latitude or not longitude:
             resp = rc.BAD_REQUEST
-            resp.write(': Need lat and long parameters')
+            resp.write('Need lat and long parameters')
             return resp
 
         url = "%sdivisions/?fields=id&lat=%s&lon=%s&apikey=%s" % (
