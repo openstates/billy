@@ -23,7 +23,7 @@ if getattr(settings, 'USE_LOCKSMITH', False):
     from locksmith.mongoauth.db import db
 
     class Authorizer(PistonKeyAuthentication):
-        def challenge(self):
+        def challenge(self, *args):
             response = 'Authorization Required'
             locksmith_url = getattr(settings, 'LOCKSMITH_REGISTRATION_URL',
                                     None)
