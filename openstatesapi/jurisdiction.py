@@ -84,6 +84,7 @@ def make_jurisdiction(a_state):
                    {'name': 'Partido Independentista Puertorriqueño'},
                    {'name': 'Partido Popular Democrático'},
                    {'name': 'Partido Nuevo Progresista'},
+                   {'name': 'Working Families'},
                   ]
         legislative_sessions = leg_sessions
 
