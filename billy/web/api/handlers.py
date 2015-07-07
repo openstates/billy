@@ -393,7 +393,7 @@ class LegislatorGeoHandler(BillyHandler):
             self.base_url, latitude, longitude, settings.API_KEY
         )
 
-        resp = json.load(urllib2.get(url).json())
+        resp = json.load(urllib2.urlopen(url))
 
         filters = []
         boundary_mapping = {}
@@ -487,7 +487,7 @@ class BoundaryHandler(BillyHandler):
             ocd_id,
             settings.API_KEY,
         )
-        data = json.load(urllib2.get(url).json())
+        data = json.load(urllib2.urlopen(url))
         geometries = filter(
             lambda x: x['boundary_set']['name'] in ACTIVE_BOUNDARY_SETS,
             data['geometries']
@@ -501,7 +501,7 @@ class BoundaryHandler(BillyHandler):
     def read(self, request, boundary_id):
         try:
             url = self._ocd_id_to_shape_url(boundary_id)
-            data = json.load(urllib2.get(url).json())
+            data = json.load(urllib2.urlopen(url))
         except urllib2.HTTPError as e:
             if e.code >= 400:
                 resp = rc.NOT_FOUND
