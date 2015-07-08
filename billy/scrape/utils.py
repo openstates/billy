@@ -5,9 +5,9 @@ import collections
 
 
 def url_xpath(url, path):
-    import scrapelib
+    import requests
     import lxml.html
-    doc = lxml.html.fromstring(scrapelib.urlopen(url))
+    doc = lxml.html.fromstring(requests.get(url).text)
     return doc.xpath(path)
 
 

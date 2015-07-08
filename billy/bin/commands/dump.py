@@ -268,7 +268,7 @@ class DumpJSON(BaseCommand):
             committee_schema = json.load(f)
 
         # write out metadata
-        response = scraper.urlopen(api_url('metadata/%s' % abbr)).bytes
+        response = scraper.get(api_url('metadata/%s' % abbr)).content
         zip.writestr('metadata.json', response)
 
         logging.info('exporting %s legislators...' % abbr)
@@ -276,7 +276,7 @@ class DumpJSON(BaseCommand):
             path = 'legislators/%s' % legislator['_id']
             url = api_url(path)
 
-            response = scraper.urlopen(url).bytes
+            response = scraper.get(url).content
             if validate:
                 validictory.validate(json.loads(response), legislator_schema,
                                      validator_cls=APIValidator)
@@ -288,7 +288,7 @@ class DumpJSON(BaseCommand):
             path = 'committees/%s' % committee['_id']
             url = api_url(path)
 
-            response = scraper.urlopen(url).bytes
+            response = scraper.get(url).content
             if validate:
                 validictory.validate(json.loads(response), committee_schema,
                                      validator_cls=APIValidator)
@@ -301,7 +301,7 @@ class DumpJSON(BaseCommand):
                                           bill['chamber'], bill['bill_id'])
             url = api_url(path)
 
-            response = scraper.urlopen(url).bytes
+            response = scraper.get(url).content
             if validate:
                 validictory.validate(json.loads(response), bill_schema,
                                      validator_cls=APIValidator)
