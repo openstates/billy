@@ -250,7 +250,7 @@ class DumpJSON(BaseCommand):
                 upload(abbr, args.file, 'json')
 
     def dump(self, abbr, filename, validate, schema_dir):
-        scraper = scrapelib.Scraper(requests_per_minute=600)
+        scraper = scrapelib.Scraper(requests_per_minute=600, retry_attempts=3)
 
         zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
 
