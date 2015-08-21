@@ -17,6 +17,7 @@ import scrapelib
 import validictory
 import boto
 from boto.s3.key import Key
+from boto.s3.connection import OrdinaryCallingFormat
 
 
 def extract_fields(d, fields, delimiter='|'):
@@ -46,7 +47,8 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
         s3_url = 'http://%s.s3.amazonaws.com/%s' % (s3_bucket, s3_path)
 
     # S3 upload
-    s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET)
+    s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET,
+                             calling_format=OrdinaryCallingFormat())
     bucket = s3conn.create_bucket(s3_bucket)
     k = Key(bucket)
     k.key = s3_path

@@ -7,6 +7,7 @@ import logging.config
 import pymongo
 from pymongo.son_manipulator import SONManipulator
 import boto
+from boto.s3.connection import OrdinaryCallingFormat
 
 from billy.core import default_settings
 
@@ -120,7 +121,9 @@ def _configure_s3(aws_key, aws_secret, bucket):
     global s3bucket
     try:
         if aws_key and aws_secret and bucket:
-            s3bucket = boto.connect_s3(aws_key, aws_secret).get_bucket(bucket)
+            s3bucket = boto.connect_s3(
+                aws_key, aws_secret, calling_format=OrdinaryCallingFormat()
+                ).get_bucket(bucket)
         else:
             s3bucket = ErrorProxy(ValueError('s3 not configured in settings'))
     except Exception as e:

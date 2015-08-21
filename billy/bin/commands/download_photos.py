@@ -4,6 +4,7 @@ import subprocess
 
 import boto
 from boto.s3.key import Key
+from boto.s3.connection import OrdinaryCallingFormat
 import scrapelib
 
 from billy.core import db
@@ -39,7 +40,8 @@ class DownloadPhotos(BaseCommand):
                           help='abbreviations for photos to update')
 
     def handle(self, args):
-        s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET)
+        s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET,
+                                 calling_format=OrdinaryCallingFormat())
         bucket = s3conn.create_bucket(settings.AWS_BUCKET)
 
         for abbr in args.abbrs:
