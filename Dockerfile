@@ -2,7 +2,15 @@ FROM        debian:jessie
 MAINTAINER  Paul R. Tagliamonte <paultag@sunlightfoundation.com>
 
 RUN apt-get update && apt-get install -y \
-    python2.7 python-pip python-lxml python-pymongo libpq-dev git libgeos-dev mercurial
+    python2.7 \
+    python-pip \
+    python-lxml \
+    python-pymongo \
+    libpq-dev \
+    git \
+    libgeos-dev \
+    mercurial \
+    imagemagick
 
 RUN mkdir -p /opt/sunlightfoundation.com/
 ADD . /opt/sunlightfoundation.com/billy/
