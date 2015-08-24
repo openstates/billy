@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
     libgeos-dev \
     mercurial \
-    imagemagick
+    imagemagick \
+    jpegoptim
 
 RUN mkdir -p /opt/sunlightfoundation.com/
 ADD . /opt/sunlightfoundation.com/billy/
