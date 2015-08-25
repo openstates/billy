@@ -217,7 +217,7 @@ class DumpCSV(BaseCommand):
         files += dump_legislator_csvs(abbr)
         files += dump_bill_csvs(abbr)
 
-        zfile = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
+        zfile = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
         for fname in files:
             arcname = fname.split('/')[-1]
             zfile.write(fname, arcname=arcname)
@@ -254,7 +254,7 @@ class DumpJSON(BaseCommand):
     def dump(self, abbr, filename, validate, schema_dir):
         scraper = scrapelib.Scraper(requests_per_minute=600, retry_attempts=3)
 
-        zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED)
+        zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
         if not schema_dir:
             cwd = os.path.split(__file__)[0]
