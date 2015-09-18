@@ -1,6 +1,17 @@
 billy changelog
 ===============
 
+1.8.1
+-----
+** 18 September 2015 **
+    * add Docker deployment
+    * upgrade to Django 1.6
+    * upgrade to scrapelib 1.0
+    * enhance legislative division lookup
+    * improve CSV handling
+    * fix Piston errors
+    * pin older module versions
+
 1.8.0
 -----
 ** 16 January 2014 **
