@@ -11,4 +11,3 @@ scrapelib>=1.0
 unicodecsv!=0.9.3
 validictory
 pyelasticsearch
-
