@@ -952,6 +952,7 @@ def legislator_edit(request, id):
             "transparencydata_id",
             "photo_url",
             "url",
+            "offices",
         ]
     })
 
