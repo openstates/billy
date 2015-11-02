@@ -1,6 +1,11 @@
 billy changelog
 ===============
 
+1.8.3
+-----
+** 2 November 2015 **
+    * removed ability to edit legislator offices in admin interface
+
 1.8.2
 -----
 ** 29 October 2015 **
