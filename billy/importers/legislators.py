@@ -31,7 +31,7 @@ def import_legislators(abbr, data_dir):
             ret = import_legislator(json.load(f))
             counts[ret] += 1
 
-    logger.info('imported %s legislator files' % len(paths))
+    logger.info('Finished importing {} legislator files.'.format(len(paths)))
 
     meta = db.metadata.find_one({'_id': abbr})
     current_term = meta['terms'][-1]['name']
@@ -100,7 +100,9 @@ def term_older_than(abbr, terma, termb):
 
 def import_legislator(data):
     data = prepare_obj(data)
-    data['_scraped_name'] = data['full_name']
+
+    if data.get('_scraped_name') is None:
+        data['_scraped_name'] = data['full_name']
 
     # Rename 'role' -> 'type'
     for role in data['roles']:
@@ -127,7 +129,7 @@ def import_legislator(data):
     # find matching legislator in current term
     leg = db.legislators.find_one(
         {settings.LEVEL_FIELD: abbr,
-         '_scraped_name': data['full_name'],
+         '_scraped_name': data['_scraped_name'],
          'roles': {'$elemMatch': spec}})
 
     # legislator with a matching old_role
@@ -135,7 +137,7 @@ def import_legislator(data):
         spec.pop('term')
         leg = db.legislators.find_one({
             settings.LEVEL_FIELD: abbr,
-            '_scraped_name': data['full_name'],
+            '_scraped_name': data['_scraped_name'],
             'old_roles.%s' % scraped_term: {'$elemMatch': spec}
         })
 
@@ -151,7 +153,7 @@ def import_legislator(data):
         spec.pop('term', None)
         leg = db.legislators.find_one(
             {settings.LEVEL_FIELD: abbr,
-             '_scraped_name': data['full_name'],
+             '_scraped_name': data['_scraped_name'],
              'roles': {'$elemMatch': spec}})
         if leg:
             if 'old_roles' not in data:

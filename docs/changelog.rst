@@ -1,19 +1,25 @@
 billy changelog
 ===============
 
+1.8.4
+-----
+
+**18 November 2015**
+    * added ability to override _scraped_name field for legislators
+
 1.8.3
 -----
-** 2 November 2015 **
+**2 November 2015**
     * removed ability to edit legislator offices in admin interface
 
 1.8.2
 -----
-** 29 October 2015 **
+**29 October 2015**
     * enable editing of legislator offices in admin interface
 
 1.8.1
 -----
-** 18 September 2015 **
+**18 September 2015**
     * add Docker deployment
     * upgrade to Django 1.6
     * upgrade to scrapelib 1.0
@@ -24,7 +30,7 @@ billy changelog
 
 1.8.0
 -----
-** 16 January 2014 **
+**16 January 2014**
     * more CSRF bugfixing
     * ensure_indexes command
     * beginnings of news entry api
@@ -40,7 +46,7 @@ billy changelog
 
 1.7.0
 -----
-** 16 February 2013 **
+**16 February 2013**
     * major changes in how ElasticSearch component works
     * functional (Scout-synced) favorites support
     * drastically improved mongodb indexing on bills collection
@@ -58,7 +64,7 @@ billy changelog
 
 1.6.0
 -----
-** 5 December 2012 **
+**5 December 2012**
     * completion of move from 'state' to flexible LEVEL_FIELD
     * new type: speeches
     * documentation improvements
