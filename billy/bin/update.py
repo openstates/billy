@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import os
-import sys
-import pdb
-import json
-import glob
-import logging
-import inspect
-import argparse
-import traceback
-import importlib
-import unicodecsv
 
+import argparse
 import datetime as dt
+import glob
+import importlib
+import inspect
+import logging
+import json
+import os
+import pdb
+import sys
+import traceback
+
+import unicodecsv
 
 from billy.core import db
 from billy.core import settings, base_arg_parser
@@ -47,7 +48,8 @@ def _get_configured_scraper(scraper_type, options, metadata):
     return ScraperClass(metadata,
                         output_dir=options.output_dir,
                         strict_validation=options.strict,
-                        fastmode=options.fastmode)
+                        fastmode=options.fastmode,
+                        options=options)
 
 
 def _is_old_scrape(f):

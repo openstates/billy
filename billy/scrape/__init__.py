@@ -1,14 +1,13 @@
-import os
-import logging
 import importlib
 import json
-
-from billy.scrape.validator import DatetimeValidator
-
-from billy.core import settings
-from billy.utils import JSONEncoderPlus
+import logging
+import os
 
 import scrapelib
+
+from billy.scrape.validator import DatetimeValidator
+from billy.core import settings
+from billy.utils import JSONEncoderPlus
 
 
 class ScrapeError(Exception):
@@ -48,7 +47,7 @@ class Scraper(scrapelib.Scraper):
     latest_only = False
 
     def __init__(self, metadata, output_dir=None, strict_validation=None,
-                 fastmode=False):
+                 fastmode=False, options={}):
         """
         Create a new Scraper instance.
 
@@ -72,6 +71,7 @@ class Scraper(scrapelib.Scraper):
         self.metadata = metadata
         self.output_dir = output_dir
         self.output_names = set()
+        self.options = options
 
         # make output_dir
         os.path.isdir(self.output_dir) or os.path.makedirs(self.output_dir)
