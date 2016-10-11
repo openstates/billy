@@ -1,4 +1,4 @@
-from pupa.scrape import Bill, Vote
+from pupa.scrape import Bill, VoteEvent
 from .base import OpenstatesBaseScraper
 
 
@@ -237,7 +237,7 @@ class OpenstatesBillScraper(OpenstatesBaseScraper):
             elif chamber == 'joint':
                 chamber = 'legislature'
 
-            newvote = Vote(legislative_session=vote.pop('session'),
+            newvote = VoteEvent(legislative_session=vote.pop('session'),
                            motion_text=vote.pop('motion'),
                            result='pass' if vote.pop('passed') else 'fail',
                            chamber=chamber,
