@@ -85,7 +85,7 @@ def find_your_legislator(request):
             lat,
             getattr(billy_settings, 'API_KEY', '')
         )
-        leg_resp = json.load(urllib2.urlopen(qurl))
+        leg_resp = json.load(urllib2.urlopen(qurl, timeout=0.5))
         # allow limiting lookup to region for region map views
         if 'abbr' in get:
             leg_resp = [leg for leg in leg_resp
@@ -105,7 +105,7 @@ def find_your_legislator(request):
                     border,
                     getattr(billy_settings, 'API_KEY', '')
                 )
-                resp = json.load(urllib2.urlopen(qurl))
+                resp = json.load(urllib2.urlopen(qurl, timeout=0.5))
                 ret[border] = resp
             return HttpResponse(json.dumps(ret))
 
@@ -122,7 +122,7 @@ def get_district(request, district_id):
         billy_settings.API_KEY
     )
     try:
-        f = urllib2.urlopen(qurl)
+        f = urllib2.urlopen(qurl, timeout=0.5)
     except urllib2.HTTPError:
         raise Http404('no such district')
     return HttpResponse(f)

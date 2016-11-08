@@ -166,7 +166,7 @@ def legislator(request, abbr, _id, slug=None):
             billy_settings.API_KEY
         )
         try:
-            f = urllib2.urlopen(qurl)
+            f = urllib2.urlopen(qurl, timeout=0.5)
             districts = json.load(f)
             district_id = None
             for district in districts:
