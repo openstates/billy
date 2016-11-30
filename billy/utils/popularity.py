@@ -12,7 +12,7 @@ class Counter(object):
             'type': type_name, 'obj_id': obj_id,
             'date': datetime.datetime.utcnow().date().toordinal()},
             {'$inc': {'count': 1}, '$set': kwargs},
-            upsert=True, safe=False)
+            upsert=True, w=0, j=False)
 
     def top(self, type_name, n=1, days=None, with_counts=False, **kwargs):
         kwargs['type'] = type_name
