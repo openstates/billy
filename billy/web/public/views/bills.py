@@ -327,10 +327,10 @@ class BillFeed(BillList):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(*args, **kwargs)
         queryset = self.get_queryset()
-        link = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+        link = 'http://%s%s?%s' % (request.get_host(),
                                    reverse('bills', args=args, kwargs=kwargs),
                                    request.META['QUERY_STRING'])
-        feed_url = 'http://%s%s?%s' % (request.META['SERVER_NAME'],
+        feed_url = 'http://%s%s?%s' % (request.get_host(),
                                        reverse('bills_feed', args=args,
                                                kwargs=kwargs),
                                        request.META['QUERY_STRING'])
@@ -339,7 +339,7 @@ class BillFeed(BillList):
                               description=context['description'] +
                               '\n'.join(context.get('long_description', '')))
         for item in queryset:
-            link = 'http://%s%s' % (request.META['SERVER_NAME'],
+            link = 'http://%s%s' % (request.get_host(),
                                     item.get_absolute_url())
             feed.add_item(title=item['bill_id'], link=link, unique_id=link,
                           description=item['title'])
