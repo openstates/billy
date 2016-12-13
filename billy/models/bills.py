@@ -108,7 +108,7 @@ class SponsorsManager(AttrManager):
     def first_fifteen_remainder(self):
         len_ = len(self.document['sponsors'])
         if 15 < len_:
-            return list(itertools.islice(self, 15))
+            return list(itertools.islice(self, 16, len_+1))
 
 
 class Action(dict):
