@@ -1,5 +1,5 @@
 FROM        debian:jessie
-MAINTAINER  Paul R. Tagliamonte <paultag@sunlightfoundation.com>
+MAINTAINER  James Turk <james@openstates.org>
 
 RUN apt-get update && apt-get install -y \
     python2.7 \
@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y \
     imagemagick \
     jpegoptim
 
-RUN mkdir -p /opt/sunlightfoundation.com/
-ADD . /opt/sunlightfoundation.com/billy/
-RUN pip install -r /opt/sunlightfoundation.com/billy/requirements.txt
-RUN pip install -e /opt/sunlightfoundation.com/billy/
+RUN mkdir -p /opt/openstates/
+ADD . /opt/openstates/billy/
+RUN pip install -r /opt/openstates/billy/requirements.txt
+RUN pip install -e /opt/openstates/billy/
 
 RUN mkdir -p /billy
 WORKDIR /billy
