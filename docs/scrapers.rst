@@ -34,12 +34,12 @@ parsed by a library like `lxml <http://codespeak.net/lxml>`_.
 This method provides advantages over built-in urlopen methods in that the underlying :class:`Scraper` class can be configured to support rate-limiting, caching, and provides robust error handling.
 
 .. note::
-    For advanced usage see `scrapelib <http://github.com/sunlightlabs/scrapelib/>`_ which provides the basis for :class:`billy.scrape.Scraper`.
+    For advanced usage see `scrapelib <https://github.com/jamesturk/scrapelib/>`_ which provides the basis for :class:`billy.scrape.Scraper`.
 
 Logging
 =======
 
-The base class also configures a `python logger <http://docs.python.org/library/logging.html>`_ instance and provides several shortcuts for logging at various log levels:
+The base class also configures a `python logger <https://docs.python.org/library/logging.html>`_ instance and provides several shortcuts for logging at various log levels:
 
 ``log(msg, *args, **kwargs)``
     log a message with level ``logging.INFO``

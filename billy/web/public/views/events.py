@@ -27,7 +27,7 @@ def event_ical(request, abbr, event_id):
     x_name = "X-BILLY"
 
     cal = Calendar()
-    cal.add('prodid', '-//Sunlight Labs//billy//')
+    cal.add('prodid', '-//Open States//billy//')
     cal.add('version', billy.__version__)
 
     cal_event = Event()
