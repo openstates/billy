@@ -1,7 +1,8 @@
+sudo: false
 language: python
 python:
     - "2.7"
-    - "3.3"
+    - "3.5"
 env:
     - DJANGO_PACKAGE="Django<1.7"
 services: mongodb
@@ -11,8 +12,7 @@ before_script: echo -e "API_KEY = '8e09610a630d40f981c68326e663992f'\nBOUNDARY_S
 script: nosetests && django-admin.py test --settings=billy.tests.django_settings --pythonpath=.
 notifications:
     email:
-        - jturk@sunlightfoundation.com
-        - paultag@sunlightfoundation.com
+        - james@openstates.org
 matrix:
     allow_failures:
-        - python: "3.3"
+        - python: "3.5"
