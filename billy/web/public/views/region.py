@@ -135,8 +135,8 @@ def search(request, abbr):
         bill_results = Bill.search(search_text, sort='last', **kwargs)
 
         # Limit the bills if it's a search.
-        more_bills_available = (len(bill_results) > 5)
         bill_result_count = len(bill_results)
+        more_bills_available = (bill_result_count > 5)
         bill_results = bill_results[:5]
 
         # See if any legislator names match. First split up name to avoid
