@@ -333,7 +333,7 @@ class BillSearchResults(object):
         self._len = None
 
     def __len__(self):
-        if not self._len:
+        if self._len is None:
             if self.es_search:
                 resp = elasticsearch.count(self.es_search['query'],
                                            index='billy', doc_type='bills')
