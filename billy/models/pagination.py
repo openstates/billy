@@ -1,5 +1,6 @@
 from collections import namedtuple
 import itertools
+from django.http import Http404
 
 
 PageLink = namedtuple('PageLink', 'string, page_number clickable')
@@ -8,7 +9,6 @@ PageLink = namedtuple('PageLink', 'string, page_number clickable')
 class PaginatorBase(object):
 
     def __init__(self, page=1, show_per_page=20):
-
         self.skip = (page - 1) * show_per_page
         self.show_per_page = show_per_page
         self.current_page = page
@@ -102,6 +102,10 @@ class PaginatorBase(object):
         midpoint = (max_number_of_links - 1) / 2
         current_page = self.current_page
         last_page = self.last_page
+
+        if current_page > last_page:
+            raise Http404('invalid page number')
+            current_page = last_page
 
         show_link_firstpage = midpoint < current_page
         show_link_previouspage = 1 < current_page
