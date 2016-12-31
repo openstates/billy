@@ -12,17 +12,17 @@
 <table class="table table-bordered table-condensed index-table">
     <thead>
     <tr>
-        <th>&nbsp;</th>
+        <th colspan=2>&nbsp;</th>
         <th colspan=7>Legislators</th>
         <th colspan=5>Committees</th>
         <th colspan=7>Bills</th>
         <th colspan=3>Votes</th>
     <tr>
         <th>&nbsp;</th>
+        <th>scraped</th>
         <!-- legislators -->
         <th>vacant</th>
         <th>over</th>
-        <th>TData</th>
         <th>URL</th>
         <th>Photo</th>
         <th>Email</th>
@@ -51,24 +51,12 @@
     {% for row in rows %}
     <tr>
         <td><a href="{{row.id}}/">{{row.name}}</a></td>
+        <td class="{{row.failure|yesno:"bad,good"}}">{{row.last_run}}</td>
         <!-- legislators -->
         <td class="{{row.legislators.vacant_seats|length|yesno:"warning,good"}}">
             {{row.legislators.vacant_seats|length}}</td>
         <td class="{{row.legislators.overfilled_seats|length|yesno:"bad,good"}}">
             {{row.legislators.overfilled_seats|length}}</td>
-        {% if row.influence_explorer %}
-        <td
-            {% if row.legislators.transparencydata_id < 75 %}
-            class="bad"
-            {% elif row.legislators.transparencydata_id < 95 %}
-            class="warning"
-            {% else %}
-            class="good"
-            {% endif %}
-            >{{row.legislators.transparencydata_id|floatformat}}%</td>
-        {% else %}
-        <td class="good">---</td>
-        {% endif %}
         <td
             {% if row.legislators.url < 90 %}
             class="bad"

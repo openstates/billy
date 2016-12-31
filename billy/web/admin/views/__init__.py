@@ -91,6 +91,13 @@ def browse_index(request, template='billy/index.html'):
                                         meta['feature_flags'])
         report['bills']['typed_actions'] = (
             100 - report['bills']['actions_per_type'].get('other', 100))
+
+        # update record
+        record = db.billy_runs.find(
+            {'abbr': report['id']}).sort([('scraped.started', -1)])[0]
+        report['failure'] = record.get('failure', False)
+        report['last_run'] = record['scraped']['started'].strftime('%Y-%m-%d')
+
         rows.append(report)
 
     rows.sort(key=lambda x: x['name'])
