@@ -6,7 +6,7 @@ python:
 env:
     - DJANGO_PACKAGE="Django<1.7"
 services: mongodb
-install: pip install pymongo nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston -e git://github.com/jdunck/python-unicodecsv.git#egg=unicodecsv --use-mirrors 
+install: pip install pymongo<3 nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston unicodecsv
 
 before_script: echo -e "API_KEY = '8e09610a630d40f981c68326e663992f'\nBOUNDARY_SERVICE_URL = 'https://api.opencivicdata.org/'\nBOUNDARY_SERVICE_SETS='sldl-14,sldu-14'" > billy_settings.py
 script: nosetests && django-admin.py test --settings=billy.tests.django_settings --pythonpath=.
