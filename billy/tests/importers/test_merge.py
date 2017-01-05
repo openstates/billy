@@ -17,6 +17,9 @@ def _load_test_data(test_name):
 
 
 def _check_results(one, two):
+    # seems like sort order here gets spurious failures
+    one['_locked_fields'].sort()
+    two['_locked_fields'].sort()
     if one != two:
         print('\n', one, '\n', two, '\n', sep='')
     return one == two

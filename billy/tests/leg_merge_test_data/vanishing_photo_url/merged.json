@@ -1,5 +1,10 @@
 {
-    "roles" : [],
+    "roles": [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ],
     "_all_ids": [
         "LOL100", 
         "LOL200"

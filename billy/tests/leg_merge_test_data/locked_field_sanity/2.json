@@ -3,7 +3,12 @@
     "L01": "info2", 
     "L10": "info2", 
     "L11": "info2", 
-    "roles" : [],
+    "roles" : [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ],
     "_all_ids": [
         "LOL200"
     ], 

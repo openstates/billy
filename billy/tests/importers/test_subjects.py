@@ -24,25 +24,30 @@ def test_basic_categorization():
     # simple
     bill = {'scraped_subjects': ['AK-47']}
     categorizer.categorize_bill(bill)
+    bill['subjects'] = sorted(bill['subjects'])
+
     assert_equal(bill, {'scraped_subjects': ['AK-47'],
-                        'subjects': [u'Guns', u'Crime']})
+                        'subjects': [u'Crime', u'Guns']})
 
     # no subjects
     bill = {'scraped_subjects': ['Welfare']}
     categorizer.categorize_bill(bill)
+    bill['subjects'] = sorted(bill['subjects'])
     assert_equal(bill, {'scraped_subjects': ['Welfare'],
                         'subjects': []})
 
     # two subjects
     bill = {'scraped_subjects': ['AK-47', 'Candy']}
     categorizer.categorize_bill(bill)
-    assert_equal(set(bill['subjects']), set([u'Guns', u'Crime', u'Food']))
+    bill['subjects'] = sorted(bill['subjects'])
+    assert_equal(bill['subjects'], [u'Crime', u'Food', u'Guns'])
 
     # avoid duplicates
     bill = {'scraped_subjects': ['AK-47', 'Hunting']}
     categorizer.categorize_bill(bill)
+    bill['subjects'] = sorted(bill['subjects'])
     assert_equal(bill, {'scraped_subjects': ['AK-47', 'Hunting'],
-                        'subjects': [u'Guns', u'Crime']})
+                        'subjects': [u'Crime', u'Guns']})
 
 
 @with_setup(setup_func)
@@ -69,7 +74,7 @@ def test_all_bills_categorization():
 
     # simple
     bill = db.bills.find_one({'bill_id': '1'})
-    assert_equal(bill['subjects'], [u'Guns', u'Crime'])
+    assert_equal(set(bill['subjects']), set([u'Guns', u'Crime']))
 
     # no subjects
     bill = db.bills.find_one({'bill_id': '2'})
@@ -81,4 +86,4 @@ def test_all_bills_categorization():
 
     # avoid duplicates
     bill = db.bills.find_one({'bill_id': '4'})
-    assert_equal(bill['subjects'], [u'Guns', u'Crime'])
+    assert_equal(set(bill['subjects']), set([u'Guns', u'Crime']))

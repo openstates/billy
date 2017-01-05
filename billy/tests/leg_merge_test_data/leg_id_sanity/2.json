@@ -2,7 +2,12 @@
     "_all_ids": [
         "LOL200"
     ], 
-    "roles" : [],
+    "roles" : [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ],
     "_id": "LOL200", 
     "_locked_fields": [], 
     "leg_id": "LOL200"

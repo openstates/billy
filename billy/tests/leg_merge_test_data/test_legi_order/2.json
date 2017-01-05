@@ -4,5 +4,10 @@
     ], 
     "_id": "LOL100", 
     "_locked_fields": [], 
-    "roles": []
+    "roles" : [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ]
 }

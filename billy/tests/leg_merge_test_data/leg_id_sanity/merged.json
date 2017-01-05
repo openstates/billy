@@ -3,7 +3,12 @@
         "LOL100", 
         "LOL200"
     ], 
-    "roles" : [],
+    "roles": [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ],
     "_id": "LOL100", 
     "_locked_fields": [], 
     "leg_id": "LOL100"

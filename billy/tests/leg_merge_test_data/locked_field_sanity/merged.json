@@ -1,5 +1,10 @@
 {
-    "roles" : [],
+    "roles": [
+        {
+            "chamber": "upper", 
+            "term": "20112012"
+        }
+    ],
     "L00": "info2", 
     "L01": "info2", 
     "L10": "info1", 
