@@ -80,7 +80,7 @@
     <td>{{leg.first_name}} {{leg.last_name}}</td>
     <td>
         <dl>
-            {% for k,v in leg.old_roles.iteritems %}
+            {% for k,v in leg.old_roles.items %}
             <dt>{{k}}</dt>
             <dd>{{v.0.chamber}} {{v.0.district}} {{v.0.party}}</dd>
             {% endfor %}

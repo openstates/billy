@@ -113,7 +113,7 @@ class RelatedBillsList(RelatedObjectsList):
         context.update(description=' '.join(description))
 
         # Add the correct path to paginated links.
-        params = list(self.request.GET.iterlists())
+        params = list(self.request.GET.lists())
         for k, v in params[:]:
             if k == 'page':
                 params.remove((k, v))

@@ -575,7 +575,7 @@ class Bill(Document):
             elif search_window != 'all':
                 raise ValueError('invalid search_window. valid choices are '
                                  ' "term", "session", "all"')
-        for key, value in simple_args.iteritems():
+        for key, value in simple_args.items():
             if value is not None:
                 if use_elasticsearch:
                     es_terms.append({'term': {key: value}})

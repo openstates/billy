@@ -75,7 +75,7 @@ def scan_votes(abbr):
                 session_d['bad_vote_counts'].add(vote['vote_id'])
 
     # do logging of unnecessary exceptions
-    for qe_type, qes in quality_exceptions.iteritems():
+    for qe_type, qes in quality_exceptions.items():
         if qes:
             logger.warning('unnecessary {0} exceptions for {1} votes: \n  {2}'
                            .format(qe_type, len(qes), '\n  '.join(qes)))
@@ -87,11 +87,11 @@ def calculate_percentages(report):
     vote_count = float(report['vote_count']) / 100
     if vote_count:
         report['votes_passed'] = report.pop('_passed_vote_count') / vote_count
-        for k in report['votes_per_type'].iterkeys():
+        for k in report['votes_per_type'].keys():
             report['votes_per_type'][k] /= vote_count
-        for k in report['votes_per_chamber'].iterkeys():
+        for k in report['votes_per_chamber'].keys():
             report['votes_per_chamber'][k] /= vote_count
-        for k in report['votes_per_month'].iterkeys():
+        for k in report['votes_per_month'].keys():
             report['votes_per_month'][k] /= vote_count
     rollcall_count = float(report.pop('_rollcall_count')) / 100
     if rollcall_count:
@@ -103,7 +103,7 @@ def calculate_percentages(report):
 def vote_report(abbr):
     report = scan_votes(abbr)
     combined_report = combine_reports(report['sessions'], _vote_report_dict())
-    for session in report['sessions'].itervalues():
+    for session in report['sessions'].values():
         calculate_percentages(session)
     calculate_percentages(combined_report)
     report.update(combined_report)

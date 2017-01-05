@@ -53,7 +53,7 @@ def region(request, abbr):
 
     chambers = []
 
-    for chamber_type, chamber in meta['chambers'].iteritems():
+    for chamber_type, chamber in meta['chambers'].items():
         res = {}
 
         # chamber metadata

@@ -702,7 +702,7 @@ def legislators(request, abbr):
         report = report['legislators']
 
     chambers = meta['chambers'].copy()
-    for chamber_type, chamber in chambers.iteritems():
+    for chamber_type, chamber in chambers.items():
         chamber['legislators'] = sorted(db.legislators.find(
             {settings.LEVEL_FIELD: abbr.lower(), 'active': True,
              'chamber': chamber_type}), key=keyfunc)
@@ -1049,7 +1049,7 @@ def committees(request, abbr):
     chambers = meta['chambers'].copy()
     chambers['joint'] = {'name': 'Joint'}
 
-    for chamber_type, chamber in chambers.iteritems():
+    for chamber_type, chamber in chambers.items():
         chamber['committees'] = sorted(db.committees.find(
             {settings.LEVEL_FIELD: abbr.lower(), 'chamber': chamber_type}))
 

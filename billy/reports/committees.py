@@ -48,7 +48,7 @@ def scan_committees(abbr):
             duplicate_sources[source['url']] += 1
 
     report['duplicate_sources'] = []
-    for url, n in duplicate_sources.iteritems():
+    for url, n in duplicate_sources.items():
         if n > 1:
             report['duplicate_sources'].append(url)
 

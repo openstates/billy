@@ -52,7 +52,7 @@ def legislators(request, abbr):
 
     spec = {'active': True, 'district': {'$exists': True}}
 
-    chambers = dict((k, v['name']) for k, v in meta['chambers'].iteritems())
+    chambers = dict((k, v['name']) for k, v in meta['chambers'].items())
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in chambers:
