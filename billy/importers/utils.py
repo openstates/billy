@@ -68,7 +68,7 @@ def insert_with_id(obj):
     cursor = collection.find({'_id': id_reg}).sort('_id', -1).limit(1)
 
     try:
-        new_id = int(cursor.next()['_id'][len(abbr) + 1:]) + 1
+        new_id = int(next(cursor)['_id'][len(abbr) + 1:]) + 1
     except StopIteration:
         new_id = 1
 

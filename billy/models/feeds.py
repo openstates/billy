@@ -50,7 +50,7 @@ class FeedEntry(Document):
                 if collection_name == 'legislators':
                     cursor = collection.find({'_all_ids': _id})
                     assert cursor.count() == 1
-                    instance = cursor.next()
+                    instance = next(cursor)
                 else:
                     instance = collection.find_one(_id)
                 url = instance.get_absolute_url()
@@ -87,7 +87,7 @@ class FeedEntry(Document):
                 if collection_name == 'legislators':
                     cursor = collection.find({'_all_ids': _id})
                     assert cursor.count() == 1
-                    instance = cursor.next()
+                    instance = next(cursor)
                 else:
                     instance = collection.find_one(_id)
                 string = instance.display_name()
