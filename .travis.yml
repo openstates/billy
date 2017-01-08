@@ -6,7 +6,9 @@ python:
     - "3.5"
 env:
     - DJANGO_PACKAGE="Django<1.7"
-install: pip install "pymongo<3" nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil -e hg+https://bitbucket.org/jespern/django-piston#egg=django-piston unicodecsv
+    - DJANGO_PACKAGE="Django<1.8"
+    - DJANGO_PACKAGE="Django<1.9"
+install: pip install "pymongo<3" nose name_tools validictory scrapelib jellyfish $DJANGO_PACKAGE pytz  icalendar boto python-dateutil unicodecsv -e git+https://github.com/marcio0/django-piston.git#egg=django-piston
 
 before_script: echo -e "API_KEY = 'fake'\nBOUNDARY_SERVICE_URL = 'http://geo.openstates.org/'\nBOUNDARY_SERVICE_SETS='sldl-14,sldu-14'" > billy_settings.py
 script: nosetests && django-admin.py test --settings=billy.tests.django_settings --pythonpath=.
