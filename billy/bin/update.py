@@ -64,6 +64,9 @@ def _run_scraper(scraper_type, options, metadata):
         _clear_scraped_data(options.output_dir, 'events')
 
     scraper = _get_configured_scraper(scraper_type, options, metadata)
+    ua_email = os.environ.get('BILLY_UA_EMAIL')
+    if ua_email:
+        scraper.user_agent += ' ({})'.format(ua_email)
     if not scraper:
         return [{
             "type": scraper_type,
