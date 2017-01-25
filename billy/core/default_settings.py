@@ -3,7 +3,6 @@ import os
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DATABASE = 'billy'
-MONGO_USER_DATABASE = 'billy_userdata'
 
 BOUNDARY_SERVICE_URL = 'http://localhost:8001/1.0/'
 BOUNDARY_SERVICE_SETS = 'sldl-14,sldu-14,nh-12'
