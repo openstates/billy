@@ -32,27 +32,6 @@ urlpatterns = patterns(
 
 )
 
-# user-related views
-urlpatterns += patterns(
-    '',
-
-    url(r'^profile/$', 'billy.web.public.views.misc.user_profile',
-        name='user_profile'),
-    url(r'^get_user_latlong/$', 'billy.web.public.views.misc.get_user_latlong',
-        name='get_user_latlong'),
-    url(r'^favorites/$', 'billy.web.public.views.favorites.favorites',
-        name='user_favorites'),
-    url(r'^favorites/set_favorite/$',
-        'billy.web.public.views.favorites.set_favorite',
-        name='set_favorite'),
-    url(r'^favorites/set_notification_preference/$',
-        'billy.web.public.views.favorites.set_notification_preference',
-        name='set_notification_preference'),
-    url(r'^favorites/favorite_bills_csv/$',
-        'billy.web.public.views.favorites.favorite_bills_csv',
-        name='favorite_bills_csv'),
-)
-
 # region specific
 urlpatterns += patterns(
     'billy.web.public.views.region',

@@ -11,7 +11,6 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from billy.core import user_db
 from billy.models import db, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
@@ -225,46 +224,3 @@ class NewsList(RelatedObjectsList):
                                 leg['_id'], slug)
         return super(NewsList, self).get(request, abbr, collection_name, _id,
                                          slug)
-
-
-@login_required
-def user_profile(request):
-    if request.method == "GET":
-        saved_changes = bool(request.GET.get('saved_changes'))
-        profile = user_db.profiles.find_one(request.user.username)
-        return render(request, templatename('user_profile'),
-                      dict(saved_changes=saved_changes,
-                           profile=profile))
-
-    elif request.method == "POST":
-        POST = request.POST
-        if "lat" in POST and "lng" in POST:
-            lat = POST['lat']
-            lng = POST['lng']
-
-        doc = {'$set': dict(location=dict(lat=lat, lng=lng))}
-
-        if POST['api_key']:
-            doc['$set']['api_key'] = POST['api_key']
-
-        if POST['location_text']:
-            doc['$set']['location']['text'] = POST['location_text']
-
-        spec = dict(_id=request.user.username)
-        user_db.profiles.update(spec, doc, upsert=True)
-
-        return redirect('%s?%s' %
-                        (reverse('user_profile'), 'saved_changes=True'))
-
-
-@login_required
-def get_user_latlong(request):
-    profile = user_db.profiles.find_one(request.user.username)
-    data = {}
-    location = profile.get('location')
-    if location:
-        for key in ('lat', 'lng'):
-            data[key] = location.get(key)
-    resp = HttpResponse(content_type='application/json')
-    json.dump(data, resp)
-    return resp
