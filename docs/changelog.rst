@@ -1,6 +1,14 @@
 billy changelog
 ===============
 
+1.9.0
+-----
+**13 January 2017**
+    * Django 1.8 LTS
+    * fix piston errors (again)
+    * lots of small tweaks from OS upgrade
+    * add timeout on upstream API calls
+
 1.8.4
 -----
 
