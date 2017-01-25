@@ -12,7 +12,6 @@ COMMAND_MODULES = (
     'billy.bin.commands.ensure_indexes',
     'billy.bin.commands.elasticsearch_push',
     'billy.bin.commands.dump',
-    'billy.bin.commands.update_external_ids',
     'billy.bin.commands.update_leg_ids',
     'billy.bin.commands.loaddistricts',
     'billy.bin.commands.unsubscribe',

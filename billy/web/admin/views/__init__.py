@@ -956,7 +956,6 @@ def legislator_edit(request, id):
             "nickname",
             "suffixes",
             "email",
-            "transparencydata_id",
             "photo_url",
             "url",
         ]
