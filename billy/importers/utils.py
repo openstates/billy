@@ -27,7 +27,7 @@ def _get_property_dict(schema):
 # load standard fields from schema files
 standard_fields = {}
 for _type in ('bill', 'person', 'committee', 'metadata', 'vote',
-              'event', 'speech'):
+              'event'):
     fname = os.path.join(os.path.split(__file__)[0],
                          '../schemas/%s.json' % _type)
     schema = json.load(open(fname))

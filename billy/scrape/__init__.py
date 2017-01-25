@@ -94,7 +94,7 @@ class Scraper(scrapelib.Scraper):
     def _load_schemas(self):
         """ load all schemas into schema dict """
 
-        types = ('bill', 'committee', 'person', 'vote', 'event', 'speech')
+        types = ('bill', 'committee', 'person', 'vote', 'event')
 
         for type in types:
             schema_path = os.path.join(os.path.split(__file__)[0],
@@ -181,9 +181,7 @@ class Scraper(scrapelib.Scraper):
         self.output_names.add(filename)     # keep tally of all output names
 
         # pluralize type
-        if obj['_type'] == 'speech':
-            data_dir = 'speeches'
-        elif obj['_type'] == 'person':
+        if obj['_type'] == 'person':
             data_dir = 'legislators'
         else:
             data_dir = obj['_type'] + 's'

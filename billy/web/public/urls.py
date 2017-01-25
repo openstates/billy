@@ -72,16 +72,6 @@ urlpatterns += patterns(
         'legislator', name='legislator_noslug'),
 )
 
-# speeches
-urlpatterns += patterns(
-    'billy.web.public.views.speeches',
-
-    url(r'^(?P<abbr>[a-z-]+)/speeches/$', 'speeches',
-        name='speeches'),
-    url(r'^(?P<abbr>[a-z-]+)/speeches/(?P<event_id>[\w-]+)/',
-        'speeches_by_event', name='speeches_by_event'),
-)
-
 # bills
 urlpatterns += patterns(
     'billy.web.public.views.bills',
