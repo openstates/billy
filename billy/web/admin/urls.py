@@ -91,8 +91,4 @@ urlpatterns = patterns(
     url(r'^(?P<abbr>[a-z-]+)/mom/$', 'mom_index', name="mom_index"),
     url(r'^(?P<abbr>[a-z-]+)/mom/merge/$', 'mom_merge', name="mom_merge"),
     url(r'^(?P<abbr>[a-z-]+)/mom/commit/$', 'mom_commit', name="mom_commit"),
-
-    # New feed URLs.
-    url(r'^newsblogs/$', 'newsblogs', name='newsblogs'),
-
 )

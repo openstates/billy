@@ -3,7 +3,6 @@ from itertools import islice
 import pymongo
 
 from django.contrib.syndication.views import Feed, FeedDoesNotExist
-from django.utils.html import strip_tags
 from django.template.defaultfilters import truncatewords
 
 from billy.models import db
@@ -69,31 +68,6 @@ class VotesListFeed(GenericListFeed):
         return '%s (%s)' % (
             item.bill()['bill_id'],
             item['date'].strftime('%B %d, %Y'))
-
-
-class NewsListFeed(GenericListFeed):
-    collection_name = 'legislators'
-    query_attribute = 'feed_entries'
-
-    def title(self, obj):
-        s = u"{0}: News stories mentioning {1}."
-        return s.format(get_domain(), obj.display_name())
-
-    description = title
-
-    def item_link(self, item):
-        return item['link']
-
-    def item_description(self, item):
-        return truncatewords(strip_tags(item['summary']), 100)
-
-    def item_title(self, item):
-        published = item.published()
-        if published is not None:
-            published = published.strftime('%B %d, %Y')
-        else:
-            published = ''
-        return '%s (%s)' % (item['title'], published)
 
 
 class EventsFeed(GenericListFeed):

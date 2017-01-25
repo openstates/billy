@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from django.http import HttpResponse
 
-from billy.core import db, feeds_db
+from billy.core import db
 from billy.models import Bill
 from billy.core import settings
 from billy.utils import find_bill, parse_param_dt, fix_bill_id
@@ -540,11 +540,3 @@ class BoundaryHandler(BillyHandler):
         district['bbox'] = bbox
 
         return district
-
-
-class NewsHandler(BillyHandler):
-
-    def read(self, request, id):
-        fields = ['entity_ids', 'entity_strings', 'link']
-        entries = feeds_db.entries.find({'entity_ids': id}, fields=fields)
-        return dict(count=entries.count(), entries=list(entries))

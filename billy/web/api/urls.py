@@ -88,8 +88,6 @@ district_handler = Resource(handlers.DistrictHandler,
                             authentication=authorizer)
 boundary_handler = Resource(handlers.BoundaryHandler,
                             authentication=authorizer)
-news_handler = Resource(handlers.NewsHandler,
-                        authentication=authorizer)
 
 urlpatterns = patterns(
     '',
@@ -128,6 +126,4 @@ urlpatterns = patterns(
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/',
         subject_list_handler),
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/', subject_list_handler),
-
-    url(r'^v1/news/(?P<id>[A-Z]{3}\d{,10})/$', news_handler),
 )

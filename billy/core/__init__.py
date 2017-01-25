@@ -59,7 +59,6 @@ except ImportError:
 
 db = None
 mdb = None
-feeds_db = None
 elasticsearch = None
 s3bucket = None
 _model_registry = {}
@@ -77,7 +76,6 @@ class ErrorProxy(object):
 def _configure_db(host, port, db_name):
     global db
     global mdb
-    global feeds_db
 
     class Transformer(SONManipulator):
         def transform_outgoing(self, son, collection,
@@ -93,15 +91,12 @@ def _configure_db(host, port, db_name):
         conn = pymongo.Connection(host, port)
         db = conn[db_name]
         mdb = conn[db_name]
-        feeds_db = conn['newsblogs']
         mdb.add_son_manipulator(transformer)
-        feeds_db.add_son_manipulator(transformer)
     # return a dummy NoDB object if we couldn't connect
     except (pymongo.errors.AutoReconnect,
             pymongo.errors.ConnectionFailure) as e:
         db = ErrorProxy(e)
         mdb = ErrorProxy(e)
-        feeds_db = ErrorProxy(e)
 
 
 def _configure_es(host, timeout):

@@ -1,9 +1,9 @@
 from django.conf.urls import patterns, url
 
-from billy.web.public.views.misc import VotesList, NewsList
+from billy.web.public.views.misc import VotesList
 from billy.web.public.views.bills import (BillList, AllBillList,
                                           AllBillCSVList, BillFeed)
-from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
+from billy.web.public.feeds import VotesListFeed, EventsFeed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 # misc. views
@@ -17,13 +17,7 @@ urlpatterns = patterns(
     url(r'^get_district/(?P<district_id>.+)/$', 'get_district',
         name='get_district'),
 
-    # votes & news
-    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
-        '(?P<slug>[^/]+)/news/$',
-        NewsList.as_view(), name='news_list'),
-    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
-        '(?P<slug>[^/]+)/news/rss/$',
-        NewsListFeed(), name='news_list_rss'),
+    # votes
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
         '/(?P<_id>[\w-]+)/votes/$', VotesList.as_view(), name='votes_list'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
