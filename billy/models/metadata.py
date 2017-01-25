@@ -76,10 +76,6 @@ class Metadata(Document):
     bills = RelatedDocuments('Bill', model_keys=[settings.LEVEL_FIELD],
                              instance_key='abbreviation')
 
-    feed_entries = RelatedDocuments('FeedEntry',
-                                    model_keys=[settings.LEVEL_FIELD],
-                                    instance_key='abbreviation')
-
     events = RelatedDocuments('Event', model_keys=[settings.LEVEL_FIELD],
                               instance_key='abbreviation')
 

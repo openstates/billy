@@ -393,8 +393,6 @@ class Bill(Document):
     votes_manager = RelatedDocuments('BillVote', model_keys=['bill_id'],
                                      sort=[('date', pymongo.DESCENDING)])
 
-    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
-
     @property
     def metadata(self):
         return Metadata.get_object(self[settings.LEVEL_FIELD])

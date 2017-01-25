@@ -6,7 +6,6 @@ from .legislators import Legislator
 from .base import DoesNotExist
 from .committees import Committee
 from .reports import Report
-from .feeds import FeedEntry
 
 __all__ = [db, Metadata, Bill, Event, Legislator, DoesNotExist, Committee,
-           Report, FeedEntry]
+           Report]
