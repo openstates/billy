@@ -65,7 +65,7 @@ def _run_scraper(scraper_type, options, metadata):
 
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     ua_email = os.environ.get('BILLY_UA_EMAIL')
-    if ua_email:
+    if ua_email and scraper:
         scraper.user_agent += ' ({})'.format(ua_email)
     if not scraper:
         return [{
