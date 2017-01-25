@@ -184,7 +184,7 @@ def _do_reports(abbrev, args):
     if 'bills' in args.types:
         report['bills'] = bill_report(abbrev)
         report['votes'] = vote_report(abbrev)
-    if 'committees' in args.types:
+    if 'committees' in args.types or 'legislators' in args.types:
         report['committees'] = committee_report(abbrev)
     if 'speeches' in args.types:
         report['speeches'] = speech_report(abbrev)
