@@ -1,6 +1,6 @@
 Django<1.7
 django-pjax
--e git://github.com/marcio0/django-piston/#egg=django-piston
+-e git://github.com/avanov/django-piston/#egg=django-piston
 boto
 icalendar
 lxml>=2.2
