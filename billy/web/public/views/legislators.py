@@ -52,7 +52,7 @@ def legislators(request, abbr):
 
     spec = {'active': True, 'district': {'$exists': True}}
 
-    chambers = dict((k, v['name']) for k, v in meta['chambers'].iteritems())
+    chambers = dict((k, v['name']) for k, v in meta['chambers'].items())
 
     chamber = request.GET.get('chamber', 'both')
     if chamber in chambers:
@@ -146,7 +146,7 @@ def legislator(request, abbr, _id, slug=None):
         msg = 'Two legislators returned for spec %r' % spec
         assert cursor.count() < 2, msg
         try:
-            legislator = cursor.next()
+            legislator = next(cursor)
         except StopIteration:
             raise Http404('No legislator was found with leg_id = %r' % _id)
         else:

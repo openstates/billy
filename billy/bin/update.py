@@ -10,7 +10,7 @@ import inspect
 import argparse
 import traceback
 import importlib
-import unicodecsv
+import six
 
 import datetime as dt
 
@@ -407,7 +407,7 @@ def main():
                     try:
                         db.billy_runs.save(scrape_data, safe=True)
                     except Exception:
-                        raise lex, None, exc_traceback
+                        six.reraise(lex, None, exc_traceback)
                         # XXX: This should *NEVER* happen, but it has
                         # in the past, so we're going to catch any errors
                         # writing # to pymongo, and raise the original

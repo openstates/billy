@@ -34,7 +34,7 @@ class SponsorsManager(AttrManager):
         if not hasattr(self, '_legislators'):
             # build a mapping from all _ids to legislators
             self._legislators = {}
-            ids = filter(None, map(operator.itemgetter('leg_id'), sponsors))
+            ids = list(filter(None, map(operator.itemgetter('leg_id'), sponsors)))
             legislators = db.legislators.find({'_all_ids': {'$in': ids}})
             for obj in legislators:
                 for _id in obj['_all_ids']:
@@ -575,7 +575,7 @@ class Bill(Document):
             elif search_window != 'all':
                 raise ValueError('invalid search_window. valid choices are '
                                  ' "term", "session", "all"')
-        for key, value in simple_args.iteritems():
+        for key, value in simple_args.items():
             if value is not None:
                 if use_elasticsearch:
                     es_terms.append({'term': {key: value}})
@@ -586,7 +586,7 @@ class Bill(Document):
             for subject in subjects:
                 es_terms.append({'term': {'subjects': subject}})
         elif subjects:
-            mongo_filter['subjects'] = {'$all': filter(None, subjects)}
+            mongo_filter['subjects'] = {'$all': list(filter(None, subjects))}
 
         if updated_since and use_elasticsearch:
             es_terms.append({'range': {'updated_at': {'gte': updated_since}}})

@@ -16,7 +16,7 @@ from billy.importers.names import attempt_committee_match
 def _get_property_dict(schema):
     """ given a schema object produce a nested dictionary of fields """
     pdict = {}
-    for k, v in schema['properties'].iteritems():
+    for k, v in schema['properties'].items():
         pdict[k] = {}
         if 'items' in v and 'properties' in v['items']:
             pdict[k] = _get_property_dict(v['items'])
@@ -68,7 +68,7 @@ def insert_with_id(obj):
     cursor = collection.find({'_id': id_reg}).sort('_id', -1).limit(1)
 
     try:
-        new_id = int(cursor.next()['_id'][len(abbr) + 1:]) + 1
+        new_id = int(next(cursor)['_id'][len(abbr) + 1:]) + 1
     except StopIteration:
         new_id = 1
 
@@ -216,7 +216,7 @@ def _make_plus_helper(obj, fields):
     """ add a + prefix to any fields in obj that aren't in fields """
     new_obj = {}
 
-    for key, value in obj.iteritems():
+    for key, value in obj.items():
         if key in fields or key.startswith('_'):
             # if there's a subschema apply it to a list or subdict
             if fields.get(key):

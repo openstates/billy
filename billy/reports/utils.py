@@ -39,20 +39,20 @@ def get_quality_exceptions(abbr):
 def combine_reports(reports, base_report):
     report = base_report
 
-    for session in reports.itervalues():
+    for session in reports.values():
         # go over all report fields
         # integers are summed, sets are combined, and dicts summed by key
-        for field, value in report.iteritems():
+        for field, value in report.items():
             if isinstance(value, int):
                 report[field] += session[field]
             elif isinstance(value, set):
                 report[field].update(session[field])
                 session[field] = list(session[field])
             elif isinstance(value, defaultdict):
-                for k, v in session[field].iteritems():
+                for k, v in session[field].items():
                     report[field][k] += v
 
-    for field, value in report.iteritems():
+    for field, value in report.items():
         if isinstance(value, set):
             report[field] = list(value)
     return report

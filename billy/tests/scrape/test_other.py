@@ -72,15 +72,15 @@ def test_vote():
                      'note': 'note', '_type': 'vote', 'sources': []})
 
     yes_voters = ['Lincoln', 'Adams', 'Johnson']
-    map(v.yes, yes_voters)
+    list(map(v.yes, yes_voters))
     assert_equal(v['yes_votes'], yes_voters)
 
     no_voters = ['Kennedy']
-    map(v.no, no_voters)
+    list(map(v.no, no_voters))
     assert_equal(v['no_votes'], no_voters)
 
     other_voters = ['Polk', 'Pierce']
-    map(v.other, other_voters)
+    list(map(v.other, other_voters))
     assert_equal(v['other_votes'], other_voters)
 
     # validate should work

@@ -118,7 +118,7 @@ def bill_to_elasticsearch(bill):
     esbill['updated_at'] = bill['updated_at'].strftime(time_format)
     esbill['created_at'] = bill['created_at'].strftime(time_format)
     esbill['action_dates'] = {k: v.strftime(time_format)
-                              for k, v in bill['action_dates'].iteritems()
+                              for k, v in bill['action_dates'].items()
                               if v}
     esbill['text'] = []
     for doc in bill['versions']:

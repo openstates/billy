@@ -61,7 +61,7 @@ def committees(request, abbr):
         show_chamber_column = True
         chamber_name = ''
 
-    chambers = dict((k, v['name']) for k, v in meta['chambers'].iteritems())
+    chambers = dict((k, v['name']) for k, v in meta['chambers'].items())
     if meta.committees({'chamber': 'joint'}).count():
         chambers['joint'] = 'Joint'
 

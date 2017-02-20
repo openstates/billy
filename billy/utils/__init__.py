@@ -4,8 +4,9 @@ import re
 import time
 import urllib
 import datetime
-import urlparse
 import contextlib
+
+from six.moves.urllib import parse
 
 from bson import ObjectId
 from django.core.exceptions import ImproperlyConfigured
@@ -80,10 +81,10 @@ def term_for_session(abbr, session, meta=None):
 
 
 def urlescape(url):
-    scheme, netloc, path, qs, anchor = urlparse.urlsplit(url)
+    scheme, netloc, path, qs, anchor = parse.urlsplit(url)
     path = urllib.quote(path, '/%')
     qs = urllib.quote_plus(qs, ':&=')
-    return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+    return parse.urlunsplit((scheme, netloc, path, qs, anchor))
 
 
 def textual_diff(l1, l2):

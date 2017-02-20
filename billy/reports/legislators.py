@@ -55,15 +55,15 @@ def scan_legislators(abbr):
             duplicate_sources[source['url']] += 1
 
     report['duplicate_sources'] = []
-    for url, n in duplicate_sources.iteritems():
+    for url, n in duplicate_sources.items():
         if n > 1:
             report['duplicate_sources'].append(url)
 
     # copy over seat issues into report
     report['overfilled_seats'] = []
     report['vacant_seats'] = []
-    for chamber, chamber_seats in district_seats.iteritems():
-        for seat, count in chamber_seats.iteritems():
+    for chamber, chamber_seats in district_seats.items():
+        for seat, count in chamber_seats.items():
             if count < 0:
                 report['overfilled_seats'].append((chamber, seat, -count))
             elif count > 0:

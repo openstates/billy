@@ -1,5 +1,6 @@
 import re
 import importlib
+from six import string_types
 
 
 def apply_filters(filter_array, obj):
@@ -35,7 +36,7 @@ def run_filter(fltr, object_path, obj):
     except KeyError:
         return obj  # Eek, bad object path. Bail.
 
-    if isinstance(fltr_obj, basestring):
+    if isinstance(fltr_obj, string_types):
         obj[object_path] = fltr(fltr_obj)
 
     if isinstance(fltr_obj, list):
@@ -129,7 +130,7 @@ def email_filter(email):
 
 
 def strip_filter(entry):
-    if not isinstance(entry, basestring):
+    if not isinstance(entry, string_types):
         return entry
 
     entry = entry.strip()
@@ -137,7 +138,7 @@ def strip_filter(entry):
 
 
 def single_space_filter(entry):
-    if not isinstance(entry, basestring):
+    if not isinstance(entry, string_types):
         return entry
 
     entry = re.sub("\s+", " ", entry)

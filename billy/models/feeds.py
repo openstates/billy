@@ -1,5 +1,5 @@
 import re
-import urlparse
+from six.moves.urllib.parse import urlparse
 import datetime
 from django.template.defaultfilters import truncatewords
 
@@ -50,7 +50,7 @@ class FeedEntry(Document):
                 if collection_name == 'legislators':
                     cursor = collection.find({'_all_ids': _id})
                     assert cursor.count() == 1
-                    instance = cursor.next()
+                    instance = next(cursor)
                 else:
                     instance = collection.find_one(_id)
                 url = instance.get_absolute_url()
@@ -87,7 +87,7 @@ class FeedEntry(Document):
                 if collection_name == 'legislators':
                     cursor = collection.find({'_all_ids': _id})
                     assert cursor.count() == 1
-                    instance = cursor.next()
+                    instance = next(cursor)
                 else:
                     instance = collection.find_one(_id)
                 string = instance.display_name()
@@ -107,7 +107,7 @@ class FeedEntry(Document):
             entry['entity_data'] = _entity_data
 
         entry['id'] = entry['_id']
-        urldata = urlparse.urlparse(entry['link'])
+        urldata = urlparse(entry['link'])
         entry['source'] = urldata.scheme + urldata.netloc
         entry['host'] = urldata.netloc
 
