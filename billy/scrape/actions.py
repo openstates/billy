@@ -119,7 +119,8 @@ class BaseCategorizer(object):
             if not isinstance(v, Iterable):
                 continue
 
-            v = list(filter(None, v))
+            if not isinstance(v, string_types):
+                v = list(filter(None, v))
 
             # Get rid of sets.
             if isinstance(v, set):
