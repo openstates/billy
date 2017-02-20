@@ -29,7 +29,7 @@ class CommitteeMemberManager(ListManager):
             try:
                 objs = self.committee._legislators
             except AttributeError:
-                ids = filter(None, [obj['leg_id'] for obj in members])
+                ids = list(filter(None, [obj['leg_id'] for obj in members]))
                 spec = {'_id': {'$in': ids}}
                 objs = dict((obj['_id'], obj) for obj in
                             db.legislators.find(spec))

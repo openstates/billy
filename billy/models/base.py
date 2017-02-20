@@ -1,6 +1,7 @@
 import re
 import copy
 import itertools
+from six import string_types
 
 from django.core import urlresolvers
 
@@ -240,7 +241,7 @@ class RelatedDocument(object):
         self.instance = instance
 
         model = self.model
-        if isinstance(model, basestring):
+        if isinstance(model, string_types):
             model = self.model = get_model(model)
 
         instance_key = getattr(self, 'instance_key', None)
@@ -322,7 +323,7 @@ class RelatedDocuments(object):
     def __get__(self, instance, type_=None, *args, **kwargs):
 
         model = self.model
-        if isinstance(model, basestring):
+        if isinstance(model, string_types):
             model = self.model = get_model(model)
 
         self.instance_val = instance[self.instance_key]

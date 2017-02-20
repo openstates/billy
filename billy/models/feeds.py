@@ -1,5 +1,5 @@
 import re
-import urlparse
+from six.moves.urllib.parse import urlparse
 import datetime
 from django.template.defaultfilters import truncatewords
 
@@ -107,7 +107,7 @@ class FeedEntry(Document):
             entry['entity_data'] = _entity_data
 
         entry['id'] = entry['_id']
-        urldata = urlparse.urlparse(entry['link'])
+        urldata = urlparse(entry['link'])
         entry['source'] = urldata.scheme + urldata.netloc
         entry['host'] = urldata.netloc
 

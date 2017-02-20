@@ -203,12 +203,12 @@ class Legislator(Document):
         # roles list, then fail over to the old_roles list.
         roles = [r for r in self['roles']
                  if r.get('type') == 'member' and r.get('term') == term]
-        roles = filter(None, roles)
+        roles = list(filter(None, roles))
 
         if not roles:
             roles = [r for r in self['old_roles'].get(term, [])
                      if r.get('type') == 'member']
-        roles = filter(None, roles)
+        roles = list(filter(None, roles))
 
         if not roles:
             # Legislator had no roles for this term. If there is a related
@@ -223,7 +223,7 @@ class Legislator(Document):
             return role
 
         # If only one of term or session is given and there are multiple roles:
-        if not filter(None, [bill, vote]):
+        if not list(filter(None, [bill, vote])):
             if term is not None:
                 role = roles[0]
                 self['context_role'] = role
@@ -303,7 +303,7 @@ class Legislator(Document):
         ids = []
         for term, roles in self['old_roles'].items():
             _ids = [role.get('committee_id') for role in roles]
-            _ids = filter(None, _ids)
+            _ids = list(filter(None, _ids))
             ids.extend(_ids)
         objs = list(db.committees.find({'_id': {'$in': ids}}))
         objs = dict((objs['_id'], objs) for objs in objs)
