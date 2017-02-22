@@ -24,8 +24,8 @@ billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
       install_requires=[
-          "Django",
-          "django-pjax",
+          "Django<1.9",
+          #"django-pjax",
           "boto",
           "icalendar",
           "lxml>=2.2",
