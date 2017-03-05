@@ -406,7 +406,8 @@ def main():
                 if 'import' in args.actions:
                     try:
                         db.billy_runs.save(scrape_data, safe=True)
-                    except Exception:
+                    except Exception as e:
+                        print('mongo error:', e)
                         six.reraise(lex, None, exc_traceback)
                         # XXX: This should *NEVER* happen, but it has
                         # in the past, so we're going to catch any errors
