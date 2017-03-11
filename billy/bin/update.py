@@ -60,8 +60,6 @@ def _run_scraper(scraper_type, options, metadata):
         scraper_type: bills, legislators, committees, votes
     """
     _clear_scraped_data(options.output_dir, scraper_type)
-    if scraper_type == 'speeches':
-        _clear_scraped_data(options.output_dir, 'events')
 
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     ua_email = os.environ.get('BILLY_UA_EMAIL')
@@ -83,7 +81,7 @@ def _run_scraper(scraper_type, options, metadata):
     }
     scrape['start_time'] = dt.datetime.utcnow()
 
-    if scraper_type in ('bills', 'votes', 'events', 'speeches'):
+    if scraper_type in ('bills', 'votes', 'events'):
         times = options.sessions
         for time in times:
             scraper.validate_session(time, scraper.latest_only)
@@ -141,7 +139,6 @@ def _do_imports(abbrev, args):
     from billy.importers.legislators import import_legislators
     from billy.importers.committees import import_committees
     from billy.importers.events import import_events
-    from billy.importers.speeches import import_speeches
 
     # always import metadata and districts
     import_metadata(abbrev)
@@ -158,11 +155,8 @@ def _do_imports(abbrev, args):
         report['committees'] = \
             import_committees(abbrev, settings.BILLY_DATA_DIR)
 
-    if 'events' in args.types or 'speeches' in args.types:
+    if 'events' in args.types:
         report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
-
-    if 'speeches' in args.types:
-        report['speeches'] = import_speeches(abbrev, settings.BILLY_DATA_DIR)
 
     return report
 
@@ -173,7 +167,6 @@ def _do_reports(abbrev, args):
     from billy.reports.votes import vote_report
     from billy.reports.legislators import legislator_report
     from billy.reports.committees import committee_report
-    from billy.reports.speeches import speech_report
 
     report = db.reports.find_one({'_id': abbrev})
     if not report:
@@ -184,10 +177,8 @@ def _do_reports(abbrev, args):
     if 'bills' in args.types:
         report['bills'] = bill_report(abbrev)
         report['votes'] = vote_report(abbrev)
-    if 'committees' in args.types:
+    if 'committees' in args.types or 'legislators' in args.types:
         report['committees'] = committee_report(abbrev)
-    if 'speeches' in args.types:
-        report['speeches'] = speech_report(abbrev)
 
     db.reports.save(report, safe=True)
 
@@ -221,7 +212,7 @@ def main():
             what.add_argument('--' + arg, action='append_const',
                               dest='chambers', const=arg)
         for arg in ('bills', 'legislators', 'committees',
-                    'votes', 'events', 'speeches'):
+                    'votes', 'events',):
             what.add_argument('--' + arg, action='append_const', dest='types',
                               const=arg)
         for arg in ('scrape', 'import', 'report', 'session-list'):
@@ -324,8 +315,6 @@ def main():
             if 'events' in metadata['feature_flags']:
                 args.types.append('events')
 
-            if 'speeches' in metadata['feature_flags']:
-                args.types.append('speeches')
 
         plan = """billy-update abbr=%s
     actions=%s
@@ -371,8 +360,7 @@ def main():
             exec_start = dt.datetime.utcnow()
 
             # scraper order matters
-            order = ('legislators', 'committees', 'votes', 'bills',
-                     'events', 'speeches')
+            order = ('legislators', 'committees', 'votes', 'bills', 'events')
             _traceback = None
             try:
                 for stype in order:

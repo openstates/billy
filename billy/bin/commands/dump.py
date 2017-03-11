@@ -93,8 +93,7 @@ def dump_legislator_csvs(abbr):
     leg_fields = ('leg_id', 'full_name', 'first_name', 'middle_name',
                   'last_name', 'suffixes', 'nickname', 'active',
                   settings.LEVEL_FIELD, 'chamber', 'district', 'party',
-                  'transparencydata_id', 'photo_url', 'created_at',
-                  'updated_at')
+                  'photo_url', 'created_at', 'updated_at')
     leg_csv_fname, leg_csv = _make_csv(abbr, 'legislators.csv', leg_fields)
 
     role_fields = ('leg_id', 'type', 'term', 'district', 'chamber',

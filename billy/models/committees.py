@@ -45,7 +45,6 @@ class CommitteeMemberManager(ListManager):
 class Committee(Document):
 
     collection = db.committees
-    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'])
 
     members_objects = CommitteeMemberManager()
 

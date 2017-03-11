@@ -1,9 +1,9 @@
 from django.conf.urls import patterns, url
 
-from billy.web.public.views.misc import VotesList, NewsList
+from billy.web.public.views.misc import VotesList
 from billy.web.public.views.bills import (BillList, AllBillList,
                                           AllBillCSVList, BillFeed)
-from billy.web.public.feeds import VotesListFeed, NewsListFeed, EventsFeed
+from billy.web.public.feeds import VotesListFeed, EventsFeed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 # misc. views
@@ -17,40 +17,13 @@ urlpatterns = patterns(
     url(r'^get_district/(?P<district_id>.+)/$', 'get_district',
         name='get_district'),
 
-    # votes & news
-    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
-        '(?P<slug>[^/]+)/news/$',
-        NewsList.as_view(), name='news_list'),
-    url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
-        '(?P<slug>[^/]+)/news/rss/$',
-        NewsListFeed(), name='news_list_rss'),
+    # votes
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
         '/(?P<_id>[\w-]+)/votes/$', VotesList.as_view(), name='votes_list'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
         'votes/rss/$',
         VotesListFeed(), name='votes_list_rss'),
 
-)
-
-# user-related views
-urlpatterns += patterns(
-    '',
-
-    url(r'^profile/$', 'billy.web.public.views.misc.user_profile',
-        name='user_profile'),
-    url(r'^get_user_latlong/$', 'billy.web.public.views.misc.get_user_latlong',
-        name='get_user_latlong'),
-    url(r'^favorites/$', 'billy.web.public.views.favorites.favorites',
-        name='user_favorites'),
-    url(r'^favorites/set_favorite/$',
-        'billy.web.public.views.favorites.set_favorite',
-        name='set_favorite'),
-    url(r'^favorites/set_notification_preference/$',
-        'billy.web.public.views.favorites.set_notification_preference',
-        name='set_notification_preference'),
-    url(r'^favorites/favorite_bills_csv/$',
-        'billy.web.public.views.favorites.favorite_bills_csv',
-        name='favorite_bills_csv'),
 )
 
 # region specific
@@ -97,16 +70,6 @@ urlpatterns += patterns(
         'legislator', name='legislator'),
     url(r'^(?P<abbr>[a-z-]+)/legislators/(?P<_id>[\w-]+)/$',
         'legislator', name='legislator_noslug'),
-)
-
-# speeches
-urlpatterns += patterns(
-    'billy.web.public.views.speeches',
-
-    url(r'^(?P<abbr>[a-z-]+)/speeches/$', 'speeches',
-        name='speeches'),
-    url(r'^(?P<abbr>[a-z-]+)/speeches/(?P<event_id>[\w-]+)/',
-        'speeches_by_event', name='speeches_by_event'),
 )
 
 # bills

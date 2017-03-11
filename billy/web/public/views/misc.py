@@ -11,7 +11,6 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
-from billy.core import user_db
 from billy.models import db, Legislator
 from billy.models.pagination import CursorPaginator
 from billy.core import settings as billy_settings
@@ -178,93 +177,3 @@ class VotesList(RelatedObjectsList):
                 return redirect('votes_list', abbr, collection_name,
                                 leg['_id'])
         return super(VotesList, self).get(request, abbr, collection_name, _id)
-
-
-class NewsList(RelatedObjectsList):
-    '''
-    Context (see utils.ListViewBase an utils.RelatedObjectsList):
-        - column_headers
-        - rowtemplate_name
-        - description_template
-        - object_list
-        - nav_active
-        - abbr
-        - metadata
-        - url
-        - use_table
-        - obj
-        - collection_name
-
-    Templates:
-        - billy/web/public/object_list.html
-        - billy/web/public/feed_entry.html
-    '''
-    list_item_context_name = 'entry'
-    mongo_sort = [('published_parsed', pymongo.DESCENDING)]
-    paginator = CursorPaginator
-    query_attr = 'feed_entries'
-    rowtemplate_name = templatename('feed_entry')
-    column_headers_tmplname = templatename('_news_column_headers')
-    nav_active = 'bills'
-    collection_name = 'entries'
-    description_template = '''
-        news and blog entries mentioning
-        <a href="{{obj.get_absolute_url}}">{{obj.display_name}}</a>
-        '''
-    title_template = '''
-        News and blogs mentioning {{obj.display_name}} -
-        {{metadata.legislature_name}}
-        '''
-
-    def get(self, request, abbr, collection_name, _id, slug):
-        # hack to redirect to proper legislator on legislators/_id_/news
-        if collection_name == 'legislators':
-            leg = db.legislators.find_one({'_all_ids': _id})
-            if leg and leg['_id'] != _id:
-                return redirect('news_list', abbr, collection_name,
-                                leg['_id'], slug)
-        return super(NewsList, self).get(request, abbr, collection_name, _id,
-                                         slug)
-
-
-@login_required
-def user_profile(request):
-    if request.method == "GET":
-        saved_changes = bool(request.GET.get('saved_changes'))
-        profile = user_db.profiles.find_one(request.user.username)
-        return render(request, templatename('user_profile'),
-                      dict(saved_changes=saved_changes,
-                           profile=profile))
-
-    elif request.method == "POST":
-        POST = request.POST
-        if "lat" in POST and "lng" in POST:
-            lat = POST['lat']
-            lng = POST['lng']
-
-        doc = {'$set': dict(location=dict(lat=lat, lng=lng))}
-
-        if POST['api_key']:
-            doc['$set']['api_key'] = POST['api_key']
-
-        if POST['location_text']:
-            doc['$set']['location']['text'] = POST['location_text']
-
-        spec = dict(_id=request.user.username)
-        user_db.profiles.update(spec, doc, upsert=True)
-
-        return redirect('%s?%s' %
-                        (reverse('user_profile'), 'saved_changes=True'))
-
-
-@login_required
-def get_user_latlong(request):
-    profile = user_db.profiles.find_one(request.user.username)
-    data = {}
-    location = profile.get('location')
-    if location:
-        for key in ('lat', 'lng'):
-            data[key] = location.get(key)
-    resp = HttpResponse(content_type='application/json')
-    json.dump(data, resp)
-    return resp

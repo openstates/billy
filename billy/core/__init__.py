@@ -59,8 +59,6 @@ except ImportError:
 
 db = None
 mdb = None
-feeds_db = None
-user_db = None
 elasticsearch = None
 s3bucket = None
 _model_registry = {}
@@ -75,11 +73,9 @@ class ErrorProxy(object):
         raise self.error
 
 
-def _configure_db(host, port, db_name, user_db_name):
+def _configure_db(host, port, db_name):
     global db
     global mdb
-    global feeds_db
-    global user_db
 
     class Transformer(SONManipulator):
         def transform_outgoing(self, son, collection,
@@ -95,16 +91,12 @@ def _configure_db(host, port, db_name, user_db_name):
         conn = pymongo.Connection(host, port)
         db = conn[db_name]
         mdb = conn[db_name]
-        user_db = conn[user_db_name]
-        feeds_db = conn['newsblogs']
         mdb.add_son_manipulator(transformer)
-        feeds_db.add_son_manipulator(transformer)
     # return a dummy NoDB object if we couldn't connect
     except (pymongo.errors.AutoReconnect,
             pymongo.errors.ConnectionFailure) as e:
         db = ErrorProxy(e)
         mdb = ErrorProxy(e)
-        feeds_db = ErrorProxy(e)
 
 
 def _configure_es(host, timeout):
@@ -131,7 +123,7 @@ def _configure_s3(aws_key, aws_secret, bucket):
 
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
-              settings.MONGO_DATABASE, settings.MONGO_USER_DATABASE)
+              settings.MONGO_DATABASE)
 if settings.ENABLE_ELASTICSEARCH:
     _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
 _configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)

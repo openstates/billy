@@ -86,8 +86,6 @@ class Legislator(Document):
     instance_key = 'leg_id'
 
     committees = RelatedDocuments('Committee', model_keys=['members.leg_id'])
-    feed_entries = RelatedDocuments('FeedEntry', model_keys=['entity_ids'],
-                                    sort=[('published_parsed', -1)])
     roles_manager = RolesManager()
     votes_manager = RelatedDocuments('BillVote', model_keys=['_voters'])
 

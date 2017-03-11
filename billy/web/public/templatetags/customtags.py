@@ -11,7 +11,6 @@ import pytz
 from billy.core import settings
 from billy.web.public.forms import get_region_select_form
 from billy.web.public.views.utils import templatename
-from billy.web.public.views.favorites import is_favorite
 
 
 register = template.Library()
@@ -122,70 +121,6 @@ class SquishedWhitespaceNode(template.Node):
         output = re.sub(u'\s+', ' ', self.nodelist.render(context))
         output = re.sub(u'\n\s+', '', self.nodelist.render(context))
         return output
-
-
-def favorite(context, obj_id, obj_type, abbr=None, _is_favorite=None,
-             params=None):
-    '''Check whether the object with the given type and id is currently
-    favorited by the user. The test whether the user is authenticated
-    currently happens in the template.
-
-    abbr is can be specified in the invocation, since it won't be in the
-    request context on the user's favorites page.
-
-    Same for _is_favorite, which needs to be True.
-
-    Same for params, which needs to be passed as a url-encoded string from
-    the user homepage.
-    '''
-    request = context['request']
-    extra_spec = {}
-
-    # We need to allow the abbr to be passed in from the user favorites page,
-    # to come from the request context in the case of a search results page,
-    # and to default to 'all' for the all bills search.
-    abbr = abbr or context.get('abbr', 'all')
-
-    # use request.GET for params if not present
-    if not params:
-        _params = {}
-        params = [
-            (k, [unicode(v).encode('utf-8') for v in vv])
-            for (k, vv) in dict(request.GET).items()]
-        for k, v in params:
-            if len(v) == 1:
-                _params[k] = v.pop()
-            elif len(v) > 1:
-                _params[k] = v
-        params = urllib.urlencode(_params, doseq=True)
-
-    # If the requested page is a search results page with a query string,
-    # create an extra spec to help determine whether the search is
-    # currently favorited.
-    if request.GET and obj_type == "search":
-        search_text = request.GET.get('search_text')
-        if search_text:
-            extra_spec['search_text'] = search_text
-        extra_spec['search_params'] = params
-
-    if _is_favorite is None:
-        _is_favorite = is_favorite(obj_id, obj_type, request.user,
-                                   extra_spec=extra_spec)
-    else:
-        _is_favorite = (_is_favorite == 'is_favorite')
-
-    return dict(extra_spec,
-                obj_type=obj_type, obj_id=obj_id,
-                is_favorite=_is_favorite, request=request,
-                abbr=abbr or context['abbr'],
-                params=params)
-
-
-register.inclusion_tag(
-    templatename('_favorite'), takes_context=True)(favorite)
-register.inclusion_tag(
-    templatename('_favorite_short'),
-    takes_context=True, name='favorite_short')(favorite)
 
 
 @register.inclusion_tag(templatename('_notification_preference'))

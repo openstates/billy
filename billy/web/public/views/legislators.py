@@ -111,7 +111,6 @@ def legislators(request, abbr):
 def legislator(request, abbr, _id, slug=None):
     '''
     Context:
-        - feed_entry_template
         - vote_preview_row_template
         - roles
         - abbr
@@ -121,16 +120,11 @@ def legislator(request, abbr, _id, slug=None):
         - sources
         - sponsored_bills
         - legislator_votes
-        - has_feed_entries
-        - feed_entries
-        - feed_entries_count
-        - feed_entries_more_count
         - has_votes
         - nav_active
 
     Templates:
         - billy/web/public/legislator.html
-        - billy/web/public/feed_entry.html
         - billy/web/public/vote_preview_row.html
 
     '''
@@ -183,21 +177,14 @@ def legislator(request, abbr, _id, slug=None):
     # Note to self: Another slow query
     legislator_votes = legislator.votes_6_sorted()
     has_votes = bool(legislator_votes)
-    feed_entries = legislator.feed_entries()
-    feed_entries_list = list(feed_entries.limit(5))
     return render(
         request, templatename('legislator'),
-        dict(feed_entry_template=templatename('feed_entry'),
-             vote_preview_row_template=templatename('vote_preview_row'),
+        dict(vote_preview_row_template=templatename('vote_preview_row'),
              roles=legislator.roles_manager, abbr=abbr,
              district_id=district_id, metadata=meta, legislator=legislator,
              sources=legislator['sources'],
              sponsored_bills=list(sponsored_bills),
              legislator_votes=list(legislator_votes),
-             has_feed_entries=bool(feed_entries_list),
-             feed_entries=feed_entries_list[:4],
-             feed_entries_count=len(feed_entries_list),
-             feed_entries_more_count=max([0, feed_entries.count() - 5]),
              has_votes=has_votes,
              nav_active='legislators'))
 
@@ -205,7 +192,6 @@ def legislator(request, abbr, _id, slug=None):
 def legislator_inactive(request, abbr, legislator):
     '''
     Context:
-        - feed_entry_template
         - vote_preview_row_template
         - old_roles
         - abbr
@@ -219,7 +205,6 @@ def legislator_inactive(request, abbr, legislator):
 
     Templates:
         - billy/web/public/legislator.html
-        - billy/web/public/feed_entry.html
         - billy/web/public/vote_preview_row.html
     '''
     sponsored_bills = legislator.sponsored_bills(
@@ -230,8 +215,7 @@ def legislator_inactive(request, abbr, legislator):
 
     return render(
         request, templatename('legislator'),
-        dict(feed_entry_template=templatename('feed_entry'),
-             vote_preview_row_template=templatename('vote_preview_row'),
+        dict(vote_preview_row_template=templatename('vote_preview_row'),
              old_roles=legislator.old_roles_manager,
              abbr=abbr,
              metadata=legislator.metadata,
