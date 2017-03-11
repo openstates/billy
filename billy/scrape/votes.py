@@ -107,7 +107,7 @@ class Vote(SourcedObject):
         filename = '%s_%s_%s_seq%s.json' % (self['session'],
                                             self['chamber'],
                                             self['bill_id'],
-                                            self.sequence.next())
+                                            next(self.sequence))
         return filename
 
     def __unicode__(self):

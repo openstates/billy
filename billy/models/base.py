@@ -1,6 +1,7 @@
 import re
 import copy
 import itertools
+from six import string_types, add_metaclass
 
 from django.core import urlresolvers
 
@@ -51,6 +52,7 @@ class DoesNotExist(Exception):
     pass
 
 
+@add_metaclass(ModelBase)
 class Document(dict):
     '''
     This base class represents a MongoDB document.
@@ -64,8 +66,6 @@ class Document(dict):
     legislator documents, should have a name like "legislator_objects" to
     document what's happening and avoid naming clashes.
     '''
-
-    __metaclass__ = ModelBase
 
     # Each subclass represents a document from a specific collection.
     collection = None
@@ -240,7 +240,7 @@ class RelatedDocument(object):
         self.instance = instance
 
         model = self.model
-        if isinstance(model, basestring):
+        if isinstance(model, string_types):
             model = self.model = get_model(model)
 
         instance_key = getattr(self, 'instance_key', None)
@@ -322,7 +322,7 @@ class RelatedDocuments(object):
     def __get__(self, instance, type_=None, *args, **kwargs):
 
         model = self.model
-        if isinstance(model, basestring):
+        if isinstance(model, string_types):
             model = self.model = get_model(model)
 
         self.instance_val = instance[self.instance_key]
@@ -399,6 +399,8 @@ class CursorWrapper(object):
         obj = next(self.cursor)
         setattr(obj, self.instance.related_name(), self.instance)
         return obj
+
+    __next__ = next
 
     def count(self):
         return self.cursor.count()

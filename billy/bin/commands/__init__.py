@@ -8,6 +8,7 @@
         add_args(): method that calls `self.add_argument`
         handle(args): method that does the command
 """
+from six import add_metaclass
 
 
 class CommandMeta(type):
@@ -26,9 +27,8 @@ class CommandMeta(type):
         return cls
 
 
+@add_metaclass(CommandMeta)
 class BaseCommand(object):
-
-    __metaclass__ = CommandMeta
 
     help = ''
 

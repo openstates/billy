@@ -154,15 +154,15 @@ def scan_bills(abbr):
 
     dup_version_urls = []
     dup_source_urls = []
-    for url, n in duplicate_versions.iteritems():
+    for url, n in duplicate_versions.items():
         if n > 1:
             dup_version_urls.append(url)
-    for url, n in duplicate_sources.iteritems():
+    for url, n in duplicate_sources.items():
         if n > 1:
             dup_source_urls.append(url)
 
     # do logging of unnecessary exceptions
-    for qe_type, qes in quality_exceptions.iteritems():
+    for qe_type, qes in quality_exceptions.items():
         if qes:
             logger.warning('unnecessary {0} exceptions for {1} bills: \n  {2}'
                            .format(qe_type, len(qes), '\n  '.join(qes)))
@@ -191,11 +191,11 @@ def calculate_percentages(report):
     # actions
     action_count = float(report['action_count']) / 100
     if action_count:
-        for k in report['actions_per_type'].iterkeys():
+        for k in report['actions_per_type'].keys():
             report['actions_per_type'][k] /= action_count
-        for k in report['actions_per_actor'].iterkeys():
+        for k in report['actions_per_actor'].keys():
             report['actions_per_actor'][k] /= action_count
-        for k in report['actions_per_month'].iterkeys():
+        for k in report['actions_per_month'].keys():
             report['actions_per_month'][k] /= action_count
 
     # sponsors
@@ -203,7 +203,7 @@ def calculate_percentages(report):
     if _sponsor_count:
         report['sponsors_with_id'] = (
             report.pop('_sponsors_with_id_count') / _sponsor_count)
-        for k in report['sponsors_per_type'].iterkeys():
+        for k in report['sponsors_per_type'].keys():
             report['sponsors_per_type'][k] /= _sponsor_count
 
 
@@ -211,7 +211,7 @@ def bill_report(abbr):
     report = scan_bills(abbr)
     combined_report = combine_reports(report['sessions'],
                                       _bill_report_dict())
-    for session in report['sessions'].itervalues():
+    for session in report['sessions'].values():
         calculate_percentages(session)
     calculate_percentages(combined_report)
     report.update(combined_report)

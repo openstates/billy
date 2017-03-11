@@ -20,11 +20,11 @@ def import_metadata(abbr):
     metadata['_type'] = 'metadata'
 
     for term in metadata['terms']:
-        for k, v in term.iteritems():
+        for k, v in term.items():
             if isinstance(v, datetime.date):
                 term[k] = datetime.datetime.combine(v, datetime.time(0, 0))
     for session in metadata['session_details'].values():
-        for k, v in session.iteritems():
+        for k, v in session.items():
             if isinstance(v, datetime.date):
                 session[k] = datetime.datetime.combine(v, datetime.time(0, 0))
 

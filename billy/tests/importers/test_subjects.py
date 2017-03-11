@@ -67,7 +67,7 @@ def test_all_bills_categorization():
               'state': 'ex'},
              {'scraped_subjects': ['AK-47', 'Hunting'], 'bill_id': '4',
               'state': 'ex'}]
-    map(db.bills.insert, bills)
+    list(map(db.bills.insert, bills))
 
     # run categorization on all bills
     categorizer.categorize_bills()

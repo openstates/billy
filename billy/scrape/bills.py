@@ -1,4 +1,5 @@
 import logging
+from six import string_types
 
 from billy.scrape import Scraper, SourcedObject
 
@@ -62,7 +63,7 @@ class Bill(SourcedObject):
 
         if not 'type' in kwargs or not kwargs['type']:
             self['type'] = ['bill']
-        elif isinstance(kwargs['type'], basestring):
+        elif isinstance(kwargs['type'], string_types):
             self['type'] = [kwargs['type']]
         else:
             self['type'] = list(kwargs['type'])
@@ -151,7 +152,7 @@ class Bill(SourcedObject):
         def _cleanup_list(obj, default):
             if not obj:
                 obj = default
-            elif isinstance(obj, basestring):
+            elif isinstance(obj, string_types):
                 obj = [obj]
             elif not isinstance(obj, list):
                 obj = list(obj)
@@ -165,7 +166,7 @@ class Bill(SourcedObject):
             raise ValueError("invalid param 'committee' passed to add_action, "
                              "must use committees")
 
-        if isinstance(committees, basestring):
+        if isinstance(committees, string_types):
             committees = [committees]
 
         related_entities = []         # OK, let's work some magic.

@@ -89,7 +89,8 @@ def git_add_bill(data):
     spam = Blob.from_string(bill)
     bid = str(data['_id'])
     git_active_repo.object_store.add_object(spam)
-    git_active_tree[bid] = (0100644, spam.id)
+    # 0100644 octal -> 33188 decimal
+    git_active_tree[bid] = (33188, spam.id)
     git_active_tree.check()
     print("added %s - %s" % (data['_id'], spam.id))
 
@@ -139,7 +140,7 @@ useful unless you're debugging production issues.
 Fondly,
    Bill, your local Billy instance.""")
     tree = Tree()
-    tree.add("README", 0100644, blob.id)
+    tree.add("README", 33188, blob.id)
     commit = Commit()
     commit.tree = tree.id
     author = "Billy <billy@localhost>"

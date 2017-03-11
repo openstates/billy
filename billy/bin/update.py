@@ -10,7 +10,7 @@ import inspect
 import argparse
 import traceback
 import importlib
-import unicodecsv
+import six
 
 import datetime as dt
 
@@ -63,7 +63,7 @@ def _run_scraper(scraper_type, options, metadata):
 
     scraper = _get_configured_scraper(scraper_type, options, metadata)
     ua_email = os.environ.get('BILLY_UA_EMAIL')
-    if ua_email:
+    if ua_email and scraper:
         scraper.user_agent += ' ({})'.format(ua_email)
     if not scraper:
         return [{
@@ -394,8 +394,9 @@ def main():
                 if 'import' in args.actions:
                     try:
                         db.billy_runs.save(scrape_data, safe=True)
-                    except Exception:
-                        raise lex, None, exc_traceback
+                    except Exception as e:
+                        print('mongo error:', e)
+                        six.reraise(lex, None, exc_traceback)
                         # XXX: This should *NEVER* happen, but it has
                         # in the past, so we're going to catch any errors
                         # writing # to pymongo, and raise the original

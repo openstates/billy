@@ -56,10 +56,10 @@ class PlaintextColumns(object):
 
     >>> table = PlaintextColumns(cols)
 
-    >>> table.rows().next()
+    >>> next(table.rows())
     ('Austin', 'Errington', 'Lawson, L', 'Pryor')
 
-    >>> table.cols().next()
+    >>> next(table.cols())
 
     ('Austin',
      'Bartlett',

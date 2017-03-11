@@ -2,6 +2,7 @@ import os
 import logging
 import importlib
 import json
+import six
 
 from billy.scrape.validator import DatetimeValidator
 
@@ -172,12 +173,16 @@ class Scraper(scrapelib.Scraper):
         raise NoDataForPeriod(term)
 
     def save_object(self, obj):
-        self.log('Save %s %s', obj['_type'], unicode(obj))
+        self.log('Save %s %s', obj['_type'], six.text_type(obj))
 
         # copy jurisdiction to LEVEL_FIELD
         obj[settings.LEVEL_FIELD] = getattr(self, 'jurisdiction')
 
-        filename = obj.get_filename().encode('utf-8')
+        if six.PY2:
+            filename = obj.get_filename().encode('utf-8')
+        else:
+            filename = obj.get_filename().decode()
+
         self.output_names.add(filename)     # keep tally of all output names
 
         # pluralize type
@@ -234,7 +239,7 @@ def get_scraper(mod_path, scraper_type):
     # now find the class within the module
     ScraperClass = None
 
-    for k, v in module.__dict__.iteritems():
+    for k, v in module.__dict__.items():
         if k.startswith('_'):
             continue
         if getattr(v, 'scraper_type', None) == scraper_type:
@@ -257,7 +262,7 @@ def check_sessions(metadata, sessions):
     metadata_session_details = list(metadata.get('_ignored_scraped_sessions',
                                                  []))
 
-    for k, v in metadata['session_details'].iteritems():
+    for k, v in metadata['session_details'].items():
         try:
             all_sessions_in_terms.remove(k)
         except ValueError:

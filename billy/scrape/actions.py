@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple, defaultdict, Iterable
+from six import string_types
 
 
 class Rule(namedtuple('Rule', 'regexes types stop attrs')):
@@ -19,12 +20,12 @@ class Rule(namedtuple('Rule', 'regexes types stop attrs')):
         'Create new instance of Rule(regex, types, attrs, stop)'
 
         # Regexes can be a string, regex, or sequence.
-        if isinstance(regexes, basestring) or hasattr(regexes, 'match'):
+        if isinstance(regexes, string_types) or hasattr(regexes, 'match'):
             regexes = (regexes,)
         compiled_regexes = []
         # pre-compile any string regexes
         for regex in regexes:
-            if isinstance(regex, basestring):
+            if isinstance(regex, string_types):
                 if flexible_whitespace:
                     regex = re.sub('\s{1,4}', '\s{,10}', regex)
                 compiled_regexes.append(re.compile(regex))
@@ -32,7 +33,7 @@ class Rule(namedtuple('Rule', 'regexes types stop attrs')):
                 compiled_regexes.append(regex)
 
         # Types can be a string or a sequence.
-        if isinstance(types, basestring):
+        if isinstance(types, string_types):
             types = set([types])
         types = set(types or [])
 
@@ -118,7 +119,8 @@ class BaseCategorizer(object):
             if not isinstance(v, Iterable):
                 continue
 
-            v = filter(None, v)
+            if not isinstance(v, string_types):
+                v = list(filter(None, v))
 
             # Get rid of sets.
             if isinstance(v, set):

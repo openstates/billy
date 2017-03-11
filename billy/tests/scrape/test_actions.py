@@ -46,7 +46,7 @@ class Categorizer(BaseCategorizer):
             for text in attrs['legislators']:
                 rgx = r'(,\s+(?![a-z]\.)|\s+and\s+)'
                 legs = re.split(rgx, text)
-                legs = filter(lambda x: x not in [', ', ' and '], legs)
+                legs = list(filter(lambda x: x not in [', ', ' and '], legs))
                 res |= set(legs)
         attrs['legislators'] = list(res)
         return attrs

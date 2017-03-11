@@ -140,7 +140,8 @@
                             "application/msword",
                             "application/rtf",
                             "application/octet-stream",
-                            "application/vnd.wordperfect"
+                            "application/vnd.wordperfect",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         ]
                     },
                     "name": { "type": "string" },

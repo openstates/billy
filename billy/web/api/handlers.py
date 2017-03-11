@@ -109,7 +109,7 @@ class BillyHandler(BaseHandler):
 
 def _metadata_backwards_shim(metadata):
     if 'chambers' in metadata:
-        for chamber_type, chamber in metadata['chambers'].iteritems():
+        for chamber_type, chamber in metadata['chambers'].items():
             for field in ('name', 'title', 'term'):
                 if field in chamber:
                     metadata[chamber_type + '_chamber_' + field] = \

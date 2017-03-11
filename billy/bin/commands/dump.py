@@ -7,6 +7,7 @@ import re
 import urllib
 import zipfile
 import unicodecsv
+from six import string_types
 
 from billy.core import settings
 from billy.utils import metadata
@@ -68,7 +69,7 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
 
 class APIValidator(validictory.SchemaValidator):
     def validate_type_datetime(self, val):
-        if not isinstance(val, basestring):
+        if not isinstance(val, string_types):
             return False
 
         return re.match(r'^\d{4}-\d\d-\d\d( \d\d:\d\d:\d\d)?$', val)
