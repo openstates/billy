@@ -3,9 +3,9 @@ from django.conf.urls import include, url
 from django.contrib.staticfiles.views import serve
 
 urlpatterns = [
-    (r'^api/', include('billy.web.api.urls')),
-    (r'^admin/', include('billy.web.admin.urls')),
-    (r'^public/', include('billy.web.public.urls')),
+    url(r'^api/', include('billy.web.api.urls')),
+    url(r'^admin/', include('billy.web.admin.urls')),
+    url(r'^public/', include('billy.web.public.urls')),
 ]
 
 if settings.DEBUG:
