@@ -90,11 +90,6 @@ def striptags(parser, token):
     return StrippedTagsNode(nodelist)
 
 
-@register.filter
-def is_dev(luser):
-    return len(luser.groups.filter(name='developer')) == 1
-
-
 class StrippedTagsNode(template.Node):
 
     def __init__(self, nodelist):
