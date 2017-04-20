@@ -1,6 +1,6 @@
 import datetime
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.http import HttpResponse
 
 import piston.resource
@@ -89,8 +89,7 @@ district_handler = Resource(handlers.DistrictHandler,
 boundary_handler = Resource(handlers.BoundaryHandler,
                             authentication=authorizer)
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # metadata
     url(r'^v1/metadata/$', all_metadata_handler),
     url(r'^v1/metadata/(?P<abbr>[a-zA-Z-]+)/$', metadata_handler),
@@ -126,4 +125,4 @@ urlpatterns = patterns(
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/(?P<session>.+)/',
         subject_list_handler),
     url(r'v1/subject_counts/(?P<abbr>[a-zA-Z-]+)/', subject_list_handler),
-)
+]

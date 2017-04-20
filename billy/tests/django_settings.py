@@ -5,6 +5,11 @@ DATABASES = {
     }
 }
 
-INSTALLED_APPS = ('billy.web.api',)
+INSTALLED_APPS = ('billy.web.api',
+                  'piston',
+                  'django.contrib.auth',
+                  'django.contrib.sites',
+                  'django.contrib.contenttypes',
+                  )
 SECRET_KEY = 'a-non-secret'
 ROOT_URLCONF = 'billy.web.urls'

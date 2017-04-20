@@ -1,7 +1,7 @@
 import json
 import urllib
+import unittest
 
-from django.utils import unittest
 from django.test import Client
 
 import billy.tests
