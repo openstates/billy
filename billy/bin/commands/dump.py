@@ -39,7 +39,7 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
     today = datetime.date.today()
 
     # build URL
-    s3_bucket = settings.AWS_BUCKET
+    s3_bucket = os.environ['S3_BUCKET']
     s3_path = '%s%s-%02d-%02d-%s-%s.zip' % (s3_prefix, today.year, today.month,
                                             today.day, abbr, type)
     if use_cname:
@@ -48,8 +48,7 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
         s3_url = 'http://%s.s3.amazonaws.com/%s' % (s3_bucket, s3_path)
 
     # S3 upload
-    s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET,
-                             calling_format=OrdinaryCallingFormat())
+    s3conn = boto.connect_s3(calling_format=OrdinaryCallingFormat())
     bucket = s3conn.create_bucket(s3_bucket)
     k = Key(bucket)
     k.key = s3_path
@@ -76,8 +75,9 @@ class APIValidator(validictory.SchemaValidator):
 
 
 def api_url(path):
-    return "%s%s/?apikey=%s" % (settings.API_BASE_URL, urllib.quote(path),
-                                settings.API_KEY)
+    return "https://openstates.org/api/v1/%s/?apikey=%s" % (
+        urllib.quote(path), os.environ['OS_API_KEY']
+    )
 
 # CSV ################################
 
