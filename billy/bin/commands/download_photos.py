@@ -40,8 +40,7 @@ class DownloadPhotos(BaseCommand):
                           help='abbreviations for photos to update')
 
     def handle(self, args):
-        s3conn = boto.connect_s3(settings.AWS_KEY, settings.AWS_SECRET,
-                                 calling_format=OrdinaryCallingFormat())
+        s3conn = boto.connect_s3(calling_format=OrdinaryCallingFormat())
         bucket = s3conn.create_bucket(settings.AWS_BUCKET)
 
         for abbr in args.abbrs:
