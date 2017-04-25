@@ -41,7 +41,7 @@ class DownloadPhotos(BaseCommand):
 
     def handle(self, args):
         s3conn = boto.connect_s3(calling_format=OrdinaryCallingFormat())
-        bucket = s3conn.create_bucket(settings.AWS_BUCKET)
+        bucket = s3conn.create_bucket(os.environ['S3_BUCKET'])
 
         for abbr in args.abbrs:
 
