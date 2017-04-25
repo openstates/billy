@@ -1,4 +1,4 @@
-Django<1.7
+Django<1.10
 django-pjax
 -e git://github.com/avanov/django-piston/#egg=django-piston
 boto
