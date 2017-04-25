@@ -24,6 +24,7 @@ billy-update = billy.bin.update:main
 billy-util = billy.bin.util:main
 """,
       install_requires=[
+          'Django<1.10',
           'six',
           #"django-pjax",
           "boto",
