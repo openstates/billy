@@ -1,6 +1,17 @@
 billy changelog
 ===============
 
+2.0.0
+-----
+**2 June 2017**
+    * Django 1.9 support
+    * some Py3 compatibility 
+    * add mimetype for docx
+    * remove isdev
+    * essentially the final release for scraping purposes,
+      future releases will start paring down unused functionality
+      until billy is no more :)
+
 1.9.0
 -----
 **13 January 2017**
