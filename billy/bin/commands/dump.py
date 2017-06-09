@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 import datetime
-import json
 import logging
 import os
-import re
 import urllib
 import zipfile
 import unicodecsv
-from six import string_types
 
 from billy.core import settings
 from billy.utils import metadata
@@ -15,7 +12,6 @@ from billy.bin.commands import BaseCommand
 from billy.core import db
 
 import scrapelib
-import validictory
 import boto
 from boto.s3.key import Key
 from boto.s3.connection import OrdinaryCallingFormat
@@ -64,14 +60,6 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
     logging.info('uploaded to %s' % s3_url)
 
 # JSON ################################
-
-
-class APIValidator(validictory.SchemaValidator):
-    def validate_type_datetime(self, val):
-        if not isinstance(val, string_types):
-            return False
-
-        return re.match(r'^\d{4}-\d\d-\d\d( \d\d:\d\d:\d\d)?$', val)
 
 
 def api_url(path):
@@ -238,36 +226,19 @@ class DumpJSON(BaseCommand):
                           help='upload the created archives to S3')
         self.add_argument('--apikey', dest='API_KEY',
                           help='the API key to use')
-        self.add_argument('--schema_dir', default=None,
-                          help='directory to use for API schemas (optional)')
-        self.add_argument('--novalidate', action='store_true', default=False,
-                          help="don't run validation")
 
     def handle(self, args):
         for abbr in args.abbrs:
             if not args.file:
                 args.file = abbr + '.zip'
-            self.dump(abbr, args.file, not args.novalidate, args.schema_dir)
+            self.dump(abbr, args.file)
             if args.upload:
                 upload(abbr, args.file, 'json')
 
-    def dump(self, abbr, filename, validate, schema_dir):
+    def dump(self, abbr, filename):
         scraper = scrapelib.Scraper(requests_per_minute=600, retry_attempts=3)
 
         zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
-
-        if not schema_dir:
-            cwd = os.path.split(__file__)[0]
-            schema_dir = os.path.join(cwd, "../../schemas/api/")
-
-        with open(os.path.join(schema_dir, "bill.json")) as f:
-            bill_schema = json.load(f)
-
-        with open(os.path.join(schema_dir, "legislator.json")) as f:
-            legislator_schema = json.load(f)
-
-        with open(os.path.join(schema_dir, "committee.json")) as f:
-            committee_schema = json.load(f)
 
         # write out metadata
         response = scraper.get(api_url('metadata/%s' % abbr)).content
@@ -279,9 +250,6 @@ class DumpJSON(BaseCommand):
             url = api_url(path)
 
             response = scraper.get(url).content
-            if validate:
-                validictory.validate(json.loads(response), legislator_schema,
-                                     validator_cls=APIValidator)
 
             zip.writestr(path, response)
 
@@ -291,9 +259,6 @@ class DumpJSON(BaseCommand):
             url = api_url(path)
 
             response = scraper.get(url).content
-            if validate:
-                validictory.validate(json.loads(response), committee_schema,
-                                     validator_cls=APIValidator)
 
             zip.writestr(path, response)
 
@@ -304,9 +269,6 @@ class DumpJSON(BaseCommand):
             url = api_url(path)
 
             response = scraper.get(url).content
-            if validate:
-                validictory.validate(json.loads(response), bill_schema,
-                                     validator_cls=APIValidator)
 
             zip.writestr(path, response)
 
