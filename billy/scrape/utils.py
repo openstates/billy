@@ -4,13 +4,6 @@ import subprocess
 import collections
 
 
-def url_xpath(url, path):
-    import requests
-    import lxml.html
-    doc = lxml.html.fromstring(requests.get(url).text)
-    return doc.xpath(path)
-
-
 def convert_pdf(filename, type='xml'):
     commands = {'text': ['pdftotext', '-layout', filename, '-'],
                 'text-nolayout': ['pdftotext', filename, '-'],
@@ -25,12 +18,6 @@ def convert_pdf(filename, type='xml'):
     data = pipe.read()
     pipe.close()
     return data
-
-
-def pdf_to_lxml(filename, type='html'):
-    import lxml.html
-    text = convert_pdf(filename, type)
-    return lxml.html.fromstring(text)
 
 
 def clean_spaces(s):
