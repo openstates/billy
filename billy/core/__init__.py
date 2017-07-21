@@ -59,7 +59,6 @@ except ImportError:
 
 db = None
 mdb = None
-elasticsearch = None
 s3bucket = None
 _model_registry = {}
 _model_registry_by_collection = {}
@@ -99,16 +98,6 @@ def _configure_db(host, port, db_name):
         mdb = ErrorProxy(e)
 
 
-def _configure_es(host, timeout):
-    import pyelasticsearch
-    global elasticsearch
-    try:
-        elasticsearch = pyelasticsearch.ElasticSearch(host, timeout=timeout,
-                                                      max_retries=0)
-    except Exception as e:
-        elasticsearch = ErrorProxy(e)
-
-
 def _configure_s3(aws_key, aws_secret, bucket):
     global s3bucket
     try:
@@ -124,6 +113,4 @@ def _configure_s3(aws_key, aws_secret, bucket):
 
 _configure_db(settings.MONGO_HOST, settings.MONGO_PORT,
               settings.MONGO_DATABASE)
-if settings.ENABLE_ELASTICSEARCH:
-    _configure_es(settings.ELASTICSEARCH_HOST, settings.ELASTICSEARCH_TIMEOUT)
 _configure_s3(settings.AWS_KEY, settings.AWS_SECRET, settings.AWS_BUCKET)

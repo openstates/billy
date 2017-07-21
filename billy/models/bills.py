@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied
 import pymongo
 
 from billy.utils import parse_param_dt, fix_bill_id
-from billy.core import mdb as db, settings, elasticsearch
+from billy.core import mdb as db, settings
 from .base import (Document, RelatedDocument, RelatedDocuments,
                    ListManager, AttrManager, take)
 from .metadata import Metadata
@@ -334,24 +334,7 @@ class BillSearchResults(object):
 
     def __len__(self):
         if self._len is None:
-            if self.es_search:
-                resp = elasticsearch.count(self.es_search['query'],
-                                           index='billy', doc_type='bills')
-                if not resp['_shards']['successful']:
-                    # if we get a parse exception, simplify from query_string
-                    # to a simple text match
-                    if 'ParseException' in resp['_shards']['failures'][0]['reason']:
-                        fquery = self.es_search['query']['filtered']['query']
-                        fquery['match'] = {'_all': fquery['query_string']['query']}
-                        fquery.pop('query_string')
-                        resp = elasticsearch.count(self.es_search['query'], index='billy',
-                                                   doc_type='bills')
-                    else:
-                        raise Exception('ElasticSearch error: %s' %
-                                        resp['_shards']['failures'])
-                self._len = resp['count']
-            else:
-                self._len = db.bills.find(self.mongo_query).count()
+            self._len = db.bills.find(self.mongo_query).count()
         return self._len
 
     def __getitem__(self, key):
@@ -365,22 +348,9 @@ class BillSearchResults(object):
             start = key
             stop = key + 1
 
-        if self.es_search:
-            search = dict(self.es_search)
-            search['sort'] = [{self.sort: 'desc'}, 'bill_id']
-            search['from'] = start
-            search['size'] = stop - start
-            es_result = elasticsearch.search(search,
-                                             index='billy', doc_type='bills')
-            _mongo_query = {'_id': {'$in': [r['_id'] for r in
-                                            es_result['hits']['hits']]}}
-            return db.bills.find(_mongo_query, fields=self.fields).sort(
-                [(self.sort, pymongo.DESCENDING),
-                 ('bill_id', pymongo.ASCENDING)])
-        else:
-            return db.bills.find(self.mongo_query, fields=self.fields).sort(
-                [(self.sort, pymongo.DESCENDING)]
-            ).skip(start).limit(stop - start)
+        return db.bills.find(self.mongo_query, fields=self.fields).sort(
+            [(self.sort, pymongo.DESCENDING)]
+        ).skip(start).limit(stop - start)
 
 
 class Bill(Document):
@@ -517,17 +487,13 @@ class Bill(Document):
                type_=None, session=None, bill_fields=None,
                sort=None, limit=None):
 
-        use_elasticsearch = False
         numeric_query = False
         mongo_filter = {}
-        es_terms = []
 
         if status is None:
             status = []
 
         if query:
-            use_elasticsearch = settings.ENABLE_ELASTICSEARCH
-
             # spammers get a 400
             if '<a href' in query:
                 raise PermissionDenied('html detected')
@@ -541,23 +507,18 @@ class Bill(Document):
                                                fix_bill_id(query).upper()}
                 else:
                     mongo_filter['bill_id'] = fix_bill_id(query).upper()
-                use_elasticsearch = False
                 numeric_query = True
 
         # handle abbr
-        if abbr and use_elasticsearch:
-            es_terms.append({'term': {'jurisdiction': abbr}})
-        elif abbr:
+        if abbr:
             mongo_filter[settings.LEVEL_FIELD] = abbr
 
         # sponsor_id
-        if sponsor_id and use_elasticsearch:
-            es_terms.append({'term': {'sponsor_ids': sponsor_id}})
-        elif sponsor_id:
+        if sponsor_id:
             mongo_filter['sponsors.leg_id'] = sponsor_id
 
         # handle simple term arguments (chamber, bill_id, type, session)
-        if isinstance(bill_id, list) and not use_elasticsearch:
+        if isinstance(bill_id, list):
             bill_id = {'$in': bill_id}
         simple_args = {'chamber': chamber, 'bill_id': bill_id, 'type': type_,
                        'session': session}
@@ -575,20 +536,12 @@ class Bill(Document):
                                  ' "term", "session", "all"')
         for key, value in simple_args.items():
             if value is not None:
-                if use_elasticsearch:
-                    es_terms.append({'term': {key: value}})
-                else:
-                    mongo_filter[key] = value
+                mongo_filter[key] = value
 
-        if subjects and use_elasticsearch:
-            for subject in subjects:
-                es_terms.append({'term': {'subjects': subject}})
-        elif subjects:
+        if subjects:
             mongo_filter['subjects'] = {'$all': list(filter(None, subjects))}
 
-        if updated_since and use_elasticsearch:
-            es_terms.append({'range': {'updated_at': {'gte': updated_since}}})
-        elif updated_since:
+        if updated_since:
             try:
                 mongo_filter['updated_at'] = {'$gte':
                                               parse_param_dt(updated_since)}
@@ -596,10 +549,7 @@ class Bill(Document):
                 raise ValueError('invalid updated_since parameter. '
                                  'please supply date in YYYY-MM-DD format')
 
-        if last_action_since and use_elasticsearch:
-            es_terms.append({'range': {'action_dates.last':
-                                       {'gte': last_action_since}}})
-        elif last_action_since:
+        if last_action_since:
             try:
                 mongo_filter['action_dates.last'] = {'$gte': parse_param_dt(last_action_since)}
             except ValueError:
@@ -617,10 +567,7 @@ class Bill(Document):
         elif len(status_spec) > 1:
             status_spec = {'$and': status_spec}
 
-        if status_spec and use_elasticsearch:
-            for key in status:
-                es_terms.append({'exists': {'field': key}})
-        elif status_spec:
+        if status_spec:
             mongo_filter.update(**status_spec)
 
         # preprocess sort
@@ -629,18 +576,7 @@ class Bill(Document):
         elif sort not in ('updated_at', 'created_at'):
             sort = 'action_dates.last'
 
-        # do the actual ES query
-        if query and use_elasticsearch:
-            search = {'query': {"query_string": {"fields": ["text", "title"],
-                                                 "default_operator": "AND",
-                                                 "query": query}}}
-            if es_terms:
-                search['filter'] = {'and': es_terms}
-                search = {'query': {'filtered': search}}
-            search['fields'] = []
-            return BillSearchResults(search, None, sort, bill_fields)
-
-        elif query and not numeric_query:
+        if query and not numeric_query:
             mongo_filter['title'] = {'$regex': query, '$options': 'i'}
 
         return BillSearchResults(None, mongo_filter, sort, bill_fields)
