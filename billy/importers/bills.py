@@ -379,6 +379,7 @@ def import_bill(data, standalone_votes, categorizer):
         save_votes(data, bill_votes)
         return "insert"
     else:
+        update(bill, data, db.bills)
         git_add_bill(bill)
         save_votes(bill, bill_votes)
         return "update"
