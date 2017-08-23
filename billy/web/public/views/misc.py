@@ -91,6 +91,12 @@ def find_your_legislator(request):
                         if leg[billy_settings.LEVEL_FIELD] == get['abbr']]
             context['abbr'] = get['abbr']
 
+        # Also, allow filtering by chamber
+        if 'chamber' in get:
+            leg_resp = [leg for leg in leg_resp
+                        if leg['chamber'] == get['chamber']]
+            context['chamber'] = get['chamber']
+
         if "boundary" in get:
             to_search = []
             for leg in leg_resp:
