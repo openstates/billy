@@ -11,7 +11,7 @@ from django.http import Http404
 from billy.core import settings
 from billy.models import db, Metadata, DoesNotExist, Bill
 from ..forms import get_region_select_form
-from .utils import templatename
+from .utils import templatename, GEO_BOUNDS
 
 
 def region_selection(request):
@@ -31,6 +31,7 @@ def region(request, abbr):
         - sessions
         - chambers
         - joint_committee_count
+        - geo_bounds
         - nav_active
 
     Templates:
@@ -41,6 +42,9 @@ def region(request, abbr):
         meta = Metadata.get_object(abbr)
     except DoesNotExist:
         raise Http404
+
+    fallback_bounds = GEO_BOUNDS['US']
+    geo_bounds = GEO_BOUNDS.get(abbr.upper(), fallback_bounds)
 
     # count legislators
     legislators = meta.legislators({'active': True}, {'party': True,
@@ -95,6 +99,7 @@ def region(request, abbr):
                   dict(abbr=abbr, metadata=meta, sessions=sessions,
                        chambers=chambers,
                        joint_committee_count=joint_committee_count,
+                       geo_bounds=geo_bounds,
                        nav_active='home'))
 
 
