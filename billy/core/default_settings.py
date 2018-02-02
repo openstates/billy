@@ -5,7 +5,7 @@ MONGO_PORT = 27017
 MONGO_DATABASE = 'billy'
 
 BOUNDARY_SERVICE_URL = 'http://localhost:8001/1.0/'
-BOUNDARY_SERVICE_SETS = 'sldl-14,sldu-14,nh-12'
+BOUNDARY_SERVICE_SETS = 'sldl-17,sldu-17,nh-12'
 
 API_BASE_URL = 'http://127.0.0.1:8000/api/v1/'
 
