@@ -3,10 +3,10 @@ from django.conf.urls import url
 from billy.web.public.views.misc import VotesList
 from billy.web.public.views.bills import (BillList, AllBillList,
                                           AllBillCSVList, BillFeed)
-from billy.web.public.feeds import VotesListFeed, EventsFeed
+from billy.web.public.feeds import VotesListFeed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from billy.web.public.views import misc, region, events, legislators, committees, bills
+from billy.web.public.views import misc, region, legislators, committees, bills
 
 # misc. views
 urlpatterns = [
@@ -28,18 +28,6 @@ urlpatterns = [
     url(r'^(?P<abbr>[a-z-]+)/search/$', region.search, name='search'),
     url(r'^(?P<abbr>[a-z-]+)/$', region.region, name='region'),
     url(r'^region_selection/$', region.region_selection, name='region_selection'),
-
-    # events
-    url(r'^(?P<abbr>[a-z-]+)/events/$', events.events,
-        name='events'),
-    url(r'^(?P<abbr>[a-z-]+)/events/rss/$', EventsFeed(),
-        name='events_rss'),
-    url(r'^(?P<abbr>[a-z-]+)/events/json_for_date/(?P<year>\d+)/(?P<month>\d+)/',
-        events.events_json_for_date, name='events_json_for_date'),
-    url(r'^(?P<abbr>[a-z-]+)/events/(?P<event_id>[\w-]+)/', events.event,
-        name='event'),
-    url(r'^(?P<abbr>[a-z-]+)/ical/(?P<event_id>[\w-]+)/', events.event_ical,
-        name='event_ical'),
 
     # committees
     url(r'^(?P<abbr>[a-z-]+)/committees/$', committees.committees, name='committees'),

@@ -15,8 +15,6 @@ from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 
 
-EVENT_PAGE_COUNT = 10
-
 
 class RelatedBillsList(RelatedObjectsList):
     show_per_page = 10
@@ -366,7 +364,6 @@ def bill(request, abbr, session, bill_id):
         - abbr
         - metadata
         - bill
-        - events
         - show_all_sponsors
         - sponsors
         - sources
@@ -386,14 +383,6 @@ def bill(request, abbr, session, bill_id):
     if bill is None:
         raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session, bill_id))
 
-    events = db.events.find({
-        settings.LEVEL_FIELD: abbr,
-        "related_bills.bill_id": bill['_id']
-    }).sort("when", -1)
-    events = list(events)
-    if len(events) > EVENT_PAGE_COUNT:
-        events = events[:EVENT_PAGE_COUNT]
-
     popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
@@ -408,7 +397,6 @@ def bill(request, abbr, session, bill_id):
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
-             events=events,
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],

@@ -68,20 +68,3 @@ class VotesListFeed(GenericListFeed):
         return '%s (%s)' % (
             item.bill()['bill_id'],
             item['date'].strftime('%B %d, %Y'))
-
-
-class EventsFeed(GenericListFeed):
-    collection_name = 'metadata'
-    query_attribute = 'events'
-
-    def title(self, obj):
-        s = u"{0}: {1} legislative events."
-        return s.format(get_domain(), obj.display_name())
-
-    description = title
-
-    def item_description(self, item):
-        return truncatewords(item['description'], 100)
-
-    def item_title(self, item):
-        return item['when'].strftime('%B %d, %Y')

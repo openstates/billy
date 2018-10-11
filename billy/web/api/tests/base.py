@@ -61,7 +61,6 @@ class BaseTestCase(unittest.TestCase):
         fixtures.load_bills()
         fixtures.load_legislators()
         fixtures.load_committees()
-        fixtures.load_events()
         fixtures.load_districts()
 
     @property
