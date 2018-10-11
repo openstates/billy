@@ -2,7 +2,6 @@ Django<1.10
 django-pjax
 -e git://github.com/avanov/django-piston/#egg=django-piston
 boto
-icalendar
 lxml>=2.2
 name_tools>=0.1.2
 nose

@@ -26,7 +26,6 @@ billy-util = billy.bin.util:main
           'six',
           #"django-pjax",
           "boto",
-          "icalendar",
           "lxml>=2.2",
           "name_tools>=0.1.2",
           "nose",
