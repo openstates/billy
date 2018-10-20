@@ -1,9 +1,10 @@
 billy changelog
 ===============
 
-2.2.0
+3.0.0
 -----
     * removed events functionality
+    * removed admin functionality
 
 2.1.0
 -----

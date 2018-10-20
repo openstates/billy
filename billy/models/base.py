@@ -6,7 +6,6 @@ from six import string_types, add_metaclass
 from django.core import urlresolvers
 
 from billy.core import _model_registry, _model_registry_by_collection
-from billy.web.admin import urls as admin_urls
 
 
 # TODO: put this in a util file
@@ -128,11 +127,6 @@ class Document(dict):
         its __unicode__. Fail.
         '''
         return self.collection.name
-
-    def get_admin_json_url(self):
-        return '/admin' + urlresolvers.reverse(
-            'object_json', urlconf=admin_urls,
-            args=[self.collection_name, self.id])
 
 
 class AttrManager(object):
