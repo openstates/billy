@@ -155,32 +155,7 @@ def _do_imports(abbrev, args):
         report['committees'] = \
             import_committees(abbrev, settings.BILLY_DATA_DIR)
 
-    if 'events' in args.types:
-        report['events'] = import_events(abbrev, settings.BILLY_DATA_DIR)
-
     return report
-
-
-def _do_reports(abbrev, args):
-    from billy.core import db
-    from billy.reports.bills import bill_report
-    from billy.reports.votes import vote_report
-    from billy.reports.legislators import legislator_report
-    from billy.reports.committees import committee_report
-
-    report = db.reports.find_one({'_id': abbrev})
-    if not report:
-        report = {'_id': abbrev}
-
-    if 'legislators' in args.types:
-        report['legislators'] = legislator_report(abbrev)
-    if 'bills' in args.types:
-        report['bills'] = bill_report(abbrev)
-        report['votes'] = vote_report(abbrev)
-    if 'committees' in args.types or 'legislators' in args.types:
-        report['committees'] = committee_report(abbrev)
-
-    db.reports.save(report, safe=True)
 
 
 def main():
@@ -312,9 +287,6 @@ def main():
             args.types = ['bills', 'legislators', 'votes', 'committees',
                           'alldata']
 
-            if 'events' in metadata['feature_flags']:
-                args.types.append('events')
-
 
         plan = """billy-update abbr=%s
     actions=%s
@@ -415,10 +387,6 @@ def main():
             # We're tying the run-logging into the import stage - since import
             # already writes to the DB, we might as well throw this in too.
             db.billy_runs.save(scrape_data, safe=True)
-
-        # reports
-        if 'report' in args.actions:
-            _do_reports(abbrev, args)
 
         if 'session-list' in args.actions:
             if hasattr(module, 'session_list'):
