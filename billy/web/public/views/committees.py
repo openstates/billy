@@ -98,7 +98,6 @@ def committee(request, abbr, committee_id):
 
     Tempaltes:
         - billy/web/public/committee.html
-        - billy/web/public/developer_committee.html
     '''
     committee = db.committees.find_one({'_id': committee_id})
     if committee is None:
