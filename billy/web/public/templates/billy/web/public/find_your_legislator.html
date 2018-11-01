@@ -39,8 +39,9 @@ $(document).ready(function() {
         var url = '/find_your_legislator/?lat=' +
                lat +
                '&lon=' +
-               lon;
-        /* This is a big operation. Kicking it off, since it's async */
+            lon;
+        /* 
+        /* This is a big operation. Kicking it off, since it's async 
         $.getJSON(url + "&boundary=y", function(data) {
             for ( var i in overlays ) {
                 map.removeOverlay(overlays[i]);
@@ -87,7 +88,7 @@ $(document).ready(function() {
                     }
                 },
                 click: function() {
-                    /* If the user clicks, let's recenter kindly. */
+                    // If the user clicks, let's recenter kindly. 
                     map.setCenter(
                         lat,
                         lon
@@ -95,7 +96,7 @@ $(document).ready(function() {
                 }
             });
             needs_update = false;
-        });
+        });*/
 
         /* Before we dispatch our request, we've already
            geo-located. Let's center first. */

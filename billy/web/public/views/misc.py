@@ -107,16 +107,7 @@ def find_your_legislator(request):
 
 
 def get_district(request, district_id):
-    qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
-        billy_settings.API_BASE_URL,
-        district_id,
-        billy_settings.API_KEY
-    )
-    try:
-        f = urllib2.urlopen(qurl, timeout=0.5)
-    except urllib2.HTTPError:
-        raise Http404('no such district')
-    return HttpResponse(f)
+    raise Http404('no such district')
 
 
 ### Votes & News don't really fit here or anywhere
