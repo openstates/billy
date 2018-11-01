@@ -98,21 +98,7 @@ def find_your_legislator(request):
             context['chamber'] = get['chamber']
 
         if "boundary" in get:
-            to_search = []
-            for leg in leg_resp:
-                if 'boundary_id' in leg:
-                    to_search.append(leg['boundary_id'])
-            borders = set(to_search)
-            ret = {}
-            for border in borders:
-                qurl = "%sdistricts/boundary/%s/?apikey=%s" % (
-                    billy_settings.API_BASE_URL,
-                    border,
-                    getattr(billy_settings, 'API_KEY', '')
-                )
-                resp = json.load(urllib2.urlopen(qurl, timeout=0.5))
-                ret[border] = resp
-            return HttpResponse(json.dumps(ret))
+            return HttpResponse(json.dumps([]))
 
         context['legislators'] = map(Legislator, leg_resp)
         template = 'find_your_legislator_table'
