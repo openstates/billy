@@ -5,6 +5,7 @@ import os
 import json
 import zipfile
 import unicodecsv
+from bson.objectid import ObjectId
 
 from billy.core import settings
 from billy.utils import metadata
@@ -31,6 +32,8 @@ class DateTimeAwareJSONEncoder(json.JSONEncoder):
             return o.isoformat()
         elif isinstance(o, datetime.time):
             return o.isoformat()
+        elif isinstance(o, ObjectId):
+            return str(o)
 
         return super(DateTimeAwareJSONEncoder, self).default(o)
 
