@@ -1,6 +1,16 @@
 billy changelog
 ===============
 
+3.0.0
+-----
+    * removed events functionality
+    * removed admin functionality
+    * removed popularity counts
+
+2.1.0
+-----
+    * various production fixes
+
 2.0.0
 -----
 **2 June 2017**

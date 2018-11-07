@@ -2,19 +2,45 @@
 import datetime
 import logging
 import os
-import urllib
+import json
 import zipfile
 import unicodecsv
+from bson.objectid import ObjectId
 
 from billy.core import settings
 from billy.utils import metadata
 from billy.bin.commands import BaseCommand
 from billy.core import db
 
-import scrapelib
 import boto
 from boto.s3.key import Key
 from boto.s3.connection import OrdinaryCallingFormat
+
+
+from django.template import defaultfilters
+
+
+class DateTimeAwareJSONEncoder(json.JSONEncoder):
+    # We wouldn't need this if django's stupid DateTimeAwareJSONEncoder
+    # used settings.DATETIME_FORMAT instead of hard coding its own
+    # format string.
+
+    def default(self, o):
+        if isinstance(o, datetime.datetime):
+            return o.isoformat()
+        elif isinstance(o, datetime.date):
+            return o.isoformat()
+        elif isinstance(o, datetime.time):
+            return o.isoformat()
+        elif isinstance(o, ObjectId):
+            return str(o)
+
+        return super(DateTimeAwareJSONEncoder, self).default(o)
+
+
+def _json(obj):
+    return json.dumps(obj, cls=DateTimeAwareJSONEncoder,
+                      ensure_ascii=False).encode('utf8')
 
 
 def extract_fields(d, fields, delimiter='|'):
@@ -59,13 +85,6 @@ def upload(abbr, filename, type, s3_prefix='downloads/', use_cname=True):
 
     logging.info('uploaded to %s' % s3_url)
 
-# JSON ################################
-
-
-def api_url(path):
-    return "https://openstates.org/api/v1/%s/?apikey=%s" % (
-        urllib.quote(path), os.environ['OS_API_KEY']
-    )
 
 # CSV ################################
 
@@ -236,40 +255,27 @@ class DumpJSON(BaseCommand):
                 upload(abbr, args.file, 'json')
 
     def dump(self, abbr, filename):
-        scraper = scrapelib.Scraper(requests_per_minute=600, retry_attempts=3)
-
         zip = zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
 
         # write out metadata
-        response = scraper.get(api_url('metadata/%s' % abbr)).content
-        zip.writestr('metadata.json', response)
+        metadata = db.metadata.find_one({'_id': abbr.lower()})
+        zip.writestr('metadata.json', _json(metadata))
 
         logging.info('exporting %s legislators...' % abbr)
         for legislator in db.legislators.find({settings.LEVEL_FIELD: abbr}):
             path = 'legislators/%s' % legislator['_id']
-            url = api_url(path)
-
-            response = scraper.get(url).content
-
-            zip.writestr(path, response)
+            zip.writestr(path, _json(legislator))
 
         logging.info('exporting %s committees...' % abbr)
         for committee in db.committees.find({settings.LEVEL_FIELD: abbr}):
             path = 'committees/%s' % committee['_id']
-            url = api_url(path)
-
-            response = scraper.get(url).content
-
-            zip.writestr(path, response)
+            zip.writestr(path, _json(committee))
 
         logging.info('exporting %s bills...' % abbr)
         for bill in db.bills.find({settings.LEVEL_FIELD: abbr}, timeout=False):
             path = "bills/%s/%s/%s/%s" % (abbr, bill['session'],
                                           bill['chamber'], bill['bill_id'])
-            url = api_url(path)
-
-            response = scraper.get(url).content
-
-            zip.writestr(path, response)
+            bill['votes'] = list(db.votes.find({'bill_id': bill['_id']}))
+            zip.writestr(path, _json(bill))
 
         zip.close()

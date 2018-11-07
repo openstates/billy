@@ -378,10 +378,6 @@ class Bill(Document):
     def display_name(self):
         return self['bill_id']
 
-    def get_admin_url(self):
-        return urlresolvers.reverse('bill', args=[self[settings.LEVEL_FIELD],
-                                                  self.id])
-
     def session_details(self):
         metadata = self.metadata
         return metadata['session_details'][self['session']]

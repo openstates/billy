@@ -7,15 +7,13 @@ from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from billy.core import settings
-from billy.utils import popularity, fix_bill_id
+from billy.utils import fix_bill_id
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import BillSearchPaginator
 
 from ..forms import get_filter_bills_form
 from .utils import templatename, RelatedObjectsList
 
-
-EVENT_PAGE_COUNT = 10
 
 
 class RelatedBillsList(RelatedObjectsList):
@@ -366,7 +364,6 @@ def bill(request, abbr, session, bill_id):
         - abbr
         - metadata
         - bill
-        - events
         - show_all_sponsors
         - sponsors
         - sources
@@ -386,16 +383,6 @@ def bill(request, abbr, session, bill_id):
     if bill is None:
         raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session, bill_id))
 
-    events = db.events.find({
-        settings.LEVEL_FIELD: abbr,
-        "related_bills.bill_id": bill['_id']
-    }).sort("when", -1)
-    events = list(events)
-    if len(events) > EVENT_PAGE_COUNT:
-        events = events[:EVENT_PAGE_COUNT]
-
-    popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
-
     show_all_sponsors = request.GET.get('show_all_sponsors')
     if show_all_sponsors:
         sponsors = bill.sponsors_manager
@@ -408,7 +395,6 @@ def bill(request, abbr, session, bill_id):
              abbr=abbr,
              metadata=Metadata.get_object(abbr),
              bill=bill,
-             events=events,
              show_all_sponsors=show_all_sponsors,
              sponsors=sponsors,
              sources=bill['sources'],

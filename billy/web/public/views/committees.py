@@ -9,13 +9,10 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from djpjax import pjax
 
 from billy.core import settings
-from billy.utils import popularity
 from billy.models import db, Metadata, DoesNotExist
 
 from .utils import templatename, mongo_fields
 
-
-EVENT_PAGE_COUNT = 10
 
 
 @pjax()
@@ -97,29 +94,16 @@ def committee(request, abbr, committee_id):
         - metadata
         - sources
         - nav_active
-        - events
 
     Tempaltes:
         - billy/web/public/committee.html
-        - billy/web/public/developer_committee.html
     '''
     committee = db.committees.find_one({'_id': committee_id})
     if committee is None:
         raise Http404
 
-    events = db.events.find({
-        settings.LEVEL_FIELD: abbr,
-        "participants.id": committee_id
-    }).sort("when", -1)
-    events = list(events)
-    if len(events) > EVENT_PAGE_COUNT:
-        events = events[:EVENT_PAGE_COUNT]
-
-    popularity.counter.inc('committees', committee_id, abbr=abbr)
-
     return render(request, templatename('committee'),
                   dict(committee=committee, abbr=abbr,
                        metadata=Metadata.get_object(abbr),
                        sources=committee['sources'],
-                       nav_active='committees',
-                       events=events))
+                       nav_active='committees'))

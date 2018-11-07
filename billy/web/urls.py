@@ -4,7 +4,6 @@ from django.contrib.staticfiles.views import serve
 
 urlpatterns = [
     url(r'^api/', include('billy.web.api.urls')),
-    url(r'^admin/', include('billy.web.admin.urls')),
     url(r'^public/', include('billy.web.public.urls')),
 ]
 
