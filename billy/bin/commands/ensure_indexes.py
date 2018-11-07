@@ -19,10 +19,6 @@ class MongoIndex(BaseCommand):
 
     def handle(self, args):
         all_indexes = {
-            'popularity_counts': [
-                [('type', pymongo.ASCENDING), ('date', pymongo.ASCENDING),
-                 ('obj_id', pymongo.ASCENDING)],
-            ],
             'committees': [
                 [('_all_ids', pymongo.ASCENDING)],
                 [(settings.LEVEL_FIELD, pymongo.ASCENDING),

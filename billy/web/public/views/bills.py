@@ -7,7 +7,7 @@ from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from billy.core import settings
-from billy.utils import popularity, fix_bill_id
+from billy.utils import fix_bill_id
 from billy.models import db, Metadata, Bill
 from billy.models.pagination import BillSearchPaginator
 
@@ -382,8 +382,6 @@ def bill(request, abbr, session, bill_id):
                               'bill_id': fixed_bill_id})
     if bill is None:
         raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session, bill_id))
-
-    popularity.counter.inc('bills', bill['_id'], abbr=abbr, session=session)
 
     show_all_sponsors = request.GET.get('show_all_sponsors')
     if show_all_sponsors:

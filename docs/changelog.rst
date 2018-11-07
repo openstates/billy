@@ -5,6 +5,7 @@ billy changelog
 -----
     * removed events functionality
     * removed admin functionality
+    * removed popularity counts
 
 2.1.0
 -----
