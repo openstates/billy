@@ -204,7 +204,7 @@ class Legislator(Document):
         roles = list(filter(None, roles))
 
         if not roles:
-            roles = [r for r in self['old_roles'].get(term, [])
+            roles = [r for r in self.get('old_roles', {}).get(term, [])
                      if r.get('type') == 'member']
         roles = list(filter(None, roles))
 
@@ -299,7 +299,7 @@ class Legislator(Document):
     @CachedAttribute
     def _old_roles_committees(self):
         ids = []
-        for term, roles in self['old_roles'].items():
+        for term, roles in self.get('old_roles', {}).items():
             _ids = [role.get('committee_id') for role in roles]
             _ids = list(filter(None, _ids))
             ids.extend(_ids)
@@ -317,7 +317,7 @@ class Legislator(Document):
         then by type.'''
         wrapper = self._old_role_wrapper
         chamber_getter = operator.methodcaller('get', 'chamber')
-        for term, roles in self['old_roles'].items():
+        for term, roles in self.get('old_roles', {}).items():
             chamber_roles = defaultdict(lambda: defaultdict(list))
             for chamber, roles in itertools.groupby(roles, chamber_getter):
                 for role in roles:
