@@ -473,8 +473,12 @@ class Bill(Document):
             return remainder
         return first5, remainder
 
-    documents_preview, documents_remainder = _split_list(5, 'documents')
-    versions_preview, versions_remainder = _split_list(12, 'versions')
+    # documents_preview, documents_remainder = _split_list(5, 'documents')
+    # versions_preview, versions_remainder = _split_list(12, 'versions')
+    documents_preview = lambda self: self['documents']
+    versions_preview = lambda self: self['versions']
+    documents_remainder = lambda self: []
+    versions_remainder = lambda self: []
 
     @staticmethod
     def search(query=None, abbr=None, chamber=None, subjects=None,
