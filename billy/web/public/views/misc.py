@@ -17,7 +17,7 @@ from billy.core import settings as billy_settings
 from .utils import templatename, RelatedObjectsList
 
 
-def disabled(request):
+def disabled(request, *args, **kwargs):
     return HttpResponse('this view is temporary disabled due to technical difficulties')
 
 
