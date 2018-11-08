@@ -143,8 +143,8 @@ class RelatedBillsList(RelatedObjectsList):
             page = int(get('page', 1))
         except ValueError:
             raise Http404('no such page')
-        if show_per_page > 100:
-            show_per_page = 100
+        # if show_per_page > 100:
+        #     show_per_page = 100
 
         # If search params are given:
         form = FilterBillsForm(self.request.GET)
@@ -215,6 +215,7 @@ class BillList(RelatedBillsList):
     query_attr = 'bills'
     description_template = '''NOT USED'''
     title_template = 'Search bills - {{ metadata.legislature_name }}'
+    show_per_page = 1000000
 
 
 class AllBillList(RelatedBillsList):
@@ -383,7 +384,7 @@ def bill(request, abbr, session, bill_id):
     if bill is None:
         raise Http404(u'no bill found {0} {1} {2}'.format(abbr, session, bill_id))
 
-    show_all_sponsors = request.GET.get('show_all_sponsors')
+    show_all_sponsors = True
     if show_all_sponsors:
         sponsors = bill.sponsors_manager
     else:
