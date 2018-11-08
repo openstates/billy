@@ -155,9 +155,7 @@ class Metadata(Document):
             return term_dict
 
     def distinct_bill_subjects(self):
-        if self.abbr not in _distinct_subjects:
-            _distinct_subjects[self.abbr] = sorted(self.bills().distinct('subjects'))
-        return _distinct_subjects[self.abbr]
+        return settings.BILLY_SUBJECTS
 
     def distinct_action_types(self):
         if self.abbr not in _distinct_action_types:
@@ -165,9 +163,7 @@ class Metadata(Document):
         return _distinct_action_types[self.abbr]
 
     def distinct_bill_types(self):
-        if self.abbr not in _distinct_types:
-            _distinct_types[self.abbr] = sorted(self.bills().distinct('type'))
-        return _distinct_types[self.abbr]
+        return ['bill', 'resolution', 'joint resolution']
 
     def committees_legislators(self, *args, **kwargs):
         '''Return an iterable of committees with all the
