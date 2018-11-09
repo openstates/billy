@@ -11,7 +11,6 @@ from billy.web.public.views import misc, region, legislators, committees, bills
 # misc. views
 urlpatterns = [
     url(r'^$', misc.homepage, name='homepage'),
-    url(r'^downloads/$', misc.downloads, name='downloads'),
     url(r'^find_your_legislator/$', misc.find_your_legislator,
         name='find_your_legislator'),
     url(r'^get_district/(?P<district_id>.+)/$', misc.get_district,
@@ -57,15 +56,15 @@ urlpatterns = [
         bills.bill, name='bill'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<bill_id>[^/]+)/$',
         bills.bill_noslug, name='bill_noslug'),
-    url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
-        r'(?P<bill_id>[^/]+)/(?P<key>documents)/$', bills.all_documents,
-        name='bill_all_documents'),
-    url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
-        r'(?P<bill_id>[^/]+)/documents/(?P<doc_id>[\w-]+)/$', bills.document,
-        name='document'),
-    url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
-        r'(?P<bill_id>[^/]+)/(?P<key>versions)/$', bills.all_versions,
-        name='bill_all_versions'),
+    # url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
+    #     r'(?P<bill_id>[^/]+)/(?P<key>documents)/$', bills.all_documents,
+    #     name='bill_all_documents'),
+    # url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
+    #     r'(?P<bill_id>[^/]+)/documents/(?P<doc_id>[\w-]+)/$', bills.document,
+    #     name='document'),
+    # url(r'^(?P<abbr>[a-z-]+)/bills/(?P<session>[^/]+)/'
+    #     r'(?P<bill_id>[^/]+)/(?P<key>versions)/$', bills.all_versions,
+    #     name='bill_all_versions'),
     url(r'^(?P<abbr>[a-z-]+)/votes/(?P<vote_id>[\w-]+)/$',
         bills.vote, name='vote'),
 ]
