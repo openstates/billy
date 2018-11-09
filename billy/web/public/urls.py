@@ -11,7 +11,6 @@ from billy.web.public.views import misc, region, legislators, committees, bills
 # misc. views
 urlpatterns = [
     url(r'^$', misc.homepage, name='homepage'),
-    url(r'^downloads/$', misc.downloads, name='downloads'),
     url(r'^find_your_legislator/$', misc.find_your_legislator,
         name='find_your_legislator'),
     url(r'^get_district/(?P<district_id>.+)/$', misc.get_district,
