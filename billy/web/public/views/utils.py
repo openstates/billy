@@ -166,8 +166,6 @@ class RelatedObjectsList(ListViewBase):
         show_per_page = getattr(self, 'show_per_page', 10)
         show_per_page = int(get('show_per_page', show_per_page))
         page = int(get('page', 1))
-        if 100 < show_per_page:
-            show_per_page = 100
 
         obj = self.get_object()
         if obj is None:

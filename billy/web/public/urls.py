@@ -17,10 +17,10 @@ urlpatterns = [
         name='get_district'),
 
     # votes
-    # url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
-    #     '/(?P<_id>[\w-]+)/votes/$', VotesList.as_view(), name='votes_list'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
-        '/(?P<_id>[\w-]+)/votes/$', misc.disabled, name='votes_list'),
+        '/(?P<_id>[\w-]+)/votes/$', VotesList.as_view(), name='votes_list'),
+    # url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)'
+    #     '/(?P<_id>[\w-]+)/votes/$', misc.disabled, name='votes_list'),
     url(r'^(?P<abbr>[a-z-]+)/(?P<collection_name>[\w-]+)/(?P<_id>[\w-]+)/'
         'votes/rss/$',
         VotesListFeed(), name='votes_list_rss'),

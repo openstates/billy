@@ -155,6 +155,7 @@ class VotesList(RelatedObjectsList):
             Votes by {{obj.display_name}} - {{metadata.legislature_name}}
         {% endif %}
         '''
+    show_per_page = 100000000
 
     def get(self, request, abbr, collection_name, _id):
         # hack to redirect to proper legislator on legislators/_id_/votes
