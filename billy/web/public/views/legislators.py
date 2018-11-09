@@ -148,24 +148,11 @@ def legislator(request, abbr, _id, slug=None):
     if not legislator['active']:
         return legislator_inactive(request, abbr, legislator)
 
-    district_id = None
-    API_KEY = getattr(billy_settings, 'API_KEY', '')
-    if API_KEY:
-        qurl = "%sdistricts/%s/?apikey=%s" % (
-            billy_settings.API_BASE_URL,
-            abbr,
-            billy_settings.API_KEY
-        )
-        # try:
-        #     f = urllib2.urlopen(qurl, timeout=0.5)
-        #     districts = json.load(f)
-        #     district_id = None
-        #     for district in districts:
-        #         legs = [x['leg_id'] for x in district['legislators']]
-        #         if legislator['leg_id'] in legs:
-        #             district_id = district['boundary_id']
-        #             break
-        # except urllib2.URLError:
+    district = db.districts.find({'abbr': abbr, 'chamber': legislator['chamber'],
+                                  'name': legislator['district']})
+    if district:
+        district_id = district[0]['division_id']
+    else:
         district_id = None
 
     sponsored_bills = legislator.sponsored_bills(
