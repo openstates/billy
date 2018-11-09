@@ -116,20 +116,6 @@ class SquishedWhitespaceNode(template.Node):
         return output
 
 
-@register.inclusion_tag(templatename('_notification_preference'))
-def notification_preference(obj_type, profile):
-    '''Display two radio buttons for turning notifications on or off.
-    The default value is is have alerts_on = True.
-    '''
-    default_alert_value = True
-    if not profile:
-        alerts_on = True
-    else:
-        notifications = profile.get('notifications', {})
-        alerts_on = notifications.get(obj_type, default_alert_value)
-    return dict(alerts_on=alerts_on, obj_type=obj_type)
-
-
 @register.filter
 def json_encode(data):
     return json.dumps(data)
