@@ -1,0 +1,4 @@
+from openstatesapi.jurisdiction import make_jurisdiction
+
+J = make_jurisdiction('wi')
+J.url = 'http://wisconsin.gov'
